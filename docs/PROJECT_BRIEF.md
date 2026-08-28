@@ -22,6 +22,12 @@ The stem-to-export association is `inferred`. The system does not prove that
 all Ableton routing passed through the plugin or that the export contains only
 the observed stem.
 
+The hardened demo positions the bundle as creation-stage input to a downstream
+registration flow. Identity, author-controlled credentials, production
+certificates, audio-native soft binding, resilient recovery, registry
+publication, production C2PA generation, consent, and rights verification all
+remain downstream requirements.
+
 ## Audience
 
 - music-technology founders evaluating provenance workflows;

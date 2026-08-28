@@ -19,6 +19,26 @@ Automated validation on 2026-08-27:
 - Source declarations and stem-to-export associations retain their correct
   `user_declared` and `inferred` proof levels.
 
+Hardening validation on 2026-08-28:
+
+- 92 Python tests pass (89 preserved tests plus three focused trust regressions).
+- The authorized 30,412,921,329-byte generated
+  `demo-output/evidence/composite_events.jsonl` was confirmed closed and removed.
+- Mixed-clock and 5,000-event regressions keep correlation within its count
+  bound, suppress repeated matches, and do not emit candidate-sized evidence.
+- Evidence prefix generation and verification stream bounded chunks.
+- A synthetic routed-audio rehearsal reports `complete_observed_path`, an
+  `inferred_match`, and local POC verifier outcome `verified`.
+- The adversarial rehearsal preserves the original, reports `changed` for a
+  modified export copy, reports `changed` for a modified manifest copy, and
+  produces an export-only `unknown_coverage` / unavailable association result.
+- Portable Ed25519 verification succeeds without the HMAC secret; signer
+  identity remains explicitly unverified.
+- The current Release VST3 builds against JUCE 8.0.15 and passes strict ad-hoc
+  bundle signature verification.
+- The built and installed arm64 executables are byte-identical with SHA-256
+  `0c01fcb673c654c0716b346998c76ea1847202eca02be88117cd8671b16f497a`.
+
 Manual v1.0 gates still to record on the demonstration machine:
 
 - [x] Current VST3 configures and builds from a clean build directory.
@@ -27,6 +47,8 @@ Manual v1.0 gates still to record on the demonstration machine:
 - [ ] Playback, stop/start, project save, and project reload remain stable.
 - [ ] A real Ableton export produces a fight card with routed-audio evidence.
 - [ ] `python3 -m daemon.verify` passes against that real manifest.
+
+No automated or synthetic result is recorded as manual Ableton validation.
 
 ## Historical Milestone Records
 

@@ -29,11 +29,16 @@ public:
     void pushMidiMessages (const juce::MidiBuffer& midi);
     void updateTransportState (juce::AudioPlayHead* playHead);
     void updateSessionConfig (int sampleRate, int channelCount, int bufferSize);
+    void recordExternalAudioDrop (int numSamples) noexcept;
 
     // Thread-safe stats for the UI.
     int getWindowSize() const noexcept;
-    int getTotalWindowsHashed() const noexcept;
-    int getTotalEventsEmitted() const noexcept;
+    std::uint64_t getTotalWindowsHashed() const noexcept;
+    std::uint64_t getTotalEventsEmitted() const noexcept;
+    std::uint64_t getBuffersSubmitted() const noexcept;
+    std::uint64_t getSamplesSubmitted() const noexcept;
+    std::uint64_t getFifoSamplesDropped() const noexcept;
+    std::uint64_t getFifoWindowsDropped() const noexcept;
     juce::String getLastHash() const;
 
 private:
@@ -122,8 +127,12 @@ private:
     std::vector<float> fftWorkspace;
 
     // ── Stats ──
-    std::atomic<int> totalWindowsHashed  { 0 };
-    std::atomic<int> totalEventsEmitted  { 0 };
+    std::atomic<std::uint64_t> totalWindowsHashed  { 0 };
+    std::atomic<std::uint64_t> totalEventsEmitted  { 0 };
+    std::atomic<std::uint64_t> buffersSubmitted { 0 };
+    std::atomic<std::uint64_t> samplesSubmitted { 0 };
+    std::atomic<std::uint64_t> fifoSamplesDropped { 0 };
+    std::atomic<std::uint64_t> fifoWindowsDropped { 0 };
     mutable juce::SpinLock lastHashLock;
     juce::String lastHashHex;
 

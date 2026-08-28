@@ -6,34 +6,55 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 DEMO_ROOT="${1:-${PROJECT_ROOT}/demo-output}"
 SOURCE_CATEGORY="${2:-unknown}"
 PROJECT_PATH="${3:-}"
+PORT="${APW_UDP_PORT:-9876}"
+STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+SESSION_ID="capture-${STAMP}-$$"
+SESSION_DIR="${DEMO_ROOT}/sessions/${SESSION_ID}"
 
-EVIDENCE_DIR="${DEMO_ROOT}/evidence"
-SAMPLE_DIR="${DEMO_ROOT}/samples"
-EXPORT_DIR="${DEMO_ROOT}/exports"
-MANIFEST_DIR="${DEMO_ROOT}/manifests"
-
-mkdir -p "${EVIDENCE_DIR}" "${SAMPLE_DIR}" "${EXPORT_DIR}" "${MANIFEST_DIR}"
-
-echo "Audio Provenance Capture demo"
-echo "  Export WAV/AIFF to: ${EXPORT_DIR}"
-echo "  Fight cards appear in: ${MANIFEST_DIR}"
-echo "  Source category: ${SOURCE_CATEGORY} (producer-declared unless unknown)"
-echo
-echo "Start Ableton, insert Audio Provenance Capture on one track, play audio,"
-echo "then export a new or overwritten WAV/AIFF into the export folder above."
-echo
+mkdir -p "${SESSION_DIR}"
+cd "${PROJECT_ROOT}"
+env python3 -m daemon.preflight "${SESSION_DIR}" --port "${PORT}"
+printf '%s\n' "${SESSION_DIR}" > "${DEMO_ROOT}/latest-session.txt"
 
 DAEMON_ARGS=(
-    --evidence-dir "${EVIDENCE_DIR}"
-    --sample-dir "${SAMPLE_DIR}"
-    --export-dir "${EXPORT_DIR}"
-    --manifest-dir "${MANIFEST_DIR}"
+    --port "${PORT}"
+    --session-id "${SESSION_ID}"
+    --stem-id "stem-${SESSION_ID##*-}"
+    --evidence-dir "${SESSION_DIR}/evidence"
+    --sample-dir "${SESSION_DIR}/samples"
+    --export-dir "${SESSION_DIR}/exports"
+    --manifest-dir "${SESSION_DIR}/manifests"
     --source-category "${SOURCE_CATEGORY}"
+    --open-artifacts
 )
 
 if [[ -n "${PROJECT_PATH}" ]]; then
     DAEMON_ARGS+=(--project "${PROJECT_PATH}")
 fi
 
-cd "${PROJECT_ROOT}"
-exec python3 -m daemon "${DAEMON_ARGS[@]}"
+echo
+echo "Routed Audio Evidence Adapter"
+echo "  Session:   ${SESSION_ID}"
+echo "  Export to: ${SESSION_DIR}/exports"
+echo "  Dashboard: ${SESSION_DIR}/dashboard.html"
+echo "  Boundary:  routed observations only; identity, rights, consent, and bypassed paths remain unestablished"
+echo
+
+env python3 -m daemon "${DAEMON_ARGS[@]}" &
+DAEMON_PID=$!
+cleanup() {
+    trap - INT TERM EXIT
+    if kill -0 "${DAEMON_PID}" 2>/dev/null; then
+        kill -TERM "${DAEMON_PID}" 2>/dev/null || true
+        wait "${DAEMON_PID}" 2>/dev/null || true
+    fi
+}
+trap cleanup INT TERM EXIT
+for _ in {1..50}; do
+    [[ -f "${SESSION_DIR}/dashboard.html" ]] && break
+    sleep 0.1
+done
+open "${SESSION_DIR}/dashboard.html"
+open "${SESSION_DIR}/exports"
+wait "${DAEMON_PID}"
+trap - INT TERM EXIT

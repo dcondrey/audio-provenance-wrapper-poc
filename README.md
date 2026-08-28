@@ -5,7 +5,7 @@ The system observes audio that passes through a JUCE VST3, streams evidence to
 a local daemon, hashes a detected WAV/AIFF export, and produces both a JSON
 manifest and a human-readable HTML fight card.
 
-## Current State: v0.9 Demo Candidate
+## Current State: v0.9 Evidence-Adapter Demo Candidate
 
 The automated one-stem path is implemented and tested. Final v1.0 status still
 requires a clean manual validation pass inside Ableton Live on the demonstration
@@ -21,6 +21,10 @@ machine.
 - Non-blocking FIFO from the audio callback to a background observer
 - Local UDP event emission to `127.0.0.1:9876`
 - UI counters that show routed audio, hash windows, and emitted events
+- Explicit plug-in instance/session IDs, event sequences, FIFO-loss counters,
+  and UDP attempt/failure counters
+- Compact UI that distinguishes locally accepted UDP writes from unacknowledged
+  daemon receipt
 
 ### Local daemon and output
 
@@ -31,9 +35,17 @@ machine.
 - Hashes stable export files and extracts basic audio metadata
 - Generates a proof-labelled JSON manifest
 - Generates a polished, dependency-free HTML fight card
-- Binds the manifest to immutable prefixes of its evidence files
+- Uses daemon monotonic time for bounded, deduplicated cross-layer correlation
+- Rotates JSONL evidence at 64 MiB with three retained backups
+- Binds the manifest to streaming-hashed immutable evidence prefixes
+- Compares routed/export RMS + zero-crossing feature sequences with bounded
+  time-offset search; the result always remains `inferred` or unknown
+- Derives `complete_observed_path`, `partial_observed_path`, or
+  `unknown_coverage` conservatively from counters
 - Applies a local software HMAC integrity seal
-- Verifies export hashes, evidence bindings, chain commitments, and manifest integrity
+- Applies a portable Ed25519 signature with signer identity kept separate
+- Produces a JSON-Schema-governed downstream registration handoff
+- Serves a live local dashboard and four plain local verifier outcomes
 
 ## Five-minute demonstration
 
@@ -41,14 +53,22 @@ Build and install the plugin. If JUCE is not already installed, CMake fetches
 the pinned JUCE `8.0.15` release automatically.
 
 ```sh
+python3 -m pip install -r requirements.txt
 ./scripts/build_plugin.sh --install
 ```
 
-Start a clean demo workspace. The second argument is the producer-declared
-source category; use `unknown` when it is not known.
+Start a clean timestamped session, preflight the machine, and open the live
+dashboard plus watched export folder:
 
 ```sh
-./scripts/run_demo.sh ./demo-output imported_sample
+./scripts/demo.sh
+```
+
+Optional arguments are the demo root, producer-declared source category, and
+saved Ableton project path:
+
+```sh
+./scripts/demo.sh ./demo-output imported_sample /path/to/Demo.als
 ```
 
 Then:
@@ -56,18 +76,18 @@ Then:
 1. Open Ableton Live and rescan VST3 plug-ins.
 2. Insert **Audio Provenance Capture** on one audio track.
 3. Play the track until the plugin shows `Capture status: ACTIVE` and increasing hash windows.
-4. Export a WAV or AIFF into `demo-output/exports/`.
-5. Open the generated `*_provenance.html` fight card in `demo-output/manifests/`.
+4. Export a WAV or AIFF into the timestamped folder opened by the launcher.
+5. The generated fight card opens automatically; the dashboard also links it.
 6. Verify the adjacent JSON manifest:
 
 ```sh
 ./scripts/verify_demo.sh ./demo-output/manifests/your_export_manifest.json
 ```
 
-For a richer demonstration, pass the saved Ableton set as the third argument:
+Run the full safe adversarial sequence without changing the original:
 
 ```sh
-./scripts/run_demo.sh ./demo-output imported_sample /path/to/Demo.als
+./scripts/demo_adversarial.sh /path/to/export_manifest.json
 ```
 
 The `.als` parser is an experimental, unsupported interpretation of saved
@@ -109,8 +129,14 @@ This project never claims full Ableton provenance.
   remain `unknown_unobserved`.
 - The HMAC seal is local integrity protection. It is not Secure Enclave
   attestation, third-party identity, or a production C2PA signature.
+- The Ed25519 signature is independently checkable with the public key. A
+  self-generated key proves possession and integrity, not identity or external trust.
+- Audio association uses simple feature sequences and remains `inferred`; a
+  failed or unavailable result does not prove routed audio was absent.
 - The included C2PA structures are an alignment/mapping prototype, not an
   embedded, conforming C2PA manifest.
+- The downstream record is a neutral provenance registration handoff, not a
+  Genotone API payload or compatibility claim.
 
 ## Tests
 
@@ -118,9 +144,9 @@ This project never claims full Ableton provenance.
 python3 -m unittest discover -s tests -v
 ```
 
-The current suite contains 89 tests, including UDP-to-export integration,
+The suite includes UDP-to-export integration,
 overwritten-export detection, report rendering, manifest verification, and
-proof-level behavior.
+focused bounded-growth, sequence-gap, and proof/coverage invariant regressions.
 
 ## Documentation
 
@@ -130,4 +156,8 @@ proof-level behavior.
 - `docs/MANIFEST_SCHEMA.md` — evidence and proof-level model
 - `docs/ROADMAP.md` — milestones and remaining v1.0 validation
 - `docs/VALIDATION.md` — build and Ableton validation record
+- `docs/GENOTONE_ALIGNMENT.md` — complementary integration boundary
+- `docs/FOUNDER_DEMO_TALK_TRACK.md` — five-minute private demo and recovery
+- `docs/EXECUTIVE_PRODUCT_BRIEF.md` — wedge, pilot, risks, and 30/60/90 path
+- `docs/manifest.schema.json` — machine-readable JSON Schema
 - `docs/MULTI_LAYER_OBSERVATION.md` — longer-term research architecture

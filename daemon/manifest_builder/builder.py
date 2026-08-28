@@ -29,6 +29,7 @@ class StemEvidence:
     hash_chain_genesis: str = "genesis"
     first_received_at: str | None = None
     last_received_at: str | None = None
+    plugin_instance_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -44,6 +45,7 @@ class ExportEvidence:
     exported_at: str
     sample_rate_hz: int | float | None = None
     channel_count: int | None = None
+    export_version: int = 1
 
 
 @dataclass(frozen=True)
@@ -90,6 +92,9 @@ class ManifestBuilder:
     hardware_binding: dict[str, object] | None = None
     time_anchors: list[dict[str, object]] = field(default_factory=list)
     forgery_report: dict[str, object] | None = None
+    coverage: dict[str, object] | None = None
+    audio_association: dict[str, object] | None = None
+    session_diagnostics: dict[str, object] | None = None
     unobserved: list[str] = field(default_factory=lambda: [
         "hidden_plugin_state",
         "internal_preset_logic",
@@ -152,6 +157,7 @@ class ManifestBuilder:
                     "category": s.source_category,
                     "apw:proof_level": s.source_category_proof_level,
                 },
+                "plugin_instance_ids": list(s.plugin_instance_ids),
                 "apw:proof_level": s.proof_level,
             }
             for s in self.stems
@@ -168,6 +174,7 @@ class ManifestBuilder:
                 "sample_rate_hz": self.export.sample_rate_hz,
                 "channel_count": self.export.channel_count,
                 "exported_at": self.export.exported_at,
+                "export_version": self.export.export_version,
                 "apw:proof_level": "directly_observed",
             }
 
@@ -197,8 +204,17 @@ class ManifestBuilder:
 
         manifest["apw:unobserved"] = self.unobserved
 
+        manifest["observation_coverage"] = self.coverage or {
+            "status": "unknown_coverage",
+            "basis": "No complete observation counters were available.",
+            "counters": {},
+            "apw:proof_level": "unknown_unobserved",
+        }
+        if self.session_diagnostics is not None:
+            manifest["session_diagnostics"] = self.session_diagnostics
+
         association_established = bool(self.stems and self.export is not None)
-        manifest["stem_export_association"] = {
+        default_association = {
             "status": (
                 "inferred_same_capture_session"
                 if association_established
@@ -214,6 +230,7 @@ class ManifestBuilder:
             ),
             "apw:proof_level": "inferred" if association_established else "unknown_unobserved",
         }
+        manifest["stem_export_association"] = self.audio_association or default_association
 
         manifest["claim_summary"] = self._build_claim_summary()
 
@@ -229,10 +246,24 @@ class ManifestBuilder:
         """Return a concise, proof-labelled fight card for human review."""
         has_stem = bool(self.stems)
         has_export = self.export is not None
-        association = has_stem and has_export
+        association_record = self.audio_association or {}
+        association = association_record.get("status") in {
+            "inferred_match",
+            "inferred_same_capture_session",
+        }
         source = self.stems[0] if self.stems else None
 
         return [
+            {
+                "claim": "observation_coverage",
+                "value": (self.coverage or {}).get("status", "unknown_coverage"),
+                "evidence": (self.coverage or {}).get(
+                    "basis", "Complete counters were not available"
+                ),
+                "apw:proof_level": (self.coverage or {}).get(
+                    "apw:proof_level", "unknown_unobserved"
+                ),
+            },
             {
                 "claim": "routed_audio_observed",
                 "value": has_stem,
@@ -252,8 +283,16 @@ class ManifestBuilder:
             {
                 "claim": "observed_stem_linked_to_export",
                 "value": association,
-                "evidence": "same local capture session" if association else "association unavailable",
-                "apw:proof_level": "inferred" if association else "unknown_unobserved",
+                "evidence": (
+                    f"{association_record.get('method')}: confidence "
+                    f"{association_record.get('confidence')} / coverage "
+                    f"{association_record.get('matched_coverage')}"
+                    if association_record
+                    else "association unavailable"
+                ),
+                "apw:proof_level": (
+                    "inferred" if association else "unknown_unobserved"
+                ),
             },
             {
                 "claim": "source_category",

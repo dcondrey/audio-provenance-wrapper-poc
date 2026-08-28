@@ -16,11 +16,33 @@ std::uint64_t getMonotonicMilliseconds() noexcept
 AudioProvenanceCaptureAudioProcessor::AudioProvenanceCaptureAudioProcessor()
     : AudioProcessor (BusesProperties()
                           .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                          .withOutput ("Output", juce::AudioChannelSet::stereo(), true))
+                          .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
+      pluginInstanceId ("plugin-" + juce::Uuid().toString().substring (0, 12)),
+      pluginCaptureSessionId ("plugin-session-" + juce::Uuid().toString().substring (0, 12))
 {
     audioObserver.start ([this] (const juce::String& jsonEvent)
     {
-        eventEmitter.sendEvent (jsonEvent);
+        auto parsed = juce::JSON::parse (jsonEvent);
+        if (auto* object = parsed.getDynamicObject())
+        {
+            const auto sequence = eventSequence.fetch_add (1, std::memory_order_relaxed) + 1;
+            object->setProperty ("plugin_instance_id", pluginInstanceId);
+            object->setProperty ("plugin_capture_session_id", pluginCaptureSessionId);
+            object->setProperty ("event_sequence", static_cast<juce::int64> (sequence));
+
+            auto* telemetry = new juce::DynamicObject();
+            telemetry->setProperty ("buffers_submitted", static_cast<juce::int64> (audioObserver.getBuffersSubmitted()));
+            telemetry->setProperty ("samples_submitted", static_cast<juce::int64> (audioObserver.getSamplesSubmitted()));
+            telemetry->setProperty ("windows_hashed", static_cast<juce::int64> (
+                audioObserver.getTotalWindowsHashed()));
+            telemetry->setProperty ("fifo_samples_dropped", static_cast<juce::int64> (audioObserver.getFifoSamplesDropped()));
+            telemetry->setProperty ("fifo_windows_dropped", static_cast<juce::int64> (audioObserver.getFifoWindowsDropped()));
+            telemetry->setProperty ("events_prepared", static_cast<juce::int64> (sequence));
+            telemetry->setProperty ("udp_sends_attempted", static_cast<juce::int64> (eventEmitter.getSendAttempts() + 1));
+            telemetry->setProperty ("udp_sends_failed", static_cast<juce::int64> (eventEmitter.getSendFailures()));
+            object->setProperty ("telemetry", juce::var (telemetry));
+            eventEmitter.sendEvent (juce::JSON::toString (parsed, true));
+        }
     });
 }
 
@@ -90,7 +112,11 @@ void AudioProvenanceCaptureAudioProcessor::processBlock (juce::AudioBuffer<doubl
 
     if (doubleConversionBuffer.getNumChannels() < numCh
         || doubleConversionBuffer.getNumSamples() < numSamp)
-        doubleConversionBuffer.setSize (numCh, numSamp);
+    {
+        audioObserver.recordExternalAudioDrop (numSamp);
+        passThrough (buffer);
+        return;
+    }
 
     for (int ch = 0; ch < numCh; ++ch)
     {

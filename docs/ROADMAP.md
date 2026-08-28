@@ -29,6 +29,14 @@ Remaining v1.0 gate: build/install the current VST3 and complete the manual
 Ableton load, pass-through, playback/reload, and real export validation in
 `docs/VALIDATION.md`.
 
+The demo candidate now also includes deterministic timestamped sessions,
+preflight, bounded daemon-clock correlation, evidence rotation and streaming
+prefix hashing, loss/coverage telemetry, conservative routed/export audio
+alignment, Ed25519 public-key integrity, JSON Schema enforcement, a live
+dashboard, adversarial rehearsal, and a neutral downstream registration
+handoff. These strengthen the one-stem promise without expanding it into full
+DAW provenance.
+
 ## Agile Epics
 
 ### Epic 1: Capture Plugin
@@ -209,6 +217,9 @@ scripts are ready; manual Ableton validation remains.
 
 ### v1.0
 One-stem end-to-end Ableton demo works reliably.
+
+The only open v1.0 criterion is the manual Ableton host pass on the meeting
+machine. Automated and synthetic results do not close that gate.
 
 ### v1.1
 Five-stem workflow works with bypass/failure tests.
