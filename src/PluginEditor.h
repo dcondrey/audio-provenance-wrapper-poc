@@ -35,6 +35,7 @@ private:
     juce::Label sessionIdLabel;
     juce::Label coverageLabel;
     juce::Label deliveryLabel;
+    juce::Label acknowledgementLabel;
     bool activityActive = false;
     std::uint64_t lastRenderedBufferSeenMilliseconds = 0;
     juce::String lastRenderedBufferSeenText = "never";

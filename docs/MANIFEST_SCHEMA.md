@@ -34,6 +34,7 @@ core_principle
 observed_stems[]
 export
 observation_coverage
+daemon_receipt_acknowledgement
 ingredients[]                 (optional)
 edit_history[]                (optional)
 session_facts                 (optional, inferred from saved .als)
@@ -87,9 +88,13 @@ The export object records filesystem-observed facts:
 
 ## Stem-to-export association
 
-The daemon compares routed and export RMS/zero-crossing feature sequences with
-a bounded time-offset search. The object records method, confidence, matched
-coverage, best offset, a compact alignment series, and limitations. A supported
+The daemon compares accepted routed plug-in and export feature sequences using
+`routed_feature_sequence_offset_search` version `2.0.0`. Relative RMS,
+zero-crossing rate, crest factor, and a four-part energy envelope are compared
+with gain normalization and bounded time-offset search. The object records
+method/version, confidence, matched and routed coverage, best offset,
+comparable/matched/overlap window counts, a compact alignment series, feature
+dimensions, reasons, extraction metadata, bounds, and limitations. A supported
 high-confidence result is `inferred_match` and remains `inferred`.
 
 Unavailable, low-confidence, or failed comparison is `unknown_unobserved`; it
@@ -107,9 +112,23 @@ Allowed statuses are:
 
 Complete status requires all mandated plug-in telemetry fields, equal hashed
 and received window counts, and zero reported FIFO drops, UDP failures,
-sequence gaps, out-of-order events, and hash-chain breaks. The result is
+sequence gaps, out-of-order events, hash-chain breaks, and daemon ACK dispatch
+failures. The result is
 `inferred` from directly observed counters. Missing routed evidence or missing
 counters produces `unknown_coverage` / `unknown_unobserved`.
+
+## Daemon receipt acknowledgement
+
+`daemon_receipt_acknowledgement` records protocol, status, daemon instance and
+capture-session identifiers, scoped plug-in instance/capture-session streams,
+highest accepted/contiguous sequences, gaps, rejections, chain breaks, and ACK
+dispatch counters. Allowed status values are `issued`, `degraded`, and `unknown`.
+
+The daemon proof level is `directly_observed` when it accepted/persisted events
+and dispatched local ACKs. Plug-in processing of each ACK is reported later in
+plug-in telemetry when another event is emitted; the daemon cannot use dispatch
+alone to claim the UI received it. No ACK field establishes identity, DAW trust,
+remote attestation, or registry confirmation.
 
 ## Claim summary
 
@@ -117,6 +136,7 @@ counters produces `unknown_coverage` / `unknown_unobserved`.
 
 - routed audio observed;
 - export file hashed;
+- daemon receipt acknowledgement issued/degraded/unknown;
 - observed stem associated with export;
 - source category;
 - full Ableton provenance explicitly not claimed.
@@ -170,6 +190,14 @@ verification.
 The local POC verifier returns `verified`, `changed`, `untrusted`, or
 `not_found`. These are local bundle-integrity outcomes, not registry, identity,
 authorship, or rights results.
+
+## Presentation and evidence bundle
+
+`presentation` links the derived fight card, stored local verifier result,
+neutral handoff, signed bundle index, and downloadable deterministic ZIP. The
+bundle index uses canonical JSON and Ed25519 to enumerate every payload archive
+entry with SHA-256 and byte length. `bundle-index.json` is not self-hashed; this
+explicit non-circular policy is part of the signed index.
 
 ## Downstream handoff
 

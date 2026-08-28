@@ -6,10 +6,19 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BUILD_DIR="${APW_BUILD_DIR:-${PROJECT_ROOT}/build}"
 BUILD_TYPE="${APW_BUILD_TYPE:-Release}"
 MACOS_DEPLOYMENT_TARGET="${APW_MACOS_DEPLOYMENT_TARGET:-12.0}"
+CODESIGN_IDENTITY="${APW_CODESIGN_IDENTITY:--}"
+JUCE_SOURCE_DIR="${APW_JUCE_DIR:-}"
 
-cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" \
-    -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+CMAKE_ARGS=(
+    -S "${PROJECT_ROOT}"
+    -B "${BUILD_DIR}"
+    -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
     -DCMAKE_OSX_DEPLOYMENT_TARGET="${MACOS_DEPLOYMENT_TARGET}"
+)
+if [[ -n "${JUCE_SOURCE_DIR}" ]]; then
+    CMAKE_ARGS+=(-DAPW_JUCE_DIR="${JUCE_SOURCE_DIR}")
+fi
+cmake "${CMAKE_ARGS[@]}"
 cmake --build "${BUILD_DIR}" --target AudioProvenanceCapture_VST3 --config "${BUILD_TYPE}"
 
 PLUGIN_BUNDLE="${BUILD_DIR}/AudioProvenanceCapture_artefacts/${BUILD_TYPE}/VST3/Audio Provenance Capture.vst3"
@@ -20,11 +29,19 @@ if [[ ! -d "${PLUGIN_BUNDLE}" ]]; then
 fi
 
 # JUCE's VST3 manifest helper writes moduleinfo.json after the linker's initial
-# ad-hoc signature. Re-sign the completed bundle so its resource seal includes
-# that generated manifest. This is local ad-hoc signing, not distribution signing.
-codesign --force --deep --sign - --timestamp=none "${PLUGIN_BUNDLE}"
+# signature. Re-sign the completed bundle so its resource seal includes that
+# generated manifest. The default remains local ad-hoc signing; a meeting build
+# can set APW_CODESIGN_IDENTITY to an available Developer ID identity.
+if [[ "${CODESIGN_IDENTITY}" == "-" ]]; then
+    codesign --force --deep --sign - --timestamp=none "${PLUGIN_BUNDLE}"
+    SIGNING_DESCRIPTION="ad-hoc local development signature"
+else
+    codesign --force --deep --options runtime --sign "${CODESIGN_IDENTITY}" --timestamp "${PLUGIN_BUNDLE}"
+    SIGNING_DESCRIPTION="${CODESIGN_IDENTITY} with hardened runtime and secure timestamp"
+fi
 codesign --verify --deep --strict "${PLUGIN_BUNDLE}"
 echo "VST3 ready: ${PLUGIN_BUNDLE}"
+echo "Signing: ${SIGNING_DESCRIPTION}"
 
 if [[ "${1:-}" == "--install" ]]; then
     INSTALL_DIR="${HOME}/Library/Audio/Plug-Ins/VST3"

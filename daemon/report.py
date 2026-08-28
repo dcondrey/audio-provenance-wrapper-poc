@@ -67,16 +67,33 @@ def render_html_report(manifest: dict[str, object]) -> str:
         if isinstance(manifest.get("presentation"), dict)
         else {}
     )
+    receipt = (
+        manifest.get("daemon_receipt_acknowledgement")
+        if isinstance(manifest.get("daemon_receipt_acknowledgement"), dict)
+        else {}
+    )
+    receipt_streams = receipt.get("streams") if isinstance(receipt.get("streams"), list) else []
+    first_receipt_stream = receipt_streams[0] if receipt_streams and isinstance(receipt_streams[0], dict) else {}
     plugin_ids = sorted({
         str(plugin_id)
         for stem in stems if isinstance(stem, dict)
         for plugin_id in stem.get("plugin_instance_ids", [])
     })
-    alignment_values = association.get("alignment_similarity", [])
+    alignment_series = association.get("alignment_series", [])
+    if not isinstance(alignment_series, list) or not alignment_series:
+        alignment_series = [
+            {"similarity": value, "matched": float(value) >= 0.72}
+            for value in association.get("alignment_similarity", [])
+            if isinstance(value, (int, float))
+        ]
     alignment_bars = "".join(
-        f'<i style="height:{max(3, min(100, float(value) * 100)):.1f}%" title="{float(value):.3f}"></i>'
-        for value in alignment_values
-        if isinstance(value, (int, float))
+        '<i class="{state}" style="height:{height:.1f}%" title="Window similarity {score:.3f}"></i>'.format(
+            state="matched" if point.get("matched") else "weak",
+            height=max(3, min(100, float(point.get("similarity", 0)) * 100)),
+            score=float(point.get("similarity", 0)),
+        )
+        for point in alignment_series
+        if isinstance(point, dict) and isinstance(point.get("similarity"), (int, float))
     )
     missing_requirements = handoff.get("missing_downstream_requirements", [])
     handoff_items = "".join(
@@ -183,13 +200,16 @@ def render_html_report(manifest: dict[str, object]) -> str:
     tr:last-child td {{ border-bottom: 0; }}
     .association {{ padding: 20px 22px; border-left: 3px solid var(--amber); }}
     .association p {{ margin: 6px 0 0; }}
-    .timeline {{ display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }}
+    .timeline {{ display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }}
     .step {{ min-height: 92px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }}
     .step b {{ display: block; color: var(--green); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }}
     .step span {{ display: block; margin-top: 8px; color: var(--muted); font-size: 12px; }}
     .alignment-chart {{ height: 150px; padding: 20px; display: flex; align-items: end; gap: 3px; }}
-    .alignment-chart i {{ display: block; flex: 1; min-width: 2px; background: linear-gradient(var(--cyan), var(--green)); border-radius: 2px 2px 0 0; }}
-    .metrics {{ display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }}
+    .alignment-chart i {{ display: block; flex: 1; min-width: 2px; background: var(--amber); border-radius: 2px 2px 0 0; }}
+    .alignment-chart i.matched {{ background: linear-gradient(var(--cyan), var(--green)); }}
+    .chart-key {{ padding: 0 20px 14px; color: var(--muted); font-size: 12px; }}
+    .chart-key b {{ color: var(--green); }} .chart-key em {{ color: var(--amber); font-style: normal; }}
+    .metrics {{ display: grid; grid-template-columns: repeat(6, 1fr); border-top: 1px solid var(--line); }}
     .metric {{ padding: 16px 20px; border-right: 1px solid var(--line); }}
     .metric:last-child {{ border-right: 0; }}
     .metric span {{ display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }}
@@ -230,11 +250,12 @@ def render_html_report(manifest: dict[str, object]) -> str:
     <h2>Session pipeline</h2>
     <div class="timeline">
       <div class="step"><b>01 Observed</b><span>Plug-in routed audio<br>{plugin_ids}</span></div>
-      <div class="step"><b>02 Received</b><span>Daemon accepted<br>{received_count} events</span></div>
-      <div class="step"><b>03 Checked</b><span>Gaps {sequence_gaps}<br>Breaks {chain_breaks}</span></div>
-      <div class="step"><b>04 Export</b><span>{export_name}</span></div>
-      <div class="step"><b>05 Associated</b><span>{association_status}</span></div>
-      <div class="step"><b>06 Verified</b><span>{verification_outcome}<br>Local POC result</span></div>
+      <div class="step"><b>02 Emitted</b><span>Local UDP writes<br>{emitted_count} attempted</span></div>
+      <div class="step"><b>03 Received</b><span>Daemon accepted<br>{received_count} events</span></div>
+      <div class="step"><b>04 Acknowledged</b><span>{receipt_status}<br>contiguous {highest_contiguous}</span></div>
+      <div class="step"><b>05 Checked</b><span>Gaps {sequence_gaps}<br>Breaks {chain_breaks}</span></div>
+      <div class="step"><b>06 Associated</b><span>{association_status}<br>{export_name}</span></div>
+      <div class="step"><b>07 Verified</b><span>{verification_outcome}<br>Local POC result</span></div>
     </div>
   </section>
 
@@ -261,10 +282,13 @@ def render_html_report(manifest: dict[str, object]) -> str:
     <h2>Routed / export alignment</h2>
     <div class="panel">
       <div class="alignment-chart">{alignment_bars}</div>
+      <div class="chart-key"><b>Green/cyan</b> windows met the bounded similarity threshold; <em>amber</em> windows did not. Bars show aligned routed/export feature windows, not raw audio.</div>
       <div class="metrics">
-        <div class="metric"><span>Method</span><strong>{association_method}</strong></div>
+        <div class="metric"><span>Method version</span><strong>{association_method}</strong></div>
         <div class="metric"><span>Confidence</span><strong>{association_confidence}</strong></div>
         <div class="metric"><span>Matched coverage</span><strong>{matched_coverage}</strong></div>
+        <div class="metric"><span>Matched windows</span><strong>{matched_windows}</strong></div>
+        <div class="metric"><span>Comparable</span><strong>{comparable_windows}</strong></div>
         <div class="metric"><span>Best offset</span><strong>{best_offset}</strong></div>
       </div>
     </div>
@@ -282,6 +306,8 @@ def render_html_report(manifest: dict[str, object]) -> str:
     <div class="panel handoff">
       <div><span class="eyebrow">Prepared input</span><h2>{handoff_status}</h2>
         <p>Export hard hash, routed observation commitment, coverage, inferred association, declarations, signing key, and evidence bindings.</p>
+        <a href="{bundle_href}">Download evidence bundle ↓</a><br>
+        <a href="{bundle_index_href}">Open signed bundle index ↗</a><br>
         <a href="{handoff_href}">Open handoff record ↗</a></div>
       <div><strong>Still required downstream</strong><ul>{handoff_items}</ul>
         <p>This is a neutral provenance handoff, not a provider-specific API payload.</p></div>
@@ -325,7 +351,9 @@ def render_html_report(manifest: dict[str, object]) -> str:
         association_badge=_proof_badge(association.get("apw:proof_level")),
         association_status=_escape(str(association.get("status", "not established")).replace("_", " ").title()),
         association_basis=_escape(association.get("basis", "")),
-        association_method=_escape(association.get("method", "unavailable")),
+        association_method=_escape(
+            f"{association.get('method', 'unavailable')} v{association.get('method_version', 'unknown')}"
+        ),
         association_confidence=_escape(
             f"{float(association.get('confidence')) * 100:.1f}%"
             if isinstance(association.get("confidence"), (int, float)) else "Unavailable"
@@ -333,6 +361,8 @@ def render_html_report(manifest: dict[str, object]) -> str:
         matched_coverage=_escape(
             f"{float(association.get('matched_coverage', 0)) * 100:.1f}%"
         ),
+        matched_windows=_escape(association.get("matched_window_count", 0)),
+        comparable_windows=_escape(association.get("comparable_window_count", 0)),
         best_offset=_escape(
             f"{association.get('best_offset_seconds')} s"
             if association.get("best_offset_seconds") is not None else "Unavailable"
@@ -340,8 +370,11 @@ def render_html_report(manifest: dict[str, object]) -> str:
         alignment_bars=alignment_bars or '<span style="color:var(--muted)">Alignment unavailable</span>',
         plugin_ids=_escape(", ".join(plugin_ids) if plugin_ids else "No instance observed"),
         received_count=_escape((coverage.get("counters") or {}).get("events_received", 0)),
+        emitted_count=_escape((coverage.get("counters") or {}).get("udp_sends_attempted", 0)),
         sequence_gaps=_escape((coverage.get("counters") or {}).get("sequence_gaps", 0)),
         chain_breaks=_escape((coverage.get("counters") or {}).get("hash_chain_breaks", 0)),
+        receipt_status=_escape(str(receipt.get("status", "unknown")).replace("_", " ").title()),
+        highest_contiguous=_escape(first_receipt_stream.get("highest_contiguous_sequence", 0)),
         verification_outcome=_escape(str(verification.get("outcome", "untrusted")).replace("_", " ").title()),
         verification_badge=_proof_badge(
             "directly_observed" if verification.get("outcome") == "verified" else "unknown_unobserved"
@@ -349,6 +382,8 @@ def render_html_report(manifest: dict[str, object]) -> str:
         handoff_status=_escape(str(handoff.get("status", "not prepared")).replace("_", " ").title()),
         handoff_items=handoff_items,
         handoff_href=_escape(presentation.get("downstream_handoff", "#")),
+        bundle_href=_escape(presentation.get("evidence_bundle", "#")),
+        bundle_index_href=_escape(presentation.get("bundle_index", "#")),
         proof_legend="".join(_proof_badge(proof) for proof in PROOF_LABELS),
         unobserved_items=unobserved_items,
         raw_manifest=raw_manifest,

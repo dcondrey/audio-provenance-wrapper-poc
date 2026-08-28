@@ -24,12 +24,14 @@ opens the live dashboard and clean export folder.
 1. Insert **Audio Provenance Capture** on one Ableton audio track.
 2. Play the track.
 3. Point to the plug-in instance ID, submitted buffers/samples, hashed windows,
-   FIFO drops, prepared events, and local UDP write result.
-4. Say: “The plug-in never says the daemon received an event. UDP writes and
-   daemon receipts are deliberately separate. Coverage is unknown here until
-   the receiver counters can close the loop.”
-5. On the dashboard, show the matching instance ID, received events, sequence
-   gaps, chain breaks, and proof-level legend.
+   FIFO drops, prepared events, UDP attempts, locally emitted datagrams, and
+   daemon-acknowledged sequence.
+4. Say: “A successful UDP write is still not receipt. This separate line means
+   this local daemon accepted and persisted the event, then returned a scoped
+   ACK. Stale, rejected, missing, mismatched, and gap states remain visible.”
+5. On the dashboard, show the matching plug-in instance and capture-session IDs,
+   highest accepted/contiguous sequence, received events, ACKs issued, gaps,
+   chain breaks, and proof-level legend.
 
 ### 1:40–2:45 — Export, align, and hand off
 
@@ -37,16 +39,20 @@ Export a WAV or AIFF into the folder opened by the launcher. The fight card
 opens automatically.
 
 Say: “The hard hash is directly observed. The routed-to-export link is still
-inferred, even with a strong alignment. The chart compares bounded RMS and
-zero-crossing feature sequences with offset search; it is not a watermark.”
+inferred, even with a strong alignment. The chart compares bounded relative RMS,
+zero-crossing, crest, and coarse energy-envelope features emitted from routed
+windows against the export with gain normalization and offset search. It is not
+a watermark.”
 
 Show:
 
 - session timeline;
 - coverage status and counters;
 - alignment confidence, matched coverage, and offset;
+- matched/comparable counts and the green/amber window visualization;
 - explicit unknowns;
 - downstream registration handoff and missing requirements.
+- downloadable deterministic bundle and signed canonical index.
 
 ### 2:45–3:25 — Positive verification
 
@@ -85,11 +91,23 @@ Close with: “The wedge is not more metadata. It is a disciplined handoff from
 creation evidence into a downstream trust system that can establish the things
 this plug-in cannot.”
 
+If Ableton is unavailable, run:
+
+```sh
+./scripts/presenter_fallback.sh
+```
+
+Say explicitly that this is a synthetic operational fallback. It exercises ACK
+receipt, a fixed gain plus offset transformation, inferred alignment, sealing,
+public-key verification, and bundle integrity; it is not manual Ableton proof.
+
 ## Recovery
 
 - UDP port busy: stop the prior demo process, then rerun `./scripts/preflight.sh`.
 - No plug-in events: confirm VST3 insertion, play non-silent audio, and compare
   the plug-in and dashboard instance IDs.
+- Locally emitted but not acknowledged: compare the plug-in capture-session ID,
+  restart the launcher, and do not describe UDP send success as receipt.
 - No export detected: export directly into the timestamped `exports/` folder
   and wait for the file to become stable.
 - Fight card did not open: use the dashboard Artifact links or open the session

@@ -93,7 +93,7 @@ class ManifestBuilderTests(unittest.TestCase):
         manifest = builder.build()
         self.assertIn("hidden_plugin_state", manifest["apw:unobserved"])
 
-    def test_claim_summary_labels_association_as_inferred(self):
+    def test_session_cooccurrence_does_not_establish_association(self):
         builder = ManifestBuilder(session_id="s1")
         builder.add_stem(StemEvidence(
             stem_id="stem-1", hash_chain_root="abc123", hash_chain_length=2,
@@ -109,7 +109,8 @@ class ManifestBuilderTests(unittest.TestCase):
         manifest = builder.build()
 
         association = manifest["stem_export_association"]
-        self.assertEqual(association["apw:proof_level"], "inferred")
+        self.assertEqual(association["status"], "not_established")
+        self.assertEqual(association["apw:proof_level"], "unknown_unobserved")
         full_provenance = next(
             claim for claim in manifest["claim_summary"]
             if claim["claim"] == "full_ableton_provenance"

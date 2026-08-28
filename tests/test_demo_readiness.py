@@ -54,8 +54,8 @@ class HtmlReportTests(unittest.TestCase):
                 "apw:proof_level": "inferred",
             }],
             "stem_export_association": {
-                "status": "inferred_same_capture_session",
-                "basis": "Temporal association only",
+                "status": "inferred_match",
+                "basis": "Bounded routed-feature comparison",
                 "apw:proof_level": "inferred",
             },
             "apw:unobserved": ["bypassed_routing"],

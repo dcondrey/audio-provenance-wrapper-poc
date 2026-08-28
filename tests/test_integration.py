@@ -138,6 +138,15 @@ class DaemonIntegrationTests(unittest.TestCase):
                 "local_software_integrity",
             )
             self.assertTrue((manifest_dir / "mixdown_provenance.html").is_file())
+            self.assertTrue((manifest_dir / "artifacts/mixdown_evidence_bundle.zip").is_file())
+            self.assertTrue((manifest_dir / "artifacts/mixdown_bundle_index.json").is_file())
+            stored_verification = json.loads(
+                (manifest_dir / "artifacts/mixdown_verification.json").read_text()
+            )
+            self.assertFalse(any(
+                finding["code"] == "html_report_missing"
+                for finding in stored_verification["findings"]
+            ))
 
             from daemon.verify import verify_manifest
             verification = verify_manifest(

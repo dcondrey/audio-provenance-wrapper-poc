@@ -68,10 +68,13 @@ AudioProvenanceCaptureAudioProcessorEditor::AudioProvenanceCaptureAudioProcessor
     configureObservationLabel (deliveryLabel, 13.0f);
     addAndMakeVisible (deliveryLabel);
 
+    configureObservationLabel (acknowledgementLabel, 13.0f);
+    addAndMakeVisible (acknowledgementLabel);
+
     updateObservationLabels();
     startTimerHz (4);
 
-    setSize (620, 460);
+    setSize (680, 500);
 }
 
 void AudioProvenanceCaptureAudioProcessorEditor::paint (juce::Graphics& g)
@@ -108,6 +111,7 @@ void AudioProvenanceCaptureAudioProcessorEditor::resized()
     hashChainLabel.setBounds (bounds.removeFromTop (24));
     lastHashLabel.setBounds (bounds.removeFromTop (24));
     deliveryLabel.setBounds (bounds.removeFromTop (24));
+    acknowledgementLabel.setBounds (bounds.removeFromTop (24));
     coverageLabel.setBounds (bounds.removeFromTop (24));
     lastBufferSeenLabel.setBounds (bounds.removeFromTop (24));
     scopeLabel.setBounds (bounds.removeFromTop (42));
@@ -173,14 +177,52 @@ void AudioProvenanceCaptureAudioProcessorEditor::updateObservationLabels()
     const auto fifoSamplesDropped = observer.getFifoSamplesDropped();
     const auto fifoWindowsDropped = observer.getFifoWindowsDropped();
     auto& emitter = audioProcessor.getEventEmitter();
-    deliveryLabel.setText (juce::String ("Emitted (local UDP): ")
-                           + juce::String (static_cast<juce::int64> (emitter.getSendAccepted())) + " · "
-                           + juce::String (static_cast<juce::int64> (emitter.getSendFailures()))
-                           + " failed · received by daemon: UNKNOWN",
+    const auto acknowledgement = emitter.getAcknowledgementSnapshot();
+    const auto locallyEmitted = emitter.getSendAccepted();
+    const auto missing = locallyEmitted > acknowledgement.highestAcceptedSequence
+        ? locallyEmitted - acknowledgement.highestAcceptedSequence : 0;
+    deliveryLabel.setText (juce::String ("Prepared ")
+                           + juce::String (static_cast<juce::int64> (eventsEmitted))
+                           + " · UDP attempted "
+                           + juce::String (static_cast<juce::int64> (emitter.getSendAttempts()))
+                           + " · locally emitted "
+                           + juce::String (static_cast<juce::int64> (locallyEmitted))
+                           + " · send failed "
+                           + juce::String (static_cast<juce::int64> (emitter.getSendFailures())),
                            juce::dontSendNotification);
-    coverageLabel.setText (juce::String ("Coverage: UNKNOWN_COVERAGE · FIFO loss ")
+
+    juce::String acknowledgementState = "UNKNOWN";
+    if (acknowledgement.acknowledgementsProcessed > 0)
+    {
+        if (acknowledgement.stale)
+            acknowledgementState = "STALE";
+        else if (acknowledgement.lastReceiptRejected)
+            acknowledgementState = "REJECTED";
+        else if (acknowledgement.streamChainBreaks > 0)
+            acknowledgementState = "ACKNOWLEDGED / CHAIN BREAK";
+        else if (acknowledgement.streamGaps > 0)
+            acknowledgementState = "ACKNOWLEDGED / GAP";
+        else if (acknowledgement.lastReceiptAccepted)
+            acknowledgementState = "ACKNOWLEDGED BY THIS DAEMON";
+    }
+    acknowledgementLabel.setText (
+        juce::String ("Daemon receipt: ") + acknowledgementState
+        + " · accepted through "
+        + juce::String (static_cast<juce::int64> (acknowledgement.highestAcceptedSequence))
+        + " · contiguous through "
+        + juce::String (static_cast<juce::int64> (acknowledgement.highestContiguousSequence))
+        + " · missing/pending " + juce::String (static_cast<juce::int64> (missing)),
+        juce::dontSendNotification);
+
+    coverageLabel.setText (juce::String ("Local health: FIFO dropped ")
                            + juce::String (static_cast<juce::int64> (fifoSamplesDropped)) + " samples / "
-                           + juce::String (static_cast<juce::int64> (fifoWindowsDropped)) + " windows",
+                           + juce::String (static_cast<juce::int64> (fifoWindowsDropped)) + " windows · ACK gaps "
+                           + juce::String (static_cast<juce::int64> (acknowledgement.streamGaps))
+                           + " · rejected "
+                           + juce::String (static_cast<juce::int64> (acknowledgement.streamRejections))
+                           + " · mismatched ACKs ignored "
+                           + juce::String (static_cast<juce::int64> (
+                               acknowledgement.sessionMismatchesIgnored)),
                            juce::dontSendNotification);
     repaint();
 }

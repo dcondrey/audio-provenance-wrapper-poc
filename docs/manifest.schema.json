@@ -12,6 +12,7 @@
     "observed_stems",
     "stem_export_association",
     "observation_coverage",
+    "daemon_receipt_acknowledgement",
     "claim_summary",
     "apw:unobserved",
     "evidence_binding",
@@ -66,7 +67,17 @@
         }
       ]
     },
-    "stem_export_association": { "$ref": "#/$defs/proofObject" },
+    "stem_export_association": {
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": ["status", "basis"],
+          "properties": {
+            "status": { "enum": ["inferred_match", "not_established", "unavailable"] }
+          }
+        }
+      ]
+    },
     "observation_coverage": {
       "allOf": [
         { "$ref": "#/$defs/proofObject" },
@@ -76,6 +87,20 @@
             "status": {
               "enum": ["complete_observed_path", "partial_observed_path", "unknown_coverage"]
             }
+          }
+        }
+      ]
+    },
+    "daemon_receipt_acknowledgement": {
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": ["protocol", "status", "streams", "counters", "scope"],
+          "properties": {
+            "protocol": { "const": "apw-local-udp-ack-v1" },
+            "status": { "enum": ["issued", "degraded", "unknown"] },
+            "streams": { "type": "array" },
+            "counters": { "type": "object" }
           }
         }
       ]

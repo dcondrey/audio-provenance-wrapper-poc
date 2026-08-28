@@ -49,7 +49,7 @@ cleanup() {
         wait "${DAEMON_PID}" 2>/dev/null || true
     fi
 }
-trap cleanup INT TERM EXIT
+trap cleanup INT TERM HUP EXIT
 for _ in {1..50}; do
     [[ -f "${SESSION_DIR}/dashboard.html" ]] && break
     sleep 0.1
@@ -57,4 +57,4 @@ done
 open "${SESSION_DIR}/dashboard.html"
 open "${SESSION_DIR}/exports"
 wait "${DAEMON_PID}"
-trap - INT TERM EXIT
+trap - INT TERM HUP EXIT

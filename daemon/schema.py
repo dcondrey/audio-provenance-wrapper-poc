@@ -23,7 +23,8 @@ def validate_manifest_invariants(data: object) -> list[str]:
     for key in (
         "apw_version", "schema", "session_id", "capture_session", "created_at",
         "observed_stems", "claim_summary", "stem_export_association",
-        "observation_coverage", "apw:unobserved", "c2pa_mapping",
+        "observation_coverage", "daemon_receipt_acknowledgement",
+        "apw:unobserved", "c2pa_mapping",
     ):
         if key not in data:
             errors.append(f"required field is missing: {key}")
@@ -55,10 +56,12 @@ def validate_manifest_invariants(data: object) -> list[str]:
         _require_proof(association, "stem_export_association", errors)
         status = association.get("status")
         proof = association.get("apw:proof_level")
-        if status in {"inferred_match", "inferred_same_capture_session"} and proof != "inferred":
+        if status == "inferred_match" and proof != "inferred":
             errors.append("established stem_export_association must remain inferred")
         if status in {"not_established", "unavailable"} and proof != "unknown_unobserved":
             errors.append("unavailable association must be unknown_unobserved")
+        if status not in {"inferred_match", "not_established", "unavailable"}:
+            errors.append(f"invalid stem_export_association status: {status}")
 
     coverage = data.get("observation_coverage")
     if isinstance(coverage, dict):
@@ -75,6 +78,7 @@ def validate_manifest_invariants(data: object) -> list[str]:
                     "windows_hashed", "buffer_hash_events_received", "fifo_samples_dropped",
                     "fifo_windows_dropped", "udp_sends_failed", "sequence_gaps",
                     "hash_chain_breaks", "events_prepared", "events_received",
+                    "daemon_acknowledgements_sent", "daemon_acknowledgements_failed",
                 ):
                     if key not in counters:
                         errors.append(f"complete_observed_path missing counter: {key}")
@@ -84,10 +88,18 @@ def validate_manifest_invariants(data: object) -> list[str]:
                     errors.append("complete_observed_path requires the prepared/received event prefix to agree")
                 for key in (
                     "fifo_samples_dropped", "fifo_windows_dropped", "udp_sends_failed",
-                    "sequence_gaps", "hash_chain_breaks",
+                    "sequence_gaps", "hash_chain_breaks", "daemon_acknowledgements_failed",
                 ):
                     if counters.get(key) != 0:
                         errors.append(f"complete_observed_path requires {key}=0")
+                if counters.get("daemon_acknowledgements_sent") != counters.get("events_received"):
+                    errors.append("complete_observed_path requires one daemon ACK dispatch per received event")
+
+    receipt = data.get("daemon_receipt_acknowledgement")
+    if isinstance(receipt, dict):
+        _require_proof(receipt, "daemon_receipt_acknowledgement", errors)
+        if receipt.get("status") not in {"issued", "degraded", "unknown"}:
+            errors.append("invalid daemon receipt acknowledgement status")
 
     portable = data.get("portable_signature")
     if isinstance(portable, dict):

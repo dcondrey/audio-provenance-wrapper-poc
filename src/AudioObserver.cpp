@@ -209,6 +209,19 @@ void AudioObserver::processWindow (const float* data, int numSamples)
     const auto zcr      = computeZeroCrossingRate (data, numSamples);
     const auto centroid = computeSpectralCentroid (data, numSamples);
     const bool hasAudio = rms > kSilenceThreshold;
+    double peak = 0.0;
+    for (int i = 0; i < numSamples; ++i)
+        peak = std::max (peak, std::abs (static_cast<double> (data[i])));
+    const auto crestFactor = rms > 1.0e-9 ? peak / rms : 0.0;
+    juce::Array<juce::var> energyEnvelope;
+    constexpr int envelopeSegments = 4;
+    for (int segment = 0; segment < envelopeSegments; ++segment)
+    {
+        const auto start = segment * numSamples / envelopeSegments;
+        const auto end = (segment + 1) * numSamples / envelopeSegments;
+        const auto segmentRms = computeRMS (data + start, end - start);
+        energyEnvelope.add (rms > 1.0e-9 ? segmentRms / rms : 0.0);
+    }
 
     // Spectral band profile (uses fftWorkspace already populated by centroid).
     const auto bands = computeSpectralBands (numSamples);
@@ -228,6 +241,8 @@ void AudioObserver::processWindow (const float* data, int numSamples)
             { "prev_hash",            prevHash },
             { "rms_level",            rms },
             { "zero_crossing_rate",   zcr },
+            { "crest_factor",         crestFactor },
+            { "energy_envelope",      juce::var (energyEnvelope) },
             { "spectral_centroid_hz", centroid },
             { "channel_count",        channels },
             { "sample_rate_hz",       sampleRate },

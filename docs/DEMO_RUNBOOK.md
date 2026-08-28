@@ -25,13 +25,27 @@ From the repository root:
 Omit the `.als` path if project parsing is not part of the story. The launcher
 creates a fresh timestamped session and opens its dashboard and export folder.
 
+If Ableton cannot be used, the presenter fallback completes the same local
+receipt/alignment/sealing/verification story with deterministic synthetic audio:
+
+```sh
+./scripts/presenter_fallback.sh
+```
+
+It creates a new ignored session, receives every daemon ACK on the sender socket,
+adds a three-window offset and fixed gain change, verifies the signed bundle, and
+opens the completed dashboard and fight card. Interruption stops the daemon and
+releases its UDP port.
+
 ## Ableton sequence
 
 1. Insert **Audio Provenance Capture** on the demonstration track.
 2. Open its UI and point out the scope statement.
 3. Press play.
-4. Wait for `Capture status: ACTIVE`, an increasing window count, and the daemon
-   message `Capture plugin evidence stream detected`.
+4. Wait for `Capture status: ACTIVE`, an increasing window count, and plug-in UI
+   lines showing prepared, UDP attempted, locally emitted, and `ACKNOWLEDGED BY
+   THIS DAEMON`. The dashboard must show the same plug-in instance and plug-in
+   capture-session identifiers.
 5. Export a WAV or AIFF into the folder opened by the launcher. Reusing a
    filename is okay; repeated artifacts are versioned `_v002`, `_v003`, and on.
 6. Wait for both `Manifest written` and `Fight-card report written`.
@@ -45,9 +59,13 @@ Use the dashboard Fight Card link and show:
 - the number of observed hash windows;
 - the proof label on each claim;
 - the inferred feature-sequence alignment, confidence, coverage, and offset;
+- the comparable/matched window counts and green/amber alignment bars;
+- the daemon ACK protocol, accepted/contiguous sequence, gap, rejection, and
+  chain-break state;
 - the observation coverage counters and gap state;
 - the explicit list of unobserved or unverified facts.
 - the neutral downstream registration handoff and missing trust requirements.
+- the directly downloadable ZIP and its canonical signed bundle index.
 
 Suggested language:
 
@@ -76,12 +94,56 @@ Then run the safe disposable tamper and export-only sequence:
 
 - No plugin stream: confirm the plugin window counter is moving and UDP port
   `9876` is free, then restart the daemon before restarting Ableton.
+- Local emission advances but ACK stays unknown: confirm the daemon is running
+  the same port and session, then restart the launcher. A stale, rejected,
+  mismatched, or gap state must not be described as confirmed receipt.
 - No manifest: confirm the export is WAV/AIFF, non-empty, and inside the exact
   watched export directory.
 - No stem in the fight card: the export arrived before any plugin hash event;
   play audio through the plugin and export again.
 - Ableton cannot find the plugin: rerun the build script with `--install`, then
   perform a full VST3 rescan.
+- Bundle missing: open the stored verifier JSON. If the fight card is present but
+  packaging failed, rerun the fallback and retain the prior manifest as an
+  incomplete artifact set; do not hand-assemble or overclaim it.
+
+## Remaining minimal Ableton gate
+
+Automated and synthetic validation do not close this gate:
+
+1. Quit Ableton completely.
+2. Reopen it and rescan the installed VST3.
+3. Insert **Audio Provenance Capture** on one routed stem.
+4. Confirm the current plug-in instance and plug-in capture-session identifiers
+   appear in the dashboard.
+5. Play audio and confirm locally emitted and daemon-acknowledged counts advance.
+6. Perform the documented transparency/null test.
+7. Save, close, and reload the Ableton project.
+8. Export a real WAV/AIFF into the watched folder.
+9. Confirm inferred alignment, observation coverage, sealing, bundle creation,
+   and local POC verification.
+10. Save the final real-session manifest and fight card.
+
+Recovery by step:
+
+- 1–2: if Live or its scanner remains resident, quit it from Activity Monitor,
+  reinstall with `./scripts/build_plugin.sh --install`, then reopen and rescan.
+- 3: if insertion fails, confirm mono/stereo routing and inspect Ableton's plug-in
+  scan log; do not substitute an older bundle.
+- 4–5: if identifiers or ACKs do not agree, stop the launcher, confirm UDP 9876
+  is free with `./scripts/preflight.sh`, then start one fresh session.
+- 6: if nulling fails, remove all differing gain, pan, warp, routing, and Utility
+  settings, then repeat with two otherwise identical paths.
+- 7: if reload fails, retain the crash/scan log, reopen a copy of the set, and do
+  not mark reload stability complete.
+- 8: if no export appears, use uncompressed WAV/AIFF and the exact timestamped
+  `exports/` folder shown by the launcher.
+- 9: if alignment is unavailable/not established, inspect format, duration,
+  matched count, and offset; treat the result as inconclusive and re-export after
+  enough routed playback. If verification is `changed` or `untrusted`, preserve
+  the artifacts and start a fresh session rather than editing them.
+- 10: retain the manifest, fight card, signed bundle index, ZIP, and real export
+  together; never replace this gate with a synthetic record.
 
 ## Claims to avoid
 

@@ -14,6 +14,7 @@ The demonstration proves that:
 - audio buffers passed through the capture plugin;
 - the plugin produced a rolling observation-hash chain;
 - the local daemon received and persisted those events;
+- the daemon returned scoped local operational receipts for accepted events;
 - a stable WAV/AIFF export appeared in the watched folder;
 - the daemon computed the export SHA-256;
 - a manifest and derived fight card were generated for the same local capture session.
@@ -21,6 +22,10 @@ The demonstration proves that:
 The stem-to-export association is `inferred`. The system does not prove that
 all Ableton routing passed through the plugin or that the export contains only
 the observed stem.
+
+A daemon receipt is not identity proof, remote attestation, DAW trust, or a
+registry result. The downloadable bundle is governed by a self-generated demo
+key whose valid signature proves integrity and key possession, not identity.
 
 The hardened demo positions the bundle as creation-stage input to a downstream
 registration flow. Identity, author-controlled credentials, production
