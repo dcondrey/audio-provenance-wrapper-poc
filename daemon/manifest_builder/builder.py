@@ -137,6 +137,14 @@ class ManifestBuilder:
             },
             "created_at": self.created_at,
             "core_principle": "Never claim full DAW provenance.",
+            "daemon_receipt_acknowledgement": {
+                "protocol": "apw-local-udp-ack-v1",
+                "status": "unknown",
+                "streams": [],
+                "counters": {"attempted": 0, "sent": 0, "failed": 0},
+                "scope": "No daemon acknowledgement evidence was supplied to the builder.",
+                "apw:proof_level": "unknown_unobserved",
+            },
         }
 
         manifest["observed_stems"] = [
@@ -213,22 +221,17 @@ class ManifestBuilder:
         if self.session_diagnostics is not None:
             manifest["session_diagnostics"] = self.session_diagnostics
 
-        association_established = bool(self.stems and self.export is not None)
         default_association = {
-            "status": (
-                "inferred_same_capture_session"
-                if association_established
-                else "not_established"
-            ),
+            "status": "not_established",
             "capture_session_id": self.session_id,
             "stem_ids": [stem.stem_id for stem in self.stems],
             "export_file_name": self.export.file_name if self.export is not None else None,
             "basis": (
-                "The routed-audio observations and export file were observed during "
-                "the same local daemon capture session. This does not prove complete "
-                "Ableton routing or exclude bypassed audio."
+                "No routed-feature/export comparison was supplied. Session co-occurrence "
+                "alone does not establish an audio association."
             ),
-            "apw:proof_level": "inferred" if association_established else "unknown_unobserved",
+            "reason": "routed-feature comparison unavailable",
+            "apw:proof_level": "unknown_unobserved",
         }
         manifest["stem_export_association"] = self.audio_association or default_association
 
@@ -247,10 +250,7 @@ class ManifestBuilder:
         has_stem = bool(self.stems)
         has_export = self.export is not None
         association_record = self.audio_association or {}
-        association = association_record.get("status") in {
-            "inferred_match",
-            "inferred_same_capture_session",
-        }
+        association = association_record.get("status") == "inferred_match"
         source = self.stems[0] if self.stems else None
 
         return [

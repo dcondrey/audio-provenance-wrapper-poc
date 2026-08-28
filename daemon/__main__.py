@@ -14,6 +14,7 @@ from collections import deque
 from pathlib import Path
 
 from daemon.audio_association import associate_export
+from daemon.bundle import create_evidence_bundle
 from daemon.common import append_jsonl, sha256_file, sha256_prefix, utc_timestamp
 from daemon.correlation_engine.engine import CorrelationEngine, LayerEvent
 from daemon.dashboard import write_dashboard
@@ -143,6 +144,8 @@ class Daemon:
         self._last_report_path: Path | None = None
         self._last_verification_path: Path | None = None
         self._last_handoff_path: Path | None = None
+        self._last_bundle_index_path: Path | None = None
+        self._last_bundle_path: Path | None = None
         self._last_verifier_outcome: str | None = None
         self._last_export_path: Path | None = None
         self._status_path = self.evidence_dir.parent / "status.json"
@@ -276,7 +279,7 @@ class Daemon:
 
         while not self._stop.is_set():
             try:
-                data, _addr = self.receiver.sock.recvfrom(65535)
+                data, address = self.receiver.sock.recvfrom(65535)
             except socket.timeout:
                 continue
             except OSError:
@@ -285,7 +288,13 @@ class Daemon:
                 log.exception("UDP socket error")
                 continue
 
-            event = self.receiver.process_packet(data)
+            event, acknowledgement = self.receiver.process_packet_with_ack(data)
+            if not self.receiver.send_acknowledgement(address, acknowledgement):
+                log.warning(
+                    "Could not dispatch local daemon acknowledgement to %s:%d",
+                    address[0],
+                    address[1],
+                )
             if event is None:
                 continue
             self._last_plugin_event_monotonic = time.monotonic()
@@ -518,9 +527,10 @@ class Daemon:
             "stem_ids": [self.stem_id] if chain_length else [],
             "export_file_name": export_path.name,
             "basis": (
-                "A bounded sequence of RMS and zero-crossing features from routed plug-in windows "
-                "was compared with windowed features extracted from this export using time-offset search. "
-                "The relationship remains inferred and does not establish complete routing."
+                "A bounded sequence of relative RMS, zero-crossing, crest-factor, and coarse energy-envelope "
+                "features emitted from accepted routed plug-in windows was compared with equivalent streaming-"
+                "extracted export features using time-offset search. The relationship remains inferred and does "
+                "not establish complete routing."
             ),
         })
         builder.audio_association = association
@@ -605,6 +615,17 @@ class Daemon:
         }
         manifest["capture_session"]["started_at"] = self._session_started_at
         manifest["capture_session"]["state_at_manifest"] = "active"
+        receipt_summary = self.receiver.receipt_summary()
+        manifest["daemon_receipt_acknowledgement"] = receipt_summary
+        manifest["claim_summary"].insert(2, {
+            "claim": "daemon_receipt_acknowledgement",
+            "value": receipt_summary["status"],
+            "evidence": (
+                f"Daemon dispatched {receipt_summary['counters']['sent']} local ACK packets; "
+                "plug-in processing of each packet is outside daemon observability."
+            ),
+            "apw:proof_level": receipt_summary["apw:proof_level"],
+        })
 
         suffix = "" if export_version == 1 else f"_v{export_version:03d}"
         manifest_path = self.manifest_dir / f"{export_path.stem}{suffix}_manifest.json"
@@ -613,11 +634,21 @@ class Daemon:
         artifact_dir.mkdir(parents=True, exist_ok=True)
         verification_path = artifact_dir / f"{export_path.stem}{suffix}_verification.json"
         handoff_path = artifact_dir / f"{export_path.stem}{suffix}_handoff.json"
+        bundle_index_path = artifact_dir / f"{export_path.stem}{suffix}_bundle_index.json"
+        bundle_path = artifact_dir / f"{export_path.stem}{suffix}_evidence_bundle.zip"
         manifest["presentation"] = {
             "html_report": report_path.name if self.generate_html_report else None,
             "derived_from": manifest_path.name,
             "verifier_result": str(verification_path.relative_to(self.manifest_dir)),
             "downstream_handoff": str(handoff_path.relative_to(self.manifest_dir)),
+            "bundle_index": (
+                str(bundle_index_path.relative_to(self.manifest_dir))
+                if self.generate_html_report else None
+            ),
+            "evidence_bundle": (
+                str(bundle_path.relative_to(self.manifest_dir))
+                if self.generate_html_report else None
+            ),
             "apw:proof_level": "directly_observed",
         }
         manifest["downstream_registration_handoff"] = self._build_handoff(
@@ -626,6 +657,8 @@ class Daemon:
             coverage=builder.coverage,
             evidence_files=evidence_files,
             manifest_name=manifest_path.name,
+            bundle_name=bundle_path.name if self.generate_html_report else None,
+            bundle_index_name=bundle_index_path.name if self.generate_html_report else None,
         )
 
         try:
@@ -675,6 +708,11 @@ class Daemon:
         )
         from daemon.verify import verify_manifest
 
+        # The verifier checks the fight card link. Materialize the unsigned derived
+        # presentation first, then store the verifier result, then render the final
+        # presentation with that local result. The signed JSON manifest is unchanged.
+        if self.generate_html_report:
+            write_html_report(dict(manifest), report_path)
         verification = verify_manifest(manifest_path)
         verification_path.write_text(
             json.dumps(verification.to_dict(), indent=2, ensure_ascii=False) + "\n",
@@ -685,6 +723,19 @@ class Daemon:
             report_manifest["local_verification_summary"] = verification.to_dict()
             write_html_report(report_manifest, report_path)
             log.info("Fight-card report written: %s", report_path)
+            try:
+                create_evidence_bundle(
+                    manifest_path=manifest_path,
+                    report_path=report_path,
+                    verification_path=verification_path,
+                    handoff_path=handoff_path,
+                    index_path=bundle_index_path,
+                    bundle_path=bundle_path,
+                    signer=self._portable_signer,
+                )
+                log.info("Evidence bundle written: %s", bundle_path)
+            except Exception:
+                log.exception("Could not create deterministic evidence bundle")
             if self.open_artifacts:
                 try:
                     subprocess.Popen(["open", str(report_path)])
@@ -695,6 +746,8 @@ class Daemon:
         self._last_report_path = report_path if self.generate_html_report else None
         self._last_verification_path = verification_path
         self._last_handoff_path = handoff_path
+        self._last_bundle_index_path = bundle_index_path if bundle_index_path.is_file() else None
+        self._last_bundle_path = bundle_path if bundle_path.is_file() else None
         self._last_export_path = export_path
         self._write_status(
             "active"
@@ -713,6 +766,10 @@ class Daemon:
         counters: dict[str, int] = {
             **telemetry,
             **receiver,
+            "udp_sends_locally_emitted": max(
+                0,
+                telemetry.get("udp_sends_attempted", 0) - telemetry.get("udp_sends_failed", 0),
+            ),
             "buffer_hash_events_received": chain_length,
             "feature_windows_dropped_from_alignment_buffer": self._feature_window_drops,
         }
@@ -752,6 +809,8 @@ class Daemon:
             and telemetry.get("events_prepared") == receiver["events_received"]
             and loss_count == 0
             and receiver["events_missing_sequence"] == 0
+            and receiver["daemon_acknowledgements_sent"] == receiver["packets_received"]
+            and receiver["daemon_acknowledgements_failed"] == 0
             and plugin_instance_count == 1
         )
         status = "complete_observed_path" if complete else "partial_observed_path"
@@ -760,7 +819,9 @@ class Daemon:
             "basis": (
                 "All submitted routed windows represented by the plug-in counters were received, "
                 "and the prepared/received event prefix agrees with no reported FIFO loss, UDP send "
-                "failure, sequence gap, or chain break. Scope ends at the last received telemetry event."
+                "failure, sequence gap, chain break, or daemon acknowledgement dispatch failure. "
+                "Scope ends at the last received telemetry event; plug-in processing of each ACK is not "
+                "observable from the daemon."
                 if complete
                 else "Routed audio was observed, but one or more counters show or cannot exclude loss."
             ),
@@ -784,6 +845,7 @@ class Daemon:
                 "max_events": self._max_session_events,
                 "events_dropped_from_memory_only": self._session_event_drops,
             },
+            "daemon_receipt_acknowledgement": self.receiver.receipt_summary(),
             "apw:proof_level": "directly_observed",
         }
 
@@ -795,6 +857,8 @@ class Daemon:
         coverage: dict[str, object] | None,
         evidence_files: dict[str, dict[str, object]],
         manifest_name: str,
+        bundle_name: str | None,
+        bundle_index_name: str | None,
     ) -> dict[str, object]:
         return {
             "record_type": "downstream_provenance_registration_handoff",
@@ -832,6 +896,9 @@ class Daemon:
                 "export": str(self._last_export_path.resolve()) if self._last_export_path else None,
                 "evidence_directory": str(self.evidence_dir.resolve()),
                 "files": evidence_files,
+                "downloadable_archive": f"artifacts/{bundle_name}" if bundle_name else None,
+                "signed_bundle_index": f"artifacts/{bundle_index_name}" if bundle_index_name else None,
+                "index_scope": "all archive payload entries; the signed index is not self-hashed",
                 "apw:proof_level": "directly_observed",
             },
             "tentative_c2pa_assertion_mapping": {
@@ -872,17 +939,37 @@ class Daemon:
             "plugin_instance_ids": plugin_instance_ids,
             "trust_boundary": (
                 "Only routed plug-in audio and local filesystem exports are observed. "
-                "Identity, authorship, rights, consent, bypassed paths, and downstream registration remain unestablished."
+                "Identity, authorship, rights, consent, bypassed paths, and downstream registration remain unestablished. "
+                "Verified, changed, untrusted, and not_found are local POC integrity outcomes, not registry outcomes."
             ),
             "coverage": self._derive_coverage(self._buffer_hash_count),
             "counts": {
                 **plugin_telemetry,
                 **self.receiver.diagnostics(),
+                "udp_sends_locally_emitted": max(
+                    0,
+                    plugin_telemetry.get("udp_sends_attempted", 0)
+                    - plugin_telemetry.get("udp_sends_failed", 0),
+                ),
                 "buffer_hash_events_received": self._buffer_hash_count,
             },
             "pipeline": {
                 "plugin_observed": "complete" if self._buffer_hash_count else "waiting",
+                "plugin_emitted": (
+                    "degraded"
+                    if plugin_telemetry.get("udp_sends_failed", 0)
+                    else "complete"
+                    if plugin_telemetry.get("udp_sends_attempted", 0)
+                    else "waiting"
+                ),
                 "daemon_received": "complete" if self.receiver.event_count else "waiting",
+                "daemon_acknowledged": (
+                    "degraded"
+                    if self.receiver.acknowledgements_failed
+                    else "issued"
+                    if self.receiver.acknowledgements_sent
+                    else "waiting"
+                ),
                 "chain_continuity": (
                     "error" if self.receiver.hash_chain_break_count else
                     "checked" if self._buffer_hash_count else "waiting"
@@ -892,6 +979,7 @@ class Daemon:
                 "evidence_sealed": "complete" if self._last_manifest_path else "waiting",
                 "verification": self._last_verifier_outcome or "waiting",
             },
+            "daemon_receipt_acknowledgement": self.receiver.receipt_summary(),
             "links": {
                 "manifest": (
                     str(self._last_manifest_path.relative_to(self._status_path.parent))
@@ -908,6 +996,14 @@ class Daemon:
                 "downstream_handoff": (
                     str(self._last_handoff_path.relative_to(self._status_path.parent))
                     if self._last_handoff_path else None
+                ),
+                "bundle_index": (
+                    str(self._last_bundle_index_path.relative_to(self._status_path.parent))
+                    if self._last_bundle_index_path else None
+                ),
+                "evidence_bundle": (
+                    str(self._last_bundle_path.relative_to(self._status_path.parent))
+                    if self._last_bundle_path else None
                 ),
             },
             "proof_levels": [

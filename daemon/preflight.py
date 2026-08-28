@@ -67,6 +67,7 @@ def run_preflight(session_dir: Path, port: int = 9876) -> list[Check]:
     installed = Path.home() / "Library/Audio/Plug-Ins/VST3/Audio Provenance Capture.vst3"
     bundles = [path for path in (installed, built) if path.is_dir()]
     if bundles:
+        binary = bundles[0] / "Contents/MacOS/Audio Provenance Capture"
         verification = subprocess.run(
             ["codesign", "--verify", "--deep", "--strict", str(bundles[0])],
             check=False,
@@ -77,6 +78,29 @@ def run_preflight(session_dir: Path, port: int = 9876) -> list[Check]:
             "plugin_bundle",
             "ok" if verification.returncode == 0 else "fail",
             str(bundles[0]) if verification.returncode == 0 else verification.stderr.strip(),
+        ))
+        architecture = subprocess.run(
+            ["file", str(binary)], check=False, capture_output=True, text=True,
+        )
+        checks.append(Check(
+            "plugin_architecture",
+            "ok" if architecture.returncode == 0 else "fail",
+            architecture.stdout.strip() or architecture.stderr.strip(),
+        ))
+        signing = subprocess.run(
+            ["codesign", "-dvvv", str(bundles[0])],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        signing_lines = [
+            line for line in signing.stderr.splitlines()
+            if line.startswith(("Authority=", "Signature=", "TeamIdentifier=", "Runtime Version="))
+        ]
+        checks.append(Check(
+            "plugin_signing",
+            "ok" if signing.returncode == 0 else "fail",
+            "; ".join(signing_lines) or signing.stderr.strip(),
         ))
     else:
         checks.append(Check(

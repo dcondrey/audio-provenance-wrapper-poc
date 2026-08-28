@@ -39,14 +39,62 @@ Hardening validation on 2026-08-28:
 - The built and installed arm64 executables are byte-identical with SHA-256
   `0c01fcb673c654c0716b346998c76ea1847202eca02be88117cd8671b16f497a`.
 
-Manual v1.0 gates still to record on the demonstration machine:
+Presenter hardening validation on 2026-08-28:
 
-- [x] Current VST3 configures and builds from a clean build directory.
-- [ ] Ableton Live discovers and opens the current VST3.
-- [ ] A polarity/null test confirms transparent pass-through.
-- [ ] Playback, stop/start, project save, and project reload remain stable.
-- [ ] A real Ableton export produces a fight card with routed-audio evidence.
-- [ ] `python3 -m daemon.verify` passes against that real manifest.
+- 95 Python tests pass: the prior 92 plus three focused ACK-state,
+  routed-association-fixture, and deterministic-bundle tests.
+- A fresh build directory compiled release VST3 version 0.9.0 from JUCE tag
+  8.0.15. The binary is arm64 with deployment target macOS 12.0.
+- Built and installed executables are byte-identical with SHA-256
+  `9b29fbd28eeb70875114f9d935e16867df38045802877d84dd71427178bdf909`.
+- Strict deep signing verification passes for both bundles. The final install is
+  Developer ID signed by team `U3PZN7P3E5`, uses hardened runtime, and carries a
+  secure timestamp. CDHash is `04f8ff083be5052c16d1167b80aa15f2d3a18794`.
+- `spctl` reports `Unnotarized Developer ID`. Notarization/packaging remains
+  production distribution work; it is not represented as complete.
+- Preflight reports READY with zero failures: installed bundle, arm64
+  architecture, Developer ID signing, Python 3.14.6, signing material, disk,
+  Ableton presence, and UDP port 9876 all pass.
+- The exact `./scripts/presenter_fallback.sh` path completes in a fresh ignored
+  session: 40/40 daemon ACKs, highest accepted/contiguous sequence 40,
+  `complete_observed_path`, gain-adjusted three-window-offset
+  `inferred_match` at 0.2786 seconds, local verifier `verified`, and signed bundle
+  integrity `verified`.
+- The stored verifier JSON records `html_report_present`; it has no false
+  `html_report_missing` artifact-ordering warning.
+- Original same-machine and `--public-only` verification both return the local
+  POC outcome `verified`. The latter verifies Ed25519 using the public key and
+  explicitly leaves signer identity unverified.
+- Disposable altered-export and altered-manifest copies return `changed`.
+- A fresh export-only rehearsal returns local file-integrity `verified` with
+  `unknown_coverage` and `unavailable` routed/export association.
+- The signed bundle index and every indexed archive payload hash verify. Dashboard,
+  fight-card, handoff, bundle, index, and verifier links resolve to existing files.
+- Ctrl-C shutdown of the primary launcher records `stopped`, leaves no daemon on
+  its test port, and permits immediate UDP rebinding.
+- Existing long-session bounds and streaming evidence-prefix tests pass. A code
+  scan confirms evidence prefixes remain chunk-streamed; whole-file reads are
+  limited to small manifests, indexes, and keys rather than JSONL evidence.
+- Ableton Live 12 Trial is installed and running. Its log proves the prior 0.9.0
+  bundle was scanned and instantiated on 2026-08-27, but the running process
+  still holds the prior binary inode after the new install. No current-build
+  rescan, UI observation, null test, reload, or real export was observed, so none
+  is marked complete.
+
+Manual v1.0 gate still to record on the demonstration machine:
+
+1. [ ] Quit Ableton completely.
+2. [ ] Reopen it and rescan the installed VST3.
+3. [ ] Insert **Audio Provenance Capture** on one routed stem.
+4. [ ] Confirm current plug-in instance and capture-session identifiers in the dashboard.
+5. [ ] Confirm locally emitted and daemon-acknowledged counts advance during playback.
+6. [ ] Complete the documented polarity/null transparency test.
+7. [ ] Save, close, and reload the Ableton project.
+8. [ ] Export a real WAV/AIFF into the watched folder.
+9. [ ] Confirm inferred alignment, coverage, sealing, bundle creation, and verification.
+10. [ ] Save the final real-session manifest and fight card.
+
+Exact per-step recovery instructions are in `docs/DEMO_RUNBOOK.md`.
 
 No automated or synthetic result is recorded as manual Ableton validation.
 

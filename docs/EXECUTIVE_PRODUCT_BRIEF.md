@@ -43,9 +43,9 @@ adapter.
 
 ### Build now
 
-- reliable VST3 observation and bounded event transport;
+- reliable VST3 observation, bounded event transport, and scoped local ACK health;
 - deterministic session/export versioning and coverage accounting;
-- portable bundle validation and adversarial demonstrations;
+- deterministic signed-index bundle validation and adversarial demonstrations;
 - policy-friendly neutral handoff records.
 
 ### Integrate through a defined seam
@@ -91,8 +91,8 @@ adapter.
 ### 60 days — Pilot workflow
 
 - package signed/notarized installer and background service;
-- replace local UDP ambiguity with authenticated local acknowledgement or a
-  bounded IPC transport;
+- threat-model and authenticate the local ACK channel or replace it with a
+  production bounded IPC transport;
 - add multi-instance/stem policy without claiming project completeness;
 - generate a versioned handoff accepted by the downstream pilot system.
 

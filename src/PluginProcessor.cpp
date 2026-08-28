@@ -18,7 +18,8 @@ AudioProvenanceCaptureAudioProcessor::AudioProvenanceCaptureAudioProcessor()
                           .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                           .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
       pluginInstanceId ("plugin-" + juce::Uuid().toString().substring (0, 12)),
-      pluginCaptureSessionId ("plugin-session-" + juce::Uuid().toString().substring (0, 12))
+      pluginCaptureSessionId ("plugin-session-" + juce::Uuid().toString().substring (0, 12)),
+      eventEmitter (pluginInstanceId, pluginCaptureSessionId)
 {
     audioObserver.start ([this] (const juce::String& jsonEvent)
     {
@@ -40,6 +41,17 @@ AudioProvenanceCaptureAudioProcessor::AudioProvenanceCaptureAudioProcessor()
             telemetry->setProperty ("events_prepared", static_cast<juce::int64> (sequence));
             telemetry->setProperty ("udp_sends_attempted", static_cast<juce::int64> (eventEmitter.getSendAttempts() + 1));
             telemetry->setProperty ("udp_sends_failed", static_cast<juce::int64> (eventEmitter.getSendFailures()));
+            const auto acknowledgement = eventEmitter.getAcknowledgementSnapshot();
+            telemetry->setProperty ("daemon_acknowledgements_processed", static_cast<juce::int64> (
+                acknowledgement.acknowledgementsProcessed));
+            telemetry->setProperty ("daemon_highest_accepted_sequence", static_cast<juce::int64> (
+                acknowledgement.highestAcceptedSequence));
+            telemetry->setProperty ("daemon_highest_contiguous_sequence", static_cast<juce::int64> (
+                acknowledgement.highestContiguousSequence));
+            telemetry->setProperty ("daemon_ack_session_mismatches_ignored", static_cast<juce::int64> (
+                acknowledgement.sessionMismatchesIgnored));
+            telemetry->setProperty ("daemon_restarts_observed", static_cast<juce::int64> (
+                acknowledgement.daemonRestartsObserved));
             object->setProperty ("telemetry", juce::var (telemetry));
             eventEmitter.sendEvent (juce::JSON::toString (parsed, true));
         }

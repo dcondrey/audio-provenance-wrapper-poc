@@ -4,8 +4,9 @@
 
 This POC is an upstream evidence adapter for an existing producer workflow. It
 observes one audio path deliberately routed through an Ableton VST3, binds those
-observations to a local export with a conservative feature-sequence comparison,
-and prepares a neutral downstream registration handoff.
+observations to a local export with a conservative routed-feature comparison,
+packages a signed local evidence index/bundle, and prepares a neutral downstream
+registration handoff.
 
 It does not reproduce or claim compatibility with Genotone technology. It gives
 a downstream trust provider more creation-stage context to evaluate when the
@@ -29,9 +30,10 @@ also frames the problem as infrastructure rather than AI detection, with
 creator-controlled identity and verification at ecosystem entry points.
 
 The adapter operates earlier. It can supply evidence that a specific plug-in
-instance observed a sequence of routed buffers, whether the local receipt chain
-had known gaps, the hard hash of the resulting export, and how strongly simple
-audio features align. This can make a master-stage registration record more
+instance observed a sequence of routed buffers, whether the local daemon returned
+scoped operational receipts and whether that sequence had known gaps, the hard
+hash of the resulting export, and how strongly compact audio features align.
+This can make a master-stage registration record more
 useful without substituting creation telemetry for identity or authorship.
 
 Official context reviewed 28 August 2026:
@@ -43,11 +45,11 @@ Official context reviewed 28 August 2026:
 
 | Stage | This adapter establishes | Downstream trust layer establishes |
 |---|---|---|
-| Creation | Routed buffers observed; chain and sequence continuity; declared source category | Nothing implied about identity, authorship, ownership, consent, or rights |
+| Creation | Routed buffers observed; local emitted/received/ACK-issued states; chain and sequence continuity; declared source category | Nothing implied about identity, authorship, ownership, consent, or rights |
 | Export | Local hard hash and audio metadata directly observed | Canonical master policy and registration acceptance |
-| Association | Windowed RMS/ZCR offset match, always inferred | Production-grade fingerprint and/or audio-native soft binding |
+| Association | Relative RMS/ZCR/crest/envelope offset match, always inferred | Production-grade fingerprint and/or audio-native soft binding |
 | Integrity | Ed25519 integrity check under a self-generated demo key | Author-controlled credential policy, verified identity, certificate chain |
-| Portability | JSON bundle and tentative C2PA assertion mapping | Production C2PA claim generation, resilient recovery, registry publication |
+| Portability | Deterministic ZIP, self-generated-key signed index, JSON manifest, and tentative C2PA assertion mapping | Production C2PA claim generation, resilient recovery, registry publication |
 | Verification | Local outcomes: verified, changed, untrusted, not_found | Open downstream/registry result under its published trust policy |
 
 ## What must not be conflated
@@ -56,6 +58,8 @@ Official context reviewed 28 August 2026:
   externally verified identity.
 - Feature alignment is an inferred local association, not a watermark,
   fingerprint-registry lookup, or proof that bypass was impossible.
+- A local daemon ACK is operational receipt evidence, not Genotone verification,
+  registry confirmation, identity, or remote attestation.
 - A producer declaration is not authorship, ownership, consent, or rights
   verification.
 - A missing observation or failed match is not evidence that audio is synthetic

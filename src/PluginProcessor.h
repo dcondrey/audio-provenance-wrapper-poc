@@ -71,11 +71,11 @@ private:
     std::atomic<std::uint64_t> lastNonSilentBufferSeenMilliseconds { 0 };
     std::atomic<bool> lastBufferHadAudio { false };
 
-    // Granular observation pipeline (emitter must outlive observer).
-    apw::EventEmitter eventEmitter;
-    apw::AudioObserver audioObserver;
+    // Granular observation pipeline (identifiers and emitter must outlive observer).
     const juce::String pluginInstanceId;
     const juce::String pluginCaptureSessionId;
+    apw::EventEmitter eventEmitter;
+    apw::AudioObserver audioObserver;
     std::atomic<std::uint64_t> eventSequence { 0 };
 
     // Pre-allocated buffer for double-to-float conversion.

@@ -25,17 +25,19 @@ card from simulated UDP evidence and a detected export. New and overwritten
 exports are covered by integration tests, and the verifier checks the export,
 evidence-prefix bindings, chain commitment, and local integrity seal.
 
-Remaining v1.0 gate: build/install the current VST3 and complete the manual
-Ableton load, pass-through, playback/reload, and real export validation in
-`docs/VALIDATION.md`.
+The current VST3 now builds cleanly, is installed, and passes architecture and
+strict Developer ID signing inspection. The remaining v1.0 gate is a fresh
+Ableton rescan followed by observed pass-through/null, playback/reload, daemon
+ACK, and real-export validation as recorded in `docs/VALIDATION.md`.
 
 The demo candidate now also includes deterministic timestamped sessions,
 preflight, bounded daemon-clock correlation, evidence rotation and streaming
-prefix hashing, loss/coverage telemetry, conservative routed/export audio
-alignment, Ed25519 public-key integrity, JSON Schema enforcement, a live
-dashboard, adversarial rehearsal, and a neutral downstream registration
-handoff. These strengthen the one-stem promise without expanding it into full
-DAW provenance.
+prefix hashing, scoped local daemon acknowledgements, loss/coverage telemetry,
+gain/offset-tolerant routed-feature/export alignment, Ed25519 public-key
+integrity, JSON Schema enforcement, a live dashboard, deterministic signed
+bundle/index, adversarial rehearsal, presenter fallback, and a neutral downstream
+registration handoff. These strengthen the one-stem promise without expanding
+it into full DAW provenance.
 
 ## Agile Epics
 
@@ -58,6 +60,7 @@ Goal:
 - Use local UDP for v0.
 - Send non-blocking event messages.
 - Persist received events.
+- Return scoped local operational receipts without touching the audio callback.
 
 ### Epic 3: Export Detection and Hashing
 
