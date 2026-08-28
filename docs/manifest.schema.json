@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://audio-provenance-poc.local/schema/manifest-v0.9.json",
+  "title": "Audio Provenance POC Manifest",
+  "type": "object",
+  "required": [
+    "apw_version",
+    "schema",
+    "session_id",
+    "capture_session",
+    "created_at",
+    "observed_stems",
+    "stem_export_association",
+    "observation_coverage",
+    "claim_summary",
+    "apw:unobserved",
+    "evidence_binding",
+    "portable_signature",
+    "downstream_registration_handoff",
+    "c2pa_mapping"
+  ],
+  "$defs": {
+    "proofLevel": {
+      "enum": [
+        "directly_observed",
+        "inferred",
+        "user_declared",
+        "externally_verified",
+        "unknown_unobserved"
+      ]
+    },
+    "proofObject": {
+      "type": "object",
+      "required": ["apw:proof_level"],
+      "properties": {
+        "apw:proof_level": { "$ref": "#/$defs/proofLevel" }
+      }
+    }
+  },
+  "properties": {
+    "apw_version": { "type": "string" },
+    "schema": { "const": "audio-provenance-manifest-v0" },
+    "session_id": { "type": "string", "minLength": 1 },
+    "capture_session": { "$ref": "#/$defs/proofObject" },
+    "created_at": { "type": "string" },
+    "observed_stems": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/$defs/proofObject" },
+          {
+            "required": [
+              "stem_id", "hash_chain_root", "hash_chain_length",
+              "source_category_proof_level", "plugin_instance_ids"
+            ]
+          }
+        ]
+      }
+    },
+    "export": {
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": ["file_path", "file_name", "sha256", "export_version"],
+          "properties": { "sha256": { "pattern": "^[0-9a-f]{64}$" } }
+        }
+      ]
+    },
+    "stem_export_association": { "$ref": "#/$defs/proofObject" },
+    "observation_coverage": {
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": ["status", "basis", "counters"],
+          "properties": {
+            "status": {
+              "enum": ["complete_observed_path", "partial_observed_path", "unknown_coverage"]
+            }
+          }
+        }
+      ]
+    },
+    "claim_summary": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/proofObject" }
+    },
+    "apw:unobserved": { "type": "array", "items": { "type": "string" } },
+    "evidence_binding": { "$ref": "#/$defs/proofObject" },
+    "portable_signature": {
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": [
+            "algorithm", "public_key_hex", "signature_hex", "signed_content_hash",
+            "trust_scope", "signer_identity", "signer_identity_proof_level"
+          ],
+          "properties": {
+            "algorithm": { "const": "Ed25519" },
+            "trust_scope": { "const": "self_generated_demo_key_integrity" },
+            "signer_identity_proof_level": { "const": "unknown_unobserved" }
+          }
+        }
+      ]
+    },
+    "downstream_registration_handoff": { "type": "object" },
+    "c2pa_mapping": { "type": "object" }
+  },
+  "additionalProperties": true
+}

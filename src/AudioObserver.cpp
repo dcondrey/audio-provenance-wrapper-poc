@@ -46,6 +46,9 @@ void AudioObserver::pushAudioBlock (const float* const* channelData,
     if (numChannels <= 0 || numSamples <= 0)
         return;
 
+    buffersSubmitted.fetch_add (1, std::memory_order_relaxed);
+    samplesSubmitted.fetch_add (static_cast<std::uint64_t> (numSamples), std::memory_order_relaxed);
+
     int start1, size1, start2, size2;
     audioFifo.prepareToWrite (numSamples, start1, size1, start2, size2);
 
@@ -65,7 +68,24 @@ void AudioObserver::pushAudioBlock (const float* const* channelData,
     if (size1 > 0) writeMono (start1, size1, 0);
     if (size2 > 0) writeMono (start2, size2, size1);
 
-    audioFifo.finishedWrite (size1 + size2);
+    const auto written = size1 + size2;
+    audioFifo.finishedWrite (written);
+    const auto dropped = numSamples - written;
+    if (dropped > 0)
+    {
+        fifoSamplesDropped.fetch_add (static_cast<std::uint64_t> (dropped), std::memory_order_relaxed);
+        fifoWindowsDropped.fetch_add (1, std::memory_order_relaxed);
+    }
+}
+
+void AudioObserver::recordExternalAudioDrop (int numSamples) noexcept
+{
+    if (numSamples <= 0)
+        return;
+    buffersSubmitted.fetch_add (1, std::memory_order_relaxed);
+    samplesSubmitted.fetch_add (static_cast<std::uint64_t> (numSamples), std::memory_order_relaxed);
+    fifoSamplesDropped.fetch_add (static_cast<std::uint64_t> (numSamples), std::memory_order_relaxed);
+    fifoWindowsDropped.fetch_add (1, std::memory_order_relaxed);
 }
 
 void AudioObserver::pushMidiMessages (const juce::MidiBuffer& midi)
@@ -195,6 +215,7 @@ void AudioObserver::processWindow (const float* data, int numSamples)
 
     auto windowHash = computeChainedHash (data, numSamples);
     auto prevHash   = previousHash.isEmpty() ? juce::String ("genesis") : previousHash;
+    totalWindowsHashed.fetch_add (1, std::memory_order_relaxed);
 
     // ── buffer_hash event ──
     // Every window is emitted so the daemon can verify the complete chain.
@@ -290,8 +311,6 @@ void AudioObserver::processWindow (const float* data, int numSamples)
     prevBands = bands;
     if (hasAudio)
         prevSpectralCentroid = centroid;
-
-    totalWindowsHashed.fetch_add (1, std::memory_order_relaxed);
 
     {
         juce::SpinLock::ScopedLockType lock (lastHashLock);
@@ -598,9 +617,13 @@ void AudioObserver::checkSessionConfigChanges()
 // Stats
 // ──────────────────────────────────────────────────────────────────────
 
-int AudioObserver::getWindowSize() const noexcept         { return kWindowSize; }
-int AudioObserver::getTotalWindowsHashed() const noexcept { return totalWindowsHashed.load (std::memory_order_relaxed); }
-int AudioObserver::getTotalEventsEmitted() const noexcept { return totalEventsEmitted.load (std::memory_order_relaxed); }
+int AudioObserver::getWindowSize() const noexcept { return kWindowSize; }
+std::uint64_t AudioObserver::getTotalWindowsHashed() const noexcept { return totalWindowsHashed.load (std::memory_order_relaxed); }
+std::uint64_t AudioObserver::getTotalEventsEmitted() const noexcept { return totalEventsEmitted.load (std::memory_order_relaxed); }
+std::uint64_t AudioObserver::getBuffersSubmitted() const noexcept { return buffersSubmitted.load (std::memory_order_relaxed); }
+std::uint64_t AudioObserver::getSamplesSubmitted() const noexcept { return samplesSubmitted.load (std::memory_order_relaxed); }
+std::uint64_t AudioObserver::getFifoSamplesDropped() const noexcept { return fifoSamplesDropped.load (std::memory_order_relaxed); }
+std::uint64_t AudioObserver::getFifoWindowsDropped() const noexcept { return fifoWindowsDropped.load (std::memory_order_relaxed); }
 
 juce::String AudioObserver::getLastHash() const
 {

@@ -53,6 +53,9 @@ public:
 
     // Granular observation stats for the UI.
     apw::AudioObserver& getAudioObserver() noexcept { return audioObserver; }
+    const apw::EventEmitter& getEventEmitter() const noexcept { return eventEmitter; }
+    const juce::String& getPluginInstanceId() const noexcept { return pluginInstanceId; }
+    const juce::String& getPluginCaptureSessionId() const noexcept { return pluginCaptureSessionId; }
 
 private:
     template <typename SampleType>
@@ -71,6 +74,9 @@ private:
     // Granular observation pipeline (emitter must outlive observer).
     apw::EventEmitter eventEmitter;
     apw::AudioObserver audioObserver;
+    const juce::String pluginInstanceId;
+    const juce::String pluginCaptureSessionId;
+    std::atomic<std::uint64_t> eventSequence { 0 };
 
     // Pre-allocated buffer for double-to-float conversion.
     juce::AudioBuffer<float> doubleConversionBuffer;

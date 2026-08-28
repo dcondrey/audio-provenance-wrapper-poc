@@ -105,7 +105,10 @@ class ClipPasteRule(CorrelationRule):
             edit_type="clip_paste",
             confidence=min(confidence, 1.0),
             timestamp_ms=candidate.window_center_ms,
-            contributing_events=_summarize_events(candidate),
+            contributing_events=_summarize_events(candidate, lambda e: (
+                (e.layer == "input_capture" and e.data.get("probable_operation") == "paste")
+                or (e.event_type == "audio_transition" and e.data.get("direction") == "silence_to_audio")
+            )),
         )
 
 
@@ -138,7 +141,10 @@ class ClipDeleteRule(CorrelationRule):
             edit_type="clip_delete",
             confidence=min(confidence, 1.0),
             timestamp_ms=candidate.window_center_ms,
-            contributing_events=_summarize_events(candidate),
+            contributing_events=_summarize_events(candidate, lambda e: (
+                (e.layer == "input_capture" and e.data.get("probable_operation") == "delete")
+                or (e.event_type == "audio_transition" and e.data.get("direction") == "audio_to_silence")
+            )),
         )
 
 
@@ -175,7 +181,9 @@ class EffectChangeRule(CorrelationRule):
             edit_type="effect_change",
             confidence=min(confidence, 1.0),
             timestamp_ms=candidate.window_center_ms,
-            contributing_events=_summarize_events(candidate),
+            contributing_events=_summarize_events(candidate, lambda e: (
+                e.event_type in {"screen_mixer_changed", "spectral_shift"}
+            )),
         )
 
 
@@ -214,7 +222,10 @@ class SampleImportRule(CorrelationRule):
             edit_type="sample_import_confirmed",
             confidence=min(confidence, 1.0),
             timestamp_ms=candidate.window_center_ms,
-            contributing_events=_summarize_events(candidate),
+            contributing_events=_summarize_events(candidate, lambda e: (
+                e is sample_event
+                or e.event_type in {"project_sample_ref_added", "ingredient_correlation"}
+            )),
             notes=[f"Sample: {sample_event.data.get('file_name', 'unknown')}"],
         )
 
@@ -243,7 +254,9 @@ class UndoRule(CorrelationRule):
             edit_type="undo",
             confidence=min(confidence, 1.0),
             timestamp_ms=candidate.window_center_ms,
-            contributing_events=_summarize_events(candidate),
+            contributing_events=_summarize_events(candidate, lambda e: (
+                e.layer == "input_capture" and e.data.get("probable_operation") == "undo"
+            )),
             notes=["Hash chain rollback detection not yet implemented."],
         )
 
@@ -291,7 +304,10 @@ class ArrangementEditRule(CorrelationRule):
             edit_type="arrangement_edit",
             confidence=min(confidence, 1.0),
             timestamp_ms=candidate.window_center_ms,
-            contributing_events=_summarize_events(candidate),
+            contributing_events=_summarize_events(candidate, lambda e: (
+                e.event_type in {"project_diff", "screen_arrangement_changed"}
+                or e.layer == "input_capture"
+            )),
             notes=[
                 f"clips +{diff_data.get('clips_added', 0)}"
                 f"/-{diff_data.get('clips_removed', 0)}"
@@ -313,14 +329,23 @@ def _layer_bonus(candidate: CorrelationCandidate, required: int) -> float:
     return max(0.0, extra * 0.05)
 
 
-def _summarize_events(candidate: CorrelationCandidate) -> list[dict[str, object]]:
+def _summarize_events(
+    candidate: CorrelationCandidate,
+    predicate=None,
+) -> list[dict[str, object]]:
+    events = candidate.events if predicate is None else [e for e in candidate.events if predicate(e)]
     return [
         {
             "layer": e.layer,
             "event_type": e.event_type,
             "timestamp_ms": e.timestamp_ms,
+            "source_timestamp_ms": e.data.get("source_timestamp_ms", e.data.get("timestamp_ms")),
+            "event_id": e.data.get(
+                "daemon_event_id",
+                f"{e.layer}:{e.event_type}:{e.timestamp_ms}:{e.data.get('event_sequence', '')}",
+            ),
         }
-        for e in candidate.events
+        for e in events
     ]
 
 
@@ -354,7 +379,9 @@ class ParameterAdjustRule(CorrelationRule):
             edit_type="effect_adjusted",
             confidence=min(confidence, 1.0),
             timestamp_ms=candidate.window_center_ms,
-            contributing_events=_summarize_events(candidate),
+            contributing_events=_summarize_events(candidate, lambda e: (
+                e.event_type in {"parameter_change", "spectral_profile_change"}
+            )),
             notes=[f"CC#{cc} change correlated with spectral profile shift"],
         )
 
@@ -392,7 +419,10 @@ class RecordingStartRule(CorrelationRule):
             edit_type=edit_type,
             confidence=min(confidence, 1.0),
             timestamp_ms=candidate.window_center_ms,
-            contributing_events=_summarize_events(candidate),
+            contributing_events=_summarize_events(candidate, lambda e: (
+                (e.event_type == "transport_change" and e.data.get("transport_state") in ("playing", "recording"))
+                or (e.event_type == "audio_transition" and e.data.get("direction") == "silence_to_audio")
+            )),
         )
 
 
@@ -427,7 +457,9 @@ class ContentChangeRule(CorrelationRule):
             edit_type="content_changed",
             confidence=min(confidence, 1.0),
             timestamp_ms=candidate.window_center_ms,
-            contributing_events=_summarize_events(candidate),
+            contributing_events=_summarize_events(candidate, lambda e: (
+                e.event_type in {"spectral_shift", "spectral_profile_change"}
+            )),
         )
 
 
@@ -449,7 +481,7 @@ class DeviceAddedRule(CorrelationRule):
                 edit_type="device_chain_changed",
                 confidence=min(confidence, 1.0),
                 timestamp_ms=candidate.window_center_ms,
-                contributing_events=_summarize_events(candidate),
+                contributing_events=_summarize_events(candidate, lambda item: item is e),
                 notes=[f"Devices changed on: {', '.join(str(d) for d in devices[:5])}"],
             )
         return None
@@ -473,7 +505,7 @@ class AutomationEditRule(CorrelationRule):
                 edit_type="automation_edited",
                 confidence=min(confidence, 1.0),
                 timestamp_ms=candidate.window_center_ms,
-                contributing_events=_summarize_events(candidate),
+                contributing_events=_summarize_events(candidate, lambda item: item is e),
                 notes=[f"Automation points delta: {delta:+d}"],
             )
         return None
@@ -497,7 +529,7 @@ class MidiEditRule(CorrelationRule):
                 edit_type="midi_edited",
                 confidence=min(confidence, 1.0),
                 timestamp_ms=candidate.window_center_ms,
-                contributing_events=_summarize_events(candidate),
+                contributing_events=_summarize_events(candidate, lambda item: item is e),
                 notes=[f"MIDI notes delta: {delta:+d}"],
             )
         return None
@@ -531,17 +563,34 @@ class CorrelationEngine:
         window_ms: int = 2000,
         rules: list[CorrelationRule] | None = None,
         evidence_path: Path = Path("evidence/composite_events.jsonl"),
+        max_buffer_events: int = 512,
+        max_dedup_keys: int = 4096,
     ) -> None:
         self.window_ms = window_ms
         self.rules = rules or list(DEFAULT_RULES)
         self.evidence_path = evidence_path.expanduser()
         self._buffer: deque[LayerEvent] = deque()
         self._emitted_count = 0
+        self.max_buffer_events = max(2, max_buffer_events)
+        self.max_dedup_keys = max(32, max_dedup_keys)
+        self._dedup_keys: set[str] = set()
+        self._dedup_order: deque[str] = deque()
+        self._capacity_drops = 0
+        self._duplicate_suppressions = 0
 
     def ingest(self, event: LayerEvent) -> list[CompositeEdit]:
         """Add an event and return any composite edits triggered."""
         self._buffer.append(event)
         self._expire_old_events(event.timestamp_ms)
+        while len(self._buffer) > self.max_buffer_events:
+            self._buffer.popleft()
+            self._capacity_drops += 1
+            if self._capacity_drops == 1 or self._capacity_drops % 1000 == 0:
+                log.warning(
+                    "Correlation buffer capacity reached; dropped=%d max_events=%d",
+                    self._capacity_drops,
+                    self.max_buffer_events,
+                )
         return self._evaluate()
 
     def _expire_old_events(self, now_ms: int) -> None:
@@ -562,6 +611,26 @@ class CorrelationEngine:
         for rule in self.rules:
             composite = rule.evaluate(candidate)
             if composite is not None and composite.confidence >= 0.5:
+                if not composite.contributing_events:
+                    continue
+                dedup_key = json.dumps(
+                    [
+                        composite.edit_type,
+                        sorted(
+                            str(item.get("event_id", ""))
+                            for item in composite.contributing_events
+                        ),
+                    ],
+                    separators=(",", ":"),
+                )
+                if dedup_key in self._dedup_keys:
+                    self._duplicate_suppressions += 1
+                    continue
+                self._dedup_keys.add(dedup_key)
+                self._dedup_order.append(dedup_key)
+                while len(self._dedup_order) > self.max_dedup_keys:
+                    expired = self._dedup_order.popleft()
+                    self._dedup_keys.discard(expired)
                 results.append(composite)
                 self._write_event(composite)
                 self._emitted_count += 1
@@ -578,3 +647,11 @@ class CorrelationEngine:
     @property
     def buffer_size(self) -> int:
         return len(self._buffer)
+
+    @property
+    def capacity_drops(self) -> int:
+        return self._capacity_drops
+
+    @property
+    def duplicate_suppressions(self) -> int:
+        return self._duplicate_suppressions

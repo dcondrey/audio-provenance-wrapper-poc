@@ -34,6 +34,9 @@ flowchart LR
     E --> G[HTML Fight Card]
     D --> E
     F[Sample Folder] -->|Filesystem watch| C
+    E --> H[Neutral Registration Handoff]
+    H --> I[Downstream Trust Provider]
+    I -->|Identity / soft binding / signing / registry| J[Open Verification]
 ```
 
 ## System Components
@@ -80,6 +83,12 @@ lock-free ring buffer and produces the following per-window evidence:
 All events are serialized as single-line JSON and streamed to the daemon over
 UDP (default port 9876).
 
+Each plug-in lifecycle has a `plugin_instance_id` and
+`plugin_capture_session_id`. Every prepared event has an increasing sequence.
+The plug-in reports buffers/samples submitted, windows hashed, FIFO loss,
+events prepared, and UDP writes attempted/failed. A successful UDP socket write
+is not displayed as daemon receipt because v0 has no acknowledgement channel.
+
 ## Local Daemon
 
 A macOS background process.
@@ -101,6 +110,17 @@ Responsibilities:
 Listens for UDP packets from the plugin, validates each event against the
 taxonomy, timestamps receipt, and appends to a JSONL evidence file.
 
+Correlation uses only `daemon_received_monotonic_ms` or an equivalent daemon
+monotonic timestamp. The original plug-in monotonic or filesystem/epoch source
+timestamp is preserved separately. Buffers are limited by both age and count;
+inferred matches are keyed by the events that actually contributed, so one
+source event cannot repeatedly emit the same match.
+
+All JSONL files rotate at 64 MiB with three backups. Rotation and drops produce
+concise diagnostics. Manifest binding records a byte length and streaming
+SHA-256 for each immutable prefix; neither generation nor verification loads an
+entire evidence file into memory.
+
 ### Sample Correlation
 
 When the sample watcher detects a new audio file it computes an audio
@@ -108,6 +128,33 @@ fingerprint (RMS + zero-crossing rate from the first second of PCM).  The
 correlator compares incoming stream features against registered sample
 fingerprints.  Matches produce ``ingredient_correlation`` events with proof
 level ``inferred``.
+
+### Routed Audio / Export Association
+
+For the one-stem demo, each received buffer-hash event contributes RMS and
+zero-crossing features. The daemon extracts comparable PCM WAV/AIFF windows
+from the export, searches a bounded set of time offsets, and reports confidence,
+matched coverage, and the best offset. Sample-rate differences are handled by
+matching window duration; channel data is mixed to mono. Unsupported/compressed
+formats, inadequate duration, or low confidence return unavailable or
+not-established status.
+
+The relationship always remains `inferred`. It is neither a watermark nor a
+registry fingerprint, and failure is not proof of absence.
+
+### Observation Coverage
+
+Coverage is derived conservatively:
+
+- `complete_observed_path`: plug-in counters are present, every hashed window
+  was received, and no FIFO drop, UDP failure, sequence gap, out-of-order event,
+  or chain break was reported;
+- `partial_observed_path`: routed evidence exists but counters show or cannot
+  exclude loss;
+- `unknown_coverage`: routed evidence or required counters are absent.
+
+Coverage is a derived (`inferred`) result backed by directly observed counters.
+Unknown coverage remains `unknown_unobserved`.
 
 ## Event Taxonomy
 
@@ -161,6 +208,37 @@ Each detected export produces two adjacent files:
 
 The HTML is presentation only. It adds no claims and is regenerated from the
 manifest.
+
+Each clean launcher run creates `demo-output/sessions/<capture-session>/` with
+independent evidence, export, manifest, dashboard, and status paths. Repeated
+exports of one filename use deterministic `_v002`, `_v003`, and later artifact
+suffixes. A live, dependency-free dashboard shows the pipeline, identifiers,
+counters, gaps, trust boundary, proof legend, and artifact links.
+
+## Portable Integrity
+
+The operational manifest has two deliberately separate integrity paths:
+
+- Ed25519 signs deterministic `apw-json-sort-v1` content and embeds the raw
+  public key. Verification needs no secret. The key is self-generated, so its
+  signer identity is `unknown_unobserved`.
+- The legacy local HMAC is retained for same-machine compatibility. It requires
+  the secret key and provides no portable identity or hardware attestation.
+
+`docs/manifest.schema.json` is the interchange schema. The verifier also
+enforces proof-level, association, and complete-coverage invariants.
+
+## Downstream Registration Handoff
+
+Every operational manifest and adjacent handoff record carry the export hard
+hash, routed chain commitment, coverage, inferred association, creator
+declarations, self-generated signing key scope, evidence locations/hashes, and
+a tentative C2PA mapping. Missing downstream requirements explicitly include
+verified identity, author-controlled credentials, a production certificate
+chain, audio-native soft binding, resilient recovery, registry publication,
+production C2PA claim generation, and consent/rights verification.
+
+This is a neutral provenance handoff, not a Genotone API payload.
 
 ## Trust Boundary
 

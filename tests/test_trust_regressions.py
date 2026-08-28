@@ -1,0 +1,92 @@
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from daemon.correlation_engine.engine import CorrelationEngine, LayerEvent
+from daemon.evidence_receiver.receiver import EvidenceReceiver
+from daemon.schema import validate_manifest_invariants
+
+
+class BoundedCorrelationTests(unittest.TestCase):
+    def test_mixed_clocks_remain_bounded_and_source_match_is_deduplicated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = Path(tmp) / "composite.jsonl"
+            engine = CorrelationEngine(
+                window_ms=2_000,
+                evidence_path=evidence,
+                max_buffer_events=32,
+            )
+            sample = LayerEvent(
+                "sample_watcher", "sample_file_observed", 1_000,
+                {"file_name": "kick.wav", "daemon_event_id": "sample-1", "timestamp_ms": 1_700_000_000_000},
+            )
+            engine.ingest(sample)
+            engine.ingest(LayerEvent("audio_buffer", "buffer_hash", 1_010, {"daemon_event_id": "audio-1"}))
+            for index in range(200):
+                engine.ingest(LayerEvent(
+                    "audio_buffer", "buffer_hash", 1_011 + index,
+                    {"daemon_event_id": f"audio-{index + 2}", "timestamp_ms": 10_000 + index},
+                ))
+            engine.ingest(LayerEvent(
+                "project_differ", "project_diff", 1_700_000_000_000,
+                {"daemon_event_id": "epoch-source", "clips_added": 1, "clips_removed": 0},
+            ))
+            self.assertLessEqual(engine.buffer_size, 32)
+            records = [json.loads(line) for line in evidence.read_text().splitlines()]
+            sample_matches = [record for record in records if record["edit_type"] == "sample_import_confirmed"]
+            self.assertEqual(len(sample_matches), 1)
+            self.assertGreater(engine.duplicate_suppressions, 0)
+
+    def test_long_session_evidence_is_linear_not_candidate_sized(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = Path(tmp) / "composite.jsonl"
+            engine = CorrelationEngine(evidence_path=evidence, max_buffer_events=64)
+            for index in range(5_000):
+                engine.ingest(LayerEvent(
+                    "audio_buffer", "buffer_hash", index,
+                    {"daemon_event_id": f"window-{index}"},
+                ))
+            self.assertLessEqual(engine.buffer_size, 64)
+            self.assertFalse(evidence.exists())
+
+
+class TrustInvariantTests(unittest.TestCase):
+    def test_sequence_gap_is_counted_and_complete_coverage_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            receiver = EvidenceReceiver(port=0, evidence_path=Path(tmp) / "events.jsonl")
+            self.addCleanup(receiver.close)
+            for sequence in (1, 3):
+                receiver.process_packet(json.dumps({
+                    "event_type": "buffer_hash",
+                    "proof_level": "directly_observed",
+                    "plugin_instance_id": "plugin-test",
+                    "event_sequence": sequence,
+                    "window_hash": f"hash-{sequence}",
+                    "prev_hash": "genesis" if sequence == 1 else "hash-1",
+                    "rms_level": 0.2,
+                    "zero_crossing_rate": 0.1,
+                }).encode())
+            self.assertEqual(receiver.sequence_gap_count, 1)
+
+            manifest = {
+                "apw_version": "0.9.0", "schema": "audio-provenance-manifest-v0",
+                "session_id": "s", "capture_session": {"apw:proof_level": "directly_observed"},
+                "created_at": "now", "observed_stems": [], "claim_summary": [],
+                "stem_export_association": {"status": "unavailable", "apw:proof_level": "unknown_unobserved"},
+                "observation_coverage": {
+                    "status": "complete_observed_path", "basis": "invalid", "apw:proof_level": "inferred",
+                    "counters": {
+                        "windows_hashed": 2, "buffer_hash_events_received": 2,
+                        "fifo_samples_dropped": 0, "fifo_windows_dropped": 0,
+                        "udp_sends_failed": 0, "sequence_gaps": 1, "hash_chain_breaks": 0,
+                    },
+                },
+                "apw:unobserved": [], "c2pa_mapping": {},
+            }
+            errors = validate_manifest_invariants(manifest)
+            self.assertTrue(any("sequence_gaps=0" in error for error in errors))
+
+
+if __name__ == "__main__":
+    unittest.main()

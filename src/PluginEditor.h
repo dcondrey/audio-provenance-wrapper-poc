@@ -22,6 +22,7 @@ private:
 
     AudioProvenanceCaptureAudioProcessor& audioProcessor;
     juce::Label titleLabel;
+    juce::Label subtitleLabel;
     juce::Label captureStatusLabel;
     juce::Label audioDetectedLabel;
     juce::Label channelCountLabel;
@@ -31,6 +32,10 @@ private:
     juce::Label hashChainLabel;
     juce::Label lastHashLabel;
     juce::Label scopeLabel;
+    juce::Label sessionIdLabel;
+    juce::Label coverageLabel;
+    juce::Label deliveryLabel;
+    bool activityActive = false;
     std::uint64_t lastRenderedBufferSeenMilliseconds = 0;
     juce::String lastRenderedBufferSeenText = "never";
 

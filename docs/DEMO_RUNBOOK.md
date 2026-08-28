@@ -11,19 +11,19 @@ under five minutes.
 2. Open Ableton Live, enable VST3 system folders, and rescan plug-ins.
 3. Confirm **Audio Provenance Capture** appears in the browser.
 4. Prepare a short, recognizable audio clip in a simple Ableton set.
-5. Use a fresh demo directory or remove old outputs manually.
-6. Close other UDP listeners that may be using port `9876`.
+5. Run `./scripts/preflight.sh`; it checks the port, runtime, disk, signing
+   material, directories, and VST3 bundle.
 
 ## Start the capture
 
 From the repository root:
 
 ```sh
-./scripts/run_demo.sh ./demo-output imported_sample /path/to/Demo.als
+./scripts/demo.sh ./demo-output imported_sample /path/to/Demo.als
 ```
 
-Omit the `.als` path if project parsing is not part of the story. Wait for the
-daemon to print its capture-session ID and watched export directory.
+Omit the `.als` path if project parsing is not part of the story. The launcher
+creates a fresh timestamped session and opens its dashboard and export folder.
 
 ## Ableton sequence
 
@@ -32,20 +32,22 @@ daemon to print its capture-session ID and watched export directory.
 3. Press play.
 4. Wait for `Capture status: ACTIVE`, an increasing window count, and the daemon
    message `Capture plugin evidence stream detected`.
-5. Export a WAV or AIFF into `demo-output/exports/`. Reusing a filename is okay;
-   overwritten exports are detected.
+5. Export a WAV or AIFF into the folder opened by the launcher. Reusing a
+   filename is okay; repeated artifacts are versioned `_v002`, `_v003`, and on.
 6. Wait for both `Manifest written` and `Fight-card report written`.
 
 ## Present the fight card
 
-Open `demo-output/manifests/<export>_provenance.html` and show:
+Use the dashboard Fight Card link and show:
 
 - the exported filename and SHA-256;
 - the final routed-audio chain commitment;
 - the number of observed hash windows;
 - the proof label on each claim;
-- the inferred stem-to-export association;
+- the inferred feature-sequence alignment, confidence, coverage, and offset;
+- the observation coverage counters and gap state;
 - the explicit list of unobserved or unverified facts.
+- the neutral downstream registration handoff and missing trust requirements.
 
 Suggested language:
 
@@ -60,9 +62,15 @@ Suggested language:
 ./scripts/verify_demo.sh ./demo-output/manifests/<export>_manifest.json
 ```
 
-Expected result: `PASS`, with a warning that the HMAC seal provides local
-integrity only and, when `.als` parsing is omitted, a warning that session facts
-are unavailable.
+Expected local POC outcome: `verified`, with warnings that signer identity is
+unverified, the HMAC is local-only compatibility, and optional `.als` session
+facts are unavailable.
+
+Then run the safe disposable tamper and export-only sequence:
+
+```sh
+./scripts/demo_adversarial.sh /path/to/<export>_manifest.json
+```
 
 ## Recovery
 

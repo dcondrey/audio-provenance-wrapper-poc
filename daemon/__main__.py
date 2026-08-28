@@ -4,14 +4,19 @@ import argparse
 import hashlib
 import json
 import logging
+import signal
 import socket
+import subprocess
 import threading
 import time
 import uuid
+from collections import deque
 from pathlib import Path
 
-from daemon.common import append_jsonl, sha256_file
+from daemon.audio_association import associate_export
+from daemon.common import append_jsonl, sha256_file, sha256_prefix, utc_timestamp
 from daemon.correlation_engine.engine import CorrelationEngine, LayerEvent
+from daemon.dashboard import write_dashboard
 from daemon.evidence_receiver.receiver import EvidenceReceiver
 from daemon.hardware_attestation.provider import HardwareProvider, SoftwareProvider, detect_provider
 from daemon.manifest_builder.builder import (
@@ -22,6 +27,7 @@ from daemon.manifest_builder.builder import (
 )
 from daemon.report import write_html_report
 from daemon.sample_watcher.watcher import SampleWatcher, extract_audio_metadata
+from daemon.signing import DEFAULT_PRIVATE_KEY, DEFAULT_PUBLIC_KEY, Ed25519Signer
 
 log = logging.getLogger(__name__)
 
@@ -72,8 +78,11 @@ class Daemon:
         stem_id: str = "stem-1",
         source_category: str = "unknown",
         signing_key_path: Path = DEFAULT_SIGNING_KEY,
+        portable_private_key_path: Path = DEFAULT_PRIVATE_KEY,
+        portable_public_key_path: Path = DEFAULT_PUBLIC_KEY,
         hardware_provider: HardwareProvider | None = None,
         generate_html_report: bool = True,
+        open_artifacts: bool = False,
     ) -> None:
         if source_category not in SOURCE_CATEGORIES:
             raise ValueError(f"Unsupported source category: {source_category}")
@@ -92,6 +101,7 @@ class Daemon:
             "unknown_unobserved" if source_category == "unknown" else "user_declared"
         )
         self.generate_html_report = generate_html_report
+        self.open_artifacts = open_artifacts
 
         self.receiver = EvidenceReceiver(
             host="127.0.0.1",
@@ -118,11 +128,34 @@ class Daemon:
             self.export_dir.mkdir(parents=True, exist_ok=True)
         self._export_seen: dict[str, tuple[int, int]] = {}
         self._session_lock = threading.Lock()
-        self._session_events: list[dict[str, object]] = []
+        self._session_events: deque[dict[str, object]] = deque()
+        self._max_session_events = 50_000
+        self._session_event_drops = 0
+        self._feature_events: deque[dict[str, object]] = deque(maxlen=12_000)
+        self._feature_window_drops = 0
+        self._buffer_hash_count = 0
+        self._first_hash_event: dict[str, object] | None = None
+        self._last_hash_event: dict[str, object] | None = None
+        self._plugin_instance_ids: set[str] = set()
+        self._latest_plugin_telemetry: dict[str, int] = {}
+        self._export_versions: dict[str, int] = {}
+        self._last_manifest_path: Path | None = None
+        self._last_report_path: Path | None = None
+        self._last_verification_path: Path | None = None
+        self._last_handoff_path: Path | None = None
+        self._last_verifier_outcome: str | None = None
+        self._last_export_path: Path | None = None
+        self._status_path = self.evidence_dir.parent / "status.json"
+        self._session_started_at = utc_timestamp()
         self._active_layers: set[str] = {"sample_watcher"}
         self._latest_project_snapshot = None
         self._plugin_seen = False
+        self._last_plugin_event_monotonic = 0.0
         self._stop = threading.Event()
+        self._portable_signer = Ed25519Signer(
+            portable_private_key_path,
+            portable_public_key_path,
+        )
 
         if hardware_provider is not None:
             self._hw_provider = hardware_provider
@@ -135,7 +168,36 @@ class Daemon:
 
     def _append_event(self, event: dict[str, object]) -> None:
         with self._session_lock:
+            if len(self._session_events) >= self._max_session_events:
+                self._session_events.popleft()
+                self._session_event_drops += 1
+                if self._session_event_drops == 1 or self._session_event_drops % 10_000 == 0:
+                    log.warning(
+                        "Session event memory limit reached; dropped=%d max=%d",
+                        self._session_event_drops,
+                        self._max_session_events,
+                    )
             self._session_events.append(event)
+
+    def _record_plugin_event(self, event: dict[str, object], layer: str) -> None:
+        self._append_event(event)
+        with self._session_lock:
+            self._active_layers.add(layer)
+            instance_id = str(event.get("plugin_instance_id", "unknown_plugin_instance"))
+            self._plugin_instance_ids.add(instance_id)
+            telemetry = event.get("telemetry")
+            if isinstance(telemetry, dict):
+                for key, value in telemetry.items():
+                    if isinstance(value, int):
+                        self._latest_plugin_telemetry[str(key)] = value
+            if event.get("event_type") == "buffer_hash":
+                self._buffer_hash_count += 1
+                if self._first_hash_event is None:
+                    self._first_hash_event = dict(event)
+                self._last_hash_event = dict(event)
+                if len(self._feature_events) == self._feature_events.maxlen:
+                    self._feature_window_drops += 1
+                self._feature_events.append(dict(event))
 
     def _correlate(self, layer_event: LayerEvent) -> None:
         try:
@@ -168,18 +230,41 @@ class Daemon:
         log.info("Capture session: %s", self.session_id)
         log.info("Declared source category: %s (%s)", self.source_category, self.source_category_proof_level)
         log.info("Daemon starting with %d threads", len(threads))
+        self._write_evidence("session_events.jsonl", {
+            "event_type": "session_start",
+            "capture_session_id": self.session_id,
+            "stem_id": self.stem_id,
+            "started_at": self._session_started_at,
+            "daemon_monotonic_ms": int(time.monotonic_ns() // 1_000_000),
+            "proof_level": "directly_observed",
+        })
+        self._write_status("idle")
         for t in threads:
             t.start()
 
         try:
             while not self._stop.is_set():
                 self._stop.wait(1.0)
+                recently_active = (
+                    self._plugin_seen
+                    and time.monotonic() - self._last_plugin_event_monotonic < 3.0
+                )
+                self._write_status("active" if recently_active else "idle")
         except KeyboardInterrupt:
             log.info("Shutting down")
             self._stop.set()
         finally:
             self._stop.set()
             self.receiver.close()
+            self._write_evidence("session_events.jsonl", {
+                "event_type": "session_end",
+                "capture_session_id": self.session_id,
+                "ended_at": utc_timestamp(),
+                "daemon_monotonic_ms": int(time.monotonic_ns() // 1_000_000),
+                "proof_level": "directly_observed",
+                "diagnostics": self.receiver.diagnostics(),
+            })
+            self._write_status("stopped")
 
     def stop(self) -> None:
         self._stop.set()
@@ -203,19 +288,18 @@ class Daemon:
             event = self.receiver.process_packet(data)
             if event is None:
                 continue
+            self._last_plugin_event_monotonic = time.monotonic()
 
             et = str(event.get("event_type", ""))
             layer = _event_type_to_layer(et)
-            with self._session_lock:
-                self._session_events.append(event)
-                self._active_layers.add(layer)
+            self._record_plugin_event(event, layer)
             if not self._plugin_seen:
                 self._plugin_seen = True
                 log.info("Capture plugin evidence stream detected")
             layer_event = LayerEvent(
                 layer=layer,
                 event_type=et,
-                timestamp_ms=int(event.get("timestamp_ms", 0)),
+                timestamp_ms=int(event.get("daemon_received_monotonic_ms", 0)),
                 data=event,
             )
             self._correlate(layer_event)
@@ -234,12 +318,14 @@ class Daemon:
 
             for event in events:
                 log.info("Sample detected: %s", event.get("file_name"))
+                event["source_timestamp"] = event.get("observed_at")
+                event["daemon_observed_monotonic_ms"] = int(time.monotonic_ns() // 1_000_000)
                 self._append_event(event)
 
                 layer_event = LayerEvent(
                     layer="sample_watcher",
                     event_type="sample_file_observed",
-                    timestamp_ms=int(time.time() * 1000),
+                    timestamp_ms=int(event["daemon_observed_monotonic_ms"]),
                     data=event,
                 )
                 self._correlate(layer_event)
@@ -278,7 +364,9 @@ class Daemon:
                         diff_event: dict[str, object] = {
                             "event_type": "project_diff",
                             "proof_level": "inferred",
+                            "source_timestamp_ms": int(time.time() * 1000),
                             "timestamp_ms": int(time.time() * 1000),
+                            "daemon_observed_monotonic_ms": int(time.monotonic_ns() // 1_000_000),
                             "clips_added": diff.clips_added,
                             "clips_removed": diff.clips_removed,
                             "clips_modified": diff.clips_modified,
@@ -297,7 +385,7 @@ class Daemon:
                         layer_event = LayerEvent(
                             layer="project_differ",
                             event_type="project_diff",
-                            timestamp_ms=int(time.time() * 1000),
+                            timestamp_ms=int(diff_event["daemon_observed_monotonic_ms"]),
                             data=diff_event,
                         )
                         self._correlate(layer_event)
@@ -343,7 +431,9 @@ class Daemon:
 
                     try:
                         log.info("Export detected: %s", path.name)
-                        self._generate_manifest(path)
+                        version = self._export_versions.get(resolved, 0) + 1
+                        self._generate_manifest(path, export_version=version)
+                        self._export_versions[resolved] = version
                         self._export_seen[resolved] = self._export_signature(path)
                     except Exception:
                         log.exception("Manifest generation failed for %s; will retry", path)
@@ -352,7 +442,8 @@ class Daemon:
 
             time.sleep(2.0)
 
-    def _generate_manifest(self, export_path: Path) -> Path:
+    def _generate_manifest(self, export_path: Path, export_version: int = 1) -> Path:
+        self._last_export_path = export_path
         export_hash = sha256_file(export_path)
         stat = export_path.stat()
         export_metadata = extract_audio_metadata(export_path)
@@ -369,36 +460,29 @@ class Daemon:
             exported_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             sample_rate_hz=export_metadata.get("sample_rate"),
             channel_count=export_metadata.get("channels"),
+            export_version=export_version,
         ))
-
-        first_hash_ms = 0
-        last_hash_ms = 0
-        first_received_at: str | None = None
-        last_received_at: str | None = None
-        last_window_hash = ""
-        chain_genesis = "genesis"
-        chain_length = 0
-        stem_sr = 0
-        stem_ch = 0
 
         with self._session_lock:
             events_snapshot = list(self._session_events)
+            feature_snapshot = list(self._feature_events)
+            first_hash_event = dict(self._first_hash_event or {})
+            last_hash_event = dict(self._last_hash_event or {})
+            chain_length = self._buffer_hash_count
+            plugin_instance_ids = tuple(sorted(self._plugin_instance_ids))
+
+        first_hash_ms = int(first_hash_event.get("source_timestamp_ms") or 0)
+        last_hash_ms = int(last_hash_event.get("source_timestamp_ms") or 0)
+        first_received_at = str(first_hash_event.get("received_at") or "") or None
+        last_received_at = str(last_hash_event.get("received_at") or "") or None
+        last_window_hash = str(last_hash_event.get("window_hash") or "")
+        chain_genesis = str(first_hash_event.get("prev_hash") or "genesis")
+        stem_sr = int(last_hash_event.get("sample_rate_hz") or 0)
+        stem_ch = int(last_hash_event.get("channel_count") or 0)
 
         for event in events_snapshot:
             et = event.get("event_type")
-            if et == "buffer_hash":
-                chain_length += 1
-                ts = int(event.get("timestamp_ms", 0))
-                if chain_length == 1:
-                    first_hash_ms = ts
-                    chain_genesis = str(event.get("prev_hash", "genesis"))
-                    first_received_at = str(event.get("received_at", "")) or None
-                last_hash_ms = ts
-                last_received_at = str(event.get("received_at", "")) or last_received_at
-                last_window_hash = str(event.get("window_hash", ""))
-                stem_sr = int(event.get("sample_rate_hz", stem_sr))
-                stem_ch = int(event.get("channel_count", stem_ch))
-            elif et == "sample_file_observed":
+            if et == "sample_file_observed":
                 builder.add_ingredient(IngredientEvidence(
                     file_name=str(event.get("file_name", "")),
                     sha256=str(event.get("sha256", "")),
@@ -424,7 +508,23 @@ class Daemon:
                 hash_chain_genesis=chain_genesis,
                 first_received_at=first_received_at,
                 last_received_at=last_received_at,
+                plugin_instance_ids=plugin_instance_ids,
             ))
+
+        builder.coverage = self._derive_coverage(chain_length)
+        association = associate_export(export_path, feature_snapshot)
+        association.update({
+            "capture_session_id": self.session_id,
+            "stem_ids": [self.stem_id] if chain_length else [],
+            "export_file_name": export_path.name,
+            "basis": (
+                "A bounded sequence of RMS and zero-crossing features from routed plug-in windows "
+                "was compared with windowed features extracted from this export using time-offset search. "
+                "The relationship remains inferred and does not establish complete routing."
+            ),
+        })
+        builder.audio_association = association
+        builder.session_diagnostics = self._session_diagnostics()
 
         all_layers = {"audio_buffer", "transport", "midi", "session",
                       "sample_watcher", "project_differ", "input_capture",
@@ -438,13 +538,13 @@ class Daemon:
 
         evidence_hashes: dict[str, str] = {}
         evidence_files: dict[str, dict[str, object]] = {}
-        for evidence_file in self.evidence_dir.glob("*.jsonl"):
-            snapshot_bytes = evidence_file.read_bytes()
-            digest = hashlib.sha256(snapshot_bytes).hexdigest()
+        for evidence_file in sorted(self.evidence_dir.glob("*.jsonl")):
+            byte_length = evidence_file.stat().st_size
+            digest = sha256_prefix(evidence_file, byte_length)
             evidence_hashes[evidence_file.name] = digest
             evidence_files[evidence_file.name] = {
                 "sha256": digest,
-                "byte_length": len(snapshot_bytes),
+                "byte_length": byte_length,
                 "binding_scope": "file_prefix_at_manifest_creation",
             }
 
@@ -503,13 +603,35 @@ class Daemon:
             "chain_length": chain_length,
             "apw:proof_level": "directly_observed",
         }
+        manifest["capture_session"]["started_at"] = self._session_started_at
+        manifest["capture_session"]["state_at_manifest"] = "active"
 
-        report_path = self.manifest_dir / f"{export_path.stem}_provenance.html"
+        suffix = "" if export_version == 1 else f"_v{export_version:03d}"
+        manifest_path = self.manifest_dir / f"{export_path.stem}{suffix}_manifest.json"
+        report_path = self.manifest_dir / f"{export_path.stem}{suffix}_provenance.html"
+        artifact_dir = self.manifest_dir / "artifacts"
+        artifact_dir.mkdir(parents=True, exist_ok=True)
+        verification_path = artifact_dir / f"{export_path.stem}{suffix}_verification.json"
+        handoff_path = artifact_dir / f"{export_path.stem}{suffix}_handoff.json"
         manifest["presentation"] = {
             "html_report": report_path.name if self.generate_html_report else None,
-            "derived_from": f"{export_path.stem}_manifest.json",
+            "derived_from": manifest_path.name,
+            "verifier_result": str(verification_path.relative_to(self.manifest_dir)),
+            "downstream_handoff": str(handoff_path.relative_to(self.manifest_dir)),
             "apw:proof_level": "directly_observed",
         }
+        manifest["downstream_registration_handoff"] = self._build_handoff(
+            export_hash=export_hash,
+            association=association,
+            coverage=builder.coverage,
+            evidence_files=evidence_files,
+            manifest_name=manifest_path.name,
+        )
+
+        try:
+            manifest["portable_signature"] = self._portable_signer.sign_manifest(manifest)
+        except Exception:
+            log.exception("Could not create portable Ed25519 signature")
 
         try:
             identity = self._hw_provider.device_identity()
@@ -542,18 +664,261 @@ class Daemon:
         except Exception:
             log.warning("Could not sign manifest", exc_info=True)
 
-        manifest_path = self.manifest_dir / f"{export_path.stem}_manifest.json"
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         with manifest_path.open("w", encoding="utf-8") as f:
             json.dump(manifest, f, indent=2, ensure_ascii=False)
             f.write("\n")
         log.info("Manifest written: %s", manifest_path)
+        handoff_path.write_text(
+            json.dumps(manifest["downstream_registration_handoff"], indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        from daemon.verify import verify_manifest
+
+        verification = verify_manifest(manifest_path)
+        verification_path.write_text(
+            json.dumps(verification.to_dict(), indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
         if self.generate_html_report:
-            write_html_report(manifest, report_path)
+            report_manifest = dict(manifest)
+            report_manifest["local_verification_summary"] = verification.to_dict()
+            write_html_report(report_manifest, report_path)
             log.info("Fight-card report written: %s", report_path)
+            if self.open_artifacts:
+                try:
+                    subprocess.Popen(["open", str(report_path)])
+                except OSError:
+                    log.warning("Could not open fight card automatically", exc_info=True)
+        self._last_verifier_outcome = verification.outcome
+        self._last_manifest_path = manifest_path
+        self._last_report_path = report_path if self.generate_html_report else None
+        self._last_verification_path = verification_path
+        self._last_handoff_path = handoff_path
+        self._last_export_path = export_path
+        self._write_status(
+            "active"
+            if self._plugin_seen and time.monotonic() - self._last_plugin_event_monotonic < 3.0
+            else "idle"
+        )
         if chain_length == 0:
             log.warning("Export was hashed, but no routed-audio hash events were received")
         return manifest_path
+
+    def _derive_coverage(self, chain_length: int) -> dict[str, object]:
+        receiver = self.receiver.diagnostics()
+        with self._session_lock:
+            telemetry = dict(self._latest_plugin_telemetry)
+            plugin_instance_count = len(self._plugin_instance_ids)
+        counters: dict[str, int] = {
+            **telemetry,
+            **receiver,
+            "buffer_hash_events_received": chain_length,
+            "feature_windows_dropped_from_alignment_buffer": self._feature_window_drops,
+        }
+        windows_hashed = telemetry.get("windows_hashed")
+        required = {
+            "buffers_submitted",
+            "samples_submitted",
+            "windows_hashed",
+            "fifo_samples_dropped",
+            "fifo_windows_dropped",
+            "events_prepared",
+            "udp_sends_attempted",
+            "udp_sends_failed",
+        }
+        if chain_length == 0 or not required.issubset(telemetry):
+            return {
+                "status": "unknown_coverage",
+                "basis": (
+                    "No routed hash windows were received."
+                    if chain_length == 0
+                    else "The plug-in stream did not include every required cumulative counter."
+                ),
+                "counters": counters,
+                "apw:proof_level": "unknown_unobserved",
+            }
+
+        loss_count = sum((
+            telemetry.get("fifo_samples_dropped", 0),
+            telemetry.get("fifo_windows_dropped", 0),
+            telemetry.get("udp_sends_failed", 0),
+            receiver["sequence_gaps"],
+            receiver["sequence_out_of_order"],
+            receiver["hash_chain_breaks"],
+        ))
+        complete = (
+            windows_hashed == chain_length
+            and telemetry.get("events_prepared") == receiver["events_received"]
+            and loss_count == 0
+            and receiver["events_missing_sequence"] == 0
+            and plugin_instance_count == 1
+        )
+        status = "complete_observed_path" if complete else "partial_observed_path"
+        return {
+            "status": status,
+            "basis": (
+                "All submitted routed windows represented by the plug-in counters were received, "
+                "and the prepared/received event prefix agrees with no reported FIFO loss, UDP send "
+                "failure, sequence gap, or chain break. Scope ends at the last received telemetry event."
+                if complete
+                else "Routed audio was observed, but one or more counters show or cannot exclude loss."
+            ),
+            "counters": counters,
+            "apw:proof_level": "inferred",
+        }
+
+    def _session_diagnostics(self) -> dict[str, object]:
+        return {
+            "receiver": self.receiver.diagnostics(),
+            "correlation": {
+                "buffer_events": self.correlation.buffer_size,
+                "buffer_max_events": self.correlation.max_buffer_events,
+                "capacity_drops": self.correlation.capacity_drops,
+                "duplicate_matches_suppressed": self.correlation.duplicate_suppressions,
+                "composite_events_emitted": self.correlation.emitted_count,
+                "clock": "daemon_monotonic_ms",
+            },
+            "session_memory": {
+                "events_retained": len(self._session_events),
+                "max_events": self._max_session_events,
+                "events_dropped_from_memory_only": self._session_event_drops,
+            },
+            "apw:proof_level": "directly_observed",
+        }
+
+    def _build_handoff(
+        self,
+        *,
+        export_hash: str,
+        association: dict[str, object],
+        coverage: dict[str, object] | None,
+        evidence_files: dict[str, dict[str, object]],
+        manifest_name: str,
+    ) -> dict[str, object]:
+        return {
+            "record_type": "downstream_provenance_registration_handoff",
+            "status": "candidate_input_not_submitted",
+            "capture_session_id": self.session_id,
+            "export_hard_hash": {
+                "algorithm": "sha256",
+                "value": export_hash,
+                "apw:proof_level": "directly_observed",
+            },
+            "routed_observation_commitment": {
+                "hash_chain_root": str((self._last_hash_event or {}).get("window_hash", "")) or None,
+                "hash_chain_length": self._buffer_hash_count,
+                "apw:proof_level": (
+                    "directly_observed" if self._buffer_hash_count else "unknown_unobserved"
+                ),
+            },
+            "coverage": coverage,
+            "audio_association": association,
+            "creator_declarations": [{
+                "name": "source_category",
+                "value": self.source_category,
+                "apw:proof_level": self.source_category_proof_level,
+            }],
+            "signing_key": {
+                "algorithm": "Ed25519",
+                "public_key_hex": self._portable_signer.public_key_hex(),
+                "public_key_file": str(self._portable_signer.public_key_path),
+                "trust_scope": "self_generated_demo_key_integrity",
+                "signer_identity": "not_established",
+                "apw:proof_level": "unknown_unobserved",
+            },
+            "evidence_bundle": {
+                "manifest": str((self.manifest_dir / manifest_name).resolve()),
+                "export": str(self._last_export_path.resolve()) if self._last_export_path else None,
+                "evidence_directory": str(self.evidence_dir.resolve()),
+                "files": evidence_files,
+                "apw:proof_level": "directly_observed",
+            },
+            "tentative_c2pa_assertion_mapping": {
+                "status": "mapping_only_not_a_production_c2pa_claim",
+                "assertions": ["c2pa.hash.data", "c2pa.ingredient", "c2pa.actions", "apw.unobserved"],
+                "apw:proof_level": "inferred",
+            },
+            "missing_downstream_requirements": [
+                "verified creator or institution identity",
+                "author-controlled credential and key policy",
+                "production certificate chain",
+                "audio-native soft binding or watermark",
+                "resilient recovery from the audio",
+                "registry publication",
+                "production C2PA claim generation and conformance validation",
+                "consent and rights verification",
+            ],
+            "boundary": (
+                "This neutral handoff is not a provider-specific API payload and claims no compatibility "
+                "with proprietary watermark, recovery, identity, signing, or registry technology."
+            ),
+        }
+
+    def _write_status(self, state: str) -> None:
+        if state != "stopped" and (
+            self.receiver.rejected_count > 0 or self.receiver.hash_chain_break_count > 0
+        ):
+            state = "error"
+        with self._session_lock:
+            plugin_instance_ids = sorted(self._plugin_instance_ids)
+            plugin_telemetry = dict(self._latest_plugin_telemetry)
+        data = {
+            "product": "Routed Audio Evidence Adapter",
+            "state": state,
+            "updated_at": utc_timestamp(),
+            "session_id": self.session_id,
+            "stem_id": self.stem_id,
+            "plugin_instance_ids": plugin_instance_ids,
+            "trust_boundary": (
+                "Only routed plug-in audio and local filesystem exports are observed. "
+                "Identity, authorship, rights, consent, bypassed paths, and downstream registration remain unestablished."
+            ),
+            "coverage": self._derive_coverage(self._buffer_hash_count),
+            "counts": {
+                **plugin_telemetry,
+                **self.receiver.diagnostics(),
+                "buffer_hash_events_received": self._buffer_hash_count,
+            },
+            "pipeline": {
+                "plugin_observed": "complete" if self._buffer_hash_count else "waiting",
+                "daemon_received": "complete" if self.receiver.event_count else "waiting",
+                "chain_continuity": (
+                    "error" if self.receiver.hash_chain_break_count else
+                    "checked" if self._buffer_hash_count else "waiting"
+                ),
+                "export_detected": "complete" if self._last_export_path else "waiting",
+                "audio_association": "evaluated" if self._last_manifest_path else "waiting",
+                "evidence_sealed": "complete" if self._last_manifest_path else "waiting",
+                "verification": self._last_verifier_outcome or "waiting",
+            },
+            "links": {
+                "manifest": (
+                    str(self._last_manifest_path.relative_to(self._status_path.parent))
+                    if self._last_manifest_path else None
+                ),
+                "fight_card": (
+                    str(self._last_report_path.relative_to(self._status_path.parent))
+                    if self._last_report_path else None
+                ),
+                "verifier_result": (
+                    str(self._last_verification_path.relative_to(self._status_path.parent))
+                    if self._last_verification_path else None
+                ),
+                "downstream_handoff": (
+                    str(self._last_handoff_path.relative_to(self._status_path.parent))
+                    if self._last_handoff_path else None
+                ),
+            },
+            "proof_levels": [
+                "directly_observed", "inferred", "user_declared",
+                "externally_verified", "unknown_unobserved",
+            ],
+        }
+        temporary = self._status_path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(data, separators=(",", ":")), encoding="utf-8")
+        temporary.replace(self._status_path)
+        write_dashboard(data, self._status_path.parent / "dashboard.html")
 
     @staticmethod
     def _file_is_stable(path: Path, checks: int = 3, interval: float = 0.5) -> bool:
@@ -610,9 +975,26 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Local software integrity-key path. This is not hardware attestation.",
     )
     parser.add_argument(
+        "--portable-private-key",
+        type=Path,
+        default=DEFAULT_PRIVATE_KEY,
+        help="Ed25519 private key for demo integrity signing.",
+    )
+    parser.add_argument(
+        "--portable-public-key",
+        type=Path,
+        default=DEFAULT_PUBLIC_KEY,
+        help="Portable Ed25519 public key written for independent verification.",
+    )
+    parser.add_argument(
         "--no-html-report",
         action="store_true",
         help="Generate only the JSON manifest, without the derived HTML fight card.",
+    )
+    parser.add_argument(
+        "--open-artifacts",
+        action="store_true",
+        help="Open each generated fight card with the macOS default browser.",
     )
     return parser.parse_args(argv)
 
@@ -635,8 +1017,12 @@ def main(argv: list[str] | None = None) -> int:
         stem_id=args.stem_id,
         source_category=args.source_category,
         signing_key_path=args.signing_key,
+        portable_private_key_path=args.portable_private_key,
+        portable_public_key_path=args.portable_public_key,
         generate_html_report=not args.no_html_report,
+        open_artifacts=args.open_artifacts,
     )
+    signal.signal(signal.SIGTERM, lambda _signum, _frame: daemon.stop())
     daemon.run()
     return 0
 

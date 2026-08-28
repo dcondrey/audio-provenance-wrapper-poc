@@ -8,8 +8,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 
+from daemon.common import canonical_json_bytes, sha256_file, sha256_prefix
 from daemon.forgery_analysis.analyzer import HashChainAnalyzer
 from daemon.hardware_attestation.provider import SoftwareProvider
+from daemon.schema import validate_manifest_invariants
+from daemon.signing import verify_ed25519_signature
 
 log = logging.getLogger(__name__)
 DEFAULT_SIGNING_KEY = Path("~/.apw/demo_signing_key.bin")
@@ -56,17 +59,55 @@ class VerificationResult:
     def error_messages(self) -> list[str]:
         return [f.message for f in self.errors]
 
+    @property
+    def outcome(self) -> str:
+        codes = {finding.code for finding in self.findings}
+        if "not_found" in codes:
+            return "not_found"
+        changed_codes = {
+            "export_hash_mismatch", "evidence_hash_mismatch", "evidence_truncated",
+            "tampered", "signature_invalid", "portable_signature_invalid",
+            "stem_commitment_mismatch",
+        }
+        if codes & changed_codes:
+            return "changed"
+        if self.errors or "portable_signature_missing" in codes:
+            return "untrusted"
+        return "verified"
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "verifier": "local_audio_provenance_poc",
+            "outcome": self.outcome,
+            "qualified_scope": (
+                "Local POC integrity outcome; not a Genotone registry, identity, rights, or authorship result."
+            ),
+            "passed": self.passed,
+            "findings": [
+                {"severity": finding.severity.value, "code": finding.code, "message": finding.message}
+                for finding in self.findings
+            ],
+        }
+
 
 def verify_manifest(
     manifest_path: Path,
     signing_key_path: Path | None = DEFAULT_SIGNING_KEY,
+    public_key_path: Path | None = None,
+    export_path_override: Path | None = None,
 ) -> VerificationResult:
     result = VerificationResult()
+    if not manifest_path.is_file():
+        result.error("not_found", f"Manifest not found: {manifest_path}")
+        return result
     try:
         data = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as e:
         result.error("read_failed", f"Cannot read manifest: {e}")
         return result
+
+    for error in validate_manifest_invariants(data):
+        result.error("schema_invalid", error)
 
     if "apw_version" not in data:
         result.error("missing_version", "Missing apw_version field")
@@ -83,11 +124,11 @@ def verify_manifest(
             result.error("export_no_hash", "Export missing sha256 hash")
         if not export.get("file_name"):
             result.error("export_no_name", "Export missing file_name")
-        export_path_value = export.get("file_path")
+        export_path_value = export_path_override or export.get("file_path")
         if export_path_value:
             export_path = Path(str(export_path_value)).expanduser()
             if export_path.is_file():
-                actual_export_hash = hashlib.sha256(export_path.read_bytes()).hexdigest()
+                actual_export_hash = sha256_file(export_path)
                 if actual_export_hash != export.get("sha256"):
                     result.error("export_hash_mismatch", "Export file SHA-256 does not match manifest")
                 else:
@@ -97,7 +138,10 @@ def verify_manifest(
 
     stems = data.get("observed_stems", [])
     if not stems:
-        result.error("no_stems", "No observed stems in manifest (no audio stream evidence)")
+        result.info(
+            "no_routed_evidence",
+            "No routed-audio evidence was received; export integrity can still be checked, but association is unobserved",
+        )
     for i, stem in enumerate(stems):
         if not stem.get("hash_chain_root"):
             result.error("stem_no_root", f"Stem {i} missing hash_chain_root")
@@ -134,23 +178,36 @@ def verify_manifest(
             evidence_dir = Path(str(evidence_dir_value)).expanduser()
             for file_name, file_binding in evidence_files.items():
                 evidence_path = evidence_dir / str(file_name)
-                if not evidence_path.is_file():
-                    result.warn("evidence_file_unavailable", f"Evidence file unavailable: {file_name}")
-                    continue
                 if not isinstance(file_binding, dict):
                     result.error("evidence_binding_invalid", f"Invalid evidence binding: {file_name}")
                     continue
                 byte_length = int(file_binding.get("byte_length", 0))
-                current_bytes = evidence_path.read_bytes()
-                if len(current_bytes) < byte_length:
-                    result.error("evidence_truncated", f"Evidence file was truncated: {file_name}")
-                    continue
-                actual_hash = hashlib.sha256(current_bytes[:byte_length]).hexdigest()
                 expected_hash = file_binding.get("sha256")
-                if actual_hash != expected_hash:
-                    result.error("evidence_hash_mismatch", f"Evidence file changed: {file_name}")
+                candidates = [evidence_path]
+                stem_parts = evidence_path.stem.rsplit(".", 1)
+                rotation_stem = (
+                    stem_parts[0] if len(stem_parts) == 2 and stem_parts[1].isdigit()
+                    else evidence_path.stem
+                )
+                candidates.extend(sorted(
+                    evidence_dir.glob(f"{rotation_stem}.*{evidence_path.suffix}")
+                ))
+                matched_path = next((
+                    candidate
+                    for candidate in candidates
+                    if candidate.is_file()
+                    and candidate.stat().st_size >= byte_length
+                    and sha256_prefix(candidate, byte_length) == expected_hash
+                ), None)
+                if matched_path is not None:
+                    suffix = "" if matched_path == evidence_path else f" (now in rotation {matched_path.name})"
+                    result.info("evidence_hash_valid", f"Evidence prefix hash matches: {file_name}{suffix}")
+                elif not any(candidate.is_file() for candidate in candidates):
+                    result.warn("evidence_file_unavailable", f"Evidence file unavailable: {file_name}")
+                elif all(candidate.stat().st_size < byte_length for candidate in candidates if candidate.is_file()):
+                    result.error("evidence_truncated", f"Evidence prefix is unavailable or truncated: {file_name}")
                 else:
-                    result.info("evidence_hash_valid", f"Evidence prefix hash matches: {file_name}")
+                    result.error("evidence_hash_mismatch", f"Evidence file changed: {file_name}")
         elif evidence_dir_value and isinstance(evidence_hashes, dict):
             evidence_dir = Path(str(evidence_dir_value)).expanduser()
             for file_name, expected_hash in evidence_hashes.items():
@@ -158,7 +215,7 @@ def verify_manifest(
                 if not evidence_path.is_file():
                     result.warn("evidence_file_unavailable", f"Evidence file unavailable: {file_name}")
                     continue
-                actual_hash = hashlib.sha256(evidence_path.read_bytes()).hexdigest()
+                actual_hash = sha256_file(evidence_path)
                 if actual_hash != expected_hash:
                     result.error("evidence_hash_mismatch", f"Evidence file changed: {file_name}")
                 else:
@@ -210,6 +267,32 @@ def verify_manifest(
                 "Signature bytes were not independently verified by this local verifier",
             )
 
+    portable = data.get("portable_signature")
+    if not isinstance(portable, dict):
+        result.warn(
+            "portable_signature_missing",
+            "No portable Ed25519 signature is present; public-key integrity is untrusted",
+        )
+    else:
+        unsigned = {
+            key: value
+            for key, value in data.items()
+            if key not in {"portable_signature", "manifest_signature"}
+        }
+        try:
+            valid, message = verify_ed25519_signature(unsigned, portable, public_key_path)
+        except (OSError, ValueError, ImportError) as exc:
+            result.error("portable_signature_invalid", f"Ed25519 verification failed: {exc}")
+        else:
+            if valid:
+                result.info("portable_signature_valid", message)
+                result.warn(
+                    "signer_identity_unverified",
+                    "Signature validity does not establish the signer’s externally verified identity",
+                )
+            else:
+                result.error("portable_signature_invalid", message)
+
     if "session_facts" in data:
         facts = data["session_facts"]
         track_count = len(facts.get("tracks", []))
@@ -233,23 +316,24 @@ def verify_hash_chain(evidence_path: Path) -> VerificationResult:
     analyzer = HashChainAnalyzer()
 
     try:
-        lines = evidence_path.read_text(encoding="utf-8").splitlines()
+        lines = evidence_path.open("r", encoding="utf-8")
     except OSError as e:
         result.error("read_failed", f"Cannot read evidence: {e}")
         return result
 
     count = 0
-    for line_num, line in enumerate(lines, 1):
-        if not line.strip():
-            continue
-        try:
-            event = json.loads(line)
-        except json.JSONDecodeError:
-            result.error("malformed_json", f"Malformed JSON at line {line_num}")
-            continue
-        if event.get("event_type") == "buffer_hash":
-            analyzer.ingest_buffer_hash(event)
-            count += 1
+    with lines:
+        for line_num, line in enumerate(lines, 1):
+            if not line.strip():
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                result.error("malformed_json", f"Malformed JSON at line {line_num}")
+                continue
+            if event.get("event_type") == "buffer_hash":
+                analyzer.ingest_buffer_hash(event)
+                count += 1
 
     if count == 0:
         result.error("no_hashes", "No buffer_hash events found in evidence file")
@@ -278,16 +362,38 @@ def main(argv: list[str] | None = None) -> int:
         default=DEFAULT_SIGNING_KEY,
         help="Local HMAC key used for same-machine integrity verification.",
     )
+    parser.add_argument(
+        "--public-key",
+        type=Path,
+        default=None,
+        help="Optional raw 32-byte Ed25519 public key; embedded public key is used by default.",
+    )
+    parser.add_argument(
+        "--public-only",
+        action="store_true",
+        help="Do not use the local HMAC compatibility key.",
+    )
+    parser.add_argument(
+        "--export",
+        type=Path,
+        default=None,
+        help="Verify the manifest export hash against this file instead of its recorded path.",
+    )
     args = parser.parse_args(argv)
 
     path = args.target
     if not path.exists():
-        log.error("File not found: %s", path)
+        log.error("OUTCOME: not_found (local POC verifier): %s", path)
         return 1
 
     if path.suffix == ".json":
         log.info("Verifying manifest: %s", path)
-        result = verify_manifest(path, args.signing_key)
+        result = verify_manifest(
+            path,
+            None if args.public_only else args.signing_key,
+            args.public_key,
+            args.export,
+        )
     elif path.suffix == ".jsonl":
         log.info("Verifying hash chain: %s", path)
         result = verify_hash_chain(path)
@@ -305,11 +411,21 @@ def main(argv: list[str] | None = None) -> int:
         else:
             log.info("OK:   [%s] %s", f.code, f.message)
 
-    if result.passed:
+    log.info(
+        "OUTCOME: %s (local POC verifier; not a registry or identity result)",
+        result.outcome,
+    )
+
+    if result.outcome == "verified":
         log.info("PASS: %d checks, %d warnings", len(result.findings), len(result.warnings))
         return 0
     else:
-        log.error("FAIL: %d errors, %d warnings", len(result.errors), len(result.warnings))
+        log.error(
+            "FAIL: outcome=%s, %d errors, %d warnings",
+            result.outcome,
+            len(result.errors),
+            len(result.warnings),
+        )
         return 1
 
 
