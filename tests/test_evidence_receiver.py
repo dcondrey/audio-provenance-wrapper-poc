@@ -105,8 +105,10 @@ class ReceiverTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp_dir:
             evidence_path = Path(tmp_dir) / "events.jsonl"
             receiver = EvidenceReceiver(
-                host="127.0.0.1", port=0, evidence_path=evidence_path
+                host="127.0.0.1", port=0, evidence_path=evidence_path,
+                capture_session_id="capture-test", stem_id="stem-test",
             )
+            self.addCleanup(receiver.close)
 
             event_json = json.dumps({
                 "event_type": "buffer_hash",
@@ -122,6 +124,9 @@ class ReceiverTests(unittest.TestCase):
             self.assertIsNotNone(result)
             self.assertEqual(result["event_type"], "buffer_hash")
             self.assertIn("received_at", result)
+            self.assertIn("received_at_ms", result)
+            self.assertEqual(result["capture_session_id"], "capture-test")
+            self.assertEqual(result["stem_id"], "stem-test")
 
             lines = evidence_path.read_text().splitlines()
             self.assertEqual(len(lines), 1)
@@ -134,6 +139,7 @@ class ReceiverTests(unittest.TestCase):
             receiver = EvidenceReceiver(
                 host="127.0.0.1", port=0, evidence_path=evidence_path
             )
+            self.addCleanup(receiver.close)
 
             result = receiver.process_packet(b"not json at all")
             self.assertIsNone(result)
@@ -145,6 +151,7 @@ class ReceiverTests(unittest.TestCase):
             receiver = EvidenceReceiver(
                 host="127.0.0.1", port=0, evidence_path=evidence_path
             )
+            self.addCleanup(receiver.close)
 
             event_json = json.dumps({"event_type": "bogus", "proof_level": "directly_observed"})
             result = receiver.process_packet(event_json.encode("utf-8"))
@@ -156,6 +163,7 @@ class ReceiverTests(unittest.TestCase):
             receiver = EvidenceReceiver(
                 host="127.0.0.1", port=0, evidence_path=evidence_path
             )
+            self.addCleanup(receiver.close)
 
             event_json = json.dumps({
                 "event_type": "transport_change",

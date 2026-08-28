@@ -141,7 +141,7 @@ class BehavioralAccumulator:
         raise NotImplementedError("Behavioral fingerprint computation not yet implemented")
 
 
-def parse_args(argv: list[str]) -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Capture OS-level input events while the DAW is focused.",
     )
@@ -157,7 +157,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    args = parse_args(argv or [])
+    args = parse_args(argv)
     observer = InputObserver(
         target_bundle_id=args.bundle_id,
         evidence_path=args.evidence_file,

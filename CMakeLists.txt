@@ -1,18 +1,20 @@
 cmake_minimum_required(VERSION 3.22)
 
 project(AudioProvenanceWrapperPoc
-    VERSION 0.2.0
+    VERSION 0.9.0
     LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if(APPLE AND NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
+if(APPLE AND (NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET OR CMAKE_OSX_DEPLOYMENT_TARGET STREQUAL ""))
     set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS deployment target" FORCE)
 endif()
 
 set(APW_JUCE_DIR "" CACHE PATH "Path to a local JUCE checkout")
+set(APW_JUCE_TAG "8.0.15" CACHE STRING "Pinned JUCE release used when no local checkout is supplied")
+option(APW_FETCH_JUCE "Fetch the pinned JUCE release when JUCE is not installed" ON)
 
 if(APW_JUCE_DIR)
     add_subdirectory("${APW_JUCE_DIR}" "${CMAKE_BINARY_DIR}/JUCE")
@@ -20,7 +22,17 @@ else()
     find_package(JUCE CONFIG QUIET)
 
     if(NOT JUCE_FOUND)
-        message(FATAL_ERROR "JUCE not found. Re-run CMake with -DAPW_JUCE_DIR=/path/to/JUCE.")
+        if(APW_FETCH_JUCE)
+            include(FetchContent)
+            FetchContent_Declare(
+                JUCE
+                GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+                GIT_TAG ${APW_JUCE_TAG}
+                GIT_SHALLOW TRUE)
+            FetchContent_MakeAvailable(JUCE)
+        else()
+            message(FATAL_ERROR "JUCE not found. Set APW_JUCE_DIR or enable APW_FETCH_JUCE.")
+        endif()
     endif()
 endif()
 

@@ -8,7 +8,7 @@ import wave
 from pathlib import Path
 
 from daemon.__main__ import Daemon
-from daemon.hardware_attestation.provider import SoftwareProvider
+from daemon.hardware_attestation.provider import SoftwareProvider, detect_provider
 
 
 class DaemonIntegrationTests(unittest.TestCase):
@@ -30,6 +30,8 @@ class DaemonIntegrationTests(unittest.TestCase):
                 sample_dir=sample_dir,
                 export_dir=export_dir,
                 manifest_dir=manifest_dir,
+                source_category="imported_sample",
+                hardware_provider=SoftwareProvider(tmp_path / "signing-key.bin"),
             )
             actual_port = daemon.receiver.sock.getsockname()[1]
 
@@ -116,7 +118,7 @@ class DaemonIntegrationTests(unittest.TestCase):
             self.assertEqual(len(manifests), 1, f"Expected 1 manifest, found {len(manifests)}")
 
             manifest = json.loads(manifests[0].read_text())
-            self.assertEqual(manifest["apw_version"], "0.2.0")
+            self.assertEqual(manifest["apw_version"], "0.9.0")
             self.assertIn("export", manifest)
             self.assertEqual(manifest["export"]["file_name"], "mixdown.wav")
             self.assertIn("apw:unobserved", manifest)
@@ -124,11 +126,32 @@ class DaemonIntegrationTests(unittest.TestCase):
 
             stems = manifest.get("observed_stems", [])
             self.assertEqual(len(stems), 1, "Expected 1 observed stem from buffer_hash events")
-            self.assertEqual(stems[0]["hash_chain_root"], "genesis")
+            self.assertEqual(stems[0]["hash_chain_root"], "hash002")
+            self.assertEqual(stems[0]["hash_chain_genesis"], "genesis")
             self.assertEqual(stems[0]["hash_chain_length"], 2)
             self.assertEqual(stems[0]["sample_rate_hz"], 44100)
+            self.assertEqual(stems[0]["source_category"], "imported_sample")
+            self.assertEqual(stems[0]["source_category_proof_level"], "user_declared")
+            self.assertIn("manifest_signature", manifest)
+            self.assertEqual(
+                manifest["manifest_signature"]["trust_scope"],
+                "local_software_integrity",
+            )
+            self.assertTrue((manifest_dir / "mixdown_provenance.html").is_file())
 
-            daemon._stop.set()
+            from daemon.verify import verify_manifest
+            verification = verify_manifest(
+                manifests[0],
+                signing_key_path=tmp_path / "signing-key.bin",
+            )
+            self.assertTrue(verification.passed)
+            self.assertTrue(any(
+                finding.code == "local_signature_valid"
+                for finding in verification.findings
+            ))
+
+            daemon.stop()
+            thread.join(timeout=3)
 
     def test_sample_detection_feeds_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -146,6 +169,7 @@ class DaemonIntegrationTests(unittest.TestCase):
                 sample_dir=sample_dir,
                 export_dir=export_dir,
                 manifest_dir=manifest_dir,
+                hardware_provider=SoftwareProvider(tmp_path / "signing-key.bin"),
             )
 
             thread = threading.Thread(target=daemon.run, daemon=True)
@@ -166,7 +190,39 @@ class DaemonIntegrationTests(unittest.TestCase):
             self.assertEqual(len(manifest["ingredients"]), 1)
             self.assertEqual(manifest["ingredients"][0]["file_name"], "kick.wav")
 
-            daemon._stop.set()
+            daemon.stop()
+            thread.join(timeout=3)
+
+    def test_overwriting_existing_export_generates_new_manifest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            evidence_dir = tmp_path / "evidence"
+            manifest_dir = tmp_path / "manifests"
+            sample_dir = tmp_path / "samples"
+            export_dir = tmp_path / "exports"
+            sample_dir.mkdir()
+            export_dir.mkdir()
+            export_path = export_dir / "demo.wav"
+            _write_test_wav(export_path, frame_count=1000)
+
+            daemon = Daemon(
+                udp_port=0,
+                evidence_dir=evidence_dir,
+                sample_dir=sample_dir,
+                export_dir=export_dir,
+                manifest_dir=manifest_dir,
+                hardware_provider=SoftwareProvider(tmp_path / "signing-key.bin"),
+            )
+            thread = threading.Thread(target=daemon.run, daemon=True)
+            thread.start()
+            time.sleep(0.4)
+
+            _write_test_wav(export_path, frame_count=4000)
+            time.sleep(4.0)
+
+            self.assertTrue((manifest_dir / "demo_manifest.json").is_file())
+            daemon.stop()
+            thread.join(timeout=3)
 
 
 class SoftwareProviderTests(unittest.TestCase):
@@ -209,7 +265,8 @@ class SoftwareProviderTests(unittest.TestCase):
             provider = SoftwareProvider(key_path=Path(tmp) / "key.bin")
             identity = provider.device_identity()
             self.assertEqual(len(identity.device_id), 16)
-            self.assertEqual(identity.algorithm, "hmac-sha256")
+            self.assertEqual(identity.algorithm, "hmac-sha256-local")
+            self.assertEqual(identity.public_key_hex, "")
 
     def test_bind_chain_root(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -235,6 +292,12 @@ class SoftwareProviderTests(unittest.TestCase):
             self.assertEqual(p1.device_identity().device_id, p2.device_identity().device_id)
             sig = p1.sign(b"data")
             self.assertTrue(p2.verify(b"data", sig))
+
+    def test_detect_provider_returns_operational_fallback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            provider = detect_provider(Path(tmp) / "key.bin")
+            signature = provider.sign(b"demo")
+            self.assertTrue(provider.verify(b"demo", signature))
 
 
 class VerifyTests(unittest.TestCase):
@@ -296,12 +359,12 @@ class VerifyTests(unittest.TestCase):
             self.assertTrue(any(f.code == "chain_break" for f in result.errors))
 
 
-def _write_test_wav(path: Path) -> None:
+def _write_test_wav(path: Path, frame_count: int = 22050) -> None:
     with wave.open(str(path), "wb") as wf:
         wf.setnchannels(1)
         wf.setsampwidth(2)
         wf.setframerate(44100)
-        wf.writeframes(b"\x00\x10" * 22050)
+        wf.writeframes(b"\x00\x10" * frame_count)
 
 
 if __name__ == "__main__":

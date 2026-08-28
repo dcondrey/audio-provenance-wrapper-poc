@@ -2,7 +2,37 @@
 
 This page documents manual validation for the JUCE VST3 proof-of-concept milestones.
 
-Scope is intentionally limited to the current milestone under test. Epic 3 adds visible audio buffer observation in the plugin UI, but still does not implement hashing, UDP, C2PA, daemon behavior, file logging, or wrapper-host plugin loading.
+## v0.9 Demo Candidate
+
+Automated validation on 2026-08-27:
+
+- 89 Python tests pass.
+- Release VST3 builds against pinned JUCE 8.0.15 in a clean build directory.
+- The generated bundle is arm64, version 0.9.0, and targets macOS 12.0+.
+- `codesign --verify --deep --strict` passes after final ad-hoc bundle signing.
+- Built executable SHA-256:
+  `40ea3e89320dbf05bb14a3ac9f62acd47e5751cef2747701f604947832b26efe`.
+- UDP receipt through export detection produces a JSON manifest and HTML fight card.
+- New and overwritten WAV exports are detected.
+- The manifest verifier checks the export SHA-256, evidence-prefix hashes,
+  routed-audio chain commitment, and signed-content hash.
+- Source declarations and stem-to-export associations retain their correct
+  `user_declared` and `inferred` proof levels.
+
+Manual v1.0 gates still to record on the demonstration machine:
+
+- [x] Current VST3 configures and builds from a clean build directory.
+- [ ] Ableton Live discovers and opens the current VST3.
+- [ ] A polarity/null test confirms transparent pass-through.
+- [ ] Playback, stop/start, project save, and project reload remain stable.
+- [ ] A real Ableton export produces a fight card with routed-audio evidence.
+- [ ] `python3 -m daemon.verify` passes against that real manifest.
+
+## Historical Milestone Records
+
+The sections below preserve validation for the earlier scaffold and Epic 3
+milestones. Statements about hashing, UDP, and daemon functionality describe
+those historical builds, not the current v0.9 candidate.
 
 ## Sample Import Provenance Spike
 

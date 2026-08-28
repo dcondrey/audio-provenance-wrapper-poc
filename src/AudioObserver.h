@@ -117,12 +117,6 @@ private:
     static constexpr int kKnobTurnMinChanges   = 3;
     static constexpr std::uint64_t kKnobTurnWindowMs = 500;
 
-    // ── Silence throttling ──
-    // During sustained silence, hash every window (chain integrity) but
-    // only emit a UDP event every kSilenceEmitInterval windows.
-    static constexpr int kSilenceEmitInterval = 12;  // ~1 s at 48 kHz
-    int consecutiveSilentWindows = 0;
-
     // ── FFT ──
     juce::dsp::FFT fft;
     std::vector<float> fftWorkspace;

@@ -46,7 +46,8 @@ AudioProvenanceCaptureAudioProcessorEditor::AudioProvenanceCaptureAudioProcessor
     configureObservationLabel (lastHashLabel, 13.0f);
     addAndMakeVisible (lastHashLabel);
 
-    scopeLabel.setText ("No C2PA or wrapper-host logic in this build.", juce::dontSendNotification);
+    scopeLabel.setText ("Scope: routed audio only - bypassed paths remain unobserved.",
+                        juce::dontSendNotification);
     scopeLabel.setJustificationType (juce::Justification::centredLeft);
     scopeLabel.setFont (juce::FontOptions (13.0f));
     addAndMakeVisible (scopeLabel);
@@ -59,8 +60,8 @@ AudioProvenanceCaptureAudioProcessorEditor::AudioProvenanceCaptureAudioProcessor
 
 void AudioProvenanceCaptureAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    g.fillAll (juce::Colour::fromRGB (24, 26, 28));
-    g.setColour (juce::Colour::fromRGB (70, 76, 82));
+    g.fillAll (juce::Colour::fromRGB (11, 15, 20));
+    g.setColour (juce::Colour::fromRGB (77, 227, 255));
     g.drawRect (getLocalBounds(), 1);
 }
 
@@ -121,7 +122,7 @@ void AudioProvenanceCaptureAudioProcessorEditor::updateObservationLabels()
 
     hashChainLabel.setText (juce::String ("Hash chain: ")
                             + juce::String (windowsHashed) + " windows, "
-                            + juce::String (eventsEmitted) + " events streamed",
+                            + juce::String (eventsEmitted) + " UDP events emitted",
                             juce::dontSendNotification);
 
     auto lastHash = observer.getLastHash();

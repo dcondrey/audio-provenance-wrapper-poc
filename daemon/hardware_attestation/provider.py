@@ -250,7 +250,7 @@ class TpmProvider(HardwareProvider):
 
 
 class SoftwareProvider(HardwareProvider):
-    """Fallback provider using filesystem-stored Ed25519 keys.
+    """Fallback provider using a filesystem-stored HMAC key.
 
     NOT attestable. Evidence produced with this provider carries proof level
     'directly_observed' for the hash chain but 'unknown_unobserved' for
@@ -268,7 +268,6 @@ class SoftwareProvider(HardwareProvider):
         self._counter = 0
         self._seed = self._load_or_create_key()
         self._device_id = hashlib.sha256(self._seed).hexdigest()[:16]
-        self._public_key = hashlib.sha256(b"apw-pubkey-" + self._seed).hexdigest()
 
     def _load_or_create_key(self) -> bytes:
         if self.key_path.exists():
@@ -283,8 +282,8 @@ class SoftwareProvider(HardwareProvider):
     def device_identity(self) -> DeviceIdentity:
         return DeviceIdentity(
             device_id=self._device_id,
-            public_key_hex=self._public_key,
-            algorithm="hmac-sha256",
+            public_key_hex="",
+            algorithm="hmac-sha256-local",
             created_at_ms=int(self.key_path.stat().st_mtime * 1000),
         )
 
@@ -327,23 +326,30 @@ class SoftwareProvider(HardwareProvider):
         return int(time.time() * 1000)
 
 
-def detect_provider() -> HardwareProvider:
+def detect_provider(
+    software_key_path: Path = Path("~/.apw/demo_signing_key.bin"),
+) -> HardwareProvider:
     """Auto-detect the best available hardware provider for this platform.
 
-    Priority: Secure Enclave > TPM 2.0 > Software fallback.
+    Hardware providers remain explicit stubs. Until one is implemented, this
+    function returns the operational local software signer and logs that its
+    output is not hardware-attested.
     """
     import platform
 
     system = platform.system()
 
     if system == "Darwin":
-        log.info("macOS detected; Secure Enclave provider selected (stub)")
-        return SecureEnclaveProvider()
+        log.warning(
+            "Secure Enclave integration is not implemented; "
+            "using a local software integrity key"
+        )
 
     if system == "Linux":
         if Path("/dev/tpm0").exists() or Path("/dev/tpmrm0").exists():
-            log.info("TPM 2.0 device detected; TPM provider selected (stub)")
-            return TpmProvider()
+            log.warning(
+                "TPM 2.0 hardware is present but its provider is not implemented; "
+                "using a local software integrity key"
+            )
 
-    log.warning("No hardware security module detected; using software fallback")
-    return SoftwareProvider()
+    return SoftwareProvider(key_path=software_key_path)

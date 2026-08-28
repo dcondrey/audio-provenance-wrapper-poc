@@ -18,6 +18,17 @@ The system must distinguish between:
 - externally verified data
 - unknown or unobserved data
 
+## Current Status: v0.9 Demo Candidate
+
+The one-stem automated path now builds a complete JSON manifest and HTML fight
+card from simulated UDP evidence and a detected export. New and overwritten
+exports are covered by integration tests, and the verifier checks the export,
+evidence-prefix bindings, chain commitment, and local integrity seal.
+
+Remaining v1.0 gate: build/install the current VST3 and complete the manual
+Ableton load, pass-through, playback/reload, and real export validation in
+`docs/VALIDATION.md`.
+
 ## Agile Epics
 
 ### Epic 1: Capture Plugin
@@ -191,6 +202,10 @@ Daemon detects exported WAV or AIFF and hashes it.
 
 ### v0.5
 Daemon produces first JSON manifest.
+
+### v0.9
+One-stem demo candidate: automated pipeline, fight card, verifier, and build/run
+scripts are ready; manual Ableton validation remains.
 
 ### v1.0
 One-stem end-to-end Ableton demo works reliably.

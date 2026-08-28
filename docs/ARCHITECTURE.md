@@ -4,7 +4,7 @@
 
 Define the high-level architecture for the Ableton audio provenance proof of concept.
 
-The system captures observable provenance events from routed audio workflows and serializes selected evidence into a C2PA-compatible crJSON manifest.
+The system captures observable provenance events from routed audio workflows and serializes selected evidence into a JSON fight-card manifest with a C2PA-aligned mapping prototype.
 
 ## Core Principle
 
@@ -31,6 +31,7 @@ flowchart LR
     B -->|UDP events| C[Local Daemon]
     A --> D[Exported WAV or AIFF]
     C --> E[JSON Manifest]
+    E --> G[HTML Fight Card]
     D --> E
     F[Sample Folder] -->|Filesystem watch| C
 ```
@@ -93,7 +94,7 @@ Responsibilities:
 - hash final exports
 - hash observed sample files
 - generate internal provenance records
-- serialize minimal C2PA-compatible manifests
+- serialize proof-labelled JSON manifests and derived HTML fight cards
 
 ### Evidence Receiver
 
@@ -136,9 +137,11 @@ It stores:
 
 This internal model is richer than the exported C2PA manifest.
 
-## C2PA/crJSON Export Layer
+## C2PA Alignment Layer
 
-The system exports a simplified C2PA-compatible crJSON manifest.
+The system exports an internal JSON manifest containing a tentative mapping of
+selected evidence to C2PA assertion labels. It is not an embedded or conforming
+C2PA manifest, and the local HMAC seal is not a production C2PA signature.
 
 The export layer maps:
 - observed stems
@@ -147,7 +150,17 @@ The export layer maps:
 - ingredients
 - source types
 
-into C2PA-compatible assertions.
+into C2PA-aligned mapping records for later integration work.
+
+## Demo Presentation Layer
+
+Each detected export produces two adjacent files:
+
+- `<export>_manifest.json`: the evidence record used for verification;
+- `<export>_provenance.html`: a dependency-free fight card derived from that JSON.
+
+The HTML is presentation only. It adds no claims and is regenerated from the
+manifest.
 
 ## Trust Boundary
 
@@ -193,6 +206,7 @@ The first implementation supports:
 - one observed stem
 - one exported asset
 - one manifest
+- one derived HTML fight card
 
 The goal is proving truthful observable provenance capture.
 

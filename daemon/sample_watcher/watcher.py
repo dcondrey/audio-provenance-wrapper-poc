@@ -285,7 +285,7 @@ def observe_existing_files(watch_dir: Path, evidence_path: Path, recursive: bool
     return observed_events
 
 
-def parse_args(argv: list[str]) -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Watch a local sample folder and write provenance evidence JSONL.")
     parser.add_argument(
         "--watch-dir",
@@ -331,7 +331,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    args = parse_args(argv or [])
+    args = parse_args(argv)
 
     if args.once:
         for event in observe_existing_files(args.watch_dir, args.evidence_file, args.recursive):

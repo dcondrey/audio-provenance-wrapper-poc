@@ -9,6 +9,8 @@ from daemon.common import utc_timestamp
 
 log = logging.getLogger(__name__)
 
+APW_VERSION = "0.9.0"
+
 
 @dataclass(frozen=True)
 class StemEvidence:
@@ -23,6 +25,10 @@ class StemEvidence:
     channel_count: int
     source_category: str
     proof_level: str
+    source_category_proof_level: str = "unknown_unobserved"
+    hash_chain_genesis: str = "genesis"
+    first_received_at: str | None = None
+    last_received_at: str | None = None
 
 
 @dataclass(frozen=True)
@@ -36,6 +42,8 @@ class ExportEvidence:
     file_size_bytes: int
     duration_seconds: float | None
     exported_at: str
+    sample_rate_hz: int | float | None = None
+    channel_count: int | None = None
 
 
 @dataclass(frozen=True)
@@ -114,9 +122,14 @@ class ManifestBuilder:
     def build(self) -> dict[str, object]:
         """Build the complete crJSON manifest."""
         manifest: dict[str, object] = {
-            "apw_version": "0.2.0",
+            "apw_version": APW_VERSION,
             "schema": "audio-provenance-manifest-v0",
             "session_id": self.session_id,
+            "capture_session": {
+                "id": self.session_id,
+                "scope": "local_daemon_runtime",
+                "apw:proof_level": "directly_observed",
+            },
             "created_at": self.created_at,
             "core_principle": "Never claim full DAW provenance.",
         }
@@ -125,12 +138,20 @@ class ManifestBuilder:
             {
                 "stem_id": s.stem_id,
                 "hash_chain_root": s.hash_chain_root,
+                "hash_chain_genesis": s.hash_chain_genesis,
                 "hash_chain_length": s.hash_chain_length,
                 "first_observed_ms": s.first_observed_ms,
                 "last_observed_ms": s.last_observed_ms,
+                "first_received_at": s.first_received_at,
+                "last_received_at": s.last_received_at,
                 "sample_rate_hz": s.sample_rate_hz,
                 "channel_count": s.channel_count,
                 "source_category": s.source_category,
+                "source_category_proof_level": s.source_category_proof_level,
+                "source": {
+                    "category": s.source_category,
+                    "apw:proof_level": s.source_category_proof_level,
+                },
                 "apw:proof_level": s.proof_level,
             }
             for s in self.stems
@@ -144,6 +165,8 @@ class ManifestBuilder:
                 "format": self.export.format,
                 "file_size_bytes": self.export.file_size_bytes,
                 "duration_seconds": self.export.duration_seconds,
+                "sample_rate_hz": self.export.sample_rate_hz,
+                "channel_count": self.export.channel_count,
                 "exported_at": self.export.exported_at,
                 "apw:proof_level": "directly_observed",
             }
@@ -174,12 +197,79 @@ class ManifestBuilder:
 
         manifest["apw:unobserved"] = self.unobserved
 
+        association_established = bool(self.stems and self.export is not None)
+        manifest["stem_export_association"] = {
+            "status": (
+                "inferred_same_capture_session"
+                if association_established
+                else "not_established"
+            ),
+            "capture_session_id": self.session_id,
+            "stem_ids": [stem.stem_id for stem in self.stems],
+            "export_file_name": self.export.file_name if self.export is not None else None,
+            "basis": (
+                "The routed-audio observations and export file were observed during "
+                "the same local daemon capture session. This does not prove complete "
+                "Ableton routing or exclude bypassed audio."
+            ),
+            "apw:proof_level": "inferred" if association_established else "unknown_unobserved",
+        }
+
+        manifest["claim_summary"] = self._build_claim_summary()
+
         manifest["c2pa_mapping"] = {
-            "claim_generator": "AudioProvenanceCapture/0.2.0",
+            "status": "mapping_only_not_an_embedded_c2pa_manifest",
+            "claim_generator": f"AudioProvenanceCapture/{APW_VERSION}",
             "assertions": self._build_c2pa_assertions(),
         }
 
         return manifest
+
+    def _build_claim_summary(self) -> list[dict[str, object]]:
+        """Return a concise, proof-labelled fight card for human review."""
+        has_stem = bool(self.stems)
+        has_export = self.export is not None
+        association = has_stem and has_export
+        source = self.stems[0] if self.stems else None
+
+        return [
+            {
+                "claim": "routed_audio_observed",
+                "value": has_stem,
+                "evidence": (
+                    f"{sum(stem.hash_chain_length for stem in self.stems)} hash windows received"
+                    if has_stem
+                    else "No buffer_hash events were received"
+                ),
+                "apw:proof_level": "directly_observed" if has_stem else "unknown_unobserved",
+            },
+            {
+                "claim": "export_file_hashed",
+                "value": has_export,
+                "evidence": self.export.sha256 if self.export is not None else "No export detected",
+                "apw:proof_level": "directly_observed" if has_export else "unknown_unobserved",
+            },
+            {
+                "claim": "observed_stem_linked_to_export",
+                "value": association,
+                "evidence": "same local capture session" if association else "association unavailable",
+                "apw:proof_level": "inferred" if association else "unknown_unobserved",
+            },
+            {
+                "claim": "source_category",
+                "value": source.source_category if source is not None else "unknown",
+                "evidence": "producer declaration" if source is not None else "no observed stem",
+                "apw:proof_level": (
+                    source.source_category_proof_level if source is not None else "unknown_unobserved"
+                ),
+            },
+            {
+                "claim": "full_ableton_provenance",
+                "value": False,
+                "evidence": "Only audio routed through the capture plugin was observed",
+                "apw:proof_level": "unknown_unobserved",
+            },
+        ]
 
     def _build_c2pa_assertions(self) -> list[dict[str, object]]:
         """Map internal evidence to C2PA assertion structures.

@@ -454,7 +454,7 @@ class ProjectWatcher:
             time.sleep(self.poll_interval_seconds)
 
 
-def parse_args(argv: list[str]) -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Watch an Ableton .als project file and emit structural diffs.",
     )
@@ -476,7 +476,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    args = parse_args(argv or [])
+    args = parse_args(argv)
     watcher = ProjectWatcher(
         project_path=args.project_path,
         evidence_path=args.evidence_file,

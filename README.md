@@ -1,57 +1,79 @@
-# audio-provenance-wrapper-poc
+# Audio Provenance Capture
 
-Proof of concept for audio provenance capture in Ableton Live using a wrapper/capture plugin, local daemon, audio hashing, and JSON manifests for stem-to-export traceability.
+A macOS + Ableton Live proof of concept for opt-in, routed-audio provenance.
+The system observes audio that passes through a JUCE VST3, streams evidence to
+a local daemon, hashes a detected WAV/AIFF export, and produces both a JSON
+manifest and a human-readable HTML fight card.
 
-## Current State (v0.2)
+## Current State: v0.9 Demo Candidate
 
-### VST3 Capture Plugin (C++ / JUCE)
+The automated one-stem path is implemented and tested. Final v1.0 status still
+requires a clean manual validation pass inside Ableton Live on the demonstration
+machine.
 
-- Mono/stereo audio pass-through
-- Rolling SHA-256 hash chain (4096-sample windows)
-- Audio feature extraction: RMS, zero-crossing rate, spectral centroid, 3-band spectral profile
-- Silence/audio transition detection
-- Spectral profile change detection (EQ/filter/effect changes)
-- Transport state tracking (play, stop, record, loop, BPM)
-- MIDI event capture with CC knob-turn aggregation
-- UDP event streaming to daemon (silence-throttled)
+### VST3 capture plugin
 
-### Local Daemon (Python)
+- Mono/stereo pass-through audio
+- Complete rolling SHA-256 observation chain (4096-sample windows)
+- RMS, zero-crossing, spectral-centroid, and three-band measurements
+- Silence/audio transitions and spectral-profile changes
+- Host transport and routed MIDI observations
+- Non-blocking FIFO from the audio callback to a background observer
+- Local UDP event emission to `127.0.0.1:9876`
+- UI counters that show routed audio, hash windows, and emitted events
 
-- **Evidence receiver**: UDP listener, event taxonomy validation, JSONL persistence
-- **Sample watcher**: Filesystem monitoring, SHA-256 hashing, audio fingerprinting
-- **Project differ**: Ableton .als gzip-XML parser, structural snapshot/diff
-- **Correlation engine**: 6 rule-based edit detectors with confidence scoring
-- **Forgery analysis**: Audio stream, input behavior, and hash chain integrity checks
-- **Manifest builder**: C2PA-compatible crJSON with proof levels
-- **Hardware attestation**: Software signing provider (Secure Enclave and TPM stubs ready)
-- **Unified daemon process**: `python3 -m daemon` starts all components
+### Local daemon and output
 
-### Scaffolded (interfaces defined, implementation pending)
+- Validates and persists plugin events as JSONL
+- Assigns a scoped local capture-session ID and one-stem ID
+- Watches optional sample and Ableton `.als` files
+- Detects new **or overwritten** WAV/AIFF exports
+- Hashes stable export files and extracts basic audio metadata
+- Generates a proof-labelled JSON manifest
+- Generates a polished, dependency-free HTML fight card
+- Binds the manifest to immutable prefixes of its evidence files
+- Applies a local software HMAC integrity seal
+- Verifies export hashes, evidence bindings, chain commitments, and manifest integrity
 
-- OS-level input capture (CGEventTap)
-- Screen observer (screenshot-to-feature-vector)
-- Secure Enclave / TPM hardware binding
-- RFC 3161 + Roughtime time anchoring
-- ARA 2 integration for cooperative DAWs
+## Five-minute demonstration
 
-## macOS Build (Plugin)
-
-Prerequisites: macOS with Xcode CLI tools, CMake 3.22+, local JUCE checkout.
-
-```sh
-cmake -S . -B build -DAPW_JUCE_DIR=/path/to/JUCE -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --target AudioProvenanceCapture_VST3 --config Debug
-```
-
-Install for Ableton:
+Build and install the plugin. If JUCE is not already installed, CMake fetches
+the pinned JUCE `8.0.15` release automatically.
 
 ```sh
-mkdir -p "$HOME/Library/Audio/Plug-Ins/VST3"
-cp -R "build/AudioProvenanceCapture_artefacts/Debug/VST3/Audio Provenance Capture.vst3" \
-      "$HOME/Library/Audio/Plug-Ins/VST3/"
+./scripts/build_plugin.sh --install
 ```
 
-## Running the Daemon
+Start a clean demo workspace. The second argument is the producer-declared
+source category; use `unknown` when it is not known.
+
+```sh
+./scripts/run_demo.sh ./demo-output imported_sample
+```
+
+Then:
+
+1. Open Ableton Live and rescan VST3 plug-ins.
+2. Insert **Audio Provenance Capture** on one audio track.
+3. Play the track until the plugin shows `Capture status: ACTIVE` and increasing hash windows.
+4. Export a WAV or AIFF into `demo-output/exports/`.
+5. Open the generated `*_provenance.html` fight card in `demo-output/manifests/`.
+6. Verify the adjacent JSON manifest:
+
+```sh
+./scripts/verify_demo.sh ./demo-output/manifests/your_export_manifest.json
+```
+
+For a richer demonstration, pass the saved Ableton set as the third argument:
+
+```sh
+./scripts/run_demo.sh ./demo-output imported_sample /path/to/Demo.als
+```
+
+The `.als` parser is an experimental, unsupported interpretation of saved
+project structure. Its resulting session facts are labelled `inferred`.
+
+## Manual daemon command
 
 ```sh
 python3 -m daemon \
@@ -59,21 +81,53 @@ python3 -m daemon \
   --sample-dir ~/Music/ProvenanceSamples \
   --export-dir ~/Music/Exports \
   --project ~/Music/MyProject/MyProject.als \
-  --manifest-dir manifests
+  --manifest-dir manifests \
+  --source-category imported_sample
 ```
 
-The daemon listens for plugin UDP events, watches for sample imports and exports, monitors the .als project file for structural changes, and generates a C2PA-compatible manifest when an export is detected.
+Supported source declarations are:
 
-## Running Tests
+- `unknown`
+- `audio_interface_recording`
+- `midi_vst_synth`
+- `imported_sample`
+- `generator`
+- `resampling`
+- `manual_import`
+
+Non-unknown source categories are recorded as `user_declared`, not verified.
+
+## Trust boundary
+
+This project never claims full Ableton provenance.
+
+- Routed buffers and export-file hashes are `directly_observed`.
+- The association between routed observations and an export is `inferred`
+  because both appeared during the same local capture session.
+- A producer-selected source category is `user_declared`.
+- Hidden plug-in state, bypassed routing, upstream rights, and unobserved audio
+  remain `unknown_unobserved`.
+- The HMAC seal is local integrity protection. It is not Secure Enclave
+  attestation, third-party identity, or a production C2PA signature.
+- The included C2PA structures are an alignment/mapping prototype, not an
+  embedded, conforming C2PA manifest.
+
+## Tests
 
 ```sh
-python3 -m unittest discover -s tests
+python3 -m unittest discover -s tests -v
 ```
+
+The current suite contains 89 tests, including UDP-to-export integration,
+overwritten-export detection, report rendering, manifest verification, and
+proof-level behavior.
 
 ## Documentation
 
-- `docs/ARCHITECTURE.md` - System architecture and trust boundary
-- `docs/MULTI_LAYER_OBSERVATION.md` - Multi-layer edit observation design
-- `docs/ROADMAP.md` - Sprint plan and version milestones
-- `docs/MANIFEST_SCHEMA.md` - Manifest trust model
-- `requirements/` - Product, technical, and acceptance requirements
+- `docs/PROJECT_BRIEF.md` — product and demonstration scope
+- `docs/DEMO_RUNBOOK.md` — presenter checklist and talk track
+- `docs/ARCHITECTURE.md` — components and trust boundary
+- `docs/MANIFEST_SCHEMA.md` — evidence and proof-level model
+- `docs/ROADMAP.md` — milestones and remaining v1.0 validation
+- `docs/VALIDATION.md` — build and Ableton validation record
+- `docs/MULTI_LAYER_OBSERVATION.md` — longer-term research architecture

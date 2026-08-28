@@ -196,24 +196,10 @@ void AudioObserver::processWindow (const float* data, int numSamples)
     auto windowHash = computeChainedHash (data, numSamples);
     auto prevHash   = previousHash.isEmpty() ? juce::String ("genesis") : previousHash;
 
-    // ── Silence throttling ──
-    // Always hash (chain integrity) but only emit UDP events at full rate
-    // when audio is present.  During sustained silence, emit once every
-    // kSilenceEmitInterval windows (~1 s) to avoid flooding the daemon.
-    bool shouldEmit = true;
-    if (! hasAudio)
-    {
-        ++consecutiveSilentWindows;
-        shouldEmit = (consecutiveSilentWindows == 1)
-                  || (consecutiveSilentWindows % kSilenceEmitInterval == 0);
-    }
-    else
-    {
-        consecutiveSilentWindows = 0;
-    }
-
     // ── buffer_hash event ──
-    if (eventCallback && shouldEmit)
+    // Every window is emitted so the daemon can verify the complete chain.
+    // At 48 kHz this is about twelve compact events per second.
+    if (eventCallback)
     {
         auto json = buildJsonEvent (EventTypes::bufferHash, timestampMs, samplePos,
         {
@@ -226,9 +212,7 @@ void AudioObserver::processWindow (const float* data, int numSamples)
             { "sample_rate_hz",       sampleRate },
             { "window_size_samples",  numSamples },
             { "bpm",                  bpmX100 / 100.0 },
-            { "silent_windows_skipped", consecutiveSilentWindows > 1
-                                        ? juce::var (consecutiveSilentWindows - 1)
-                                        : juce::var (0) },
+            { "silent_windows_skipped", 0 },
             { "band_low",  bands.low },
             { "band_mid",  bands.mid },
             { "band_high", bands.high }
@@ -282,7 +266,7 @@ void AudioObserver::processWindow (const float* data, int numSamples)
         const double dHigh = std::abs (bands.high - prevBands.high);
         const double maxDelta = std::max ({ dLow, dMid, dHigh });
 
-        if (maxDelta > kBandShiftThreshold && eventCallback && shouldEmit)
+        if (maxDelta > kBandShiftThreshold && eventCallback)
         {
             auto json = buildJsonEvent ("spectral_profile_change", timestampMs, samplePos,
             {

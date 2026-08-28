@@ -16,7 +16,7 @@ class ManifestBuilderTests(unittest.TestCase):
         builder = ManifestBuilder(session_id="test-session")
         manifest = builder.build()
         self.assertEqual(manifest["session_id"], "test-session")
-        self.assertEqual(manifest["apw_version"], "0.2.0")
+        self.assertEqual(manifest["apw_version"], "0.9.0")
         self.assertIn("apw:unobserved", manifest)
         self.assertIn("c2pa_mapping", manifest)
 
@@ -32,10 +32,15 @@ class ManifestBuilderTests(unittest.TestCase):
             channel_count=2,
             source_category="audio_interface_recording",
             proof_level="directly_observed",
+            source_category_proof_level="user_declared",
         ))
         manifest = builder.build()
         self.assertEqual(len(manifest["observed_stems"]), 1)
         self.assertEqual(manifest["observed_stems"][0]["stem_id"], "stem-1")
+        self.assertEqual(
+            manifest["observed_stems"][0]["source"]["apw:proof_level"],
+            "user_declared",
+        )
 
     def test_export_included(self):
         builder = ManifestBuilder(session_id="s1")
@@ -87,6 +92,30 @@ class ManifestBuilderTests(unittest.TestCase):
         builder = ManifestBuilder(session_id="s1")
         manifest = builder.build()
         self.assertIn("hidden_plugin_state", manifest["apw:unobserved"])
+
+    def test_claim_summary_labels_association_as_inferred(self):
+        builder = ManifestBuilder(session_id="s1")
+        builder.add_stem(StemEvidence(
+            stem_id="stem-1", hash_chain_root="abc123", hash_chain_length=2,
+            first_observed_ms=1000, last_observed_ms=2000, sample_rate_hz=48000,
+            channel_count=2, source_category="unknown", proof_level="directly_observed",
+        ))
+        builder.set_export(ExportEvidence(
+            file_path="/tmp/out.wav", file_name="out.wav", sha256="deadbeef",
+            format="wav", file_size_bytes=100, duration_seconds=1.0,
+            exported_at="2026-05-26T00:00:00Z",
+        ))
+
+        manifest = builder.build()
+
+        association = manifest["stem_export_association"]
+        self.assertEqual(association["apw:proof_level"], "inferred")
+        full_provenance = next(
+            claim for claim in manifest["claim_summary"]
+            if claim["claim"] == "full_ableton_provenance"
+        )
+        self.assertFalse(full_provenance["value"])
+        self.assertEqual(full_provenance["apw:proof_level"], "unknown_unobserved")
 
     def test_write_json(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

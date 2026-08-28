@@ -1,4 +1,6 @@
 build/
+.deps/
+demo-output/
 cmake-build-*/
 *.xcodeproj/
 *.xcworkspace/
