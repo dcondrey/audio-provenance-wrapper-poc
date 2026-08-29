@@ -253,6 +253,12 @@ class Daemon:
         finally:
             self._stop.set()
             self.receiver.close()
+            # IMPORTANT: workers write evidence/status/manifests; join them before
+            # the session_end record so nothing lands after status says "stopped".
+            for t in threads:
+                t.join(timeout=10.0)
+                if t.is_alive():
+                    log.warning("Worker thread %s did not stop within 10s", t.name)
             self._write_evidence("session_events.jsonl", {
                 "event_type": "session_end",
                 "capture_session_id": self.session_id,
@@ -316,7 +322,7 @@ class Daemon:
                 events = self.sample_watcher.scan_once()
             except Exception:
                 log.exception("Sample watcher error")
-                time.sleep(self.sample_watcher.poll_interval_seconds)
+                self._stop.wait(self.sample_watcher.poll_interval_seconds)
                 continue
 
             for event in events:
@@ -333,7 +339,7 @@ class Daemon:
                 )
                 self._correlate(layer_event)
 
-            time.sleep(self.sample_watcher.poll_interval_seconds)
+            self._stop.wait(self.sample_watcher.poll_interval_seconds)
 
     def _run_project_watcher(self) -> None:
         from daemon.project_differ.differ import extract_snapshot, compute_diff
@@ -346,7 +352,7 @@ class Daemon:
             try:
                 stat = self.project_path.stat()
             except OSError:
-                time.sleep(2.0)
+                self._stop.wait(2.0)
                 continue
 
             if stat.st_mtime_ns != prev_mtime_ns:
@@ -355,7 +361,7 @@ class Daemon:
                     snapshot = extract_snapshot(self.project_path)
                 except Exception:
                     log.exception("Failed to parse %s", self.project_path)
-                    time.sleep(2.0)
+                    self._stop.wait(2.0)
                     continue
 
                 with self._session_lock:
@@ -400,7 +406,7 @@ class Daemon:
                 prev_snapshot = snapshot
                 self._latest_project_snapshot = snapshot
 
-            time.sleep(2.0)
+            self._stop.wait(2.0)
 
     def _run_export_watcher(self) -> None:
         log.info("Export watcher on %s", self.export_dir)
@@ -443,7 +449,7 @@ class Daemon:
             except OSError:
                 log.exception("Export watcher could not scan %s", self.export_dir)
 
-            time.sleep(2.0)
+            self._stop.wait(2.0)
 
     def _generate_manifest(self, export_path: Path, export_version: int = 1) -> Path:
         return _manifest_generator.generate_manifest(self, export_path, export_version)

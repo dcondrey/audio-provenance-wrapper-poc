@@ -15,10 +15,7 @@ class DaemonIntegrationTests(unittest.TestCase):
     """End-to-end: send plugin events via UDP, detect export, generate manifest."""
 
     def test_full_pipeline(self):
-        # FIXME: Daemon.run() never joins its worker threads, so a straggling
-        # watcher write can race tmpdir cleanup after stop(); tolerated here
-        # (all assertions run before cleanup) until daemon shutdown joins them.
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             evidence_dir = tmp_path / "evidence"
             manifest_dir = tmp_path / "manifests"
@@ -176,10 +173,10 @@ class DaemonIntegrationTests(unittest.TestCase):
             ))
 
             daemon.stop()
-            thread.join(timeout=3)
+            thread.join(timeout=15)
 
     def test_sample_detection_feeds_manifest(self):
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             evidence_dir = tmp_path / "evidence"
             manifest_dir = tmp_path / "manifests"
@@ -229,10 +226,10 @@ class DaemonIntegrationTests(unittest.TestCase):
             self.assertEqual(manifest["ingredients"][0]["file_name"], "kick.wav")
 
             daemon.stop()
-            thread.join(timeout=3)
+            thread.join(timeout=15)
 
     def test_overwriting_existing_export_generates_new_manifest(self):
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             evidence_dir = tmp_path / "evidence"
             manifest_dir = tmp_path / "manifests"
@@ -267,7 +264,7 @@ class DaemonIntegrationTests(unittest.TestCase):
             )
             self.assertTrue((manifest_dir / "demo_manifest.json").is_file())
             daemon.stop()
-            thread.join(timeout=3)
+            thread.join(timeout=15)
 
 
 class SoftwareProviderTests(unittest.TestCase):
