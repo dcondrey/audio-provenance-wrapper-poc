@@ -1,34 +1,24 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
-import json
 import logging
 import signal
 import socket
-import subprocess
 import threading
 import time
 import uuid
 from collections import deque
 from pathlib import Path
 
-from daemon.audio_association import associate_export
-from daemon.bundle import create_evidence_bundle
-from daemon.common import append_jsonl, sha256_file, sha256_prefix, utc_timestamp
+from daemon import status as _status
+from daemon.common import append_jsonl, utc_timestamp
 from daemon.correlation_engine.engine import CorrelationEngine, LayerEvent
-from daemon.dashboard import write_dashboard
 from daemon.evidence_receiver.receiver import EvidenceReceiver
 from daemon.hardware_attestation.provider import HardwareProvider, SoftwareProvider, detect_provider
-from daemon.manifest_builder.builder import (
-    ExportEvidence,
-    IngredientEvidence,
-    ManifestBuilder,
-    StemEvidence,
-)
-from daemon.report import write_html_report
-from daemon.sample_watcher.watcher import SampleWatcher, extract_audio_metadata
+from daemon.manifest_builder import generator as _manifest_generator
+from daemon.sample_watcher.watcher import SampleWatcher
 from daemon.signing import DEFAULT_PRIVATE_KEY, DEFAULT_PUBLIC_KEY, Ed25519Signer
+from daemon.time_anchor.anchor import DEFAULT_TSA_URL, RFC3161Provider, TimeAnchorService
 
 log = logging.getLogger(__name__)
 
@@ -84,6 +74,7 @@ class Daemon:
         hardware_provider: HardwareProvider | None = None,
         generate_html_report: bool = True,
         open_artifacts: bool = False,
+        time_anchor_url: str | None = None,
     ) -> None:
         if source_category not in SOURCE_CATEGORIES:
             raise ValueError(f"Unsupported source category: {source_category}")
@@ -103,6 +94,9 @@ class Daemon:
         )
         self.generate_html_report = generate_html_report
         self.open_artifacts = open_artifacts
+        self._time_anchor = (
+            TimeAnchorService(RFC3161Provider(time_anchor_url)) if time_anchor_url else None
+        )
 
         self.receiver = EvidenceReceiver(
             host="127.0.0.1",
@@ -452,402 +446,19 @@ class Daemon:
             time.sleep(2.0)
 
     def _generate_manifest(self, export_path: Path, export_version: int = 1) -> Path:
-        self._last_export_path = export_path
-        export_hash = sha256_file(export_path)
-        stat = export_path.stat()
-        export_metadata = extract_audio_metadata(export_path)
-        builder = ManifestBuilder(
-            session_id=self.session_id,
-        )
-        builder.set_export(ExportEvidence(
-            file_path=str(export_path),
-            file_name=export_path.name,
-            sha256=export_hash,
-            format=export_path.suffix.lower().lstrip("."),
-            file_size_bytes=stat.st_size,
-            duration_seconds=export_metadata.get("duration_seconds"),
-            exported_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            sample_rate_hz=export_metadata.get("sample_rate"),
-            channel_count=export_metadata.get("channels"),
-            export_version=export_version,
-        ))
-
-        with self._session_lock:
-            events_snapshot = list(self._session_events)
-            feature_snapshot = list(self._feature_events)
-            first_hash_event = dict(self._first_hash_event or {})
-            last_hash_event = dict(self._last_hash_event or {})
-            chain_length = self._buffer_hash_count
-            plugin_instance_ids = tuple(sorted(self._plugin_instance_ids))
-
-        first_hash_ms = int(first_hash_event.get("source_timestamp_ms") or 0)
-        last_hash_ms = int(last_hash_event.get("source_timestamp_ms") or 0)
-        first_received_at = str(first_hash_event.get("received_at") or "") or None
-        last_received_at = str(last_hash_event.get("received_at") or "") or None
-        last_window_hash = str(last_hash_event.get("window_hash") or "")
-        chain_genesis = str(first_hash_event.get("prev_hash") or "genesis")
-        stem_sr = int(last_hash_event.get("sample_rate_hz") or 0)
-        stem_ch = int(last_hash_event.get("channel_count") or 0)
-
-        for event in events_snapshot:
-            et = event.get("event_type")
-            if et == "sample_file_observed":
-                builder.add_ingredient(IngredientEvidence(
-                    file_name=str(event.get("file_name", "")),
-                    sha256=str(event.get("sha256", "")),
-                    proof_level=str(event.get("proof_level", "directly_observed")),
-                    correlation_confidence=None,
-                    audio_fingerprint=event.get("audio_fingerprint"),
-                ))
-            elif et == "composite_edit":
-                builder.add_composite_edit(event)
-
-        if chain_length > 0:
-            builder.add_stem(StemEvidence(
-                stem_id=self.stem_id,
-                hash_chain_root=last_window_hash,
-                hash_chain_length=chain_length,
-                first_observed_ms=first_hash_ms,
-                last_observed_ms=last_hash_ms,
-                sample_rate_hz=stem_sr,
-                channel_count=stem_ch,
-                source_category=self.source_category,
-                proof_level="directly_observed",
-                source_category_proof_level=self.source_category_proof_level,
-                hash_chain_genesis=chain_genesis,
-                first_received_at=first_received_at,
-                last_received_at=last_received_at,
-                plugin_instance_ids=plugin_instance_ids,
-            ))
-
-        builder.coverage = self._derive_coverage(chain_length)
-        association = associate_export(export_path, feature_snapshot)
-        association.update({
-            "capture_session_id": self.session_id,
-            "stem_ids": [self.stem_id] if chain_length else [],
-            "export_file_name": export_path.name,
-            "basis": (
-                "A bounded sequence of relative RMS, zero-crossing, crest-factor, and coarse energy-envelope "
-                "features emitted from accepted routed plug-in windows was compared with equivalent streaming-"
-                "extracted export features using time-offset search. The relationship remains inferred and does "
-                "not establish complete routing."
-            ),
-        })
-        builder.audio_association = association
-        builder.session_diagnostics = self._session_diagnostics()
-
-        all_layers = {"audio_buffer", "transport", "midi", "session",
-                      "sample_watcher", "project_differ", "input_capture",
-                      "screen_observer"}
-        with self._session_lock:
-            active_layers = set(self._active_layers)
-        missing_layers = sorted(all_layers - active_layers)
-        builder.unobserved = list(builder.unobserved)
-        for layer in missing_layers:
-            builder.unobserved.append(f"layer_{layer}_not_active")
-
-        evidence_hashes: dict[str, str] = {}
-        evidence_files: dict[str, dict[str, object]] = {}
-        for evidence_file in sorted(self.evidence_dir.glob("*.jsonl")):
-            byte_length = evidence_file.stat().st_size
-            digest = sha256_prefix(evidence_file, byte_length)
-            evidence_hashes[evidence_file.name] = digest
-            evidence_files[evidence_file.name] = {
-                "sha256": digest,
-                "byte_length": byte_length,
-                "binding_scope": "file_prefix_at_manifest_creation",
-            }
-
-        manifest = builder.build()
-
-        snap = self._latest_project_snapshot
-        if snap is not None:
-            manifest["session_facts"] = {
-                "apw:proof_level": "inferred",
-                "observation_basis": (
-                    "Structural facts inferred by parsing the saved Ableton .als file; "
-                    "Ableton does not provide this project with a supported semantic API."
-                ),
-                "bpm": snap.transport_bpm,
-                "time_signature": f"{snap.transport_time_signature[0]}/{snap.transport_time_signature[1]}",
-                "loop_on": snap.transport_loop_on,
-                "track_count": snap.track_count,
-                "clip_count": snap.clip_count,
-                "sample_refs": sorted(snap.sample_refs),
-                "tracks": [
-                    {
-                        "name": t.name,
-                        "type": t.track_type,
-                        "devices": list(t.devices),
-                        "device_presets": list(t.device_presets),
-                        "sample_paths": list(t.sample_paths),
-                        "clips": [
-                            {
-                                "name": c.name,
-                                "position_beats": c.position_beats,
-                                "length_beats": c.length_beats,
-                                "sample_ref": c.sample_ref,
-                                "warp_on": c.warp_on,
-                                "is_midi": c.is_midi,
-                            }
-                            for c in t.clips
-                        ],
-                        "clip_count": t.clip_count,
-                        "midi_note_count": t.midi_note_count,
-                        "automation_point_count": t.automation_point_count,
-                        "routing_input": t.routing_input,
-                        "routing_output": t.routing_output,
-                        "sends": [{"target": s.target, "level": s.level} for s in t.sends],
-                        "group_id": t.group_id,
-                        "is_frozen": t.is_frozen,
-                        "color_index": t.color_index,
-                    }
-                    for t in snap.tracks
-                ],
-            }
-        manifest["evidence_binding"] = {
-            "evidence_directory": str(self.evidence_dir.resolve()),
-            "evidence_file_hashes": evidence_hashes,
-            "evidence_files": evidence_files,
-            "last_window_hash": last_window_hash,
-            "chain_length": chain_length,
-            "apw:proof_level": "directly_observed",
-        }
-        manifest["capture_session"]["started_at"] = self._session_started_at
-        manifest["capture_session"]["state_at_manifest"] = "active"
-        receipt_summary = self.receiver.receipt_summary()
-        manifest["daemon_receipt_acknowledgement"] = receipt_summary
-        manifest["claim_summary"].insert(2, {
-            "claim": "daemon_receipt_acknowledgement",
-            "value": receipt_summary["status"],
-            "evidence": (
-                f"Daemon dispatched {receipt_summary['counters']['sent']} local ACK packets; "
-                "plug-in processing of each packet is outside daemon observability."
-            ),
-            "apw:proof_level": receipt_summary["apw:proof_level"],
-        })
-
-        suffix = "" if export_version == 1 else f"_v{export_version:03d}"
-        manifest_path = self.manifest_dir / f"{export_path.stem}{suffix}_manifest.json"
-        report_path = self.manifest_dir / f"{export_path.stem}{suffix}_provenance.html"
-        artifact_dir = self.manifest_dir / "artifacts"
-        artifact_dir.mkdir(parents=True, exist_ok=True)
-        verification_path = artifact_dir / f"{export_path.stem}{suffix}_verification.json"
-        handoff_path = artifact_dir / f"{export_path.stem}{suffix}_handoff.json"
-        bundle_index_path = artifact_dir / f"{export_path.stem}{suffix}_bundle_index.json"
-        bundle_path = artifact_dir / f"{export_path.stem}{suffix}_evidence_bundle.zip"
-        manifest["presentation"] = {
-            "html_report": report_path.name if self.generate_html_report else None,
-            "derived_from": manifest_path.name,
-            "verifier_result": str(verification_path.relative_to(self.manifest_dir)),
-            "downstream_handoff": str(handoff_path.relative_to(self.manifest_dir)),
-            "bundle_index": (
-                str(bundle_index_path.relative_to(self.manifest_dir))
-                if self.generate_html_report else None
-            ),
-            "evidence_bundle": (
-                str(bundle_path.relative_to(self.manifest_dir))
-                if self.generate_html_report else None
-            ),
-            "apw:proof_level": "directly_observed",
-        }
-        manifest["downstream_registration_handoff"] = self._build_handoff(
-            export_hash=export_hash,
-            association=association,
-            coverage=builder.coverage,
-            evidence_files=evidence_files,
-            manifest_name=manifest_path.name,
-            bundle_name=bundle_path.name if self.generate_html_report else None,
-            bundle_index_name=bundle_index_path.name if self.generate_html_report else None,
-        )
-
-        try:
-            manifest["portable_signature"] = self._portable_signer.sign_manifest(manifest)
-        except Exception:
-            log.exception("Could not create portable Ed25519 signature")
-
-        try:
-            identity = self._hw_provider.device_identity()
-            manifest_bytes = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
-            signature = self._hw_provider.sign(manifest_bytes)
-            manifest["manifest_signature"] = {
-                "algorithm": identity.algorithm,
-                "device_id": identity.device_id,
-                "public_key_hex": identity.public_key_hex,
-                "signature_hex": signature.hex(),
-                "signed_content_hash": hashlib.sha256(manifest_bytes).hexdigest(),
-                "trust_scope": (
-                    "local_software_integrity"
-                    if isinstance(self._hw_provider, SoftwareProvider)
-                    else "hardware_provider"
-                ),
-                "hardware_attested": not isinstance(self._hw_provider, SoftwareProvider),
-                "apw:proof_level": (
-                    "unknown_unobserved"
-                    if isinstance(self._hw_provider, SoftwareProvider)
-                    else "directly_observed"
-                ),
-                "notes": (
-                    "The local HMAC seal detects changes when checked with the same secret key; "
-                    "it is not hardware attestation or third-party identity verification."
-                    if isinstance(self._hw_provider, SoftwareProvider)
-                    else "Signature produced by the configured hardware provider."
-                ),
-            }
-        except Exception:
-            log.warning("Could not sign manifest", exc_info=True)
-
-        manifest_path.parent.mkdir(parents=True, exist_ok=True)
-        with manifest_path.open("w", encoding="utf-8") as f:
-            json.dump(manifest, f, indent=2, ensure_ascii=False)
-            f.write("\n")
-        log.info("Manifest written: %s", manifest_path)
-        handoff_path.write_text(
-            json.dumps(manifest["downstream_registration_handoff"], indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8",
-        )
-        from daemon.verify import verify_manifest
-
-        # The verifier checks the fight card link. Materialize the unsigned derived
-        # presentation first, then store the verifier result, then render the final
-        # presentation with that local result. The signed JSON manifest is unchanged.
-        if self.generate_html_report:
-            write_html_report(dict(manifest), report_path)
-        verification = verify_manifest(manifest_path)
-        verification_path.write_text(
-            json.dumps(verification.to_dict(), indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8",
-        )
-        if self.generate_html_report:
-            report_manifest = dict(manifest)
-            report_manifest["local_verification_summary"] = verification.to_dict()
-            write_html_report(report_manifest, report_path)
-            log.info("Fight-card report written: %s", report_path)
-            try:
-                create_evidence_bundle(
-                    manifest_path=manifest_path,
-                    report_path=report_path,
-                    verification_path=verification_path,
-                    handoff_path=handoff_path,
-                    index_path=bundle_index_path,
-                    bundle_path=bundle_path,
-                    signer=self._portable_signer,
-                )
-                log.info("Evidence bundle written: %s", bundle_path)
-            except Exception:
-                log.exception("Could not create deterministic evidence bundle")
-            if self.open_artifacts:
-                try:
-                    subprocess.Popen(["open", str(report_path)])
-                except OSError:
-                    log.warning("Could not open fight card automatically", exc_info=True)
-        self._last_verifier_outcome = verification.outcome
-        self._last_manifest_path = manifest_path
-        self._last_report_path = report_path if self.generate_html_report else None
-        self._last_verification_path = verification_path
-        self._last_handoff_path = handoff_path
-        self._last_bundle_index_path = bundle_index_path if bundle_index_path.is_file() else None
-        self._last_bundle_path = bundle_path if bundle_path.is_file() else None
-        self._last_export_path = export_path
-        self._write_status(
-            "active"
-            if self._plugin_seen and time.monotonic() - self._last_plugin_event_monotonic < 3.0
-            else "idle"
-        )
-        if chain_length == 0:
-            log.warning("Export was hashed, but no routed-audio hash events were received")
-        return manifest_path
+        return _manifest_generator.generate_manifest(self, export_path, export_version)
 
     def _derive_coverage(self, chain_length: int) -> dict[str, object]:
-        receiver = self.receiver.diagnostics()
-        with self._session_lock:
-            telemetry = dict(self._latest_plugin_telemetry)
-            plugin_instance_count = len(self._plugin_instance_ids)
-        counters: dict[str, int] = {
-            **telemetry,
-            **receiver,
-            "udp_sends_locally_emitted": max(
-                0,
-                telemetry.get("udp_sends_attempted", 0) - telemetry.get("udp_sends_failed", 0),
-            ),
-            "buffer_hash_events_received": chain_length,
-            "feature_windows_dropped_from_alignment_buffer": self._feature_window_drops,
-        }
-        windows_hashed = telemetry.get("windows_hashed")
-        required = {
-            "buffers_submitted",
-            "samples_submitted",
-            "windows_hashed",
-            "fifo_samples_dropped",
-            "fifo_windows_dropped",
-            "events_prepared",
-            "udp_sends_attempted",
-            "udp_sends_failed",
-        }
-        if chain_length == 0 or not required.issubset(telemetry):
-            return {
-                "status": "unknown_coverage",
-                "basis": (
-                    "No routed hash windows were received."
-                    if chain_length == 0
-                    else "The plug-in stream did not include every required cumulative counter."
-                ),
-                "counters": counters,
-                "apw:proof_level": "unknown_unobserved",
-            }
+        return _manifest_generator.derive_coverage(self, chain_length)
 
-        loss_count = sum((
-            telemetry.get("fifo_samples_dropped", 0),
-            telemetry.get("fifo_windows_dropped", 0),
-            telemetry.get("udp_sends_failed", 0),
-            receiver["sequence_gaps"],
-            receiver["sequence_out_of_order"],
-            receiver["hash_chain_breaks"],
-        ))
-        complete = (
-            windows_hashed == chain_length
-            and telemetry.get("events_prepared") == receiver["events_received"]
-            and loss_count == 0
-            and receiver["events_missing_sequence"] == 0
-            and receiver["daemon_acknowledgements_sent"] == receiver["packets_received"]
-            and receiver["daemon_acknowledgements_failed"] == 0
-            and plugin_instance_count == 1
-        )
-        status = "complete_observed_path" if complete else "partial_observed_path"
-        return {
-            "status": status,
-            "basis": (
-                "All submitted routed windows represented by the plug-in counters were received, "
-                "and the prepared/received event prefix agrees with no reported FIFO loss, UDP send "
-                "failure, sequence gap, chain break, or daemon acknowledgement dispatch failure. "
-                "Scope ends at the last received telemetry event; plug-in processing of each ACK is not "
-                "observable from the daemon."
-                if complete
-                else "Routed audio was observed, but one or more counters show or cannot exclude loss."
-            ),
-            "counters": counters,
-            "apw:proof_level": "inferred",
-        }
+    def _derive_forgery_analysis(self, events_snapshot: list[dict[str, object]]) -> dict[str, object]:
+        return _manifest_generator.derive_forgery_analysis(events_snapshot)
+
+    def _derive_readiness(self) -> dict[str, object]:
+        return _status.derive_readiness(self)
 
     def _session_diagnostics(self) -> dict[str, object]:
-        return {
-            "receiver": self.receiver.diagnostics(),
-            "correlation": {
-                "buffer_events": self.correlation.buffer_size,
-                "buffer_max_events": self.correlation.max_buffer_events,
-                "capacity_drops": self.correlation.capacity_drops,
-                "duplicate_matches_suppressed": self.correlation.duplicate_suppressions,
-                "composite_events_emitted": self.correlation.emitted_count,
-                "clock": "daemon_monotonic_ms",
-            },
-            "session_memory": {
-                "events_retained": len(self._session_events),
-                "max_events": self._max_session_events,
-                "events_dropped_from_memory_only": self._session_event_drops,
-            },
-            "daemon_receipt_acknowledgement": self.receiver.receipt_summary(),
-            "apw:proof_level": "directly_observed",
-        }
+        return _status.session_diagnostics(self)
 
     def _build_handoff(
         self,
@@ -860,161 +471,22 @@ class Daemon:
         bundle_name: str | None,
         bundle_index_name: str | None,
     ) -> dict[str, object]:
-        return {
-            "record_type": "downstream_provenance_registration_handoff",
-            "status": "candidate_input_not_submitted",
-            "capture_session_id": self.session_id,
-            "export_hard_hash": {
-                "algorithm": "sha256",
-                "value": export_hash,
-                "apw:proof_level": "directly_observed",
-            },
-            "routed_observation_commitment": {
-                "hash_chain_root": str((self._last_hash_event or {}).get("window_hash", "")) or None,
-                "hash_chain_length": self._buffer_hash_count,
-                "apw:proof_level": (
-                    "directly_observed" if self._buffer_hash_count else "unknown_unobserved"
-                ),
-            },
-            "coverage": coverage,
-            "audio_association": association,
-            "creator_declarations": [{
-                "name": "source_category",
-                "value": self.source_category,
-                "apw:proof_level": self.source_category_proof_level,
-            }],
-            "signing_key": {
-                "algorithm": "Ed25519",
-                "public_key_hex": self._portable_signer.public_key_hex(),
-                "public_key_file": str(self._portable_signer.public_key_path),
-                "trust_scope": "self_generated_demo_key_integrity",
-                "signer_identity": "not_established",
-                "apw:proof_level": "unknown_unobserved",
-            },
-            "evidence_bundle": {
-                "manifest": str((self.manifest_dir / manifest_name).resolve()),
-                "export": str(self._last_export_path.resolve()) if self._last_export_path else None,
-                "evidence_directory": str(self.evidence_dir.resolve()),
-                "files": evidence_files,
-                "downloadable_archive": f"artifacts/{bundle_name}" if bundle_name else None,
-                "signed_bundle_index": f"artifacts/{bundle_index_name}" if bundle_index_name else None,
-                "index_scope": "all archive payload entries; the signed index is not self-hashed",
-                "apw:proof_level": "directly_observed",
-            },
-            "tentative_c2pa_assertion_mapping": {
-                "status": "mapping_only_not_a_production_c2pa_claim",
-                "assertions": ["c2pa.hash.data", "c2pa.ingredient", "c2pa.actions", "apw.unobserved"],
-                "apw:proof_level": "inferred",
-            },
-            "missing_downstream_requirements": [
-                "verified creator or institution identity",
-                "author-controlled credential and key policy",
-                "production certificate chain",
-                "audio-native soft binding or watermark",
-                "resilient recovery from the audio",
-                "registry publication",
-                "production C2PA claim generation and conformance validation",
-                "consent and rights verification",
-            ],
-            "boundary": (
-                "This neutral handoff is not a provider-specific API payload and claims no compatibility "
-                "with proprietary watermark, recovery, identity, signing, or registry technology."
-            ),
-        }
+        return _status.build_handoff(
+            self,
+            export_hash=export_hash,
+            association=association,
+            coverage=coverage,
+            evidence_files=evidence_files,
+            manifest_name=manifest_name,
+            bundle_name=bundle_name,
+            bundle_index_name=bundle_index_name,
+        )
+
+    def _status_link(self, path: Path | None) -> str | None:
+        return _status.status_link(path, self._status_path.parent)
 
     def _write_status(self, state: str) -> None:
-        if state != "stopped" and (
-            self.receiver.rejected_count > 0 or self.receiver.hash_chain_break_count > 0
-        ):
-            state = "error"
-        with self._session_lock:
-            plugin_instance_ids = sorted(self._plugin_instance_ids)
-            plugin_telemetry = dict(self._latest_plugin_telemetry)
-        data = {
-            "product": "Routed Audio Evidence Adapter",
-            "state": state,
-            "updated_at": utc_timestamp(),
-            "session_id": self.session_id,
-            "stem_id": self.stem_id,
-            "plugin_instance_ids": plugin_instance_ids,
-            "trust_boundary": (
-                "Only routed plug-in audio and local filesystem exports are observed. "
-                "Identity, authorship, rights, consent, bypassed paths, and downstream registration remain unestablished. "
-                "Verified, changed, untrusted, and not_found are local POC integrity outcomes, not registry outcomes."
-            ),
-            "coverage": self._derive_coverage(self._buffer_hash_count),
-            "counts": {
-                **plugin_telemetry,
-                **self.receiver.diagnostics(),
-                "udp_sends_locally_emitted": max(
-                    0,
-                    plugin_telemetry.get("udp_sends_attempted", 0)
-                    - plugin_telemetry.get("udp_sends_failed", 0),
-                ),
-                "buffer_hash_events_received": self._buffer_hash_count,
-            },
-            "pipeline": {
-                "plugin_observed": "complete" if self._buffer_hash_count else "waiting",
-                "plugin_emitted": (
-                    "degraded"
-                    if plugin_telemetry.get("udp_sends_failed", 0)
-                    else "complete"
-                    if plugin_telemetry.get("udp_sends_attempted", 0)
-                    else "waiting"
-                ),
-                "daemon_received": "complete" if self.receiver.event_count else "waiting",
-                "daemon_acknowledged": (
-                    "degraded"
-                    if self.receiver.acknowledgements_failed
-                    else "issued"
-                    if self.receiver.acknowledgements_sent
-                    else "waiting"
-                ),
-                "chain_continuity": (
-                    "error" if self.receiver.hash_chain_break_count else
-                    "checked" if self._buffer_hash_count else "waiting"
-                ),
-                "export_detected": "complete" if self._last_export_path else "waiting",
-                "audio_association": "evaluated" if self._last_manifest_path else "waiting",
-                "evidence_sealed": "complete" if self._last_manifest_path else "waiting",
-                "verification": self._last_verifier_outcome or "waiting",
-            },
-            "daemon_receipt_acknowledgement": self.receiver.receipt_summary(),
-            "links": {
-                "manifest": (
-                    str(self._last_manifest_path.relative_to(self._status_path.parent))
-                    if self._last_manifest_path else None
-                ),
-                "fight_card": (
-                    str(self._last_report_path.relative_to(self._status_path.parent))
-                    if self._last_report_path else None
-                ),
-                "verifier_result": (
-                    str(self._last_verification_path.relative_to(self._status_path.parent))
-                    if self._last_verification_path else None
-                ),
-                "downstream_handoff": (
-                    str(self._last_handoff_path.relative_to(self._status_path.parent))
-                    if self._last_handoff_path else None
-                ),
-                "bundle_index": (
-                    str(self._last_bundle_index_path.relative_to(self._status_path.parent))
-                    if self._last_bundle_index_path else None
-                ),
-                "evidence_bundle": (
-                    str(self._last_bundle_path.relative_to(self._status_path.parent))
-                    if self._last_bundle_path else None
-                ),
-            },
-            "proof_levels": [
-                "directly_observed", "inferred", "user_declared",
-                "externally_verified", "unknown_unobserved",
-            ],
-        }
-        temporary = self._status_path.with_suffix(".tmp")
-        temporary.write_text(json.dumps(data, separators=(",", ":")), encoding="utf-8")
-        temporary.replace(self._status_path)
-        write_dashboard(data, self._status_path.parent / "dashboard.html")
+        _status.write_status(self, state)
 
     @staticmethod
     def _file_is_stable(path: Path, checks: int = 3, interval: float = 0.5) -> bool:
@@ -1058,6 +530,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Optional local capture-session identifier. A unique value is generated by default.",
     )
     parser.add_argument("--stem-id", default="stem-1", help="Identifier for the single routed stem.")
+    parser.add_argument(
+        "--time-anchor",
+        nargs="?",
+        const=DEFAULT_TSA_URL,
+        default=None,
+        metavar="TSA_URL",
+        help=(
+            "Anchor each export hash at an RFC 3161 TSA (default server if no URL given). "
+            "Requires network access at manifest-sealing time; degrades to an explicit "
+            "unavailable record on failure."
+        ),
+    )
     parser.add_argument(
         "--source-category",
         choices=SOURCE_CATEGORIES,
@@ -1117,6 +601,7 @@ def main(argv: list[str] | None = None) -> int:
         portable_public_key_path=args.portable_public_key,
         generate_html_report=not args.no_html_report,
         open_artifacts=args.open_artifacts,
+        time_anchor_url=args.time_anchor,
     )
     signal.signal(signal.SIGTERM, lambda _signum, _frame: daemon.stop())
     daemon.run()

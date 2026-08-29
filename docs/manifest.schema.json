@@ -17,6 +17,8 @@
     "apw:unobserved",
     "evidence_binding",
     "portable_signature",
+    "manifest_signature",
+    "presentation",
     "downstream_registration_handoff",
     "c2pa_mapping"
   ],
@@ -123,6 +125,59 @@
             "algorithm": { "const": "Ed25519" },
             "trust_scope": { "const": "self_generated_demo_key_integrity" },
             "signer_identity_proof_level": { "const": "unknown_unobserved" }
+          }
+        }
+      ]
+    },
+    "manifest_signature": {
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": [
+            "algorithm", "device_id", "public_key_hex", "signature_hex",
+            "signed_content_hash", "trust_scope", "hardware_attested"
+          ],
+          "properties": {
+            "trust_scope": { "enum": ["local_software_integrity", "hardware_provider"] },
+            "hardware_attested": { "type": "boolean" },
+            "signed_content_hash": { "pattern": "^[0-9a-f]{64}$" }
+          }
+        }
+      ]
+    },
+    "presentation": {
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": ["derived_from", "verifier_result", "downstream_handoff"],
+          "properties": {
+            "html_report": { "type": ["string", "null"] },
+            "bundle_index": { "type": ["string", "null"] },
+            "evidence_bundle": { "type": ["string", "null"] }
+          }
+        }
+      ]
+    },
+    "forgery_analysis": {
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": ["method", "scope", "suspicion_score", "analyzers"],
+          "properties": {
+            "suspicion_score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "analyzers": { "type": "object" }
+          }
+        }
+      ]
+    },
+    "time_anchor": {
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": ["status", "data_hash", "scope"],
+          "properties": {
+            "status": { "enum": ["anchored", "unavailable"] },
+            "data_hash": { "pattern": "^[0-9a-f]{64}$" }
           }
         }
       ]

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-import time
+import threading
 from collections import deque
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -577,21 +577,34 @@ class CorrelationEngine:
         self._dedup_order: deque[str] = deque()
         self._capacity_drops = 0
         self._duplicate_suppressions = 0
+        # IMPORTANT: ingest() is called from the udp-receiver, sample-watcher, and
+        # project-watcher threads; buffer/dedup state must mutate atomically, and
+        # append_jsonl's check-then-rotate is not safe under concurrent writers.
+        self._lock = threading.Lock()
+        self._write_lock = threading.Lock()
 
     def ingest(self, event: LayerEvent) -> list[CompositeEdit]:
         """Add an event and return any composite edits triggered."""
-        self._buffer.append(event)
-        self._expire_old_events(event.timestamp_ms)
-        while len(self._buffer) > self.max_buffer_events:
-            self._buffer.popleft()
-            self._capacity_drops += 1
-            if self._capacity_drops == 1 or self._capacity_drops % 1000 == 0:
-                log.warning(
-                    "Correlation buffer capacity reached; dropped=%d max_events=%d",
-                    self._capacity_drops,
-                    self.max_buffer_events,
-                )
-        return self._evaluate()
+        with self._lock:
+            self._buffer.append(event)
+            self._expire_old_events(event.timestamp_ms)
+            while len(self._buffer) > self.max_buffer_events:
+                self._buffer.popleft()
+                self._capacity_drops += 1
+                if self._capacity_drops == 1 or self._capacity_drops % 1000 == 0:
+                    log.warning(
+                        "Correlation buffer capacity reached; dropped=%d max_events=%d",
+                        self._capacity_drops,
+                        self.max_buffer_events,
+                    )
+            results = self._evaluate()
+        for composite in results:
+            try:
+                with self._write_lock:
+                    self._write_event(composite)
+            except OSError:
+                log.exception("Could not append composite edit evidence")
+        return results
 
     def _expire_old_events(self, now_ms: int) -> None:
         cutoff = now_ms - self.window_ms
@@ -632,7 +645,6 @@ class CorrelationEngine:
                     expired = self._dedup_order.popleft()
                     self._dedup_keys.discard(expired)
                 results.append(composite)
-                self._write_event(composite)
                 self._emitted_count += 1
 
         return results

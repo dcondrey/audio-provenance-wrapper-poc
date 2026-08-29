@@ -26,9 +26,12 @@ exports are covered by integration tests, and the verifier checks the export,
 evidence-prefix bindings, chain commitment, and local integrity seal.
 
 The current VST3 now builds cleanly, is installed, and passes architecture and
-strict Developer ID signing inspection. The remaining v1.0 gate is a fresh
-Ableton rescan followed by observed pass-through/null, playback/reload, daemon
-ACK, and real-export validation as recorded in `docs/VALIDATION.md`.
+strict Developer ID signing inspection. A live Ableton pass on the demonstration
+machine (2026-08-28, session `capture-20260828T221446Z-9959`) completed rescan,
+insertion, daemon ACK, real-export, coverage, and verification validation with
+`complete_observed_path` coverage and `inferred_match` association. The
+remaining v1.0 gate is the transparency/null test and project save/close/reload
+as recorded in `docs/VALIDATION.md`.
 
 The demo candidate now also includes deterministic timestamped sessions,
 preflight, bounded daemon-clock correlation, evidence rotation and streaming
@@ -221,8 +224,10 @@ scripts are ready; manual Ableton validation remains.
 ### v1.0
 One-stem end-to-end Ableton demo works reliably.
 
-The only open v1.0 criterion is the manual Ableton host pass on the meeting
-machine. Automated and synthetic results do not close that gate.
+A manual Ableton host pass on the meeting machine is recorded for 2026-08-28
+(session `capture-20260828T221446Z-9959`). The open v1.0 criteria are the
+transparency/null test and project save/close/reload. Automated and synthetic
+results do not close that gate.
 
 ### v1.1
 Five-stem workflow works with bypass/failure tests.

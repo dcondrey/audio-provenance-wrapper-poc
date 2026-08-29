@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -125,39 +126,68 @@ def create_evidence_bundle(
     }
     index["portable_signature"] = signer.sign_manifest(index)
     index_bytes = json.dumps(index, indent=2, ensure_ascii=False, sort_keys=True).encode("utf-8") + b"\n"
-    index_path.parent.mkdir(parents=True, exist_ok=True)
-    index_path.write_bytes(index_bytes)
 
+    # IMPORTANT: publish atomically. Writing the ZIP in place would truncate a
+    # previously good bundle, and a failure while writing the adjacent index
+    # would orphan a signed index no archive backs. Stage both to .part files,
+    # then os.replace the bundle first and the index second, so a crash between
+    # the two renames leaves new-bundle + old-index (which the verifier rejects
+    # fail-closed), never a signed index without its archive.
     bundle_path.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(
-        bundle_path,
-        "w",
-        compression=zipfile.ZIP_DEFLATED,
-        compresslevel=9,
-        strict_timestamps=True,
-    ) as archive:
-        write_items: list[tuple[str, Path | None, int, bytes | None]] = [
-            (item.archive_path, item.source_path, item.byte_length, None) for item in members
-        ]
-        write_items.append(("bundle-index.json", None, len(index_bytes), index_bytes))
-        for archive_path, source_path, byte_length, inline in sorted(write_items):
-            info = zipfile.ZipInfo(archive_path, date_time=(1980, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            info.create_system = 3
-            info.external_attr = (0o100644 & 0xFFFF) << 16
-            with archive.open(info, "w", force_zip64=True) as destination:
-                if inline is not None:
-                    destination.write(inline)
-                    continue
-                assert source_path is not None
-                remaining = byte_length
-                with source_path.open("rb") as source:
-                    while remaining:
-                        chunk = source.read(min(1024 * 1024, remaining))
-                        if not chunk:
-                            raise EOFError(f"{source_path} changed while creating the bundle")
-                        destination.write(chunk)
-                        remaining -= len(chunk)
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    bundle_part = bundle_path.with_name(bundle_path.name + ".part")
+    index_part = index_path.with_name(index_path.name + ".part")
+    try:
+        with zipfile.ZipFile(
+            bundle_part,
+            "w",
+            compression=zipfile.ZIP_DEFLATED,
+            compresslevel=9,
+            strict_timestamps=True,
+        ) as archive:
+            write_items: list[tuple[str, Path | None, int, str | None, bytes | None]] = [
+                (item.archive_path, item.source_path, item.byte_length, item.sha256, None)
+                for item in members
+            ]
+            write_items.append(("bundle-index.json", None, len(index_bytes), None, index_bytes))
+            for archive_path, source_path, byte_length, expected_sha256, inline in sorted(write_items):
+                info = zipfile.ZipInfo(archive_path, date_time=(1980, 1, 1, 0, 0, 0))
+                info.compress_type = zipfile.ZIP_DEFLATED
+                info.create_system = 3
+                info.external_attr = (0o100644 & 0xFFFF) << 16
+                with archive.open(info, "w", force_zip64=True) as destination:
+                    if inline is not None:
+                        destination.write(inline)
+                        continue
+                    assert source_path is not None
+                    # IMPORTANT: constraint 3 (the signed index covers every entry).
+                    # Hash the bytes actually archived; a re-export landing between
+                    # the index hash and this copy must fail the bundle, not ship a
+                    # signed digest that does not match its own archive.
+                    digest = hashlib.sha256()
+                    remaining = byte_length
+                    with source_path.open("rb") as source:
+                        while remaining:
+                            chunk = source.read(min(1024 * 1024, remaining))
+                            if not chunk:
+                                raise EOFError(f"{source_path} changed while creating the bundle")
+                            digest.update(chunk)
+                            destination.write(chunk)
+                            remaining -= len(chunk)
+                    if digest.hexdigest() != expected_sha256:
+                        raise ValueError(
+                            f"{source_path} changed while creating the bundle; "
+                            "archived bytes do not match the signed index"
+                        )
+        index_part.write_bytes(index_bytes)
+    except BaseException:
+        # Discard only our own staging; a previously published good pair is
+        # untouched because we never wrote to their real paths.
+        bundle_part.unlink(missing_ok=True)
+        index_part.unlink(missing_ok=True)
+        raise
+    os.replace(bundle_part, bundle_path)
+    os.replace(index_part, index_path)
     return index_path, bundle_path
 
 

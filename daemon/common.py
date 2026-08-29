@@ -22,11 +22,18 @@ def utc_timestamp(timestamp: float | None = None) -> str:
 
 def sha256_file(path: Path) -> str:
     """SHA-256 hex digest of a file, read in 1 MB chunks."""
+    return sha256_file_with_size(path)[0]
+
+
+def sha256_file_with_size(path: Path) -> tuple[str, int]:
+    """SHA-256 hex digest plus the byte count actually hashed."""
     digest = hashlib.sha256()
+    size = 0
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             digest.update(chunk)
-    return digest.hexdigest()
+            size += len(chunk)
+    return digest.hexdigest(), size
 
 
 def sha256_prefix(path: Path, byte_length: int) -> str:

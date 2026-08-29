@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import threading
 from pathlib import Path
 
 
@@ -19,7 +20,8 @@ def render_dashboard(status: dict[str, object]) -> str:
         else {}
     )
     receipt_streams = receipt.get("streams") if isinstance(receipt.get("streams"), list) else []
-    instances = status.get("plugin_instance_ids", [])
+    readiness = status.get("readiness") if isinstance(status.get("readiness"), dict) else {}
+    readiness_alerts = readiness.get("alerts") if isinstance(readiness.get("alerts"), list) else []
     steps = [
         ("Plug-in observed", pipeline.get("plugin_observed", "waiting")),
         ("Locally emitted", pipeline.get("plugin_emitted", "waiting")),
@@ -40,6 +42,7 @@ def render_dashboard(status: dict[str, object]) -> str:
         ("Windows hashed", counts.get("windows_hashed", "—")),
         ("Windows received", counts.get("buffer_hash_events_received", 0)),
         ("FIFO samples dropped", counts.get("fifo_samples_dropped", "—")),
+        ("MIDI events dropped", counts.get("midi_events_dropped", "—")),
         ("Events prepared", counts.get("events_prepared", "—")),
         ("UDP send attempted", counts.get("udp_sends_attempted", "—")),
         ("Locally emitted", counts.get("udp_sends_locally_emitted", "—")),
@@ -58,6 +61,22 @@ def render_dashboard(status: dict[str, object]) -> str:
         f'<a href="{_escape(target)}">{_escape(label.replace("_", " ").title())} ↗</a>'
         for label, target in links.items() if target
     ) or '<span class="muted">Artifacts appear after an export is sealed.</span>'
+    if readiness_alerts:
+        readiness_html = (
+            '<div class="panel readiness blocked"><b>NOT READY TO EXPORT</b>'
+            + "".join(f"<p>{_escape(alert)}</p>" for alert in readiness_alerts)
+            + f'<p class="muted">{_escape(readiness.get("export_guidance", ""))}</p></div>'
+        )
+    elif readiness.get("ready_to_export"):
+        readiness_html = (
+            '<div class="panel readiness ready"><b>READY TO EXPORT</b>'
+            f'<p>{_escape(readiness.get("export_guidance", ""))}</p></div>'
+        )
+    else:
+        readiness_html = (
+            '<div class="panel readiness waiting"><b>WAITING FOR ROUTED AUDIO</b>'
+            f'<p class="muted">{_escape(readiness.get("export_guidance", ""))}</p></div>'
+        )
     stream_html = "".join(
         "<code>{instance} · {session}</code><span class=\"muted\">accepted {accepted} · contiguous {contiguous} · gaps {gaps} · rejected {rejections}</span>".format(
             instance=_escape(stream.get("plugin_instance_id", "unknown")),
@@ -84,9 +103,11 @@ section{{margin-top:28px}} h2{{font-size:15px;margin:0 0 12px}} .pipeline{{displ
 .step.complete i,.step.checked i,.step.evaluated i,.step.verified i,.step.issued i{{background:var(--green)}} .step.complete b,.step.checked b,.step.evaluated b,.step.verified b,.step.issued b{{color:var(--green)}} .step.error i,.step.changed i,.step.untrusted i,.step.degraded i{{background:var(--red)}} .step.error b,.step.changed b,.step.untrusted b,.step.degraded b{{color:var(--red)}}
 .grid{{display:grid;grid-template-columns:1.5fr .8fr;gap:14px}} .panel{{border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}} .counts{{display:grid;grid-template-columns:repeat(5,1fr)}} .counts div{{padding:17px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}} .counts span{{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em}} .counts strong{{display:block;font-size:21px;margin-top:6px}} .boundary{{padding:22px;border-left:3px solid var(--amber)}}
 .ids{{padding:18px 22px}} .ids code{{display:block;overflow-wrap:anywhere;margin-top:5px}} .ids .muted{{display:block;margin:3px 0 10px}} .links{{display:flex;gap:10px;flex-wrap:wrap;padding:18px 22px}} a{{color:var(--cyan);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:8px 12px}} .legend{{display:flex;gap:8px;flex-wrap:wrap}} .legend span{{padding:5px 9px;border-radius:999px;background:#1d2937;color:var(--muted);font-size:11px}} .legend span:nth-child(1){{color:var(--green)}} .legend span:nth-child(2){{color:var(--amber)}} .legend span:nth-child(3){{color:var(--violet)}}
+.readiness{{padding:18px 22px}} .readiness b{{display:block;letter-spacing:.09em;font-size:12px}} .readiness p{{margin:8px 0 0}} .readiness.ready{{border-left:3px solid var(--green)}} .readiness.ready b{{color:var(--green)}} .readiness.blocked{{border-left:3px solid var(--red)}} .readiness.blocked b{{color:var(--red)}} .readiness.waiting{{border-left:3px solid var(--amber)}} .readiness.waiting b{{color:var(--amber)}}
 @media(max-width:850px){{header{{display:block}}.state{{margin-top:14px}}.pipeline{{grid-template-columns:1fr 1fr}}.grid{{grid-template-columns:1fr}}.counts{{grid-template-columns:1fr 1fr}}}}
 </style></head><body><main>
 <header><div><div class="eyebrow">Creation-stage evidence → downstream trust handoff</div><h1>Routed Audio Evidence Adapter</h1><p>Live, local, opt-in observation for one routed stem.</p></div><div><div class="state {_escape(status.get('state','idle'))}"><i></i>{_escape(status.get('state','idle'))}</div><code>{_escape(status.get('session_id','unknown'))}</code><p>{_escape(str(coverage.get('status','unknown_coverage')).replace('_',' ').title())}</p></div></header>
+<section><h2>Export readiness</h2>{readiness_html}</section>
 <section><h2>Evidence pipeline</h2><div class="pipeline">{step_html}</div></section>
 <section class="grid"><div><h2>Observed, emitted, received, acknowledged</h2><div class="panel counts">{counts_html}</div></div><div><h2>Scoped receipt streams</h2><div class="panel ids"><span class="muted">Stem</span><code>{_escape(status.get('stem_id','unknown'))}</code><span class="muted">Plug-in instance · capture session</span>{stream_html}<span class="muted">ACK status: {_escape(receipt.get('status','unknown'))}. Daemon dispatch is directly observed; plug-in processing is not visible here.</span></div></div></section>
 <section><h2>Current trust boundary</h2><div class="panel boundary">{_escape(status.get('trust_boundary',''))}</div></section>
@@ -95,5 +116,7 @@ section{{margin-top:28px}} h2{{font-size:15px;margin:0 0 12px}} .pipeline{{displ
 
 
 def write_dashboard(status: dict[str, object], path: Path) -> Path:
-    path.write_text(render_dashboard(status), encoding="utf-8")
+    temporary = path.with_name(f".{path.name}.tmp-{threading.get_ident()}")
+    temporary.write_text(render_dashboard(status), encoding="utf-8")
+    temporary.replace(path)
     return path

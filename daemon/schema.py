@@ -31,7 +31,11 @@ def validate_manifest_invariants(data: object) -> list[str]:
 
     _validate_proof_values(data, "$", errors)
 
-    for index, stem in enumerate(data.get("observed_stems", [])):
+    stems = data.get("observed_stems", [])
+    if not isinstance(stems, list):
+        errors.append("observed_stems must be a list")
+        stems = []
+    for index, stem in enumerate(stems):
         if not isinstance(stem, dict):
             errors.append(f"observed_stems[{index}] must be an object")
             continue
@@ -87,10 +91,11 @@ def validate_manifest_invariants(data: object) -> list[str]:
                 if counters.get("events_prepared") != counters.get("events_received"):
                     errors.append("complete_observed_path requires the prepared/received event prefix to agree")
                 for key in (
-                    "fifo_samples_dropped", "fifo_windows_dropped", "udp_sends_failed",
-                    "sequence_gaps", "hash_chain_breaks", "daemon_acknowledgements_failed",
+                    "fifo_samples_dropped", "fifo_windows_dropped", "midi_events_dropped",
+                    "udp_sends_failed", "sequence_gaps", "hash_chain_breaks",
+                    "stream_evictions", "daemon_acknowledgements_failed",
                 ):
-                    if counters.get(key) != 0:
+                    if counters.get(key, 0) != 0:
                         errors.append(f"complete_observed_path requires {key}=0")
                 if counters.get("daemon_acknowledgements_sent") != counters.get("events_received"):
                     errors.append("complete_observed_path requires one daemon ACK dispatch per received event")
