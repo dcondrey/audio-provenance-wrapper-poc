@@ -128,7 +128,10 @@ void AudioObserver::pushMidiMessages (const juce::MidiBuffer& midi)
 
         int s1, sz1, s2, sz2;
         midiFifo.prepareToWrite (1, s1, sz1, s2, sz2);
-        if (sz1 > 0) midiFifoBuffer[static_cast<size_t> (s1)] = record;
+        if (sz1 > 0)
+            midiFifoBuffer[static_cast<size_t> (s1)] = record;
+        else
+            midiEventsDropped.fetch_add (1, std::memory_order_relaxed);
         midiFifo.finishedWrite (sz1 + sz2);
     }
 }
@@ -468,7 +471,9 @@ void AudioObserver::drainMidiEvents()
                 auto& cc = ccStates[rec.data1];
                 if (cc.lastValue < 0)
                 {
+                    cc.firstValue   = rec.data2;
                     cc.lastValue    = rec.data2;
+                    cc.channel      = rec.channel;
                     cc.changeCount  = 1;
                     cc.firstChangeMs = timestampMs;
                     cc.lastChangeMs  = timestampMs;
@@ -486,10 +491,10 @@ void AudioObserver::drainMidiEvents()
                     {
                         auto json = buildJsonEvent ("parameter_change", cc.firstChangeMs, samplePos,
                         {
-                            { "midi_channel",    static_cast<int> (rec.channel) },
+                            { "midi_channel",    static_cast<int> (cc.channel) },
                             { "cc_number",       static_cast<int> (rec.data1) },
-                            { "start_value",     static_cast<int> (cc.lastValue) },
-                            { "end_value",       static_cast<int> (rec.data2) },
+                            { "start_value",     cc.firstValue },
+                            { "end_value",       cc.lastValue },
                             { "change_count",    cc.changeCount },
                             { "duration_ms",     static_cast<int> (cc.lastChangeMs - cc.firstChangeMs) }
                         });
@@ -497,7 +502,9 @@ void AudioObserver::drainMidiEvents()
                         totalEventsEmitted.fetch_add (1, std::memory_order_relaxed);
                     }
                     // Start new tracking window.
+                    cc.firstValue    = rec.data2;
                     cc.lastValue     = rec.data2;
+                    cc.channel       = rec.channel;
                     cc.changeCount   = 1;
                     cc.firstChangeMs = timestampMs;
                     cc.lastChangeMs  = timestampMs;
@@ -544,9 +551,9 @@ void AudioObserver::drainMidiEvents()
         {
             auto json = buildJsonEvent ("parameter_change", state.firstChangeMs, samplePos,
             {
-                { "midi_channel",    0 },
+                { "midi_channel",    static_cast<int> (state.channel) },
                 { "cc_number",       cc },
-                { "start_value",     state.lastValue },
+                { "start_value",     state.firstValue },
                 { "end_value",       state.lastValue },
                 { "change_count",    state.changeCount },
                 { "duration_ms",     static_cast<int> (state.lastChangeMs - state.firstChangeMs) }
@@ -556,7 +563,9 @@ void AudioObserver::drainMidiEvents()
         }
         if (state.changeCount > 0 && timestampMs - state.lastChangeMs >= kKnobTurnWindowMs)
         {
+            state.firstValue   = -1;
             state.lastValue    = -1;
+            state.channel      = 0;
             state.changeCount  = 0;
             state.firstChangeMs = 0;
             state.lastChangeMs  = 0;
@@ -639,6 +648,7 @@ std::uint64_t AudioObserver::getBuffersSubmitted() const noexcept { return buffe
 std::uint64_t AudioObserver::getSamplesSubmitted() const noexcept { return samplesSubmitted.load (std::memory_order_relaxed); }
 std::uint64_t AudioObserver::getFifoSamplesDropped() const noexcept { return fifoSamplesDropped.load (std::memory_order_relaxed); }
 std::uint64_t AudioObserver::getFifoWindowsDropped() const noexcept { return fifoWindowsDropped.load (std::memory_order_relaxed); }
+std::uint64_t AudioObserver::getMidiEventsDropped() const noexcept { return midiEventsDropped.load (std::memory_order_relaxed); }
 
 juce::String AudioObserver::getLastHash() const
 {

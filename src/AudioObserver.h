@@ -39,6 +39,7 @@ public:
     std::uint64_t getSamplesSubmitted() const noexcept;
     std::uint64_t getFifoSamplesDropped() const noexcept;
     std::uint64_t getFifoWindowsDropped() const noexcept;
+    std::uint64_t getMidiEventsDropped() const noexcept;
     juce::String getLastHash() const;
 
 private:
@@ -112,8 +113,10 @@ private:
     // ── CC parameter tracking (knob turn detection) ──
     struct CCState
     {
+        int firstValue    = -1;
         int lastValue     = -1;
         int changeCount   = 0;
+        std::uint8_t channel = 0;
         std::uint64_t firstChangeMs = 0;
         std::uint64_t lastChangeMs  = 0;
     };
@@ -133,6 +136,7 @@ private:
     std::atomic<std::uint64_t> samplesSubmitted { 0 };
     std::atomic<std::uint64_t> fifoSamplesDropped { 0 };
     std::atomic<std::uint64_t> fifoWindowsDropped { 0 };
+    std::atomic<std::uint64_t> midiEventsDropped { 0 };
     mutable juce::SpinLock lastHashLock;
     juce::String lastHashHex;
 
