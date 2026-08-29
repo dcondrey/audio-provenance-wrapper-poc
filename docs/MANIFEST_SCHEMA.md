@@ -185,6 +185,18 @@ This can detect manifest changes when checked in the same local key context. It
 does not provide a public-key identity, Secure Enclave attestation, or external
 verification.
 
+Both `manifest_signature` and `presentation` are always present and are defined
+and required in `docs/manifest.schema.json`. `forgery_analysis` (statistical
+screening of the routed stream and hash chain) is always present;
+`time_anchor` (an RFC 3161 timestamp over the export hash) appears only when
+the daemon runs with `--time-anchor`. Both are defined in the schema as
+optional properties. The time anchor is labelled `inferred`, not
+`directly_observed`, and carries `cms_signature_verified: false`: the daemon
+checks the token's message imprint and nonce but does not verify the TSA's CMS
+signature, so the time is a relayed third-party assertion. Verify that
+signature against the TSA certificate chain downstream before relying on it,
+and prefer an `https` TSA URL so an on-path attacker cannot substitute a token.
+
 ## Local verifier outcomes
 
 The local POC verifier returns `verified`, `changed`, `untrusted`, or

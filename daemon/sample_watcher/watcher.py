@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
-from daemon.common import append_jsonl, sha256_file, utc_timestamp
+from daemon.common import append_jsonl, sha256_file_with_size, utc_timestamp
 
 log = logging.getLogger(__name__)
 
@@ -176,25 +176,48 @@ def compute_audio_fingerprint(path: Path) -> dict[str, float | None]:
         return {"rms": None, "zero_crossing_rate": None}
 
 
-def build_sample_file_event(path: Path, observed_at: str | None = None) -> dict[str, object]:
+def build_sample_file_event(
+    path: Path,
+    observed_at: str | None = None,
+    expected_signature: FileSignature | None = None,
+) -> dict[str, object]:
     resolved_path = path.expanduser().resolve()
     stat_result = resolved_path.stat()
     created_timestamp = getattr(stat_result, "st_birthtime", stat_result.st_ctime)
+    if expected_signature is not None and (
+        stat_result.st_size != expected_signature.size_bytes
+        or stat_result.st_mtime_ns != expected_signature.modified_ns
+    ):
+        raise OSError(f"{resolved_path} changed after its stability check; evidence not recorded")
+
+    # IMPORTANT: a directly_observed record must be internally consistent.
+    # Every read of the file (hash, metadata, fingerprint) happens before the
+    # validating re-stat; a write landing anywhere in between voids the record.
+    sha256, hashed_bytes = sha256_file_with_size(resolved_path)
+    audio_metadata = extract_audio_metadata(resolved_path)
+    audio_fingerprint = compute_audio_fingerprint(resolved_path)
+    post_stat = resolved_path.stat()
+    if (
+        hashed_bytes != stat_result.st_size
+        or post_stat.st_size != stat_result.st_size
+        or post_stat.st_mtime_ns != stat_result.st_mtime_ns
+    ):
+        raise OSError(f"{resolved_path} changed while being read; evidence not recorded")
 
     return {
         "event_type": "sample_file_observed",
         "proof_level": "directly_observed",
         "file_name": resolved_path.name,
         "file_path": str(resolved_path),
-        "sha256": sha256_file(resolved_path),
+        "sha256": sha256,
         "format": resolved_path.suffix.lower().lstrip("."),
         "file_extension": resolved_path.suffix.lower(),
-        "file_size_bytes": stat_result.st_size,
+        "file_size_bytes": hashed_bytes,
         "created_at": utc_timestamp(created_timestamp),
         "modified_at": utc_timestamp(stat_result.st_mtime),
         "observed_at": observed_at or utc_timestamp(),
-        "audio_metadata": extract_audio_metadata(resolved_path),
-        "audio_fingerprint": compute_audio_fingerprint(resolved_path),
+        "audio_metadata": audio_metadata,
+        "audio_fingerprint": audio_fingerprint,
         "notes": list(DEFAULT_NOTES),
     }
 
@@ -229,7 +252,14 @@ class SampleWatcher:
         self.watch_dir.mkdir(parents=True, exist_ok=True)
         observed_events: list[dict[str, object]] = []
 
-        for path in iter_audio_files(self.watch_dir, self.recursive):
+        current_paths = list(iter_audio_files(self.watch_dir, self.recursive))
+        current_keys = {str(path.resolve()) for path in current_paths}
+        for vanished_key in self._seen.keys() - current_keys:
+            del self._seen[vanished_key]
+        for vanished_key in self._pending.keys() - current_keys:
+            del self._pending[vanished_key]
+
+        for path in current_paths:
             resolved_key = str(path.resolve())
             try:
                 signature = file_signature(path)
@@ -247,7 +277,7 @@ class SampleWatcher:
                 continue
 
             try:
-                event = build_sample_file_event(path)
+                event = build_sample_file_event(path, expected_signature=signature)
             except OSError:
                 continue
 
@@ -278,7 +308,11 @@ def observe_existing_files(watch_dir: Path, evidence_path: Path, recursive: bool
     observed_events: list[dict[str, object]] = []
 
     for path in iter_audio_files(watch_dir, recursive):
-        event = build_sample_file_event(path)
+        try:
+            event = build_sample_file_event(path)
+        except OSError as exc:
+            log.warning("Skipping unstable file: %s", exc)
+            continue
         append_event(event, evidence_path)
         observed_events.append(event)
 

@@ -296,12 +296,32 @@ class SoftwareProvider(HardwareProvider):
         expected = hmac.new(self._seed, data, hashlib.sha256).digest()
         return hmac.compare_digest(expected, signature)
 
+    @staticmethod
+    def _keystream(key: bytes, nonce: bytes, length: int) -> bytes:
+        """Counter-varied keystream: HMAC(key, nonce || counter) per block.
+
+        A repeated fixed-key block (key * n) leaks identical ciphertext for
+        identical aligned plaintext blocks (ECB-style). Mixing in a
+        big-endian block counter makes every block's keystream distinct.
+        """
+        import hmac
+        blocks = []
+        produced = 0
+        counter = 0
+        while produced < length:
+            block = hmac.new(key, nonce + counter.to_bytes(8, "big"), hashlib.sha256).digest()
+            blocks.append(block)
+            produced += len(block)
+            counter += 1
+        return b"".join(blocks)[:length]
+
     def seal(self, plaintext: bytes) -> bytes:
         import hmac
         import os
         nonce = os.urandom(16)
         key = hmac.new(self._seed, b"apw-seal-" + nonce, hashlib.sha256).digest()
-        sealed = bytes(a ^ b for a, b in zip(plaintext, (key * ((len(plaintext) // 32) + 1))[:len(plaintext)]))
+        keystream = self._keystream(key, nonce, len(plaintext))
+        sealed = bytes(a ^ b for a, b in zip(plaintext, keystream))
         tag = hmac.new(key, sealed, hashlib.sha256).digest()[:16]
         return nonce + tag + sealed
 
@@ -316,7 +336,8 @@ class SoftwareProvider(HardwareProvider):
         expected_tag = hmac.new(key, ciphertext, hashlib.sha256).digest()[:16]
         if not hmac.compare_digest(tag, expected_tag):
             raise ValueError("Sealed data integrity check failed")
-        return bytes(a ^ b for a, b in zip(ciphertext, (key * ((len(ciphertext) // 32) + 1))[:len(ciphertext)]))
+        keystream = self._keystream(key, nonce, len(ciphertext))
+        return bytes(a ^ b for a, b in zip(ciphertext, keystream))
 
     def monotonic_counter(self) -> int:
         self._counter += 1

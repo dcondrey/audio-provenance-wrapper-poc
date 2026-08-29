@@ -11,6 +11,9 @@ MAX_FEATURE_WINDOWS = 12_000
 MAX_ALIGNMENT_OFFSETS = 801
 MAX_COMPARISON_POINTS = 600
 ALIGNMENT_CHART_POINTS = 56
+# An export must overlap at least this fraction of all routed windows for the
+# association to be established; the dashboard derives export guidance from it.
+MIN_ROUTED_COVERAGE = 0.25
 METHOD = "routed_feature_sequence_offset_search"
 METHOD_VERSION = "2.0.0"
 
@@ -255,7 +258,7 @@ def compare_feature_sequences(
     established = (
         confidence >= 0.74
         and matched_coverage >= 0.60
-        and routed_coverage >= 0.25
+        and routed_coverage >= MIN_ROUTED_COVERAGE
         and comparable_count >= 3
     )
     chart_stride = max(1, math.ceil(len(scores) / ALIGNMENT_CHART_POINTS))

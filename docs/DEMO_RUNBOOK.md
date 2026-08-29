@@ -22,8 +22,13 @@ From the repository root:
 ./scripts/demo.sh ./demo-output imported_sample /path/to/Demo.als
 ```
 
-Omit the `.als` path if project parsing is not part of the story. The launcher
-creates a fresh timestamped session and opens its dashboard and export folder.
+Save the Ableton set first and pass its `.als` path (or export
+`APW_PROJECT_PATH`); without it the manifest carries the `no_session_facts`
+warning, the only remaining warning in a clean live pass that is fixable.
+Export `APW_TIME_ANCHOR=1` (or a TSA URL) to anchor each export hash at an
+RFC 3161 timestamp authority; this needs network access at sealing time and
+degrades to an explicit `unavailable` record without it. The launcher creates
+a fresh timestamped session and opens its dashboard and export folder.
 
 If Ableton cannot be used, the presenter fallback completes the same local
 receipt/alignment/sealing/verification story with deterministic synthetic audio:
@@ -77,7 +82,7 @@ Suggested language:
 ## Verify live
 
 ```sh
-./scripts/verify_demo.sh ./demo-output/manifests/<export>_manifest.json
+./scripts/verify_demo.sh "$(cat ./demo-output/latest-session.txt)/manifests/<export>_manifest.json"
 ```
 
 Expected local POC outcome: `verified`, with warnings that signer identity is
@@ -89,6 +94,20 @@ Then run the safe disposable tamper and export-only sequence:
 ```sh
 ./scripts/demo_adversarial.sh /path/to/<export>_manifest.json
 ```
+
+## Package to send
+
+After a session has a sealed manifest (and optionally an adversarial run),
+assemble a self-contained package for handing to a downstream reviewer:
+
+```sh
+python3 scripts/package_demo.py "$(cat ./demo-output/latest-session.txt)"
+```
+
+It emits a folder and deterministic ZIP under `demo-output/founder-package/`
+containing the manifest, fight card, evidence bundle, verifier transcripts for
+the original and tampered copies, the honest-null session, and a generated
+README stating what is proven, inferred, and not established.
 
 ## Recovery
 
@@ -144,6 +163,32 @@ Recovery by step:
   the artifacts and start a fresh session rather than editing them.
 - 10: retain the manifest, fight card, signed bundle index, ZIP, and real export
   together; never replace this gate with a synthetic record.
+
+## Timing rules for a clean live pass
+
+The dashboard now enforces these in realtime: its **Export readiness** panel
+shows READY TO EXPORT with a minimum render length, and flags a stale plug-in
+instance or FIFO overflow with the exact recovery action. The rules below
+explain what it is checking.
+
+Learned on the 2026-08-28 live pass (`capture-20260828T221446Z-9959`, coverage
+`complete_observed_path`, association `inferred_match`). Steps 8–9 fail without
+them:
+
+- Load the plug-in fresh **after** the daemon session starts. Coverage requires
+  the plug-in's cumulative `windows_hashed` to equal the daemon's received chain
+  length, so the counters must start at zero within the session. Delete and
+  re-add the device; restarting the daemon mid-plug-in-life leaves the counters
+  ahead and grades every later session `partial_observed_path`.
+- Keep the observed session tight. Association requires the export to overlap at
+  least 25% of all routed windows, and silence through a loaded plug-in counts
+  as routed audio. Play at least as long as the export, and pick a render length
+  of at least a quarter of the total time the device has been active.
+- Deactivate the plug-in device before **File → Export**. Offline render outruns
+  the realtime hasher, overflows the plug-in FIFO (`fifo_samples_dropped` grades
+  coverage partial), and re-enters the render itself into the routed stream,
+  diluting the overlap ratio. Deactivation freezes the observed stream at the
+  played audio; reload the device fresh for the next take.
 
 ## Claims to avoid
 

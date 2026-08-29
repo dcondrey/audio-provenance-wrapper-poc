@@ -1,10 +1,50 @@
+import gzip
+import tempfile
 import unittest
+from pathlib import Path
 
 from daemon.project_differ.differ import (
     ProjectDiff,
     ProjectSnapshot,
+    TrackInfo,
     compute_diff,
+    extract_snapshot,
 )
+
+_ALS_WITH_CHILDLESS_AUDIO_CLIP = b"""<?xml version="1.0"?>
+<Ableton>
+  <LiveSet>
+    <Tracks>
+      <AudioTrack>
+        <Name><EffectiveName Value="Track 1"/></Name>
+        <ClipSlot><AudioClip/></ClipSlot>
+      </AudioTrack>
+    </Tracks>
+    <Transport/>
+  </LiveSet>
+</Ableton>
+"""
+
+
+def _make_track(name: str, device_chain_hashes: frozenset[str]) -> TrackInfo:
+    return TrackInfo(
+        name=name,
+        track_type="AudioTrack",
+        devices=(),
+        device_presets=(),
+        sample_paths=(),
+        clips=(),
+        clip_count=0,
+        automation_point_count=0,
+        midi_note_count=0,
+        device_chain_hashes=device_chain_hashes,
+        group_id="",
+        routing_input="",
+        routing_output="",
+        sends=(),
+        is_frozen=False,
+        color_index=-1,
+    )
 
 
 def _make_snapshot(**overrides) -> ProjectSnapshot:
@@ -81,10 +121,60 @@ class ComputeDiffTests(unittest.TestCase):
         self.assertEqual(diff.midi_notes_delta, 25)
 
     def test_devices_changed(self):
-        prev = _make_snapshot(device_chain_hashes=frozenset({"d1"}))
-        curr = _make_snapshot(device_chain_hashes=frozenset({"d2"}))
+        prev = _make_snapshot(
+            device_chain_hashes=frozenset({"d1"}),
+            tracks=(
+                _make_track("Track 1", frozenset({"d1"})),
+                _make_track("Track 2", frozenset({"d2"})),
+            ),
+        )
+        curr = _make_snapshot(
+            device_chain_hashes=frozenset({"d1", "d3"}),
+            tracks=(
+                _make_track("Track 1", frozenset({"d3"})),
+                _make_track("Track 2", frozenset({"d2"})),
+            ),
+        )
         diff = compute_diff(prev, curr)
-        self.assertTrue(len(diff.devices_changed) > 0)
+        self.assertEqual(diff.devices_changed, ["Track 1"])
+
+    def test_devices_changed_scoped_to_touched_track(self):
+        """Only the track whose device chain actually changed is named,
+        not every track, even though the project-wide hash sets differ."""
+        prev = _make_snapshot(
+            device_chain_hashes=frozenset({"d1", "d2"}),
+            tracks=(
+                _make_track("Track 1", frozenset({"d1"})),
+                _make_track("Track 2", frozenset({"d2"})),
+            ),
+        )
+        curr = _make_snapshot(
+            device_chain_hashes=frozenset({"d1", "d3"}),
+            tracks=(
+                _make_track("Track 1", frozenset({"d1"})),
+                _make_track("Track 2", frozenset({"d3"})),
+            ),
+        )
+        diff = compute_diff(prev, curr)
+        self.assertEqual(diff.devices_changed, ["Track 2"])
+
+
+class ExtractSnapshotTests(unittest.TestCase):
+    def test_childless_audio_clip_is_not_dropped(self):
+        """A child-less <AudioClip/> is a valid Element that is falsy under
+        bool(); an `or`-based lookup treats it as absent and misclassifies
+        the clip. It must be found via an explicit `is not None` check."""
+        with tempfile.TemporaryDirectory() as tmp:
+            als_path = Path(tmp) / "project.als"
+            with gzip.open(als_path, "wb") as f:
+                f.write(_ALS_WITH_CHILDLESS_AUDIO_CLIP)
+
+            snapshot = extract_snapshot(als_path)
+
+        self.assertEqual(snapshot.clip_count, 1)
+        self.assertEqual(len(snapshot.tracks), 1)
+        self.assertEqual(len(snapshot.tracks[0].clips), 1)
+        self.assertFalse(snapshot.tracks[0].clips[0].is_midi)
 
 
 class ProjectDiffHasChangesTests(unittest.TestCase):

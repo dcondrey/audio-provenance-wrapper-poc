@@ -77,24 +77,38 @@ Presenter hardening validation on 2026-08-28:
   limited to small manifests, indexes, and keys rather than JSONL evidence.
 - Ableton Live 12 Trial is installed and running. Its log proves the prior 0.9.0
   bundle was scanned and instantiated on 2026-08-27, but the running process
-  still holds the prior binary inode after the new install. No current-build
-  rescan, UI observation, null test, reload, or real export was observed, so none
-  is marked complete.
+  still holds the prior binary inode after the new install. At that point no
+  current-build rescan, UI observation, null test, reload, or real export had
+  been observed. The live pass recorded below later closed all of these except
+  the null test and reload.
 
-Manual v1.0 gate still to record on the demonstration machine:
+Live Ableton validation on 2026-08-28:
 
-1. [ ] Quit Ableton completely.
-2. [ ] Reopen it and rescan the installed VST3.
-3. [ ] Insert **Audio Provenance Capture** on one routed stem.
-4. [ ] Confirm current plug-in instance and capture-session identifiers in the dashboard.
-5. [ ] Confirm locally emitted and daemon-acknowledged counts advance during playback.
+- A manual pass in Ableton Live on the demonstration machine completed the
+  one-stem path end to end. The evidence is session
+  `capture-20260828T221446Z-9959`: a real WAV export, manifest, fight card,
+  signed bundle and index, and a stored local verifier outcome of `verified`.
+- Coverage graded `complete_observed_path`; routed/export association graded
+  `inferred_match`.
+- The transparency/null test and project save/close/reload were not performed
+  during this pass and are not marked complete.
+
+Manual v1.0 gate on the demonstration machine (evidence for completed steps:
+session `capture-20260828T221446Z-9959`, 2026-08-28):
+
+1. [x] Quit Ableton completely.
+2. [x] Reopen it and rescan the installed VST3.
+3. [x] Insert **Audio Provenance Capture** on one routed stem.
+4. [x] Confirm current plug-in instance and capture-session identifiers in the dashboard.
+5. [x] Confirm locally emitted and daemon-acknowledged counts advance during playback.
 6. [ ] Complete the documented polarity/null transparency test.
 7. [ ] Save, close, and reload the Ableton project.
-8. [ ] Export a real WAV/AIFF into the watched folder.
-9. [ ] Confirm inferred alignment, coverage, sealing, bundle creation, and verification.
-10. [ ] Save the final real-session manifest and fight card.
+8. [x] Export a real WAV/AIFF into the watched folder.
+9. [x] Confirm inferred alignment, coverage, sealing, bundle creation, and verification.
+10. [x] Save the final real-session manifest and fight card.
 
-Exact per-step recovery instructions are in `docs/DEMO_RUNBOOK.md`.
+Steps 6 and 7 are the remaining v1.0 gate. Exact per-step recovery instructions
+are in `docs/DEMO_RUNBOOK.md`.
 
 No automated or synthetic result is recorded as manual Ableton validation.
 

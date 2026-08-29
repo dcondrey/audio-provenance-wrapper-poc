@@ -47,6 +47,7 @@ class TrackInfo:
     clip_count: int
     automation_point_count: int
     midi_note_count: int
+    device_chain_hashes: frozenset[str]
     group_id: str
     routing_input: str
     routing_output: str
@@ -116,13 +117,38 @@ class ProjectDiff:
         )
 
 
+# A watched .als is untrusted input: bound the gzip expansion and refuse DTDs
+# (no DOCTYPE means no entity expansion; Ableton never emits one).
+MAX_ALS_DECOMPRESSED_BYTES = 256 * 1024 * 1024
+_DOCTYPE_MARKER = b"<!DOCTYPE"
+
+
 def parse_als(path: Path) -> ET.Element:
     """Decompress and parse an Ableton .als file.
 
-    Stub: returns the parsed XML root element. Raises on invalid files.
+    Raises on invalid, oversized, or DTD-carrying files.
     """
+    parser = ET.XMLParser(target=ET.TreeBuilder())
+    total = 0
+    carry = b""
     with gzip.open(path, "rb") as f:
-        return ET.parse(f).getroot()
+        while True:
+            chunk = f.read(1024 * 1024)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > MAX_ALS_DECOMPRESSED_BYTES:
+                raise ValueError(
+                    f"{path} decompresses past {MAX_ALS_DECOMPRESSED_BYTES} bytes; refusing to parse"
+                )
+            if _DOCTYPE_MARKER in carry + chunk:
+                raise ValueError(f"{path} contains a DTD declaration; refusing to parse")
+            carry = chunk[-(len(_DOCTYPE_MARKER) - 1):]
+            parser.feed(chunk)
+    root = parser.close()
+    if not isinstance(root, ET.Element):
+        raise ValueError(f"{path} did not parse to an XML element")
+    return root
 
 
 def extract_snapshot(path: Path) -> ProjectSnapshot:
@@ -165,14 +191,16 @@ def extract_snapshot(path: Path) -> ProjectSnapshot:
             track_presets: list[str] = []
             track_samples: list[str] = []
             track_clip_infos: list[ClipInfo] = []
-            is_midi_track = track_type == "MidiTrack"
+            track_device_hashes: set[str] = set()
 
             for clip_slot in track.iter("ClipSlot"):
                 clip_count += 1
                 track_clips += 1
                 clip_hashes.add(hashlib.sha256(ET.tostring(clip_slot)).hexdigest()[:16])
 
-                clip_el = clip_slot.find(".//AudioClip") or clip_slot.find(".//MidiClip")
+                audio_clip_el = clip_slot.find(".//AudioClip")
+                midi_clip_el = clip_slot.find(".//MidiClip")
+                clip_el = audio_clip_el if audio_clip_el is not None else midi_clip_el
                 if clip_el is not None:
                     clip_name_el = clip_el.find("Name")
                     clip_name = clip_name_el.get("Value", "") if clip_name_el is not None else ""
@@ -196,7 +224,9 @@ def extract_snapshot(path: Path) -> ProjectSnapshot:
                     ))
 
             for device_chain in track.iter("DeviceChain"):
-                device_hashes.add(hashlib.sha256(ET.tostring(device_chain)).hexdigest()[:16])
+                chain_hash = hashlib.sha256(ET.tostring(device_chain)).hexdigest()[:16]
+                device_hashes.add(chain_hash)
+                track_device_hashes.add(chain_hash)
                 devices_el = device_chain.find(".//Devices")
                 if devices_el is not None:
                     for device in devices_el:
@@ -288,6 +318,7 @@ def extract_snapshot(path: Path) -> ProjectSnapshot:
                 clip_count=track_clips,
                 automation_point_count=track_auto,
                 midi_note_count=track_midi,
+                device_chain_hashes=frozenset(track_device_hashes),
                 group_id=group_id,
                 routing_input=routing_in,
                 routing_output=routing_out,
@@ -362,17 +393,17 @@ def compute_diff(previous: ProjectSnapshot, current: ProjectSnapshot) -> Project
 
     new_clips = current.clip_hashes - previous.clip_hashes
     removed_clips = previous.clip_hashes - current.clip_hashes
-    common_count = len(current.clip_hashes & previous.clip_hashes)
     modified_clips = abs(current.clip_count - previous.clip_count) - len(new_clips) - len(removed_clips)
     if modified_clips < 0:
         modified_clips = 0
 
-    prev_devices = previous.device_chain_hashes
-    curr_devices = current.device_chain_hashes
-    devices_changed: list[str] = []
-    if prev_devices != curr_devices:
-        for i, name in enumerate(current.track_names):
-            devices_changed.append(name)
+    prev_track_devices = {t.name: t.device_chain_hashes for t in previous.tracks}
+    curr_track_devices = {t.name: t.device_chain_hashes for t in current.tracks}
+    devices_changed = sorted(
+        name
+        for name in curr_names & prev_names
+        if curr_track_devices.get(name, frozenset()) != prev_track_devices.get(name, frozenset())
+    )
 
     return ProjectDiff(
         timestamp_ms=int(time.time() * 1000),
@@ -383,7 +414,7 @@ def compute_diff(previous: ProjectSnapshot, current: ProjectSnapshot) -> Project
         clips_added=len(new_clips),
         clips_removed=len(removed_clips),
         clips_modified=modified_clips,
-        devices_changed=devices_changed if prev_devices != curr_devices else [],
+        devices_changed=devices_changed,
         automation_points_delta=current.automation_point_count - previous.automation_point_count,
         midi_notes_delta=current.midi_note_count - previous.midi_note_count,
         samples_added=current.sample_refs - previous.sample_refs,

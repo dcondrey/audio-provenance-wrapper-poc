@@ -84,20 +84,20 @@ class AudioStreamAnalyzer:
         self._last_transition_ms: int | None = None
 
     def ingest_buffer_hash(self, event: dict[str, object]) -> None:
-        rms = event.get("rms_level")
-        zcr = event.get("zero_crossing_rate")
-        centroid = event.get("spectral_centroid_hz")
+        rms = _finite_number(event.get("rms_level"))
+        zcr = _finite_number(event.get("zero_crossing_rate"))
+        centroid = _finite_number(event.get("spectral_centroid_hz"))
 
-        if isinstance(rms, (int, float)):
-            self._rms_values.append(float(rms))
-        if isinstance(zcr, (int, float)):
-            self._zcr_values.append(float(zcr))
-        if isinstance(centroid, (int, float)):
-            self._centroid_values.append(float(centroid))
+        if rms is not None:
+            self._rms_values.append(rms)
+        if zcr is not None:
+            self._zcr_values.append(zcr)
+        if centroid is not None:
+            self._centroid_values.append(centroid)
 
     def ingest_transition(self, event: dict[str, object]) -> None:
-        ts = event.get("timestamp_ms")
-        if isinstance(ts, (int, float)):
+        ts = _finite_number(event.get("timestamp_ms"))
+        if ts is not None:
             ts_int = int(ts)
             if self._last_transition_ms is not None:
                 interval = ts_int - self._last_transition_ms
@@ -230,12 +230,13 @@ class InputBehaviorAnalyzer:
         self._current_segment: list[float] = []
 
     def ingest_keystroke_batch(self, event: dict[str, object]) -> None:
-        mean_iki = event.get("mean_iki_ms")
+        mean_iki = _finite_number(event.get("mean_iki_ms"))
         count = event.get("count", 0)
-        if isinstance(mean_iki, (int, float)) and isinstance(count, int):
-            for _ in range(count):
-                self._iki_ms.append(float(mean_iki))
-                self._current_segment.append(float(mean_iki))
+        if mean_iki is None or isinstance(count, bool) or not isinstance(count, int):
+            return
+        for _ in range(min(max(count, 0), 10_000)):
+            self._iki_ms.append(mean_iki)
+            self._current_segment.append(mean_iki)
 
     def segment_break(self) -> None:
         if self._current_segment:
@@ -390,16 +391,16 @@ class HashChainAnalyzer:
     def ingest_buffer_hash(self, event: dict[str, object]) -> None:
         wh = event.get("window_hash")
         ph = event.get("prev_hash")
-        ts = event.get("timestamp_ms")
-        sp = event.get("sample_position")
+        ts = _finite_number(event.get("timestamp_ms"))
+        sp = _finite_number(event.get("sample_position"))
 
         if isinstance(wh, str):
             self._hashes.append(wh)
         if isinstance(ph, str):
             self._prev_hashes.append(ph)
-        if isinstance(ts, (int, float)):
+        if ts is not None:
             self._timestamps.append(int(ts))
-        if isinstance(sp, (int, float)):
+        if sp is not None:
             self._sample_positions.append(int(sp))
 
     def analyze(self) -> ForgeryReport:
@@ -467,6 +468,15 @@ class HashChainAnalyzer:
 
 
 # ─── Utilities ────────────────────────────────────────────────────────
+
+
+def _finite_number(value: object) -> float | None:
+    """Numeric value safe for statistics; None for bool, non-numbers, inf, NaN."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    if not math.isfinite(value):
+        return None
+    return float(value)
 
 
 def _mean_std(values: list[float]) -> tuple[float, float]:

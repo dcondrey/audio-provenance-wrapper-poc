@@ -7,9 +7,12 @@ manifest and a human-readable HTML fight card.
 
 ## Current State: v0.9 Evidence-Adapter Demo Candidate
 
-The automated one-stem path is implemented and tested. Final v1.0 status still
-requires a clean manual validation pass inside Ableton Live on the demonstration
-machine.
+The automated one-stem path is implemented and tested. A manual Ableton Live
+pass on the demonstration machine (2026-08-28, session
+`capture-20260828T221446Z-9959`) completed the one-stem path end to end with
+`complete_observed_path` coverage and `inferred_match` association. Final v1.0
+status still requires the transparency/null test and project save/close/reload
+recorded as open in `docs/VALIDATION.md`.
 
 ### VST3 capture plugin
 
@@ -94,13 +97,19 @@ Then:
 6. Verify the adjacent JSON manifest:
 
 ```sh
-./scripts/verify_demo.sh ./demo-output/manifests/your_export_manifest.json
+./scripts/verify_demo.sh "$(cat ./demo-output/latest-session.txt)/manifests/your_export_manifest.json"
 ```
 
 Run the full safe adversarial sequence without changing the original:
 
 ```sh
 ./scripts/demo_adversarial.sh /path/to/export_manifest.json
+```
+
+Assemble a self-contained, sendable evidence package from the session:
+
+```sh
+python3 scripts/package_demo.py "$(cat ./demo-output/latest-session.txt)"
 ```
 
 The `.als` parser is an experimental, unsupported interpretation of saved

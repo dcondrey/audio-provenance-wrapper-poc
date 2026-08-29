@@ -106,6 +106,7 @@ def _events(
                 "windows_hashed": sequence,
                 "fifo_samples_dropped": 0,
                 "fifo_windows_dropped": 0,
+                "midi_events_dropped": 0,
                 "events_prepared": sequence,
                 "udp_sends_attempted": sequence,
                 "udp_sends_failed": 0,
@@ -163,7 +164,12 @@ def _send_with_acknowledgements(
     }
 
 
-def run(output: Path, export_only: bool = False, open_artifacts: bool = False) -> Path:
+def run(
+    output: Path,
+    export_only: bool = False,
+    open_artifacts: bool = False,
+    time_anchor_url: str | None = None,
+) -> Path:
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     session = output.expanduser().resolve() / f"synthetic-{stamp}-{time.time_ns() % 1_000_000:06d}"
     evidence = session / "evidence"
@@ -182,6 +188,7 @@ def run(output: Path, export_only: bool = False, open_artifacts: bool = False) -
         session_id=session.name,
         stem_id="synthetic-stem",
         source_category="generator",
+        time_anchor_url=time_anchor_url,
     )
     port = daemon.receiver.sock.getsockname()[1]
     thread = threading.Thread(target=daemon.run, daemon=True)
@@ -259,8 +266,16 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=Path("demo-output/rehearsals"))
     parser.add_argument("--export-only", action="store_true")
     parser.add_argument("--open", action="store_true", dest="open_artifacts")
+    parser.add_argument(
+        "--time-anchor",
+        nargs="?",
+        const="http://timestamp.digicert.com",
+        default=None,
+        metavar="TSA_URL",
+        help="Anchor the export hash at an RFC 3161 TSA during sealing (needs network).",
+    )
     args = parser.parse_args()
-    run(args.output, args.export_only, args.open_artifacts)
+    run(args.output, args.export_only, args.open_artifacts, args.time_anchor)
     return 0
 
 

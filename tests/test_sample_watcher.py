@@ -6,6 +6,8 @@ import wave
 from pathlib import Path
 
 from daemon.sample_watcher.watcher import (
+    FileSignature,
+    SampleWatcher,
     build_sample_file_event,
     is_audio_file,
     observe_existing_files,
@@ -44,6 +46,54 @@ class SampleWatcherTests(unittest.TestCase):
             lines = evidence_path.read_text(encoding="utf-8").splitlines()
             self.assertEqual(len(lines), 1)
             self.assertEqual(json.loads(lines[0])["file_name"], "loop.WAV")
+
+    def test_mid_read_write_refuses_evidence_record(self):
+        from unittest import mock
+
+        from daemon.sample_watcher import watcher as watcher_module
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            sample_path = Path(tmp_dir) / "example.wav"
+            _write_test_wav(sample_path)
+
+            def rewrite_then_extract(path):
+                _write_test_wav(path)
+                return watcher_module.empty_audio_metadata()
+
+            with mock.patch.object(
+                watcher_module, "extract_audio_metadata", side_effect=rewrite_then_extract
+            ):
+                with self.assertRaises(OSError):
+                    build_sample_file_event(sample_path)
+
+    def test_stale_signature_refuses_evidence_record(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            sample_path = Path(tmp_dir) / "example.wav"
+            _write_test_wav(sample_path)
+            stale = FileSignature(size_bytes=1, modified_ns=1)
+
+            with self.assertRaises(OSError):
+                build_sample_file_event(sample_path, expected_signature=stale)
+
+    def test_vanished_path_is_evicted_from_seen_and_pending(self):
+        """Regression for M-008: _seen/_pending must not grow unbounded
+        across a long bounce/delete/re-bounce session."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            evidence_path = root / "evidence" / "sample_import_events.jsonl"
+            sample_path = root / "loop.wav"
+            _write_test_wav(sample_path)
+
+            watcher = SampleWatcher(watch_dir=root, evidence_path=evidence_path, stable_polls=1)
+            watcher.scan_once()
+            resolved_key = str(sample_path.resolve())
+            self.assertIn(resolved_key, watcher._seen)
+
+            sample_path.unlink()
+            watcher.scan_once()
+
+            self.assertNotIn(resolved_key, watcher._seen)
+            self.assertNotIn(resolved_key, watcher._pending)
 
     def test_audio_file_detection_is_extension_based(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

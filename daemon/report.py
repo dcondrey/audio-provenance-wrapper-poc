@@ -339,7 +339,6 @@ def render_html_report(manifest: dict[str, object]) -> str:
         export_name=_escape(export.get("file_name", "No export detected")),
         export_hash_full=_escape(export.get("sha256", "")),
         export_hash=_escape(_short_hash(export.get("sha256"))),
-        stem_count=len(stems),
         coverage_status=_escape(str(coverage.get("status", "unknown_coverage")).replace("_", " ").title()),
         window_count=sum(
             int(stem.get("hash_chain_length", 0))

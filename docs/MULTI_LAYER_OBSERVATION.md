@@ -1,5 +1,11 @@
 # Multi-Layer Edit Observation Architecture
 
+> **Status: architecture, not shipped capability.** Of the layers below, only
+> filesystem observation (sample import watching) and the plugin audio path are
+> implemented. `daemon/input_capture/` and `daemon/screen_observer/` are
+> unimplemented stubs, so correlation rules that depend on them cannot fire.
+> The demo makes no claims that rest on this document.
+
 ## Problem Statement
 
 A VST3 plugin can only observe audio buffers flowing through it. It cannot see

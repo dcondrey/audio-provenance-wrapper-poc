@@ -1,18 +1,30 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import logging
 import socket
+import threading
 import time
 import uuid
+from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 
 from daemon.common import append_jsonl, utc_timestamp
-from .taxonomy import validate_event
+from .taxonomy import validate_network_event
 
 log = logging.getLogger(__name__)
+
+# Stream keys are sender-controlled; cap tracked streams so a local flooder
+# cannot grow receiver memory without bound. The table LRU-evicts at capacity
+# rather than refusing new streams, so the live subject is never locked out
+# once stale per-reinstantiation keys fill it. Eviction is not a silent reset:
+# any eviction permanently degrades the receipt and caps its proof level at
+# unknown_unobserved, and a returning evicted stream's chain gap is recorded as
+# a break (see _track_stream and receipt_summary).
+MAX_TRACKED_STREAMS = 64
 
 
 @dataclass
@@ -22,6 +34,7 @@ class _StreamReceiptState:
     gaps: int = 0
     rejections: int = 0
     chain_breaks: int = 0
+    last_window_hash: str | None = None
 
 
 class EvidenceReceiver:
@@ -51,9 +64,36 @@ class EvidenceReceiver:
         self.acknowledgements_attempted = 0
         self.acknowledgements_sent = 0
         self.acknowledgements_failed = 0
-        self._stream_states: dict[tuple[str, str], _StreamReceiptState] = {}
-        self._last_window_hash_by_stream: dict[tuple[str, str], str] = {}
+        self.stream_evictions = 0
+        self._stream_states: OrderedDict[tuple[str, str], _StreamReceiptState] = OrderedDict()
+        # The udp-receiver thread mutates the stream table per packet while the
+        # status, export, and diagnostics threads snapshot it.
+        self._streams_lock = threading.Lock()
         self._receiver_instance_id = f"receiver-{uuid.uuid4().hex[:12]}"
+
+    def _track_stream(self, stream_key: tuple[str, str]) -> _StreamReceiptState:
+        """Return the stream's state, evicting the least-recently-active stream at
+        capacity.
+
+        Eviction never silently resets continuity: an evicted stream that returns
+        is first-seen again, and the non-genesis-start rule in
+        process_packet_with_ack records its chain gap as a break. Because an
+        evicted stream might have been the subject, any eviction degrades the
+        whole receipt (see receipt_summary). Refusing the new stream instead
+        would lock out the live plug-in once stale keys (one per plug-in
+        reinstantiation: reload, re-add, rescan) fill the table.
+        """
+        with self._streams_lock:
+            state = self._stream_states.get(stream_key)
+            if state is None:
+                state = _StreamReceiptState()
+                self._stream_states[stream_key] = state
+                if len(self._stream_states) > MAX_TRACKED_STREAMS:
+                    self._stream_states.popitem(last=False)
+                    self.stream_evictions += 1
+            else:
+                self._stream_states.move_to_end(stream_key)
+            return state
 
     def process_packet(self, data: bytes) -> dict[str, object] | None:
         event, _ack = self.process_packet_with_ack(data)
@@ -82,13 +122,17 @@ class EvidenceReceiver:
             event.get("plugin_capture_session_id") or "unknown_plugin_capture_session"
         )
         stream_key = (instance_id, plugin_session_id)
-        stream = self._stream_states.setdefault(stream_key, _StreamReceiptState())
 
-        valid, error = validate_event(event)
+        valid, error = validate_network_event(event)
         if not valid:
             self._reject(error)
-            stream.rejections += 1
-            return None, self._build_ack(event, False, "rejected_invalid", error, stream)
+            with self._streams_lock:
+                known_stream = self._stream_states.get(stream_key)
+                if known_stream is not None:
+                    known_stream.rejections += 1
+            return None, self._build_ack(event, False, "rejected_invalid", error, known_stream)
+
+        stream = self._track_stream(stream_key)
 
         received_at_ms = int(time.time() * 1000)
         received_monotonic_ms = int(time.monotonic_ns() // 1_000_000)
@@ -141,7 +185,7 @@ class EvidenceReceiver:
             receipt_state = "accepted_sequence_unknown"
 
         if event.get("event_type") == "buffer_hash":
-            expected = self._last_window_hash_by_stream.get(stream_key)
+            expected = stream.last_window_hash
             previous_hash = str(event.get("prev_hash", ""))
             if expected is not None and previous_hash != expected:
                 self.hash_chain_break_count += 1
@@ -154,7 +198,19 @@ class EvidenceReceiver:
                     expected[:12],
                     previous_hash[:12],
                 )
-            self._last_window_hash_by_stream[stream_key] = str(event.get("window_hash", ""))
+            elif expected is None and previous_hash and previous_hash != "genesis":
+                # A first-seen stream cannot vouch for a chain that claims to
+                # continue from windows this receiver never saw.
+                self.hash_chain_break_count += 1
+                stream.chain_breaks += 1
+                receipt_state = "accepted_chain_unknown"
+                log.warning(
+                    "Non-genesis chain start: instance=%s plugin_session=%s prev=%s",
+                    instance_id,
+                    plugin_session_id,
+                    previous_hash[:12],
+                )
+            stream.last_window_hash = str(event.get("window_hash", ""))
 
         event["daemon_event_id"] = (
             f"{self.capture_session_id or self._receiver_instance_id}:{self.event_count + 1}"
@@ -176,7 +232,8 @@ class EvidenceReceiver:
             event.get("plugin_capture_session_id") or "unknown_plugin_capture_session"
         )
         if stream is None:
-            stream = self._stream_states.get((instance_id, plugin_session_id))
+            with self._streams_lock:
+                stream = self._stream_states.get((instance_id, plugin_session_id))
         ack: dict[str, object] = {
             "message_type": "daemon_receipt_acknowledgement",
             "protocol": "apw-local-udp-ack-v1",
@@ -239,12 +296,17 @@ class EvidenceReceiver:
             "events_missing_sequence": self.sequence_missing_count,
             "sequence_out_of_order": self.sequence_out_of_order_count,
             "hash_chain_breaks": self.hash_chain_break_count,
+            "stream_evictions": self.stream_evictions,
             "daemon_acknowledgements_attempted": self.acknowledgements_attempted,
             "daemon_acknowledgements_sent": self.acknowledgements_sent,
             "daemon_acknowledgements_failed": self.acknowledgements_failed,
         }
 
     def receipt_summary(self) -> dict[str, object]:
+        with self._streams_lock:
+            snapshot = sorted(
+                (key, dataclasses.replace(state)) for key, state in self._stream_states.items()
+            )
         streams = [
             {
                 "plugin_instance_id": instance_id,
@@ -255,13 +317,20 @@ class EvidenceReceiver:
                 "rejections": state.rejections,
                 "chain_breaks": state.chain_breaks,
             }
-            for (instance_id, plugin_session_id), state in sorted(self._stream_states.items())
+            for (instance_id, plugin_session_id), state in snapshot
         ]
         if not streams:
             status = "unknown"
-        elif self.acknowledgements_failed or self.acknowledgements_sent < self.packet_count or any(
-            stream["gaps"] or stream["rejections"] or stream["chain_breaks"]
-            for stream in streams
+        elif (
+            self.acknowledgements_failed
+            or self.acknowledgements_sent < self.packet_count
+            # An evicted stream might have been the subject; once any stream was
+            # dropped the receiver cannot vouch for a continuous view of it.
+            or self.stream_evictions
+            or any(
+                stream["gaps"] or stream["rejections"] or stream["chain_breaks"]
+                for stream in streams
+            )
         ):
             status = "degraded"
         else:
@@ -277,11 +346,14 @@ class EvidenceReceiver:
                 "sent": self.acknowledgements_sent,
                 "failed": self.acknowledgements_failed,
             },
+            "stream_evictions": self.stream_evictions,
             "scope": (
                 "The daemon directly observed validation, persistence, and local acknowledgement "
                 "dispatch. It cannot observe whether every UDP acknowledgement reached the plug-in UI."
             ),
-            "apw:proof_level": "directly_observed" if streams else "unknown_unobserved",
+            # A degraded receipt (dropped stream, ACK gap, chain break) cannot be
+            # claimed as a firsthand observation of a complete stream.
+            "apw:proof_level": "directly_observed" if status == "issued" else "unknown_unobserved",
         }
 
     def _write_event(self, event: dict[str, object]) -> None:
