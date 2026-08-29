@@ -15,7 +15,10 @@ class DaemonIntegrationTests(unittest.TestCase):
     """End-to-end: send plugin events via UDP, detect export, generate manifest."""
 
     def test_full_pipeline(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        # FIXME: Daemon.run() never joins its worker threads, so a straggling
+        # watcher write can race tmpdir cleanup after stop(); tolerated here
+        # (all assertions run before cleanup) until daemon shutdown joins them.
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
             tmp_path = Path(tmp)
             evidence_dir = tmp_path / "evidence"
             manifest_dir = tmp_path / "manifests"
@@ -102,17 +105,30 @@ class DaemonIntegrationTests(unittest.TestCase):
             finally:
                 sock.close()
 
-            time.sleep(0.5)
-
             plugin_events_path = evidence_dir / "plugin_events.jsonl"
-            self.assertTrue(plugin_events_path.exists())
+            _wait_for(
+                lambda: plugin_events_path.exists()
+                and len(plugin_events_path.read_text().splitlines()) >= 4,
+                message="4 plugin events in plugin_events.jsonl",
+            )
             lines = plugin_events_path.read_text().splitlines()
             self.assertEqual(len(lines), 4)
 
             export_path = export_dir / "mixdown.wav"
             _write_test_wav(export_path)
 
-            time.sleep(4.0)
+            artifact_dir = manifest_dir / "artifacts"
+            expected_outputs = [
+                manifest_dir / "mixdown_provenance.html",
+                artifact_dir / "mixdown_verification.json",
+                artifact_dir / "mixdown_bundle_index.json",
+                artifact_dir / "mixdown_evidence_bundle.zip",
+            ]
+            _wait_for(
+                lambda: bool(list(manifest_dir.glob("*.json")))
+                and all(p.is_file() for p in expected_outputs),
+                message="manifest and evidence artifacts for mixdown.wav",
+            )
 
             manifests = list(manifest_dir.glob("*.json"))
             self.assertEqual(len(manifests), 1, f"Expected 1 manifest, found {len(manifests)}")
@@ -163,7 +179,7 @@ class DaemonIntegrationTests(unittest.TestCase):
             thread.join(timeout=3)
 
     def test_sample_detection_feeds_manifest(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
             tmp_path = Path(tmp)
             evidence_dir = tmp_path / "evidence"
             manifest_dir = tmp_path / "manifests"
@@ -186,10 +202,23 @@ class DaemonIntegrationTests(unittest.TestCase):
             time.sleep(0.3)
 
             _write_test_wav(sample_dir / "kick.wav")
-            time.sleep(5.0)
+            sample_events_path = evidence_dir / "sample_import_events.jsonl"
+            _wait_for(
+                lambda: sample_events_path.exists()
+                and bool(sample_events_path.read_text().strip()),
+                message="sample import event for kick.wav",
+            )
 
             _write_test_wav(export_dir / "final.wav")
-            time.sleep(4.0)
+            final_outputs = [
+                manifest_dir / "final_manifest.json",
+                manifest_dir / "artifacts" / "final_bundle_index.json",
+                manifest_dir / "artifacts" / "final_evidence_bundle.zip",
+            ]
+            _wait_for(
+                lambda: all(p.is_file() for p in final_outputs),
+                message="manifest and evidence bundle for final.wav",
+            )
 
             manifests = list(manifest_dir.glob("*.json"))
             self.assertEqual(len(manifests), 1)
@@ -203,7 +232,7 @@ class DaemonIntegrationTests(unittest.TestCase):
             thread.join(timeout=3)
 
     def test_overwriting_existing_export_generates_new_manifest(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
             tmp_path = Path(tmp)
             evidence_dir = tmp_path / "evidence"
             manifest_dir = tmp_path / "manifests"
@@ -227,8 +256,15 @@ class DaemonIntegrationTests(unittest.TestCase):
             time.sleep(0.4)
 
             _write_test_wav(export_path, frame_count=4000)
-            time.sleep(4.0)
-
+            demo_outputs = [
+                manifest_dir / "demo_manifest.json",
+                manifest_dir / "artifacts" / "demo_bundle_index.json",
+                manifest_dir / "artifacts" / "demo_evidence_bundle.zip",
+            ]
+            _wait_for(
+                lambda: all(p.is_file() for p in demo_outputs),
+                message="manifest and evidence bundle for overwritten demo.wav",
+            )
             self.assertTrue((manifest_dir / "demo_manifest.json").is_file())
             daemon.stop()
             thread.join(timeout=3)
@@ -340,6 +376,186 @@ class VerifyTests(unittest.TestCase):
             result = verify_manifest(p)
             self.assertFalse(result.passed)
 
+    def test_malformed_manifest_degrades_never_crashes(self):
+        from daemon.verify import verify_manifest
+
+        malformed = [
+            "null",
+            "5",
+            "true",
+            '"string"',
+            "[1, 2, 3]",
+            '{"export": "not-a-dict"}',
+            '{"observed_stems": 5}',
+            '{"observed_stems": ["not-a-dict"]}',
+            '{"c2pa_mapping": "nope"}',
+            '{"c2pa_mapping": {"assertions": [1, 2]}}',
+            '{"evidence_binding": "nope"}',
+            json.dumps({
+                "evidence_binding": {
+                    "evidence_directory": "/tmp",
+                    "evidence_files": {"e.jsonl": {"byte_length": "not-a-number", "sha256": "x"}},
+                },
+            }),
+            json.dumps({
+                "evidence_binding": {
+                    "evidence_directory": "/tmp",
+                    "evidence_files": {"e.jsonl": {"byte_length": -5, "sha256": "x"}},
+                },
+            }),
+            '{"manifest_signature": "nope"}',
+            '{"session_facts": "nope"}',
+            '{"session_facts": {"tracks": 7}}',
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            for i, content in enumerate(malformed):
+                p = Path(tmp) / f"m{i}.json"
+                p.write_text(content)
+                result = verify_manifest(p)
+                self.assertFalse(result.passed, f"case {i}: {content[:60]}")
+                self.assertIn(result.outcome, {"changed", "untrusted"}, f"case {i}")
+
+    def test_status_write_survives_divergent_artifact_roots(self):
+        # H-003: relative_to raised ValueError when --manifest-dir did not share
+        # a root with the status dir, killing the export-watcher thread.
+        with tempfile.TemporaryDirectory() as evidence_root, \
+                tempfile.TemporaryDirectory() as manifest_root:
+            daemon = Daemon(
+                udp_port=0,
+                evidence_dir=Path(evidence_root) / "evidence",
+                sample_dir=Path(evidence_root) / "samples",
+                manifest_dir=Path(manifest_root) / "manifests",
+                generate_html_report=False,
+            )
+            try:
+                daemon._last_manifest_path = Path(manifest_root) / "manifests" / "m.json"
+                daemon._last_bundle_path = Path(manifest_root) / "manifests" / "b.zip"
+                daemon._write_status("idle")
+                status = json.loads(
+                    (Path(evidence_root) / "status.json").read_text()
+                )
+                self.assertIn("..", status["links"]["manifest"])
+            finally:
+                daemon.receiver.close()
+
+    def test_lying_coverage_counters_are_caught_from_bound_evidence(self):
+        from daemon.verify import verify_manifest
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            evidence_dir = root / "evidence"
+            evidence_dir.mkdir()
+            evidence = evidence_dir / "plugin_events.jsonl"
+            lines = []
+            prev = "genesis"
+            for i in range(4):
+                window = f"hash-{i:03d}"
+                lines.append(json.dumps({
+                    "event_type": "buffer_hash",
+                    "window_hash": window,
+                    "prev_hash": prev,
+                    "timestamp_ms": 1000 + i,
+                }))
+                prev = window
+            evidence.write_text("\n".join(lines) + "\n")
+            byte_length = evidence.stat().st_size
+            import hashlib as _hashlib
+            digest = _hashlib.sha256(evidence.read_bytes()).hexdigest()
+
+            manifest = root / "m.json"
+            manifest.write_text(json.dumps({
+                "session_id": "s",
+                "observation_coverage": {
+                    "status": "complete_observed_path",
+                    "apw:proof_level": "inferred",
+                    "counters": {"buffer_hash_events_received": 9},
+                },
+                "evidence_binding": {
+                    "evidence_directory": str(evidence_dir),
+                    "evidence_files": {
+                        "plugin_events.jsonl": {"byte_length": byte_length, "sha256": digest},
+                    },
+                    "evidence_file_hashes": {"plugin_events.jsonl": digest},
+                    "chain_length": 9,
+                    "last_window_hash": "hash-003",
+                },
+            }))
+            result = verify_manifest(manifest)
+            codes = {finding.code for finding in result.findings}
+            self.assertIn("coverage_counters_mismatch", codes)
+            self.assertFalse(result.passed)
+
+            honest = root / "honest.json"
+            content = json.loads(manifest.read_text())
+            content["observation_coverage"]["counters"]["buffer_hash_events_received"] = 4
+            content["evidence_binding"]["chain_length"] = 4
+            honest.write_text(json.dumps(content))
+            codes = {finding.code for finding in verify_manifest(honest).findings}
+            self.assertIn("coverage_counters_rederived", codes)
+            self.assertNotIn("coverage_counters_mismatch", codes)
+
+            # Live-stream race: more events landed in the bound file than the
+            # counter snapshot claimed. Conservative, not fraud: no error.
+            conservative = root / "conservative.json"
+            content = json.loads(honest.read_text())
+            content["observation_coverage"]["counters"]["buffer_hash_events_received"] = 3
+            content["evidence_binding"]["chain_length"] = 3
+            content["evidence_binding"]["last_window_hash"] = "hash-002"
+            conservative.write_text(json.dumps(content))
+            codes = {finding.code for finding in verify_manifest(conservative).findings}
+            self.assertNotIn("coverage_counters_mismatch", codes)
+            self.assertIn("coverage_counters_rederived", codes)
+
+    def test_chain_length_claimed_over_zero_bound_events_is_caught(self):
+        from daemon.verify import verify_manifest
+        import hashlib as _hashlib
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            evidence_dir = root / "evidence"
+            evidence_dir.mkdir()
+            # Bound evidence exists and hashes fine, but contains zero buffer_hash
+            # events. A manifest claiming a chain over it must not pass silently.
+            evidence = evidence_dir / "plugin_events.jsonl"
+            evidence.write_text(
+                json.dumps({"event_type": "transport_change", "transport_state": "playing"}) + "\n"
+            )
+            byte_length = evidence.stat().st_size
+            digest = _hashlib.sha256(evidence.read_bytes()).hexdigest()
+            manifest = root / "m.json"
+            manifest.write_text(json.dumps({
+                "session_id": "s",
+                "observation_coverage": {
+                    "status": "partial_observed_path",
+                    "apw:proof_level": "inferred",
+                    "counters": {"buffer_hash_events_received": 50},
+                },
+                "evidence_binding": {
+                    "evidence_directory": str(evidence_dir),
+                    "evidence_files": {
+                        "plugin_events.jsonl": {"byte_length": byte_length, "sha256": digest},
+                    },
+                    "evidence_file_hashes": {"plugin_events.jsonl": digest},
+                    "chain_length": 50,
+                },
+            }))
+            codes = {finding.code for finding in verify_manifest(manifest).findings}
+            self.assertIn("coverage_counters_mismatch", codes)
+
+    def test_malformed_evidence_degrades_never_crashes(self):
+        from daemon.verify import verify_hash_chain
+
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "e.jsonl"
+            p.write_text('5\n"str"\nnot json\n')
+            result = verify_hash_chain(p)
+            self.assertFalse(result.passed)
+
+            binary = Path(tmp) / "b.jsonl"
+            binary.write_bytes(b"\xff\xfe\x00garbage")
+            result = verify_hash_chain(binary)
+            self.assertFalse(result.passed)
+
     def test_valid_hash_chain_passes(self):
         from daemon.verify import verify_hash_chain
 
@@ -366,6 +582,15 @@ class VerifyTests(unittest.TestCase):
             result = verify_hash_chain(p)
             self.assertFalse(result.passed)
             self.assertTrue(any(f.code == "chain_break" for f in result.errors))
+
+
+def _wait_for(condition, timeout: float = 30.0, interval: float = 0.05, message: str = "condition") -> None:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if condition():
+            return
+        time.sleep(interval)
+    raise AssertionError(f"Timed out after {timeout}s waiting for {message}")
 
 
 def _write_test_wav(path: Path, frame_count: int = 22050) -> None:
