@@ -369,7 +369,7 @@ class Daemon:
             self._stop.wait(self.sample_watcher.poll_interval_seconds)
 
     def _run_project_watcher(self) -> None:
-        from daemon.project_differ.differ import extract_snapshot, compute_diff
+        from daemon.project_differ.differ import extract_snapshot, compute_diff, diff_to_event
 
         log.info("Project watcher on %s", self.project_path)
         prev_snapshot = None
@@ -397,24 +397,7 @@ class Daemon:
                 if prev_snapshot is not None:
                     diff = compute_diff(prev_snapshot, snapshot)
                     if diff.has_changes():
-                        diff_event: dict[str, object] = {
-                            "event_type": "project_diff",
-                            "proof_level": "inferred",
-                            "source_timestamp_ms": int(time.time() * 1000),
-                            "timestamp_ms": int(time.time() * 1000),
-                            "daemon_observed_monotonic_ms": int(time.monotonic_ns() // 1_000_000),
-                            "clips_added": diff.clips_added,
-                            "clips_removed": diff.clips_removed,
-                            "clips_modified": diff.clips_modified,
-                            "tracks_added": diff.tracks_added,
-                            "tracks_removed": diff.tracks_removed,
-                            "devices_changed": diff.devices_changed,
-                            "samples_added": sorted(diff.samples_added),
-                            "samples_removed": sorted(diff.samples_removed),
-                            "midi_notes_delta": diff.midi_notes_delta,
-                            "automation_points_delta": diff.automation_points_delta,
-                            "bpm_changed": diff.bpm_changed,
-                        }
+                        diff_event = diff_to_event(diff)
                         self._write_evidence("project_diff_events.jsonl", diff_event)
                         self._append_event(diff_event)
 

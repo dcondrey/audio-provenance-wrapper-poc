@@ -26,8 +26,11 @@ _ALS_WITH_CHILDLESS_AUDIO_CLIP = b"""<?xml version="1.0"?>
 """
 
 
-def _make_track(name: str, device_chain_hashes: frozenset[str]) -> TrackInfo:
+def _make_track(
+    name: str, device_chain_hashes: frozenset[str], track_id: str | None = None
+) -> TrackInfo:
     return TrackInfo(
+        track_id=track_id if track_id is not None else name,
         name=name,
         track_type="AudioTrack",
         devices=(),
@@ -53,9 +56,16 @@ def _make_snapshot(**overrides) -> ProjectSnapshot:
         file_size_bytes=1000,
         track_count=2,
         track_names=("Track 1", "Track 2"),
-        tracks=(),
+        tracks=(
+            _make_track("Track 1", frozenset({"d1"})),
+            _make_track("Track 2", frozenset({"d2"})),
+        ),
         clip_count=4,
         clip_hashes=frozenset({"c1", "c2", "c3", "c4"}),
+        clip_slot_hashes={
+            ("Track 1", "s0"): "c1", ("Track 1", "s1"): "c2",
+            ("Track 2", "s0"): "c3", ("Track 2", "s1"): "c4",
+        },
         device_chain_hashes=frozenset({"d1", "d2"}),
         automation_point_count=10,
         midi_note_count=50,
@@ -77,29 +87,68 @@ class ComputeDiffTests(unittest.TestCase):
         self.assertFalse(diff.has_changes())
 
     def test_tracks_added(self):
-        prev = _make_snapshot(track_names=("Track 1",))
-        curr = _make_snapshot(track_names=("Track 1", "Track 2"))
+        prev = _make_snapshot(tracks=(_make_track("Track 1", frozenset({"d1"})),))
+        curr = _make_snapshot()
         diff = compute_diff(prev, curr)
         self.assertIn("Track 2", diff.tracks_added)
 
     def test_tracks_removed(self):
-        prev = _make_snapshot(track_names=("Track 1", "Track 2"))
-        curr = _make_snapshot(track_names=("Track 1",))
+        prev = _make_snapshot()
+        curr = _make_snapshot(tracks=(_make_track("Track 1", frozenset({"d1"})),))
         diff = compute_diff(prev, curr)
         self.assertIn("Track 2", diff.tracks_removed)
 
+    def test_duplicate_named_track_deletion_is_reported(self):
+        """Cmd+D duplicates share EffectiveName; deleting one must still
+        surface in tracks_removed (identity is the XML Id, not the name)."""
+        duplicated = (
+            _make_track("Track 1", frozenset({"d1"}), track_id="10"),
+            _make_track("Track 1", frozenset({"d1"}), track_id="11"),
+        )
+        prev = _make_snapshot(tracks=duplicated, track_names=("Track 1", "Track 1"))
+        curr = _make_snapshot(tracks=duplicated[:1], track_names=("Track 1",))
+        diff = compute_diff(prev, curr)
+        self.assertEqual(diff.tracks_removed, ["Track 1"])
+        self.assertEqual(diff.tracks_added, [])
+
     def test_clips_added(self):
-        prev = _make_snapshot(clip_hashes=frozenset({"c1", "c2"}))
-        curr = _make_snapshot(clip_hashes=frozenset({"c1", "c2", "c3"}))
+        prev = _make_snapshot(clip_slot_hashes={("Track 1", "s0"): "c1", ("Track 1", "s1"): "c2"})
+        curr = _make_snapshot(clip_slot_hashes={
+            ("Track 1", "s0"): "c1", ("Track 1", "s1"): "c2", ("Track 2", "s0"): "c3",
+        })
         diff = compute_diff(prev, curr)
         self.assertEqual(diff.clips_added, 1)
         self.assertEqual(diff.clips_removed, 0)
 
     def test_clips_removed(self):
-        prev = _make_snapshot(clip_hashes=frozenset({"c1", "c2", "c3"}))
-        curr = _make_snapshot(clip_hashes=frozenset({"c1", "c2"}))
+        prev = _make_snapshot(clip_slot_hashes={
+            ("Track 1", "s0"): "c1", ("Track 1", "s1"): "c2", ("Track 2", "s0"): "c3",
+        })
+        curr = _make_snapshot(clip_slot_hashes={("Track 1", "s0"): "c1", ("Track 1", "s1"): "c2"})
         diff = compute_diff(prev, curr)
         self.assertEqual(diff.clips_removed, 1)
+
+    def test_single_clip_edit_is_a_modification_not_delete_plus_add(self):
+        prev = _make_snapshot(clip_slot_hashes={("Track 1", "s0"): "c1", ("Track 1", "s1"): "c2"})
+        curr = _make_snapshot(clip_slot_hashes={("Track 1", "s0"): "c1-edited", ("Track 1", "s1"): "c2"})
+        diff = compute_diff(prev, curr)
+        self.assertEqual(diff.clips_modified, 1)
+        self.assertEqual(diff.clips_added, 0)
+        self.assertEqual(diff.clips_removed, 0)
+
+    def test_scene_deletion_does_not_misreport_trailing_clips(self):
+        """Slots key on the ClipSlot Id, not list position, so removing one
+        scene must not shift every later slot into a false modification."""
+        prev = _make_snapshot(clip_slot_hashes={
+            ("Track 1", "1"): "c1", ("Track 1", "2"): "c2", ("Track 1", "3"): "c3",
+        })
+        curr = _make_snapshot(clip_slot_hashes={
+            ("Track 1", "2"): "c2", ("Track 1", "3"): "c3",
+        })
+        diff = compute_diff(prev, curr)
+        self.assertEqual(diff.clips_removed, 1)
+        self.assertEqual(diff.clips_modified, 0)
+        self.assertEqual(diff.clips_added, 0)
 
     def test_samples_added(self):
         prev = _make_snapshot(sample_refs=frozenset({"a.wav"}))

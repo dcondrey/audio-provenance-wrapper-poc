@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from daemon.common import sha256_file
+from daemon.common import append_jsonl, sha256_file
 
 log = logging.getLogger(__name__)
 
@@ -38,6 +38,9 @@ class SendInfo:
 class TrackInfo:
     """Rich per-track metadata extracted from the .als XML."""
 
+    # IMPORTANT: display names are not unique (Cmd+D duplicates share
+    # EffectiveName); identity comparisons key on the XML Id attribute.
+    track_id: str
     name: str
     track_type: str
     devices: tuple[str, ...]
@@ -67,6 +70,7 @@ class ProjectSnapshot:
     tracks: tuple[TrackInfo, ...]
     clip_count: int
     clip_hashes: frozenset[str]
+    clip_slot_hashes: dict[tuple[str, str], str]
     device_chain_hashes: frozenset[str]
     automation_point_count: int
     midi_note_count: int
@@ -173,8 +177,11 @@ def extract_snapshot(path: Path) -> ProjectSnapshot:
 
     track_infos: list[TrackInfo] = []
 
+    clip_slot_hashes: dict[tuple[str, str], str] = {}
+
     if tracks_el is not None:
-        for track in tracks_el:
+        for track_index, track in enumerate(tracks_el):
+            track_id = track.get("Id") or f"pos-{track_index}"
             name_el = track.find("Name")
             name_val = ""
             if name_el is not None:
@@ -193,10 +200,15 @@ def extract_snapshot(path: Path) -> ProjectSnapshot:
             track_clip_infos: list[ClipInfo] = []
             track_device_hashes: set[str] = set()
 
-            for clip_slot in track.iter("ClipSlot"):
+            for slot_index, clip_slot in enumerate(track.iter("ClipSlot")):
                 clip_count += 1
                 track_clips += 1
-                clip_hashes.add(hashlib.sha256(ET.tostring(clip_slot)).hexdigest()[:16])
+                slot_hash = hashlib.sha256(ET.tostring(clip_slot)).hexdigest()[:16]
+                clip_hashes.add(slot_hash)
+                # Slot identity mirrors track identity: the element's own Id,
+                # so a scene insert/delete does not shift every later slot's key.
+                slot_id = clip_slot.get("Id") or f"pos-{slot_index}"
+                clip_slot_hashes[(track_id, slot_id)] = slot_hash
 
                 audio_clip_el = clip_slot.find(".//AudioClip")
                 midi_clip_el = clip_slot.find(".//MidiClip")
@@ -309,6 +321,7 @@ def extract_snapshot(path: Path) -> ProjectSnapshot:
                     pass
 
             track_infos.append(TrackInfo(
+                track_id=track_id,
                 name=name_val,
                 track_type=track_type,
                 devices=tuple(track_devices),
@@ -375,6 +388,7 @@ def extract_snapshot(path: Path) -> ProjectSnapshot:
         tracks=tuple(track_infos),
         clip_count=clip_count,
         clip_hashes=frozenset(clip_hashes),
+        clip_slot_hashes=clip_slot_hashes,
         device_chain_hashes=frozenset(device_hashes),
         automation_point_count=automation_count,
         midi_note_count=midi_note_count,
@@ -388,31 +402,35 @@ def extract_snapshot(path: Path) -> ProjectSnapshot:
 
 
 def compute_diff(previous: ProjectSnapshot, current: ProjectSnapshot) -> ProjectDiff:
-    prev_names = set(previous.track_names)
-    curr_names = set(current.track_names)
+    # Identity comparisons key on track_id / (track_id, slot): display names
+    # collide on duplicated tracks, and hash-set algebra reported every
+    # single-clip edit as a delete+add pair with clips_modified stuck at 0.
+    prev_by_id = {t.track_id: t for t in previous.tracks}
+    curr_by_id = {t.track_id: t for t in current.tracks}
 
-    new_clips = current.clip_hashes - previous.clip_hashes
-    removed_clips = previous.clip_hashes - current.clip_hashes
-    modified_clips = abs(current.clip_count - previous.clip_count) - len(new_clips) - len(removed_clips)
-    if modified_clips < 0:
-        modified_clips = 0
+    prev_slots = previous.clip_slot_hashes
+    curr_slots = current.clip_slot_hashes
+    shared_slots = prev_slots.keys() & curr_slots.keys()
+    modified_clips = sum(1 for key in shared_slots if prev_slots[key] != curr_slots[key])
 
-    prev_track_devices = {t.name: t.device_chain_hashes for t in previous.tracks}
-    curr_track_devices = {t.name: t.device_chain_hashes for t in current.tracks}
     devices_changed = sorted(
-        name
-        for name in curr_names & prev_names
-        if curr_track_devices.get(name, frozenset()) != prev_track_devices.get(name, frozenset())
+        curr_by_id[track_id].name
+        for track_id in curr_by_id.keys() & prev_by_id.keys()
+        if curr_by_id[track_id].device_chain_hashes != prev_by_id[track_id].device_chain_hashes
     )
 
     return ProjectDiff(
         timestamp_ms=int(time.time() * 1000),
         previous_file_hash=previous.file_hash,
         current_file_hash=current.file_hash,
-        tracks_added=sorted(curr_names - prev_names),
-        tracks_removed=sorted(prev_names - curr_names),
-        clips_added=len(new_clips),
-        clips_removed=len(removed_clips),
+        tracks_added=sorted(
+            curr_by_id[track_id].name for track_id in curr_by_id.keys() - prev_by_id.keys()
+        ),
+        tracks_removed=sorted(
+            prev_by_id[track_id].name for track_id in prev_by_id.keys() - curr_by_id.keys()
+        ),
+        clips_added=len(curr_slots.keys() - prev_slots.keys()),
+        clips_removed=len(prev_slots.keys() - curr_slots.keys()),
         clips_modified=modified_clips,
         devices_changed=devices_changed,
         automation_points_delta=current.automation_point_count - previous.automation_point_count,
@@ -426,11 +444,34 @@ def compute_diff(previous: ProjectSnapshot, current: ProjectSnapshot) -> Project
     )
 
 
+def diff_to_event(diff: ProjectDiff) -> dict[str, object]:
+    """Serialize a diff as the project_diff evidence event both the daemon
+    and the standalone watcher write."""
+    return {
+        "event_type": "project_diff",
+        "proof_level": "inferred",
+        "source_timestamp_ms": diff.timestamp_ms,
+        "timestamp_ms": diff.timestamp_ms,
+        "daemon_observed_monotonic_ms": int(time.monotonic_ns() // 1_000_000),
+        "clips_added": diff.clips_added,
+        "clips_removed": diff.clips_removed,
+        "clips_modified": diff.clips_modified,
+        "tracks_added": diff.tracks_added,
+        "tracks_removed": diff.tracks_removed,
+        "devices_changed": diff.devices_changed,
+        "samples_added": sorted(diff.samples_added),
+        "samples_removed": sorted(diff.samples_removed),
+        "midi_notes_delta": diff.midi_notes_delta,
+        "automation_points_delta": diff.automation_points_delta,
+        "bpm_changed": diff.bpm_changed,
+    }
+
+
 class ProjectWatcher:
     """Watches an Ableton .als file for saves and emits structural diffs.
 
-    Stub: the polling loop is functional but the extract_snapshot parser
-    needs validation against real .als files across Ableton versions.
+    Stub: the extract_snapshot parser still needs validation against real
+    .als files across Ableton versions.
     """
 
     def __init__(
@@ -446,11 +487,7 @@ class ProjectWatcher:
         self._previous_mtime_ns: int = 0
 
     def run_forever(self) -> None:
-        """Poll the project file and emit diffs on each save.
-
-        Stub: actual implementation will also write events to the JSONL
-        evidence file, matching the pattern in evidence_receiver.
-        """
+        """Poll the project file and write a project_diff event on each save."""
         log.info("Watching %s for saves; writing %s", self.project_path, self.evidence_path)
 
         while True:
@@ -472,6 +509,7 @@ class ProjectWatcher:
                 if self._previous_snapshot is not None:
                     diff = compute_diff(self._previous_snapshot, snapshot)
                     if diff.has_changes():
+                        append_jsonl(self.evidence_path, diff_to_event(diff))
                         log.info(
                             "Project diff: +%d/-%d/%d~ clips, %d samples added",
                             diff.clips_added,
