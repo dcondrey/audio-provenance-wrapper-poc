@@ -30,8 +30,10 @@ strict Developer ID signing inspection. A live Ableton pass on the demonstration
 machine (2026-08-28, session `capture-20260828T221446Z-9959`) completed rescan,
 insertion, daemon ACK, real-export, coverage, and verification validation with
 `complete_observed_path` coverage and `inferred_match` association. The
-remaining v1.0 gate is the transparency/null test and project save/close/reload
-as recorded in `docs/VALIDATION.md`.
+transparency/null test and project save/close/reload were completed live on
+2026-08-29 (sessions `capture-20260830T015947Z-85675` and
+`capture-20260830T021208Z-11629`), closing the v1.0 gate as recorded in
+`docs/VALIDATION.md`.
 
 The demo candidate now also includes deterministic timestamped sessions,
 preflight, bounded daemon-clock correlation, evidence rotation and streaming
@@ -225,9 +227,10 @@ scripts are ready; manual Ableton validation remains.
 One-stem end-to-end Ableton demo works reliably.
 
 A manual Ableton host pass on the meeting machine is recorded for 2026-08-28
-(session `capture-20260828T221446Z-9959`). The open v1.0 criteria are the
-transparency/null test and project save/close/reload. Automated and synthetic
-results do not close that gate.
+(session `capture-20260828T221446Z-9959`). The remaining criteria, the
+transparency/null test and project save/close/reload, were completed live on
+2026-08-29 (`docs/VALIDATION.md`). The v1.0 gate is closed; automated and
+synthetic results were not used to close it.
 
 ### v1.1
 Five-stem workflow works with bypass/failure tests.

@@ -1,9 +1,11 @@
 # Multi-Layer Edit Observation Architecture
 
-> **Status: architecture, not shipped capability.** Of the layers below, only
-> filesystem observation (sample import watching) and the plugin audio path are
-> implemented. `daemon/input_capture/` and `daemon/screen_observer/` are
-> unimplemented stubs, so correlation rules that depend on them cannot fire.
+> **Status: partially shipped.** Of the layers below, the plugin audio path
+> (Layer 1), the project file differ (Layer 3, `.als` parsing feeding
+> `session_facts` and `project_diff` evidence into every manifest), and
+> filesystem observation (Layer 5, sample import watching) are implemented.
+> `daemon/input_capture/` and `daemon/screen_observer/` are unimplemented
+> stubs, so correlation rules that depend on them cannot fire.
 > The demo makes no claims that rest on this document.
 
 ## Problem Statement
@@ -193,7 +195,7 @@ programmatic/scripted automation, with proof level `inferred`.
 
 ---
 
-## Layer 3: Project File Differ
+## Layer 3: Project File Differ (Implemented)
 
 **Source:** DAW project file on disk
 

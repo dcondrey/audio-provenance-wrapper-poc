@@ -101,16 +101,79 @@ session `capture-20260828T221446Z-9959`, 2026-08-28):
 3. [x] Insert **Audio Provenance Capture** on one routed stem.
 4. [x] Confirm current plug-in instance and capture-session identifiers in the dashboard.
 5. [x] Confirm locally emitted and daemon-acknowledged counts advance during playback.
-6. [ ] Complete the documented polarity/null transparency test.
-7. [ ] Save, close, and reload the Ableton project.
+6. [x] Complete the documented polarity/null transparency test. (2026-08-29)
+7. [x] Save, close, and reload the Ableton project. (2026-08-29, after the export sealed)
 8. [x] Export a real WAV/AIFF into the watched folder.
 9. [x] Confirm inferred alignment, coverage, sealing, bundle creation, and verification.
 10. [x] Save the final real-session manifest and fight card.
 
-Steps 6 and 7 are the remaining v1.0 gate. Exact per-step recovery instructions
-are in `docs/DEMO_RUNBOOK.md`.
+The gate is closed. Exact per-step recovery instructions are in
+`docs/DEMO_RUNBOOK.md`.
 
 No automated or synthetic result is recorded as manual Ableton validation.
+
+Live Ableton validation on 2026-08-29 (gate steps 6-7 and runtime verification
+of the 2026-08-29 fix batches; rebuilt plug-in installed, binary
+`f7e32e45a0f7…`):
+
+- Transparency/null test (step 6): the routed stem was duplicated, the plug-in
+  left on only the original, and the duplicate polarity-inverted with the
+  Utility "Phase Invert" preset (Ø L + Ø R). During playback both source
+  meters ran hot while the Main meter stayed dark. A 24-second 32-bit-float
+  offline render of the Main bus contained 2,116,800 samples, every one
+  exactly 0.0 (peak -inf dBFS): the plug-in path is bit-identical on the
+  routed path.
+- Save/close/reload (step 7): the set was saved as
+  `demo-output/apw-live-set/apw-live-verification Project/apw-live-verification.als`,
+  Live was quit completely and relaunched, and the set reopened. The reloaded
+  plug-in instance (`plugin-092972dcd532`) streamed genesis-clean into the
+  same daemon session (contiguous acknowledgements, zero gaps, zero chain
+  breaks, zero alerts). Performed after the graded export sealed; a
+  mid-session reload adds a second instance, and later status honestly grades
+  `partial_observed_path` for the two-instance remainder, as the runbook
+  documents.
+- Graded pass (session `capture-20260830T021208Z-11629`): plug-in loaded fresh
+  after daemon start, 16-bit export `session-b-take2.wav` graded coverage
+  `complete_observed_path`, association `inferred_match` (confidence 0.8538,
+  211/258 windows, routed coverage 0.332), verifier `verified` (12 checks, 2
+  expected warnings), session facts populated from the saved `.als` (6 tracks,
+  BPM 120), `hardware_binding` present and the hardware cosignature nested
+  inside `manifest_signature`. A first take rendered as 32-bit float WAV
+  (format 3) was recorded honestly as association `unavailable` with reason
+  `unsupported WAV format`; the association reader accepts PCM WAV/AIFF only.
+- H-011 (unsupported-MIDI counter), session `capture-20260830T015947Z-85675`:
+  17 pitch-bend plus 5 aftertouch messages injected over a virtual CoreMIDI
+  port produced `midi_unsupported_dropped: 22` in telemetry (exact count),
+  degraded live coverage to `partial_observed_path`, and rendered the
+  dashboard alert for unsupported MIDI types.
+- H-018 (missing/pending panel): with the plug-in running before any daemon,
+  the panel showed `Daemon receipt: UNKNOWN … missing/pending` equal to the
+  full prepared backlog beside `send failed 0`; after a daemon started
+  mid-stream it showed `ACKNOWLEDGED / CHAIN BREAK · accepted through 3700 ·
+  contiguous through 0 · missing/pending 0` with ACK gaps 1770, and the daemon
+  logged the non-genesis chain start. In the clean session the same panel
+  reached `contiguous through 783 · missing/pending 0`. The
+  failed-send arm of the old defect is not reachable live (unconnected UDP
+  send to a dead localhost port reports success), so that arm remains
+  code-review-verified only.
+- M-022 (per-channel CC keying): a 3-second CC71 ramp aggregated into one
+  `parameter_change` record (channel, CC, start/end value, change count all
+  correct). Cross-channel merging is not reachable through Ableton track
+  routing: notes sent on channels 5, 2, and 3 all arrived at the plug-in on
+  channel 1 with the MPE input flag both off and on, and MPE-mode CC74 never
+  reached processBlock as a controller. Live flattens routed MIDI to channel
+  1 for this plug-in, so the (channel, CC) keying's cross-channel arm stays
+  covered by code review and the C++ inspection only.
+- M-023 (teardown flush): with a CC71 knob gesture mid-flight (94 of 240
+  planned changes), the plug-in device was deleted; the final event on the
+  wire for that stream was the flushed `parameter_change` (start 0, end 93,
+  change_count 94) after the final window drains. Shutdown loss is accounted
+  rather than silent.
+- Bonus alert paths observed live: the FIFO-overflow alert fired with exact
+  recovery text after an offline render with the device active
+  (253,953 samples / 497 windows dropped), and the readiness panel showed
+  READY TO EXPORT with a 14-second minimum against 55.4 routed seconds in the
+  clean session.
 
 ## Historical Milestone Records
 

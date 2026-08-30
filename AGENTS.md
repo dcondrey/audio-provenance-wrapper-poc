@@ -27,7 +27,11 @@ A producer can:
 - v0.3: UDP event stream to daemon.
 - v0.4: daemon stores session state.
 - v0.5: daemon detects final export and hashes the file.
-- v1.0: JSON manifest generated end-to-end.
+- v1.0: JSON manifest generated end-to-end, plus the manual Ableton
+  validation gate in docs/ROADMAP.md ("v1.0") and docs/VALIDATION.md
+  ("Manual v1.0 gate"). Automated and synthetic results do not close
+  that gate; two steps (transparency/null test, project
+  save/close/reload) remain open.
 
 ## Proof Levels
 Every manifest field must include one of:
