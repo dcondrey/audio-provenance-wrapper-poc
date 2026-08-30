@@ -212,15 +212,32 @@ def run(
             export_path = exports / "unobserved_export.wav"
         _write_wav(export_path, export_samples)
 
+        # The manifest lands before create_evidence_bundle() finishes inside the
+        # same _generate_manifest call; stopping the daemon on manifest-glob alone
+        # verified a bundle that did not exist yet (presenter-fallback false alarm).
         deadline = time.monotonic() + 12.0
         while time.monotonic() < deadline:
             candidates = sorted(manifests.glob("*_manifest.json"))
             if candidates:
-                manifest_path = candidates[-1]
-                break
+                candidate = candidates[-1]
+                try:
+                    presentation = json.loads(candidate.read_text()).get("presentation", {})
+                except (OSError, json.JSONDecodeError):
+                    presentation = {}
+                bundle_name = str(presentation.get("evidence_bundle") or "")
+                index_name = str(presentation.get("bundle_index") or "")
+                if (
+                    bundle_name and index_name
+                    and (manifests / bundle_name).exists()
+                    and (manifests / index_name).exists()
+                ):
+                    manifest_path = candidate
+                    break
             time.sleep(0.2)
         if manifest_path is None:
-            raise RuntimeError("synthetic rehearsal timed out waiting for a manifest")
+            raise RuntimeError(
+                "synthetic rehearsal timed out waiting for a manifest and its evidence bundle"
+            )
     finally:
         daemon.stop()
         thread.join(timeout=3)
