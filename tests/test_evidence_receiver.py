@@ -185,6 +185,21 @@ class ReceiverTests(unittest.TestCase):
             self.assertIsNone(result)
             self.assertFalse(evidence_path.exists())
 
+    def test_process_deeply_nested_json_rejected_not_crashed(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            evidence_path = Path(tmp_dir) / "events.jsonl"
+            receiver = EvidenceReceiver(
+                host="127.0.0.1", port=0, evidence_path=evidence_path
+            )
+            self.addCleanup(receiver.close)
+
+            # json.loads raises RecursionError at ~10k nesting levels; the
+            # boundary must reject the datagram like any other malformed input.
+            result = receiver.process_packet(b"[" * 20000)
+            self.assertIsNone(result)
+            self.assertEqual(receiver.rejected_count, 1)
+            self.assertFalse(evidence_path.exists())
+
     def test_process_invalid_event(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             evidence_path = Path(tmp_dir) / "events.jsonl"
@@ -230,6 +245,47 @@ class ReceiverTests(unittest.TestCase):
             )
             summary = receiver.receipt_summary()
             # Dropped streams mean the receiver cannot vouch for a complete view.
+            self.assertEqual(summary["status"], "degraded")
+            self.assertEqual(summary["apw:proof_level"], "unknown_unobserved")
+
+    def test_stream_cap_boundary_demotes_at_exactly_cap_plus_one(self):
+        from daemon.evidence_receiver.receiver import MAX_TRACKED_STREAMS
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            receiver = EvidenceReceiver(
+                host="127.0.0.1", port=0,
+                evidence_path=Path(tmp_dir) / "events.jsonl",
+            )
+            self.addCleanup(receiver.close)
+
+            def send(instance: str) -> None:
+                self.assertIsNotNone(receiver.process_packet(json.dumps({
+                    "event_type": "transport_change",
+                    "proof_level": "directly_observed",
+                    "transport_state": "playing",
+                    "plugin_instance_id": instance,
+                }).encode()))
+
+            def clean_summary() -> dict[str, object]:
+                # Isolate the eviction predicate: receipt_summary also degrades
+                # on unsent acknowledgements, which process_packet never sends.
+                receiver.acknowledgements_sent = receiver.packet_count
+                return receiver.receipt_summary()
+
+            for i in range(MAX_TRACKED_STREAMS - 1):
+                send(f"stream-{i}")
+            self.assertEqual(receiver.stream_evictions, 0)
+
+            send(f"stream-{MAX_TRACKED_STREAMS - 1}")
+            self.assertEqual(receiver.stream_evictions, 0)
+            summary = clean_summary()
+            self.assertEqual(summary["status"], "issued")
+            self.assertEqual(summary["apw:proof_level"], "directly_observed")
+
+            send("one-over-cap")
+            self.assertEqual(receiver.stream_evictions, 1)
+            self.assertEqual(len(receiver._stream_states), MAX_TRACKED_STREAMS)
+            summary = clean_summary()
             self.assertEqual(summary["status"], "degraded")
             self.assertEqual(summary["apw:proof_level"], "unknown_unobserved")
 

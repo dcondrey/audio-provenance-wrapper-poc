@@ -51,6 +51,51 @@ class BoundedCorrelationTests(unittest.TestCase):
             self.assertFalse(evidence.exists())
 
 
+class NetworkNumericFieldTests(unittest.TestCase):
+    def test_non_numeric_wire_fields_are_rejected_at_the_boundary(self):
+        from daemon.evidence_receiver.taxonomy import validate_network_event
+
+        base = {
+            "event_type": "buffer_hash",
+            "proof_level": "directly_observed",
+            "window_hash": "h", "prev_hash": "genesis",
+            "rms_level": 0.2, "zero_crossing_rate": 0.1,
+        }
+        valid, _ = validate_network_event(base)
+        self.assertTrue(valid)
+        valid, _ = validate_network_event({**base, "window_size_samples": 4096, "sample_rate_hz": 44100})
+        self.assertTrue(valid)
+        for poisoned in (
+            {**base, "window_size_samples": "x"},
+            {**base, "sample_rate_hz": "44100hz"},
+            {**base, "rms_level": "loud"},
+            {**base, "energy_envelope": ["a", "b", "c", "d"]},
+            # json.loads accepts the non-standard NaN/Infinity literals
+            {**base, "window_size_samples": float("nan")},
+            {**base, "sample_rate_hz": float("inf")},
+            {**base, "energy_envelope": [0.1, float("nan"), 0.2, 0.3]},
+        ):
+            valid, reason = validate_network_event(poisoned)
+            self.assertFalse(valid, reason)
+
+
+class VerifierInputHardeningTests(unittest.TestCase):
+    def test_hostile_verifier_inputs_yield_findings_not_exceptions(self):
+        from daemon.bundle import verify_evidence_bundle
+        from daemon.verify import verify_manifest
+
+        with tempfile.TemporaryDirectory() as tmp:
+            deep = Path(tmp) / "deep_manifest.json"
+            deep.write_text('{"apw_version":"0.9.0","x":' + "[" * 3000 + "]" * 3000 + "}")
+            result = verify_manifest(deep)
+            self.assertEqual(result.outcome, "untrusted")
+
+            index = Path(tmp) / "bundle_index.json"
+            index.write_text("null")
+            errors = verify_evidence_bundle(index, Path(tmp) / "bundle.zip")
+            self.assertEqual(errors, ["bundle index must be a JSON object"])
+
+
 class TrustInvariantTests(unittest.TestCase):
     def test_sequence_gap_is_counted_and_complete_coverage_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:

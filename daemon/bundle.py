@@ -199,6 +199,8 @@ def verify_evidence_bundle(index_path: Path, bundle_path: Path) -> list[str]:
         index = json.loads(index_bytes)
     except (OSError, json.JSONDecodeError) as exc:
         return [f"bundle index could not be read: {exc}"]
+    if not isinstance(index, dict):
+        return ["bundle index must be a JSON object"]
     signature = index.get("portable_signature")
     if not isinstance(signature, dict):
         errors.append("bundle index portable signature is missing")

@@ -116,16 +116,24 @@ def validate_manifest_invariants(data: object) -> list[str]:
     return errors
 
 
-def _validate_proof_values(value: Any, path: str, errors: list[str]) -> None:
+# Real manifests nest ~6 levels; a crafted deeply-nested one must produce a
+# finding, not a RecursionError out of the verifier (untrusted verifier input).
+_MAX_PROOF_VALUE_DEPTH = 64
+
+
+def _validate_proof_values(value: Any, path: str, errors: list[str], depth: int = 0) -> None:
+    if depth >= _MAX_PROOF_VALUE_DEPTH:
+        errors.append(f"manifest nesting exceeds {_MAX_PROOF_VALUE_DEPTH} levels at {path}")
+        return
     if isinstance(value, dict):
         for key, child in value.items():
             child_path = f"{path}.{key}"
             if (key == "apw:proof_level" or key.endswith("_proof_level")) and child not in PROOF_LEVELS:
                 errors.append(f"invalid proof level at {child_path}: {child}")
-            _validate_proof_values(child, child_path, errors)
+            _validate_proof_values(child, child_path, errors, depth + 1)
     elif isinstance(value, list):
         for index, child in enumerate(value):
-            _validate_proof_values(child, f"{path}[{index}]", errors)
+            _validate_proof_values(child, f"{path}[{index}]", errors, depth + 1)
 
 
 def _require_proof(value: dict[str, object], path: str, errors: list[str]) -> None:

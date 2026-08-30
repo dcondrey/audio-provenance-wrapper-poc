@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 from enum import Enum
 
@@ -92,6 +93,24 @@ NETWORK_PROOF_LEVEL_CAP: dict[str, str] = {
     EventType.PARAMETER_CHANGE: ProofLevel.DIRECTLY_OBSERVED,
 }
 
+# IMPORTANT: downstream consumers (status readiness, audio association, sample
+# correlation) do arithmetic on these fields straight off the wire; a non-numeric
+# value crashes those threads, so the type invariant is established here at the
+# UDP boundary rather than re-checked at every consumer.
+NETWORK_NUMERIC_FIELDS: dict[str, tuple[str, ...]] = {
+    EventType.BUFFER_HASH: (
+        "rms_level", "zero_crossing_rate", "window_size_samples",
+        "sample_rate_hz", "spectral_centroid_hz", "crest_factor",
+    ),
+    EventType.SPECTRAL_SHIFT: ("prev_spectral_centroid_hz", "new_spectral_centroid_hz"),
+    EventType.SESSION_CONFIG: ("sample_rate_hz", "channel_count"),
+    EventType.SPECTRAL_PROFILE_CHANGE: ("band_low_delta", "band_mid_delta", "band_high_delta"),
+    EventType.PARAMETER_CHANGE: (
+        "cc_number", "change_count", "midi_channel", "start_value", "end_value",
+    ),
+    EventType.MIDI_EVENT: ("midi_channel",),
+}
+
 
 def validate_event(event: Mapping[str, object]) -> tuple[bool, str]:
     """Return (True, '') if the event is well-formed, else (False, reason)."""
@@ -131,4 +150,22 @@ def validate_network_event(event: Mapping[str, object]) -> tuple[bool, str]:
             f"Proof level '{proof_level}' exceeds network cap '{cap}' for {event_type}"
         )
 
+    for field in NETWORK_NUMERIC_FIELDS.get(event_type, ()):
+        value = event.get(field)
+        if value is not None and not _is_finite_number(value):
+            return False, f"Field '{field}' must be a finite number for {event_type}"
+    if event_type == EventType.BUFFER_HASH:
+        envelope = event.get("energy_envelope")
+        if envelope is not None and (
+            not isinstance(envelope, list)
+            or not all(_is_finite_number(v) for v in envelope)
+        ):
+            return False, "Field 'energy_envelope' must be a list of finite numbers"
+
     return True, ""
+
+
+def _is_finite_number(value: object) -> bool:
+    # json.loads accepts the non-standard NaN/Infinity literals, and int(nan)
+    # raises ValueError downstream, so isinstance alone does not close the hole.
+    return isinstance(value, (int, float)) and math.isfinite(value)

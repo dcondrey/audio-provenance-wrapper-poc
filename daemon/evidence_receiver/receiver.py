@@ -111,7 +111,9 @@ class EvidenceReceiver:
                 raw_event = decoded
             else:
                 raise ValueError("event must be a JSON object")
-        except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+        except (json.JSONDecodeError, UnicodeDecodeError, ValueError, RecursionError):
+            # RecursionError: json.loads recurses per nesting level, so a
+            # pathologically nested datagram must reject, not kill the thread.
             reason = "invalid JSON/UTF-8 object"
             self._reject(reason)
             return None, self._build_ack(raw_event, False, "rejected_invalid", reason)

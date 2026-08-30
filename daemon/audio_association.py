@@ -60,20 +60,35 @@ def _feature(samples: list[float]) -> Feature:
 
 
 def _open_pcm(path: Path):
+    """Open a PCM export. Contract: unsupported or unreadable formats raise
+    ValueError so callers degrade to an honest "unavailable" association;
+    wave.Error/aifc.Error are Exception subclasses outside callers' tuples,
+    and aifc left the stdlib in Python 3.13."""
     if path.suffix.lower() == ".wav":
         import wave
 
-        handle = wave.open(str(path), "rb")
+        try:
+            handle = wave.open(str(path), "rb")
+        except wave.Error as exc:
+            raise ValueError(f"unsupported WAV format: {exc}") from exc
         if handle.getcomptype() != "NONE":
             handle.close()
             raise ValueError("compressed WAV is not supported")
         return handle, "little"
     if path.suffix.lower() in {".aif", ".aiff"}:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            import aifc
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                import aifc
+        except ModuleNotFoundError as exc:
+            raise ValueError(
+                "AIFF association requires the stdlib aifc module, removed in Python 3.13"
+            ) from exc
 
-        handle = aifc.open(str(path), "rb")
+        try:
+            handle = aifc.open(str(path), "rb")
+        except aifc.Error as exc:
+            raise ValueError(f"unsupported AIFF format: {exc}") from exc
         if handle.getcomptype() not in {b"NONE", "NONE"}:
             handle.close()
             raise ValueError("compressed AIFF is not supported")
