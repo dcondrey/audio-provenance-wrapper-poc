@@ -169,6 +169,9 @@ class Daemon:
             except Exception:
                 log.warning("Signer detection failed; using software fallback", exc_info=True)
                 self._hw_provider = SoftwareProvider(key_path=signing_key_path)
+        # Cosignature chain across this session's manifests (CPoE pattern):
+        # each manifest_signature.hardware_cosignature entangles this hash.
+        self._last_cosignature_hash = "genesis"
 
     def _append_event(self, event: dict[str, object]) -> None:
         with self._session_lock:

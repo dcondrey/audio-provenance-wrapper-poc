@@ -150,6 +150,18 @@ class DaemonIntegrationTests(unittest.TestCase):
                 manifest["manifest_signature"]["trust_scope"],
                 "local_software_integrity",
             )
+            self.assertIn("hardware_binding", manifest)
+            self.assertEqual(
+                manifest["hardware_binding"]["chain_root_hash"],
+                stems[0]["hash_chain_root"],
+            )
+            self.assertFalse(manifest["hardware_binding"]["hardware_attested"])
+            cosignature = manifest["manifest_signature"]["hardware_cosignature"]
+            self.assertEqual(cosignature["previous_cosignature_hash"], "genesis")
+            self.assertEqual(
+                cosignature["content_hash"],
+                manifest["manifest_signature"]["signed_content_hash"],
+            )
             self.assertTrue((manifest_dir / "mixdown_provenance.html").is_file())
             self.assertTrue((manifest_dir / "artifacts/mixdown_evidence_bundle.zip").is_file())
             self.assertTrue((manifest_dir / "artifacts/mixdown_bundle_index.json").is_file())
@@ -263,6 +275,13 @@ class DaemonIntegrationTests(unittest.TestCase):
                 message="manifest and evidence bundle for overwritten demo.wav",
             )
             self.assertTrue((manifest_dir / "demo_manifest.json").is_file())
+            manifest = json.loads((manifest_dir / "demo_manifest.json").read_text())
+            # The next manifest in this session must entangle this one.
+            self.assertEqual(
+                daemon._last_cosignature_hash,
+                manifest["manifest_signature"]["hardware_cosignature"]["entangled_hash"],
+            )
+            self.assertNotEqual(daemon._last_cosignature_hash, "genesis")
             daemon.stop()
             thread.join(timeout=15)
 

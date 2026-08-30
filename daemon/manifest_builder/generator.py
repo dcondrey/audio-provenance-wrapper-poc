@@ -11,6 +11,7 @@ explicit parameter list for a pure refactor.
 
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 import json
 import logging
@@ -396,6 +397,22 @@ def generate_manifest(daemon: "Daemon", export_path: Path, export_version: int =
     if daemon._time_anchor is not None:
         manifest["time_anchor"] = daemon._time_anchor.anchor_record(export_hash)
 
+    if chain_length > 0 and last_window_hash:
+        # Added before signing so both manifest signatures cover the binding.
+        try:
+            binding = daemon._hw_provider.bind_chain_root(last_window_hash)
+            manifest["hardware_binding"] = {
+                **dataclasses.asdict(binding),
+                "hardware_attested": not isinstance(daemon._hw_provider, SoftwareProvider),
+                "apw:proof_level": (
+                    "unknown_unobserved"
+                    if isinstance(daemon._hw_provider, SoftwareProvider)
+                    else "directly_observed"
+                ),
+            }
+        except Exception:
+            log.warning("Could not bind hash chain root to device", exc_info=True)
+
     try:
         manifest["portable_signature"] = daemon._portable_signer.sign_manifest(manifest)
     except Exception:
@@ -405,12 +422,21 @@ def generate_manifest(daemon: "Daemon", export_path: Path, export_version: int =
         identity = daemon._hw_provider.device_identity()
         manifest_bytes = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
         signature = daemon._hw_provider.sign(manifest_bytes)
+        signed_content_hash = hashlib.sha256(manifest_bytes).hexdigest()
+        # Entangles the software signature, so it cannot precede signing; it
+        # lives inside manifest_signature because the verifier excludes that
+        # key when recomputing signed_content_hash (verify.py).
+        cosignature = daemon._hw_provider.cosign_checkpoint(
+            content_hash=signed_content_hash,
+            software_signature=signature.hex(),
+            previous_cosignature_hash=daemon._last_cosignature_hash,
+        )
         manifest["manifest_signature"] = {
             "algorithm": identity.algorithm,
             "device_id": identity.device_id,
             "public_key_hex": identity.public_key_hex,
             "signature_hex": signature.hex(),
-            "signed_content_hash": hashlib.sha256(manifest_bytes).hexdigest(),
+            "signed_content_hash": signed_content_hash,
             "trust_scope": (
                 "local_software_integrity"
                 if isinstance(daemon._hw_provider, SoftwareProvider)
@@ -428,7 +454,9 @@ def generate_manifest(daemon: "Daemon", export_path: Path, export_version: int =
                 if isinstance(daemon._hw_provider, SoftwareProvider)
                 else "Signature produced by the configured hardware provider."
             ),
+            "hardware_cosignature": dataclasses.asdict(cosignature),
         }
+        daemon._last_cosignature_hash = cosignature.entangled_hash
     except Exception:
         log.warning("Could not sign manifest", exc_info=True)
 
