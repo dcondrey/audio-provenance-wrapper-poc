@@ -242,6 +242,7 @@ class SampleWatcher:
         self.recursive = recursive
         self._seen: dict[str, FileSignature] = {}
         self._pending: dict[str, tuple[FileSignature, int]] = {}
+        self._read_failed: set[str] = set()
 
     def mark_existing_seen(self) -> None:
         self.watch_dir.mkdir(parents=True, exist_ok=True)
@@ -258,6 +259,7 @@ class SampleWatcher:
             del self._seen[vanished_key]
         for vanished_key in self._pending.keys() - current_keys:
             del self._pending[vanished_key]
+        self._read_failed &= current_keys
 
         for path in current_paths:
             resolved_key = str(path.resolve())
@@ -278,9 +280,19 @@ class SampleWatcher:
 
             try:
                 event = build_sample_file_event(path, expected_signature=signature)
-            except OSError:
+            except OSError as exc:
+                # The unchanged signature re-satisfies the stable check every
+                # poll, so this retries forever; say so once per episode instead
+                # of dropping the file's evidence in silence.
+                if resolved_key not in self._read_failed:
+                    log.warning(
+                        "Sample file stat is stable but its content is unreadable; "
+                        "evidence not emitted, will keep retrying: %s (%s)", path, exc,
+                    )
+                    self._read_failed.add(resolved_key)
                 continue
 
+            self._read_failed.discard(resolved_key)
             append_event(event, self.evidence_path)
             observed_events.append(event)
             self._seen[resolved_key] = signature

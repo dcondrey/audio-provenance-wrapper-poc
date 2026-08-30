@@ -7,7 +7,7 @@ import socket
 import threading
 import time
 import uuid
-from collections import deque
+from collections import OrderedDict, deque
 from pathlib import Path
 
 from daemon import status as _status
@@ -21,6 +21,10 @@ from daemon.signing import DEFAULT_PRIVATE_KEY, DEFAULT_PUBLIC_KEY, Ed25519Signe
 from daemon.time_anchor.anchor import DEFAULT_TSA_URL, RFC3161Provider, TimeAnchorService
 
 log = logging.getLogger(__name__)
+
+# Same bound rationale as receiver.MAX_TRACKED_STREAMS: both tables are keyed
+# by wire-controlled values and rendered into the signed manifest.
+MAX_TRACKED_PLUGIN_KEYS = 64
 
 _LAYER_MAP: dict[str, str] = {
     "buffer_hash": "audio_buffer",
@@ -131,8 +135,11 @@ class Daemon:
         self._buffer_hash_count = 0
         self._first_hash_event: dict[str, object] | None = None
         self._last_hash_event: dict[str, object] | None = None
-        self._plugin_instance_ids: set[str] = set()
-        self._latest_plugin_telemetry: dict[str, int] = {}
+        # Bounded like receiver._stream_states: both are keyed by wire-controlled
+        # values and exported into the signed manifest, so unbounded growth is a
+        # local-DoS and manifest-spam vector. OrderedDict keys act as an LRU set.
+        self._plugin_instance_ids: OrderedDict[str, None] = OrderedDict()
+        self._latest_plugin_telemetry: OrderedDict[str, int] = OrderedDict()
         self._export_versions: dict[str, int] = {}
         self._last_manifest_path: Path | None = None
         self._last_report_path: Path | None = None
@@ -181,12 +188,19 @@ class Daemon:
         with self._session_lock:
             self._active_layers.add(layer)
             instance_id = str(event.get("plugin_instance_id", "unknown_plugin_instance"))
-            self._plugin_instance_ids.add(instance_id)
+            self._plugin_instance_ids[instance_id] = None
+            self._plugin_instance_ids.move_to_end(instance_id)
+            while len(self._plugin_instance_ids) > MAX_TRACKED_PLUGIN_KEYS:
+                evicted, _ = self._plugin_instance_ids.popitem(last=False)
+                log.warning("Plugin instance table full; evicted least-recent id %s", evicted)
             telemetry = event.get("telemetry")
             if isinstance(telemetry, dict):
                 for key, value in telemetry.items():
                     if isinstance(value, int):
                         self._latest_plugin_telemetry[str(key)] = value
+                        self._latest_plugin_telemetry.move_to_end(str(key))
+                while len(self._latest_plugin_telemetry) > MAX_TRACKED_PLUGIN_KEYS:
+                    self._latest_plugin_telemetry.popitem(last=False)
             if event.get("event_type") == "buffer_hash":
                 self._buffer_hash_count += 1
                 if self._first_hash_event is None:
@@ -246,7 +260,12 @@ class Daemon:
                     self._plugin_seen
                     and time.monotonic() - self._last_plugin_event_monotonic < 3.0
                 )
-                self._write_status("active" if recently_active else "idle")
+                # Worker loops all degrade on exceptions; the main loop must not
+                # be the one thread a bad status write can kill.
+                try:
+                    self._write_status("active" if recently_active else "idle")
+                except Exception:
+                    log.exception("Status write failed; daemon continues")
         except KeyboardInterrupt:
             log.info("Shutting down")
             self._stop.set()
@@ -267,7 +286,10 @@ class Daemon:
                 "proof_level": "directly_observed",
                 "diagnostics": self.receiver.diagnostics(),
             })
-            self._write_status("stopped")
+            try:
+                self._write_status("stopped")
+            except Exception:
+                log.exception("Final status write failed")
 
     def stop(self) -> None:
         self._stop.set()
@@ -288,30 +310,35 @@ class Daemon:
                 log.exception("UDP socket error")
                 continue
 
-            event, acknowledgement = self.receiver.process_packet_with_ack(data)
-            if not self.receiver.send_acknowledgement(address, acknowledgement):
-                log.warning(
-                    "Could not dispatch local daemon acknowledgement to %s:%d",
-                    address[0],
-                    address[1],
-                )
-            if event is None:
-                continue
-            self._last_plugin_event_monotonic = time.monotonic()
+            try:
+                event, acknowledgement = self.receiver.process_packet_with_ack(data)
+                if not self.receiver.send_acknowledgement(address, acknowledgement):
+                    log.warning(
+                        "Could not dispatch local daemon acknowledgement to %s:%d",
+                        address[0],
+                        address[1],
+                    )
+                if event is None:
+                    continue
+                self._last_plugin_event_monotonic = time.monotonic()
 
-            et = str(event.get("event_type", ""))
-            layer = _event_type_to_layer(et)
-            self._record_plugin_event(event, layer)
-            if not self._plugin_seen:
-                self._plugin_seen = True
-                log.info("Capture plugin evidence stream detected")
-            layer_event = LayerEvent(
-                layer=layer,
-                event_type=et,
-                timestamp_ms=int(event.get("daemon_received_monotonic_ms", 0)),
-                data=event,
-            )
-            self._correlate(layer_event)
+                et = str(event.get("event_type", ""))
+                layer = _event_type_to_layer(et)
+                self._record_plugin_event(event, layer)
+                if not self._plugin_seen:
+                    self._plugin_seen = True
+                    log.info("Capture plugin evidence stream detected")
+                layer_event = LayerEvent(
+                    layer=layer,
+                    event_type=et,
+                    timestamp_ms=int(event.get("daemon_received_monotonic_ms", 0)),
+                    data=event,
+                )
+                self._correlate(layer_event)
+            except Exception:
+                # One bad datagram must degrade, not kill the receiver thread,
+                # matching the sample/project/export worker-loop pattern.
+                log.exception("UDP packet processing error")
 
     def _run_sample_watcher(self) -> None:
         self.sample_watcher.mark_existing_seen()
@@ -412,12 +439,15 @@ class Daemon:
         log.info("Export watcher on %s", self.export_dir)
         AUDIO_EXTENSIONS = {".wav", ".aiff", ".aif"}
 
-        for existing in self.export_dir.iterdir():
-            if existing.is_file() and existing.suffix.lower() in AUDIO_EXTENSIONS:
-                try:
-                    self._export_seen[str(existing.resolve())] = self._export_signature(existing)
-                except OSError:
-                    continue
+        try:
+            for existing in self.export_dir.iterdir():
+                if existing.is_file() and existing.suffix.lower() in AUDIO_EXTENSIONS:
+                    try:
+                        self._export_seen[str(existing.resolve())] = self._export_signature(existing)
+                    except OSError:
+                        continue
+        except OSError:
+            log.exception("Export watcher could not scan %s at startup", self.export_dir)
 
         while not self._stop.is_set():
             try:
