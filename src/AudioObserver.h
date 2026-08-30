@@ -40,6 +40,7 @@ public:
     std::uint64_t getFifoSamplesDropped() const noexcept;
     std::uint64_t getFifoWindowsDropped() const noexcept;
     std::uint64_t getMidiEventsDropped() const noexcept;
+    std::uint64_t getUnsupportedMidiEventsDropped() const noexcept;
     juce::String getLastHash() const;
 
 private:
@@ -48,6 +49,11 @@ private:
     void drainMidiEvents();
     void checkTransportChanges();
     void checkSessionConfigChanges();
+
+    void drainReadyWindows (bool stopOnExitSignal);
+    void flushKnobTurn (int channelIndex, int ccNumber, juce::int64 samplePos);
+    void flushExpiredKnobTurns (std::uint64_t nowMs, juce::int64 samplePos);
+    void flushAllKnobTurns (juce::int64 samplePos);
 
     juce::String computeChainedHash (const float* data, int numSamples);
     static double computeRMS (const float* data, int numSamples);
@@ -116,12 +122,14 @@ private:
         int firstValue    = -1;
         int lastValue     = -1;
         int changeCount   = 0;
-        std::uint8_t channel = 0;
         std::uint64_t firstChangeMs = 0;
         std::uint64_t lastChangeMs  = 0;
     };
+    static constexpr int kMidiChannels = 16;
     static constexpr int kMaxCCTracked = 128;
-    CCState ccStates[kMaxCCTracked] {};
+    // Keyed by (channel, CC): concurrent turns on the same CC number from
+    // different MIDI channels (MPE controllers) are distinct knob turns.
+    CCState ccStates[kMidiChannels][kMaxCCTracked] {};
     static constexpr int kKnobTurnMinChanges   = 3;
     static constexpr std::uint64_t kKnobTurnWindowMs = 500;
 
@@ -137,6 +145,7 @@ private:
     std::atomic<std::uint64_t> fifoSamplesDropped { 0 };
     std::atomic<std::uint64_t> fifoWindowsDropped { 0 };
     std::atomic<std::uint64_t> midiEventsDropped { 0 };
+    std::atomic<std::uint64_t> unsupportedMidiEventsDropped { 0 };
     mutable juce::SpinLock lastHashLock;
     juce::String lastHashHex;
 

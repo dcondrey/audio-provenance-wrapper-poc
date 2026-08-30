@@ -39,6 +39,7 @@ AudioProvenanceCaptureAudioProcessor::AudioProvenanceCaptureAudioProcessor()
             telemetry->setProperty ("fifo_samples_dropped", static_cast<juce::int64> (audioObserver.getFifoSamplesDropped()));
             telemetry->setProperty ("fifo_windows_dropped", static_cast<juce::int64> (audioObserver.getFifoWindowsDropped()));
             telemetry->setProperty ("midi_events_dropped", static_cast<juce::int64> (audioObserver.getMidiEventsDropped()));
+            telemetry->setProperty ("midi_unsupported_dropped", static_cast<juce::int64> (audioObserver.getUnsupportedMidiEventsDropped()));
             telemetry->setProperty ("events_prepared", static_cast<juce::int64> (sequence));
             telemetry->setProperty ("udp_sends_attempted", static_cast<juce::int64> (eventEmitter.getSendAttempts() + 1));
             telemetry->setProperty ("udp_sends_failed", static_cast<juce::int64> (eventEmitter.getSendFailures()));

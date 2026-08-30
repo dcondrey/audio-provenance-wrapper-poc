@@ -88,6 +88,8 @@ def derive_coverage(daemon: "Daemon", chain_length: int) -> dict[str, object]:
         telemetry.get("fifo_samples_dropped", 0),
         telemetry.get("fifo_windows_dropped", 0),
         telemetry.get("midi_events_dropped", 0),
+        # Optional (older plugin builds omit it), so not in `required`.
+        telemetry.get("midi_unsupported_dropped", 0),
         telemetry.get("udp_sends_failed", 0),
         receiver["sequence_gaps"],
         receiver["sequence_out_of_order"],

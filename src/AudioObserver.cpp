@@ -121,6 +121,10 @@ void AudioObserver::pushMidiMessages (const juce::MidiBuffer& midi)
         }
         else
         {
+            // Pitch bend, aftertouch, sysex, etc. are not captured; an
+            // uncounted discard would let the manifest claim zero MIDI loss
+            // for a performance whose expression data was never observed.
+            unsupportedMidiEventsDropped.fetch_add (1, std::memory_order_relaxed);
             continue;
         }
 
@@ -172,30 +176,53 @@ void AudioObserver::run()
 {
     while (! threadShouldExit())
     {
-        while (audioFifo.getNumReady() >= kWindowSize && ! threadShouldExit())
-        {
-            int start1, size1, start2, size2;
-            audioFifo.prepareToRead (kWindowSize, start1, size1, start2, size2);
-
-            if (size1 > 0)
-                std::copy (audioFifoBuffer.begin() + start1,
-                           audioFifoBuffer.begin() + start1 + size1,
-                           windowBuffer.begin());
-            if (size2 > 0)
-                std::copy (audioFifoBuffer.begin() + start2,
-                           audioFifoBuffer.begin() + start2 + size2,
-                           windowBuffer.begin() + size1);
-
-            audioFifo.finishedRead (size1 + size2);
-
-            processWindow (windowBuffer.data(), kWindowSize);
-        }
-
+        drainReadyWindows (true);
         drainMidiEvents();
         checkTransportChanges();
         checkSessionConfigChanges();
 
         juce::Thread::sleep (5);
+    }
+
+    // Teardown: hash the complete windows still queued, count the partial
+    // remainder as dropped, and flush in-flight MIDI so shutdown loss is
+    // accounted rather than silent. Bounded by the FIFO (16 windows), well
+    // inside the 2 s stopThread budget.
+    drainReadyWindows (false);
+    const auto leftover = audioFifo.getNumReady();
+    if (leftover > 0)
+    {
+        int start1, size1, start2, size2;
+        audioFifo.prepareToRead (leftover, start1, size1, start2, size2);
+        audioFifo.finishedRead (size1 + size2);
+        fifoSamplesDropped.fetch_add (static_cast<std::uint64_t> (size1 + size2),
+                                      std::memory_order_relaxed);
+        fifoWindowsDropped.fetch_add (1, std::memory_order_relaxed);
+    }
+    drainMidiEvents();
+    flushAllKnobTurns (transportSamplePos.load (std::memory_order_relaxed));
+}
+
+void AudioObserver::drainReadyWindows (bool stopOnExitSignal)
+{
+    while (audioFifo.getNumReady() >= kWindowSize
+           && ! (stopOnExitSignal && threadShouldExit()))
+    {
+        int start1, size1, start2, size2;
+        audioFifo.prepareToRead (kWindowSize, start1, size1, start2, size2);
+
+        if (size1 > 0)
+            std::copy (audioFifoBuffer.begin() + start1,
+                       audioFifoBuffer.begin() + start1 + size1,
+                       windowBuffer.begin());
+        if (size2 > 0)
+            std::copy (audioFifoBuffer.begin() + start2,
+                       audioFifoBuffer.begin() + start2 + size2,
+                       windowBuffer.begin() + size1);
+
+        audioFifo.finishedRead (size1 + size2);
+
+        processWindow (windowBuffer.data(), kWindowSize);
     }
 }
 
@@ -468,12 +495,13 @@ void AudioObserver::drainMidiEvents()
             // emit a single "parameter_change" event with start/end values.
             if (rec.type == 0xB0 && rec.data1 < kMaxCCTracked)
             {
-                auto& cc = ccStates[rec.data1];
+                const int chIdx = juce::jlimit (0, kMidiChannels - 1,
+                                                static_cast<int> (rec.channel) - 1);
+                auto& cc = ccStates[chIdx][rec.data1];
                 if (cc.lastValue < 0)
                 {
                     cc.firstValue   = rec.data2;
                     cc.lastValue    = rec.data2;
-                    cc.channel      = rec.channel;
                     cc.changeCount  = 1;
                     cc.firstChangeMs = timestampMs;
                     cc.lastChangeMs  = timestampMs;
@@ -487,24 +515,9 @@ void AudioObserver::drainMidiEvents()
                 else
                 {
                     // Window expired: flush previous knob turn if it qualifies.
-                    if (cc.changeCount >= kKnobTurnMinChanges && eventCallback)
-                    {
-                        auto json = buildJsonEvent ("parameter_change", cc.firstChangeMs, samplePos,
-                        {
-                            { "midi_channel",    static_cast<int> (cc.channel) },
-                            { "cc_number",       static_cast<int> (rec.data1) },
-                            { "start_value",     cc.firstValue },
-                            { "end_value",       cc.lastValue },
-                            { "change_count",    cc.changeCount },
-                            { "duration_ms",     static_cast<int> (cc.lastChangeMs - cc.firstChangeMs) }
-                        });
-                        eventCallback (json);
-                        totalEventsEmitted.fetch_add (1, std::memory_order_relaxed);
-                    }
-                    // Start new tracking window.
+                    flushKnobTurn (chIdx, static_cast<int> (rec.data1), samplePos);
                     cc.firstValue    = rec.data2;
                     cc.lastValue     = rec.data2;
-                    cc.channel       = rec.channel;
                     cc.changeCount   = 1;
                     cc.firstChangeMs = timestampMs;
                     cc.lastChangeMs  = timestampMs;
@@ -541,36 +554,48 @@ void AudioObserver::drainMidiEvents()
         midiFifo.finishedRead (size1 + size2);
     }
 
-    // ── Flush any in-progress knob turns that have gone stale ──
-    for (int cc = 0; cc < kMaxCCTracked; ++cc)
+    flushExpiredKnobTurns (timestampMs, samplePos);
+}
+
+void AudioObserver::flushKnobTurn (int channelIndex, int ccNumber, juce::int64 samplePos)
+{
+    auto& state = ccStates[channelIndex][ccNumber];
+    if (state.changeCount >= kKnobTurnMinChanges && eventCallback)
     {
-        auto& state = ccStates[cc];
-        if (state.changeCount >= kKnobTurnMinChanges
-            && timestampMs - state.lastChangeMs >= kKnobTurnWindowMs
-            && eventCallback)
+        auto json = buildJsonEvent ("parameter_change", state.firstChangeMs, samplePos,
         {
-            auto json = buildJsonEvent ("parameter_change", state.firstChangeMs, samplePos,
-            {
-                { "midi_channel",    static_cast<int> (state.channel) },
-                { "cc_number",       cc },
-                { "start_value",     state.firstValue },
-                { "end_value",       state.lastValue },
-                { "change_count",    state.changeCount },
-                { "duration_ms",     static_cast<int> (state.lastChangeMs - state.firstChangeMs) }
-            });
-            eventCallback (json);
-            totalEventsEmitted.fetch_add (1, std::memory_order_relaxed);
-        }
-        if (state.changeCount > 0 && timestampMs - state.lastChangeMs >= kKnobTurnWindowMs)
+            { "midi_channel",    channelIndex + 1 },
+            { "cc_number",       ccNumber },
+            { "start_value",     state.firstValue },
+            { "end_value",       state.lastValue },
+            { "change_count",    state.changeCount },
+            { "duration_ms",     static_cast<int> (state.lastChangeMs - state.firstChangeMs) }
+        });
+        eventCallback (json);
+        totalEventsEmitted.fetch_add (1, std::memory_order_relaxed);
+    }
+    state = {};
+}
+
+void AudioObserver::flushExpiredKnobTurns (std::uint64_t nowMs, juce::int64 samplePos)
+{
+    for (int ch = 0; ch < kMidiChannels; ++ch)
+    {
+        for (int cc = 0; cc < kMaxCCTracked; ++cc)
         {
-            state.firstValue   = -1;
-            state.lastValue    = -1;
-            state.channel      = 0;
-            state.changeCount  = 0;
-            state.firstChangeMs = 0;
-            state.lastChangeMs  = 0;
+            const auto& state = ccStates[ch][cc];
+            if (state.changeCount > 0 && nowMs - state.lastChangeMs >= kKnobTurnWindowMs)
+                flushKnobTurn (ch, cc, samplePos);
         }
     }
+}
+
+void AudioObserver::flushAllKnobTurns (juce::int64 samplePos)
+{
+    for (int ch = 0; ch < kMidiChannels; ++ch)
+        for (int cc = 0; cc < kMaxCCTracked; ++cc)
+            if (ccStates[ch][cc].changeCount > 0)
+                flushKnobTurn (ch, cc, samplePos);
 }
 
 void AudioObserver::checkTransportChanges()
@@ -649,6 +674,8 @@ std::uint64_t AudioObserver::getSamplesSubmitted() const noexcept { return sampl
 std::uint64_t AudioObserver::getFifoSamplesDropped() const noexcept { return fifoSamplesDropped.load (std::memory_order_relaxed); }
 std::uint64_t AudioObserver::getFifoWindowsDropped() const noexcept { return fifoWindowsDropped.load (std::memory_order_relaxed); }
 std::uint64_t AudioObserver::getMidiEventsDropped() const noexcept { return midiEventsDropped.load (std::memory_order_relaxed); }
+
+std::uint64_t AudioObserver::getUnsupportedMidiEventsDropped() const noexcept { return unsupportedMidiEventsDropped.load (std::memory_order_relaxed); }
 
 juce::String AudioObserver::getLastHash() const
 {

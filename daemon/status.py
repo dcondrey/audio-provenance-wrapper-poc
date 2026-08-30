@@ -54,6 +54,11 @@ def derive_readiness(daemon: "Daemon") -> dict[str, object]:
             "Plug-in MIDI FIFO overflowed; MIDI evidence was lost and coverage "
             "will grade partial."
         )
+    if telemetry.get("midi_unsupported_dropped", 0):
+        alerts.append(
+            "Unsupported MIDI message types (pitch bend, aftertouch, sysex) were "
+            "not captured; MIDI evidence is incomplete and coverage will grade partial."
+        )
     window_size = int(last_hash.get("window_size_samples") or 0)
     sample_rate = int(last_hash.get("sample_rate_hz") or 0)
     routed_seconds = (
