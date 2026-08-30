@@ -54,6 +54,7 @@ public:
     // Granular observation stats for the UI.
     apw::AudioObserver& getAudioObserver() noexcept { return audioObserver; }
     const apw::EventEmitter& getEventEmitter() const noexcept { return eventEmitter; }
+    std::uint64_t getHighestPreparedSequence() const noexcept { return eventSequence.load (std::memory_order_relaxed); }
     const juce::String& getPluginInstanceId() const noexcept { return pluginInstanceId; }
     const juce::String& getPluginCaptureSessionId() const noexcept { return pluginCaptureSessionId; }
 

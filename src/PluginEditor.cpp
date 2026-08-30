@@ -179,8 +179,12 @@ void AudioProvenanceCaptureAudioProcessorEditor::updateObservationLabels()
     auto& emitter = audioProcessor.getEventEmitter();
     const auto acknowledgement = emitter.getAcknowledgementSnapshot();
     const auto locallyEmitted = emitter.getSendAccepted();
-    const auto missing = locallyEmitted > acknowledgement.highestAcceptedSequence
-        ? locallyEmitted - acknowledgement.highestAcceptedSequence : 0;
+    // Sequence-space comparison: getSendAccepted() is a success COUNT, so a
+    // failed send shrank "missing" and the panel claimed missing=0 next to a
+    // nonzero send-failed figure (a label stronger than the evidence).
+    const auto highestPrepared = audioProcessor.getHighestPreparedSequence();
+    const auto missing = highestPrepared > acknowledgement.highestAcceptedSequence
+        ? highestPrepared - acknowledgement.highestAcceptedSequence : 0;
     deliveryLabel.setText (juce::String ("Prepared ")
                            + juce::String (static_cast<juce::int64> (eventsEmitted))
                            + " · UDP attempted "
