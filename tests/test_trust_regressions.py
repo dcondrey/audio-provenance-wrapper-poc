@@ -38,6 +38,39 @@ class BoundedCorrelationTests(unittest.TestCase):
             self.assertEqual(len(sample_matches), 1)
             self.assertGreater(engine.duplicate_suppressions, 0)
 
+    def test_one_action_emits_one_composite_edit_as_supporting_evidence_grows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = Path(tmp) / "composite.jsonl"
+            engine = CorrelationEngine(window_ms=2_000, evidence_path=evidence)
+            engine.ingest(LayerEvent(
+                "transport", "transport_change", 1_000,
+                {"daemon_event_id": "transport-1", "transport_state": "recording"},
+            ))
+            for index in range(5):
+                engine.ingest(LayerEvent(
+                    "audio_buffer", "audio_transition", 1_100 + index * 100,
+                    {"daemon_event_id": f"transition-{index}", "direction": "silence_to_audio"},
+                ))
+            records = [json.loads(line) for line in evidence.read_text().splitlines()]
+            started = [r for r in records if r["edit_type"] == "recording_started"]
+            self.assertEqual(len(started), 1)
+            self.assertGreater(engine.duplicate_suppressions, 0)
+
+    def test_continuous_content_change_is_bounded_per_window_not_per_event(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = Path(tmp) / "composite.jsonl"
+            engine = CorrelationEngine(window_ms=2_000, evidence_path=evidence)
+            for index in range(50):
+                engine.ingest(LayerEvent(
+                    "audio_buffer", "spectral_shift", index * 100,
+                    {"daemon_event_id": f"shift-{index}"},
+                ))
+            records = [json.loads(line) for line in evidence.read_text().splitlines()]
+            changed = [r for r in records if r["edit_type"] == "content_changed"]
+            self.assertGreaterEqual(len(changed), 1)
+            self.assertLessEqual(len(changed), 3)
+            self.assertGreater(engine.duplicate_suppressions, 0)
+
     def test_long_session_evidence_is_linear_not_candidate_sized(self):
         with tempfile.TemporaryDirectory() as tmp:
             evidence = Path(tmp) / "composite.jsonl"

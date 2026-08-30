@@ -329,6 +329,13 @@ def _layer_bonus(candidate: CorrelationCandidate, required: int) -> float:
     return max(0.0, extra * 0.05)
 
 
+# Continuous audio-observation streams: they corroborate an action but never
+# identify one, so they stay out of composite-edit dedup keys.
+_SUPPORTING_EVENT_TYPES = frozenset({
+    "buffer_hash", "audio_transition", "spectral_shift", "spectral_profile_change",
+})
+
+
 def _summarize_events(
     candidate: CorrelationCandidate,
     predicate=None,
@@ -626,16 +633,7 @@ class CorrelationEngine:
             if composite is not None and composite.confidence >= 0.5:
                 if not composite.contributing_events:
                     continue
-                dedup_key = json.dumps(
-                    [
-                        composite.edit_type,
-                        sorted(
-                            str(item.get("event_id", ""))
-                            for item in composite.contributing_events
-                        ),
-                    ],
-                    separators=(",", ":"),
-                )
+                dedup_key = self._dedup_key(composite)
                 if dedup_key in self._dedup_keys:
                     self._duplicate_suppressions += 1
                     continue
@@ -648,6 +646,23 @@ class CorrelationEngine:
                 self._emitted_count += 1
 
         return results
+
+    def _dedup_key(self, composite: CompositeEdit) -> str:
+        # IMPORTANT: keying on the full contributing set let the same action
+        # re-emit on every new supporting audio event (the set, and so the key,
+        # grew each ingest). The action's identity is its non-continuous trigger
+        # events; continuous audio evidence only corroborates.
+        anchors = sorted(
+            str(item.get("event_id", ""))
+            for item in composite.contributing_events
+            if str(item.get("event_type", "")) not in _SUPPORTING_EVENT_TYPES
+        )
+        if not anchors:
+            # All-supporting rules (e.g. content_changed) have no identifying
+            # event, and any event-derived anchor drifts as the window slides.
+            # Quantize instead: one emission per window span per edit_type.
+            anchors = [f"window:{composite.timestamp_ms // max(1, self.window_ms)}"]
+        return json.dumps([composite.edit_type, anchors], separators=(",", ":"))
 
     def _write_event(self, composite: CompositeEdit) -> None:
         append_jsonl(self.evidence_path, composite.to_event_dict())
