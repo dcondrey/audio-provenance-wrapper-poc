@@ -1,0 +1,24 @@
+[package]
+name = "audio-provenance-manifest"
+description = "The signed provenance record: the Audio Provenance manifest, the POC audio-provenance-manifest-v0 interop path, and C2PA manifest-store reading."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+default = ["std"]
+std = ["audio-provenance-core/std", "hex/std", "serde/std", "serde_json/std", "thiserror/std"]
+
+[dependencies]
+ciborium = { workspace = true }
+audio-provenance-core = { workspace = true }
+hex = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }

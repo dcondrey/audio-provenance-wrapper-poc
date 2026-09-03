@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import signal
 import socket
@@ -16,6 +17,9 @@ from daemon.correlation_engine.engine import CorrelationEngine, LayerEvent
 from daemon.evidence_receiver.receiver import EvidenceReceiver
 from daemon.hardware_attestation.provider import HardwareProvider, SoftwareProvider, detect_provider
 from daemon.manifest_builder import generator as _manifest_generator
+from daemon.provenance import DEFAULT_STORE as DEFAULT_PROVENANCE_STORE
+from daemon.provenance import ProvenanceProvider
+from daemon.provenance import detect_provider as detect_provenance_provider
 from daemon.sample_watcher.watcher import SampleWatcher
 from daemon.signing import DEFAULT_PRIVATE_KEY, DEFAULT_PUBLIC_KEY, Ed25519Signer
 from daemon.time_anchor.anchor import DEFAULT_TSA_URL, RFC3161Provider, TimeAnchorService
@@ -25,6 +29,10 @@ log = logging.getLogger(__name__)
 # Same bound rationale as receiver.MAX_TRACKED_STREAMS: both tables are keyed
 # by wire-controlled values and rendered into the signed manifest.
 MAX_TRACKED_PLUGIN_KEYS = 64
+
+# A sealing failure that cannot succeed (read-only manifest dir, revoked key)
+# otherwise retries every 2s forever behind the DAW window.
+MAX_EXPORT_SEAL_ATTEMPTS = 5
 
 _LAYER_MAP: dict[str, str] = {
     "buffer_hash": "audio_buffer",
@@ -58,6 +66,22 @@ SOURCE_CATEGORIES = (
 )
 
 
+class DaemonStartupError(RuntimeError):
+    """A startup precondition failed with an operator-actionable explanation."""
+
+
+def _prepare_directory(path: Path, flag: str) -> Path:
+    path = path.expanduser()
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise DaemonStartupError(
+            f"Cannot create the {flag} directory {path}: {exc}. "
+            f"Start the daemon from a writable directory, or pass {flag} <writable path>."
+        ) from exc
+    return path
+
+
 class Daemon:
     """Unified daemon that orchestrates all observation layers."""
 
@@ -76,17 +100,22 @@ class Daemon:
         portable_private_key_path: Path = DEFAULT_PRIVATE_KEY,
         portable_public_key_path: Path = DEFAULT_PUBLIC_KEY,
         hardware_provider: HardwareProvider | None = None,
+        provenance_provider: ProvenanceProvider | None = None,
+        provenance_store: Path = DEFAULT_PROVENANCE_STORE,
         generate_html_report: bool = True,
         open_artifacts: bool = False,
         time_anchor_url: str | None = None,
+        sdk_adapter_enabled: bool = False,
+        sdk_cli: str = "audio-provenance",
+        sdk_development_key: Path = Path("~/.apw/sdk_development.key"),
+        sdk_registry: str | None = None,
     ) -> None:
         if source_category not in SOURCE_CATEGORIES:
             raise ValueError(f"Unsupported source category: {source_category}")
 
-        self.evidence_dir = evidence_dir.expanduser()
-        self.manifest_dir = manifest_dir.expanduser()
-        self.evidence_dir.mkdir(parents=True, exist_ok=True)
-        self.manifest_dir.mkdir(parents=True, exist_ok=True)
+        self.evidence_dir = _prepare_directory(evidence_dir, "--evidence-dir")
+        self.manifest_dir = _prepare_directory(manifest_dir, "--manifest-dir")
+        self._provenance_store = Path(provenance_store).expanduser()
 
         self.session_id = session_id or (
             f"capture-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}-{uuid.uuid4().hex[:8]}"
@@ -98,6 +127,10 @@ class Daemon:
         )
         self.generate_html_report = generate_html_report
         self.open_artifacts = open_artifacts
+        self.sdk_adapter_enabled = sdk_adapter_enabled
+        self.sdk_cli = sdk_cli
+        self.sdk_development_key = sdk_development_key.expanduser()
+        self.sdk_registry = sdk_registry
         self._time_anchor = (
             TimeAnchorService(RFC3161Provider(time_anchor_url)) if time_anchor_url else None
         )
@@ -122,9 +155,9 @@ class Daemon:
         )
 
         self.project_path = project_path
-        self.export_dir = export_dir.expanduser() if export_dir else None
-        if self.export_dir is not None:
-            self.export_dir.mkdir(parents=True, exist_ok=True)
+        self.export_dir = (
+            _prepare_directory(export_dir, "--export-dir") if export_dir else None
+        )
         self._export_seen: dict[str, tuple[int, int]] = {}
         self._session_lock = threading.Lock()
         self._session_events: deque[dict[str, object]] = deque()
@@ -140,7 +173,11 @@ class Daemon:
         # local-DoS and manifest-spam vector. OrderedDict keys act as an LRU set.
         self._plugin_instance_ids: OrderedDict[str, None] = OrderedDict()
         self._latest_plugin_telemetry: OrderedDict[str, int] = OrderedDict()
+        self._telemetry_regressions = 0
         self._export_versions: dict[str, int] = {}
+        self._export_failures: dict[str, tuple[tuple[int, int] | None, int]] = {}
+        self._last_manifest_error: str | None = None
+        self._last_association_status: str | None = None
         self._last_manifest_path: Path | None = None
         self._last_report_path: Path | None = None
         self._last_verification_path: Path | None = None
@@ -149,6 +186,10 @@ class Daemon:
         self._last_bundle_path: Path | None = None
         self._last_verifier_outcome: str | None = None
         self._last_export_path: Path | None = None
+        self._last_sdk_receipt_path: Path | None = None
+        self._last_sdk_record_id: str | None = None
+        self._last_sdk_verification_status: str | None = None
+        self._last_sdk_error: str | None = None
         self._status_path = self.evidence_dir.parent / "status.json"
         self._session_started_at = utc_timestamp()
         self._active_layers: set[str] = {"sample_watcher"}
@@ -169,9 +210,32 @@ class Daemon:
             except Exception:
                 log.warning("Signer detection failed; using software fallback", exc_info=True)
                 self._hw_provider = SoftwareProvider(key_path=signing_key_path)
-        # Cosignature chain across this session's manifests (CPoE pattern):
-        # each manifest_signature.hardware_cosignature entangles this hash.
-        self._last_cosignature_hash = "genesis"
+        if provenance_provider is not None:
+            self._provenance_provider = provenance_provider
+        else:
+            try:
+                self._provenance_provider = detect_provenance_provider(provenance_store)
+            except Exception:
+                # A manifest without a C2PA claim is honest; a daemon that cannot
+                # start because key custody failed is not.
+                log.warning(
+                    "Provenance provider unavailable; manifests will record no C2PA claim",
+                    exc_info=True,
+                )
+                self._provenance_provider = None
+        # The post-write verification must use the key that actually sealed the
+        # manifest. An injected provider carries its own path, and reading the
+        # CLI default instead reported a valid manifest as signer_mismatch.
+        self._signing_key_path = (
+            self._hw_provider.key_path
+            if isinstance(self._hw_provider, SoftwareProvider)
+            else signing_key_path.expanduser()
+        )
+        # Cosignature chain across this device's manifests (CPoE pattern): each
+        # manifest_signature.hardware_cosignature entangles this hash. Resumed
+        # from the provider so a restart continues the chain instead of silently
+        # restarting it at genesis, which is indistinguishable from a replay.
+        self._last_cosignature_hash = self._hw_provider.last_cosignature_hash()
 
     def _append_event(self, event: dict[str, object]) -> None:
         with self._session_lock:
@@ -198,10 +262,28 @@ class Daemon:
                 log.warning("Plugin instance table full; evicted least-recent id %s", evicted)
             telemetry = event.get("telemetry")
             if isinstance(telemetry, dict):
+                # IMPORTANT: the UDP socket cannot authenticate its sender and the
+                # plug-in broadcasts its instance id in cleartext, so a spoofed
+                # datagram reusing that id could otherwise reset fifo_samples_dropped
+                # to 0 and upgrade a lossy session to complete_observed_path. These
+                # are cumulative counters: a value below the last accepted one is
+                # either a spoof or a restarted instance, and neither may lower the
+                # recorded loss.
                 for key, value in telemetry.items():
-                    if isinstance(value, int):
-                        self._latest_plugin_telemetry[str(key)] = value
-                        self._latest_plugin_telemetry.move_to_end(str(key))
+                    if isinstance(value, bool) or not isinstance(value, int):
+                        continue
+                    name = str(key)
+                    previous = self._latest_plugin_telemetry.get(name)
+                    if previous is not None and value < previous:
+                        self._telemetry_regressions += 1
+                        log.warning(
+                            "Plug-in telemetry counter %s went backwards (%d -> %d); "
+                            "ignoring the lower value and grading coverage as partial",
+                            name, previous, value,
+                        )
+                        continue
+                    self._latest_plugin_telemetry[name] = value
+                    self._latest_plugin_telemetry.move_to_end(name)
                 while len(self._latest_plugin_telemetry) > MAX_TRACKED_PLUGIN_KEYS:
                     self._latest_plugin_telemetry.popitem(last=False)
             if event.get("event_type") == "buffer_hash":
@@ -454,18 +536,97 @@ class Daemon:
                     if not self._file_is_stable(path):
                         continue
 
+                    # Keyed by the bytes that failed: once the operator fixes the
+                    # cause and re-renders, the file must be sealed again rather
+                    # than stay silently skipped for the life of the process.
+                    failed_signature, attempts = self._export_failures.get(resolved, (None, 0))
+                    if failed_signature != signature:
+                        attempts = 0
+                        self._export_failures.pop(resolved, None)
+                    elif attempts >= MAX_EXPORT_SEAL_ATTEMPTS:
+                        continue
+
                     try:
                         log.info("Export detected: %s", path.name)
-                        version = self._export_versions.get(resolved, 0) + 1
+                        version = self._next_export_version(path, resolved)
                         self._generate_manifest(path, export_version=version)
                         self._export_versions[resolved] = version
                         self._export_seen[resolved] = self._export_signature(path)
-                    except Exception:
-                        log.exception("Manifest generation failed for %s; will retry", path)
+                        self._export_failures.pop(resolved, None)
+                        self._last_manifest_error = None
+                        self._mark_superseded(path, version)
+                    except Exception as exc:
+                        attempts += 1
+                        self._export_failures[resolved] = (signature, attempts)
+                        self._last_manifest_error = (
+                            f"{path.name}: {type(exc).__name__}: {' '.join(str(exc).split())[:200]}"
+                        )
+                        log.exception(
+                            "Manifest generation failed for %s (attempt %d of %d)",
+                            path, attempts, MAX_EXPORT_SEAL_ATTEMPTS,
+                        )
+                        if attempts >= MAX_EXPORT_SEAL_ATTEMPTS:
+                            log.error(
+                                "Giving up on %s after %d attempts; no manifest, fight card or "
+                                "evidence bundle will be produced for it",
+                                path, attempts,
+                            )
+                        try:
+                            self._write_status("error")
+                        except Exception:
+                            log.exception("Status write failed while reporting a sealing failure")
             except OSError:
                 log.exception("Export watcher could not scan %s", self.export_dir)
 
             self._stop.wait(2.0)
+
+    @staticmethod
+    def manifest_suffix(export_version: int) -> str:
+        return "" if export_version == 1 else f"_v{export_version:03d}"
+
+    def _manifest_path_for(self, export_path: Path, export_version: int) -> Path:
+        return self.manifest_dir / (
+            f"{export_path.stem}{self.manifest_suffix(export_version)}_manifest.json"
+        )
+
+    def _next_export_version(self, export_path: Path, resolved: str) -> int:
+        """Choose a version whose artifact set is not already on disk.
+
+        _export_versions is per-process, so after a restart the same re-export
+        recomputed version 1 and clobbered the previous run's manifest, fight
+        card, evidence bundle and signed C2PA asset with no warning.
+        """
+        version = self._export_versions.get(resolved, 0) + 1
+        while self._manifest_path_for(export_path, version).exists():
+            version += 1
+        return version
+
+    def _mark_superseded(self, export_path: Path, export_version: int) -> None:
+        """Record that an earlier manifest describes bytes this file no longer has.
+
+        The DAW overwrites the audio in place while the manifest is versioned, so
+        the earlier, still-complete artifact set verifies as changed on an
+        untampered session unless the verifier can say why.
+        """
+        if export_version <= 1:
+            return
+        newer = self._manifest_path_for(export_path, export_version).name
+        for earlier in range(1, export_version):
+            manifest_path = self._manifest_path_for(export_path, earlier)
+            if not manifest_path.is_file():
+                continue
+            marker = manifest_path.with_name(manifest_path.stem + ".superseded.json")
+            try:
+                marker.write_text(
+                    json.dumps({
+                        "superseded_by": newer,
+                        "at": utc_timestamp(),
+                        "reason": "the export was re-rendered under the same file name",
+                    }, indent=2) + "\n",
+                    encoding="utf-8",
+                )
+            except OSError:
+                log.warning("Could not record supersession beside %s", manifest_path, exc_info=True)
 
     def _generate_manifest(self, export_path: Path, export_version: int = 1) -> Path:
         return _manifest_generator.generate_manifest(self, export_path, export_version)
@@ -476,8 +637,8 @@ class Daemon:
     def _derive_forgery_analysis(self, events_snapshot: list[dict[str, object]]) -> dict[str, object]:
         return _manifest_generator.derive_forgery_analysis(events_snapshot)
 
-    def _derive_readiness(self) -> dict[str, object]:
-        return _status.derive_readiness(self)
+    def _derive_readiness(self, state: str | None = None) -> dict[str, object]:
+        return _status.derive_readiness(self, state)
 
     def _session_diagnostics(self) -> dict[str, object]:
         return _status.session_diagnostics(self)
@@ -492,6 +653,9 @@ class Daemon:
         manifest_name: str,
         bundle_name: str | None,
         bundle_index_name: str | None,
+        c2pa_claim: dict[str, object] | None = None,
+        chain_root: str | None = None,
+        chain_length: int = 0,
     ) -> dict[str, object]:
         return _status.build_handoff(
             self,
@@ -502,6 +666,9 @@ class Daemon:
             manifest_name=manifest_name,
             bundle_name=bundle_name,
             bundle_index_name=bundle_index_name,
+            c2pa_claim=c2pa_claim,
+            chain_root=chain_root,
+            chain_length=chain_length,
         )
 
     def _status_link(self, path: Path | None) -> str | None:
@@ -589,6 +756,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Portable Ed25519 public key written for independent verification.",
     )
     parser.add_argument(
+        "--provenance-store",
+        type=Path,
+        default=DEFAULT_PROVENANCE_STORE,
+        help=(
+            "Local provenance key-custody store used to sign the C2PA claim. "
+            "The chain issued here is self-asserted, not an externally verified identity."
+        ),
+    )
+    parser.add_argument(
         "--no-html-report",
         action="store_true",
         help="Generate only the JSON manifest, without the derived HTML fight card.",
@@ -597,6 +773,30 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--open-artifacts",
         action="store_true",
         help="Open each generated fight card with the macOS default browser.",
+    )
+    parser.add_argument(
+        "--sdk-adapter",
+        action="store_true",
+        help=(
+            "After an export is sealed, convert its signed handoff through the Rust SDK, write a "
+            "development-only sidecar/receipt, and verify it with the public SDK API."
+        ),
+    )
+    parser.add_argument(
+        "--sdk-cli",
+        default="audio-provenance",
+        help="Path to the Rust audio-provenance CLI used by --sdk-adapter.",
+    )
+    parser.add_argument(
+        "--sdk-development-key",
+        type=Path,
+        default=Path("~/.apw/sdk_development.key"),
+        help="Retry-stable 32-byte development key; created with mode 0600 if absent.",
+    )
+    parser.add_argument(
+        "--sdk-registry",
+        default=None,
+        help="Optional configured local SDK registry name for development publication.",
     )
     return parser.parse_args(argv)
 
@@ -608,7 +808,18 @@ def main(argv: list[str] | None = None) -> int:
         datefmt="%H:%M:%S",
     )
     args = parse_args(argv)
-    daemon = Daemon(
+    try:
+        daemon = _build_daemon(args)
+    except DaemonStartupError as exc:
+        log.error("%s", exc)
+        return 2
+    signal.signal(signal.SIGTERM, lambda _signum, _frame: daemon.stop())
+    daemon.run()
+    return 0
+
+
+def _build_daemon(args: argparse.Namespace) -> Daemon:
+    return Daemon(
         udp_port=args.port,
         evidence_dir=args.evidence_dir,
         sample_dir=args.sample_dir,
@@ -621,13 +832,15 @@ def main(argv: list[str] | None = None) -> int:
         signing_key_path=args.signing_key,
         portable_private_key_path=args.portable_private_key,
         portable_public_key_path=args.portable_public_key,
+        provenance_store=args.provenance_store,
         generate_html_report=not args.no_html_report,
         open_artifacts=args.open_artifacts,
         time_anchor_url=args.time_anchor,
+        sdk_adapter_enabled=args.sdk_adapter,
+        sdk_cli=args.sdk_cli,
+        sdk_development_key=args.sdk_development_key,
+        sdk_registry=args.sdk_registry,
     )
-    signal.signal(signal.SIGTERM, lambda _signum, _frame: daemon.stop())
-    daemon.run()
-    return 0
 
 
 if __name__ == "__main__":

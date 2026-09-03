@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import abc
 import hashlib
+import hmac
+import json
 import logging
+import os
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -112,6 +116,17 @@ class HardwareProvider(abc.ABC):
         monotonic system clock attested by the SE.
         """
 
+    def last_cosignature_hash(self) -> str:
+        """Head of this device's cosignature chain, or 'genesis' if it has none."""
+        return "genesis"
+
+    def counter_scope(self) -> str:
+        """State what the monotonic counter is actually backed by."""
+        return "provider_defined"
+
+    def _record_cosignature(self, entangled_hash: str) -> None:
+        """Persist the new chain head. Providers without durable state keep none."""
+
     def bind_chain_root(self, chain_root_hash: str) -> HardwareBinding:
         """Bind a hash chain root to this hardware device.
 
@@ -165,6 +180,7 @@ class HardwareProvider(abc.ABC):
         )
         entangled_hash = hashlib.sha256(entangle_input).hexdigest()
         signature = self.sign(entangled_hash.encode())
+        self._record_cosignature(entangled_hash)
 
         return HardwareCosignature(
             entangled_hash=entangled_hash,
@@ -265,19 +281,71 @@ class SoftwareProvider(HardwareProvider):
 
     def __init__(self, key_path: Path = Path("~/.apw/device_key.bin")) -> None:
         self.key_path = key_path.expanduser()
-        self._counter = 0
+        self._state_path = self.key_path.with_name(self.key_path.name + ".state.json")
+        self._state_lock = threading.Lock()
         self._seed = self._load_or_create_key()
         self._device_id = hashlib.sha256(self._seed).hexdigest()[:16]
 
+    @staticmethod
+    def _restrict(path: Path) -> None:
+        """Keep the signing seed unreadable by other local users.
+
+        IMPORTANT: repaired on every load, not only on creation. Anyone who can
+        read the seed derives the device_id and forges a manifest_signature the
+        verifier accepts, and machines provisioned before this check existed
+        still carry the world-readable file.
+        """
+        try:
+            mode = path.stat().st_mode & 0o777
+            if mode & 0o077:
+                os.chmod(path, 0o600)
+                log.warning("Tightened permissions on %s from %o to 600", path, mode)
+        except OSError:
+            log.warning("Could not restrict permissions on %s", path, exc_info=True)
+
     def _load_or_create_key(self) -> bytes:
         if self.key_path.exists():
+            self._restrict(self.key_path)
             return self.key_path.read_bytes()
-        import os
         seed = os.urandom(32)
         self.key_path.parent.mkdir(parents=True, exist_ok=True)
         self.key_path.write_bytes(seed)
+        self._restrict(self.key_path)
         log.info("Created software signing key at %s", self.key_path)
         return seed
+
+    def _read_state(self) -> dict[str, object]:
+        try:
+            state = json.loads(self._state_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError):
+            return {}
+        return state if isinstance(state, dict) else {}
+
+    def _write_state(self, state: dict[str, object]) -> None:
+        temporary = self._state_path.with_name(self._state_path.name + f".tmp-{os.getpid()}")
+        try:
+            temporary.write_text(json.dumps(state, sort_keys=True), encoding="utf-8")
+            temporary.replace(self._state_path)
+            self._restrict(self._state_path)
+        except OSError:
+            temporary.unlink(missing_ok=True)
+            log.warning("Could not persist signer state to %s", self._state_path, exc_info=True)
+
+    def last_cosignature_hash(self) -> str:
+        value = self._read_state().get("last_cosignature_hash")
+        return value if isinstance(value, str) and value else "genesis"
+
+    def counter_scope(self) -> str:
+        return (
+            "persisted local file counter, not hardware-backed; rollback is prevented only "
+            "by filesystem permissions on the signer state file"
+        )
+
+    def _record_cosignature(self, entangled_hash: str) -> None:
+        with self._state_lock:
+            state = self._read_state()
+            state["last_cosignature_hash"] = entangled_hash
+            self._write_state(state)
 
     def device_identity(self) -> DeviceIdentity:
         return DeviceIdentity(
@@ -288,11 +356,9 @@ class SoftwareProvider(HardwareProvider):
         )
 
     def sign(self, data: bytes) -> bytes:
-        import hmac
         return hmac.new(self._seed, data, hashlib.sha256).digest()
 
     def verify(self, data: bytes, signature: bytes) -> bool:
-        import hmac
         expected = hmac.new(self._seed, data, hashlib.sha256).digest()
         return hmac.compare_digest(expected, signature)
 
@@ -304,7 +370,6 @@ class SoftwareProvider(HardwareProvider):
         identical aligned plaintext blocks (ECB-style). Mixing in a
         big-endian block counter makes every block's keystream distinct.
         """
-        import hmac
         blocks = []
         produced = 0
         counter = 0
@@ -316,8 +381,6 @@ class SoftwareProvider(HardwareProvider):
         return b"".join(blocks)[:length]
 
     def seal(self, plaintext: bytes) -> bytes:
-        import hmac
-        import os
         nonce = os.urandom(16)
         key = hmac.new(self._seed, b"apw-seal-" + nonce, hashlib.sha256).digest()
         keystream = self._keystream(key, nonce, len(plaintext))
@@ -326,7 +389,6 @@ class SoftwareProvider(HardwareProvider):
         return nonce + tag + sealed
 
     def unseal(self, sealed_data: bytes) -> bytes:
-        import hmac
         if len(sealed_data) < 32:
             raise ValueError("Sealed data too short")
         nonce = sealed_data[:16]
@@ -340,8 +402,20 @@ class SoftwareProvider(HardwareProvider):
         return bytes(a ^ b for a, b in zip(ciphertext, keystream))
 
     def monotonic_counter(self) -> int:
-        self._counter += 1
-        return self._counter
+        """Persisted across processes.
+
+        A per-process integer restarted at 1 on every launch, which made the
+        signed counter useless for the replay, reorder and drop detection the
+        HardwareProvider contract promises it is for.
+        """
+        with self._state_lock:
+            state = self._read_state()
+            raw = state.get("monotonic_counter")
+            current = raw if isinstance(raw, int) and not isinstance(raw, bool) and raw >= 0 else 0
+            current += 1
+            state["monotonic_counter"] = current
+            self._write_state(state)
+            return current
 
     def clock_ms(self) -> int:
         return int(time.time() * 1000)

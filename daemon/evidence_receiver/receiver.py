@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from daemon.common import append_jsonl, utc_timestamp
-from .taxonomy import validate_network_event
+from .taxonomy import MAX_STREAM_KEY_CHARS, validate_network_event
 
 log = logging.getLogger(__name__)
 
@@ -25,6 +25,19 @@ log = logging.getLogger(__name__)
 # unknown_unobserved, and a returning evicted stream's chain gap is recorded as
 # a break (see _track_stream and receipt_summary).
 MAX_TRACKED_STREAMS = 64
+
+# IMPORTANT: the acknowledgement is echoed back over UDP, so every sender-derived
+# value in it is bounded. One 65 KB event_sequence pushed the reply past the
+# 65,507-byte payload limit, which raised acknowledgements_failed and
+# permanently capped the session's coverage at partial.
+MAX_ACK_REASON_CHARS = 256
+
+
+def _stream_field(value: object, fallback: str) -> str:
+    """Bound a sender-controlled stream key before it reaches a reply or evidence."""
+    if not isinstance(value, str) or not value:
+        return fallback
+    return value[:MAX_STREAM_KEY_CHARS]
 
 
 @dataclass
@@ -119,9 +132,9 @@ class EvidenceReceiver:
             return None, self._build_ack(raw_event, False, "rejected_invalid", reason)
 
         event = raw_event
-        instance_id = str(event.get("plugin_instance_id") or "unknown_plugin_instance")
-        plugin_session_id = str(
-            event.get("plugin_capture_session_id") or "unknown_plugin_capture_session"
+        instance_id = _stream_field(event.get("plugin_instance_id"), "unknown_plugin_instance")
+        plugin_session_id = _stream_field(
+            event.get("plugin_capture_session_id"), "unknown_plugin_capture_session"
         )
         stream_key = (instance_id, plugin_session_id)
 
@@ -152,7 +165,7 @@ class EvidenceReceiver:
 
         sequence = event.get("event_sequence")
         receipt_state = "accepted"
-        if isinstance(sequence, int) and sequence > 0:
+        if isinstance(sequence, int) and not isinstance(sequence, bool) and sequence > 0:
             previous = stream.highest_accepted_sequence
             if previous > 0 and sequence <= previous:
                 self.sequence_out_of_order_count += 1
@@ -217,7 +230,13 @@ class EvidenceReceiver:
         event["daemon_event_id"] = (
             f"{self.capture_session_id or self._receiver_instance_id}:{self.event_count + 1}"
         )
-        self._write_event(event)
+        try:
+            self._write_event(event)
+        except (OSError, ValueError, TypeError) as exc:
+            reason = f"event could not be persisted as evidence: {exc}"
+            self._reject(reason)
+            stream.rejections += 1
+            return None, self._build_ack(event, False, "rejected_unpersistable", reason, stream)
         self.event_count += 1
         return event, self._build_ack(event, True, receipt_state, None, stream)
 
@@ -229,10 +248,12 @@ class EvidenceReceiver:
         reason: str | None,
         stream: _StreamReceiptState | None = None,
     ) -> dict[str, object]:
-        instance_id = str(event.get("plugin_instance_id") or "unknown_plugin_instance")
-        plugin_session_id = str(
-            event.get("plugin_capture_session_id") or "unknown_plugin_capture_session"
+        instance_id = _stream_field(event.get("plugin_instance_id"), "unknown_plugin_instance")
+        plugin_session_id = _stream_field(
+            event.get("plugin_capture_session_id"), "unknown_plugin_capture_session"
         )
+        raw_sequence = event.get("event_sequence")
+        sequence = raw_sequence if isinstance(raw_sequence, int) and not isinstance(raw_sequence, bool) else None
         if stream is None:
             with self._streams_lock:
                 stream = self._stream_states.get((instance_id, plugin_session_id))
@@ -243,7 +264,7 @@ class EvidenceReceiver:
             "daemon_capture_session_id": self.capture_session_id,
             "plugin_instance_id": instance_id,
             "plugin_capture_session_id": plugin_session_id,
-            "event_sequence": event.get("event_sequence"),
+            "event_sequence": sequence if isinstance(sequence, int) else None,
             "accepted": accepted,
             "receipt_state": receipt_state,
             "highest_accepted_sequence": stream.highest_accepted_sequence if stream else 0,
@@ -258,7 +279,7 @@ class EvidenceReceiver:
             ),
         }
         if reason:
-            ack["reason"] = reason
+            ack["reason"] = reason[:MAX_ACK_REASON_CHARS]
         return ack
 
     def send_acknowledgement(

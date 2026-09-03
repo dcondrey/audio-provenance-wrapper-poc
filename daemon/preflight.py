@@ -11,6 +11,10 @@ from pathlib import Path
 from daemon.signing import Ed25519Signer
 
 
+MINIMUM_PYTHON = (3, 11)
+REQUIRED_ARCHITECTURES = frozenset({"x86_64", "arm64"})
+
+
 @dataclass(frozen=True)
 class Check:
     name: str
@@ -45,17 +49,28 @@ def run_preflight(session_dir: Path, port: int = 9876) -> list[Check]:
         "ok" if free_bytes >= 2 * 1024**3 else "fail",
         f"{free_bytes / 1024**3:.1f} GiB free (2 GiB minimum)",
     ))
+    runtime_ok = sys.version_info >= MINIMUM_PYTHON
     checks.append(Check(
         "python_runtime",
-        "ok" if sys.version_info >= (3, 11) else "fail",
-        sys.version.split()[0],
+        "ok" if runtime_ok else "fail",
+        f"{sys.version.split()[0]} at {sys.executable}" + (
+            "" if runtime_ok else
+            f"; Python {MINIMUM_PYTHON[0]}.{MINIMUM_PYTHON[1]}+ is required. Run the repo venv "
+            "interpreter (./.venv/bin/python -m daemon.preflight), or create it with "
+            "'uv venv && uv pip install -r requirements.txt'."
+        ),
     ))
 
     try:
         signer = Ed25519Signer()
         public_key = signer.public_key_hex()
     except Exception as exc:
-        checks.append(Check("signing_material", "fail", str(exc)))
+        checks.append(Check(
+            "signing_material",
+            "fail",
+            f"{type(exc).__name__}: {exc}. Install the daemon dependencies into the repo venv: "
+            "'uv pip install -r requirements.txt', then rerun with ./.venv/bin/python.",
+        ))
     else:
         checks.append(Check(
             "signing_material", "ok",
@@ -79,13 +94,21 @@ def run_preflight(session_dir: Path, port: int = 9876) -> list[Check]:
             "ok" if verification.returncode == 0 else "fail",
             str(bundles[0]) if verification.returncode == 0 else verification.stderr.strip(),
         ))
+        # IMPORTANT: file(1) exits 0 for any readable Mach-O, so keying on its
+        # status computed nothing about architecture: a thin arm64 bundle passed
+        # on the Intel Mac the universal build exists to serve.
         architecture = subprocess.run(
-            ["file", str(binary)], check=False, capture_output=True, text=True,
+            ["lipo", "-archs", str(binary)], check=False, capture_output=True, text=True,
         )
+        slices = set(architecture.stdout.split()) if architecture.returncode == 0 else set()
+        missing = sorted(REQUIRED_ARCHITECTURES - slices)
         checks.append(Check(
             "plugin_architecture",
-            "ok" if architecture.returncode == 0 else "fail",
-            architecture.stdout.strip() or architecture.stderr.strip(),
+            "ok" if not missing else "fail",
+            " ".join(sorted(slices)) if not missing else (
+                f"missing {', '.join(missing)} (found {' '.join(sorted(slices)) or 'nothing'}); "
+                "rebuild universal with ./scripts/build_plugin.sh --install"
+            ),
         ))
         signing = subprocess.run(
             ["codesign", "-dvvv", str(bundles[0])],

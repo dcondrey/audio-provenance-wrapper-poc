@@ -1,0 +1,5 @@
+# Example impulse-response manifest. Every RIR directory must carry manifest.jsonl and every line
+# must declare its own licence; the loader refuses anything outside the commercial allowlist.
+{"path": "stage0/treated_small/monitor_iphone_1m_75dba.wav", "licence": "audio-provenance-owned", "source": "audio-provenance-stage0", "sample_rate": 48000}
+{"path": "mit_traer_mcdermott/h001_office.wav", "licence": "CC-BY-4.0", "source": "mit-arss", "attribution": "Traer and McDermott, Acoustical Reverberation Scene Statistics Survey", "url": "https://mcdermottlab.mit.edu/Reverb/IR_Survey.html", "sample_rate": 44100}
+{"path": "echothief/BatteryPowell.wav", "licence": "echothief-convolution-grant", "source": "echothief", "url": "http://www.echothief.com/", "sample_rate": 48000}

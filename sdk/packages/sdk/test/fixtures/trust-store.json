@@ -1,0 +1,10 @@
+{
+  "format": "audio-provenance-trust-store-v0",
+  "anchors": [
+    {
+      "signer_id": "604ca4627a21158b",
+      "identity": "Signal Room Studios",
+      "authority": "studio-ca"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 
 Define the high-level architecture for the Ableton audio provenance proof of concept.
 
-The system captures observable provenance events from routed audio workflows and serializes selected evidence into a JSON fight-card manifest with a C2PA-aligned mapping prototype.
+The system captures observable provenance events from routed audio workflows and serializes selected evidence into a JSON fight-card manifest and a real, signed C2PA claim.
 
 ## Core Principle
 
@@ -208,22 +208,32 @@ It stores:
 - filesystem-observed sample import events
 - unknown or bypassed states
 
-This internal model is richer than the exported C2PA manifest.
+This internal model is richer than the signed C2PA claim.
 
-## C2PA Alignment Layer
+## C2PA Layer
 
-The system exports an internal JSON manifest containing a tentative mapping of
-selected evidence to C2PA assertion labels. It is not an embedded or conforming
-C2PA manifest, and the local HMAC seal is not a production C2PA signature.
+`daemon/c2pa_engine` builds and signs a real C2PA claim with the c2pa-rs SDK
+(`c2pa-python`). For a 16-bit PCM WAV the manifest is embedded as a top-level
+`C2PA` RIFF chunk in a signed copy under `manifests/artifacts/`; AIFF cannot
+embed, so it gets a `.c2pa` sidecar whose binding has no exclusions. The
+detected export is never rewritten, because its digest is already committed.
 
-The export layer maps:
-- observed stems
-- hashes
-- actions
-- ingredients
-- source types
+`daemon/provenance` is the neutral seam that supplies the signing material.
+`detect_provider()` returns a file-backed local reference provider by default
+and is injected into the daemon the way the hardware attestation provider is,
+so tests substitute their own. The chain it issues is self-signed by a root this
+machine generated: key possession, never verified identity.
 
-into C2PA-aligned mapping records for later integration work.
+The claim carries:
+- a `c2pa.actions.v2` assertion
+- an `apw.unobserved` assertion naming what was not observed
+- ingredients for the observed stem (`componentOf`), observed samples
+  (`inputTo`), and project-referenced samples the daemon never observed
+  (`inputTo`, `unknown_unobserved`, hash recorded)
+
+`c2pa_mapping` remains in the manifest as a descriptive projection. The local
+HMAC seal is a separate, local-only integrity mechanism and is not a C2PA
+signature.
 
 ## Demo Presentation Layer
 
@@ -274,12 +284,14 @@ enforces proof-level, association, and complete-coverage invariants.
 Every operational manifest and adjacent handoff record carry the export hard
 hash, routed chain commitment, coverage, inferred association, creator
 declarations, self-generated signing key scope, evidence locations/hashes, and
-a tentative C2PA mapping. Missing downstream requirements explicitly include
-verified identity, author-controlled credentials, a production certificate
-chain, audio-native soft binding, resilient recovery, registry publication,
-production C2PA claim generation, and consent/rights verification.
+a summary of the signed C2PA claim. Missing downstream requirements explicitly
+include verified identity, author-controlled credentials, a production
+certificate chain issued by a recognised authority, publication on a recognised
+C2PA trust list, audio-native soft binding, resilient recovery, registry
+publication, and consent/rights verification.
 
-This is a neutral provenance handoff, not a Genotone API payload.
+This is a neutral provenance handoff. The internal SDK adapter must validate and map it before it
+becomes a registry record.
 
 ## Trust Boundary
 
@@ -329,7 +341,12 @@ The first implementation supports:
 
 The goal is proving truthful observable provenance capture.
 
-Not full production-ready C2PA implementation.
+The C2PA claim is real: the reference tool `c2patool 0.26.68`, run outside our
+pipeline, reads the embedded WAV claim as `validation_state: Trusted` with zero
+failures against the issuing root and `signingCredential.untrusted` without it
+(`docs/VALIDATION.md`). It shares the c2pa-rs core with the binding that wrote
+the claim, the AIFF sidecar path is not externally validated, and the chain is
+self-issued, so this is not a production trust deployment.
 
 ## Future Expansion
 
@@ -338,6 +355,6 @@ Future versions may support:
 - wrapper or mini-host plugin architecture
 - plugin hosting inside the capture plugin
 - richer ingredient relationships
-- full C2PA signing workflows
-- embedded manifests
+- CAWG identity assertions embedded in the signed claim
+- signing under an externally issued certificate chain
 - additional DAW support

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from daemon.common import canonical_json_bytes, sha256_prefix
-from daemon.signing import Ed25519Signer, verify_ed25519_signature
+from daemon.signing import Ed25519Signer, pinned_public_key, verify_ed25519_signature
 
 
 @dataclass(frozen=True)
@@ -34,6 +34,20 @@ def _member(
     if expected_sha256 is not None and digest != expected_sha256:
         raise ValueError(f"bundle source hash changed before packaging: {source_path}")
     return BundleMember(archive_path, source_path, size, digest, source_kind)
+
+
+def _archive_path(path: Path, base: Path, fallback_dir: str) -> str:
+    """Mirror the producer's manifest directory inside the archive.
+
+    IMPORTANT: the manifest resolves presentation.html_report, verifier_result,
+    downstream_handoff and c2pa_claim.signed_asset.relative_path against its own
+    directory, so a member filed under an invented folder is a dead link for the
+    recipient the bundle exists to serve.
+    """
+    try:
+        return path.resolve().relative_to(base).as_posix()
+    except ValueError:
+        return f"{fallback_dir}/{path.name}"
 
 
 def _bound_evidence_source(evidence_dir: Path, file_name: str, byte_length: int, digest: str) -> Path:
@@ -68,16 +82,37 @@ def create_evidence_bundle(
         if isinstance(manifest.get("evidence_binding"), dict)
         else {}
     )
+    base = manifest_path.resolve().parent
     members = [
-        _member(f"manifest/{manifest_path.name}", manifest_path, "manifest"),
-        _member(f"presentation/{report_path.name}", report_path, "fight_card"),
-        _member(f"verification/{verification_path.name}", verification_path, "local_poc_verifier_result"),
-        _member(f"handoff/{handoff_path.name}", handoff_path, "downstream_handoff"),
+        _member(manifest_path.name, manifest_path, "manifest"),
+        _member(_archive_path(report_path, base, "presentation"), report_path, "fight_card"),
+        _member(
+            _archive_path(verification_path, base, "verification"),
+            verification_path,
+            "local_poc_verifier_result",
+        ),
+        _member(_archive_path(handoff_path, base, "handoff"), handoff_path, "downstream_handoff"),
     ]
 
     export_path = Path(str(export.get("file_path", ""))).expanduser()
     if export_path.is_file():
         members.append(_member(f"export/{export_path.name}", export_path, "export_audio"))
+
+    claim = manifest.get("c2pa_claim") if isinstance(manifest.get("c2pa_claim"), dict) else {}
+    signed_asset = claim.get("signed_asset") if isinstance(claim.get("signed_asset"), dict) else {}
+    for relative, kind in (
+        (signed_asset.get("relative_path"), "c2pa_signed_asset"),
+        (claim.get("sidecar_manifest"), "c2pa_sidecar_manifest"),
+    ):
+        if not isinstance(relative, str) or not relative:
+            continue
+        source = (base / relative).resolve()
+        if not source.is_file():
+            continue
+        archive_path = _archive_path(source, base, "c2pa")
+        if any(member.archive_path == archive_path for member in members):
+            continue
+        members.append(_member(archive_path, source, kind))
 
     evidence_dir = Path(str(binding.get("evidence_directory", ""))).expanduser()
     evidence_files = binding.get("evidence_files", {})
@@ -191,8 +226,16 @@ def create_evidence_bundle(
     return index_path, bundle_path
 
 
-def verify_evidence_bundle(index_path: Path, bundle_path: Path) -> list[str]:
-    """Return integrity errors for the signed index and deterministic archive payload."""
+def verify_evidence_bundle(
+    index_path: Path,
+    bundle_path: Path,
+    public_key_path: Path | None = None,
+) -> list[str]:
+    """Return integrity errors for the signed index and deterministic archive payload.
+
+    IMPORTANT: the index signature is checked against a locally pinned Ed25519 public
+    key. Without a pin, anyone could re-sign an edited index with a key of their own.
+    """
     errors: list[str] = []
     try:
         index_bytes = index_path.read_bytes()
@@ -202,11 +245,17 @@ def verify_evidence_bundle(index_path: Path, bundle_path: Path) -> list[str]:
     if not isinstance(index, dict):
         return ["bundle index must be a JSON object"]
     signature = index.get("portable_signature")
+    pinned, pinned_path = pinned_public_key(public_key_path)
     if not isinstance(signature, dict):
         errors.append("bundle index portable signature is missing")
+    elif pinned is None:
+        errors.append(
+            f"bundle index signature was not checked: no pinned Ed25519 public key at "
+            f"{pinned_path}; supply the producer's public key to verify it"
+        )
     else:
         unsigned = {key: value for key, value in index.items() if key != "portable_signature"}
-        valid, message = verify_ed25519_signature(unsigned, signature)
+        valid, message = verify_ed25519_signature(unsigned, signature, public_key_path)
         if not valid:
             errors.append(message)
     try:

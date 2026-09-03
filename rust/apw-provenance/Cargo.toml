@@ -1,0 +1,34 @@
+[package]
+name = "apw-provenance"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lints.rust]
+warnings = "deny"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+
+[dependencies]
+apw-core.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rcgen.workspace = true
+x509-parser.workspace = true
+p256.workspace = true
+sha2.workspace = true
+hmac.workspace = true
+subtle.workspace = true
+zeroize.workspace = true
+rand_core.workspace = true
+time.workspace = true
+log.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

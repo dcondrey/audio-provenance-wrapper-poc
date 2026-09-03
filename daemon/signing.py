@@ -93,23 +93,47 @@ class Ed25519Signer:
         ).hex()
 
 
+def pinned_public_key(public_key_path: Path | None = None) -> tuple[bytes | None, Path]:
+    """Load the verifying key this machine pins, with the path it looked in.
+
+    A caller that cannot find a pin must say so rather than report a failed
+    signature: on a recipient's machine the two are completely different facts.
+    """
+    pinned = (public_key_path or DEFAULT_PUBLIC_KEY).expanduser()
+    try:
+        raw = pinned.read_bytes()
+    except OSError:
+        return None, pinned
+    return (raw if len(raw) == 32 else None), pinned
+
+
 def verify_ed25519_signature(
     unsigned_manifest: dict[str, object],
     signature: dict[str, object],
     public_key_path: Path | None = None,
 ) -> tuple[bool, str]:
+    """Verify a portable signature against a key held by this machine.
+
+    IMPORTANT: the verifying key is never taken from ``signature["public_key_hex"]``.
+    A blob that supplies its own key proves only that whoever re-signed it owned some
+    Ed25519 key, so any attacker could re-sign an edited document and pass. The
+    embedded key is used solely to say whether the signer differs from the pinned one.
+    """
     from cryptography.exceptions import InvalidSignature
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-    if public_key_path is not None:
-        raw_public = public_key_path.expanduser().read_bytes()
-    else:
-        try:
-            raw_public = bytes.fromhex(str(signature.get("public_key_hex", "")))
-        except ValueError:
-            return False, "portable public key is malformed"
-    if len(raw_public) != 32:
-        return False, "portable public key must be 32 raw bytes"
+    raw_public, pinned = pinned_public_key(public_key_path)
+    if raw_public is None:
+        return False, (
+            f"no usable pinned Ed25519 public key at {pinned}; a portable signature "
+            "cannot supply the key that verifies it"
+        )
+    embedded = str(signature.get("public_key_hex", ""))
+    if embedded and embedded.lower() != raw_public.hex():
+        return False, (
+            "the portable signature was produced by a different key than the pinned "
+            f"public key at {pinned}"
+        )
     try:
         signature_bytes = bytes.fromhex(str(signature.get("signature_hex", "")))
     except ValueError:
@@ -122,4 +146,7 @@ def verify_ed25519_signature(
         Ed25519PublicKey.from_public_bytes(raw_public).verify(signature_bytes, content)
     except InvalidSignature:
         return False, "Ed25519 signature is invalid"
-    return True, "Ed25519 signature verified with the public key; signer identity remains unverified"
+    return True, (
+        f"Ed25519 signature verified against the pinned public key at {pinned}; "
+        "signer identity remains unverified"
+    )

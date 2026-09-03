@@ -46,6 +46,7 @@ portable_signature
 manifest_signature
 presentation
 c2pa_mapping
+c2pa_claim
 downstream_registration_handoff
 ```
 
@@ -216,8 +217,9 @@ explicit non-circular policy is part of the signed index.
 `downstream_registration_handoff` is a neutral, standards-oriented record. It
 contains the export hard hash, routed commitment, coverage, inferred
 association, real proof levels for declarations, signing-key trust scope,
-evidence bindings, a tentative C2PA mapping, and missing downstream
-requirements. It is not a Genotone API payload or compatibility claim.
+evidence bindings, a summary of the signed C2PA claim, and missing downstream
+requirements. It is not directly a registry payload; the internal SDK adapter must validate and
+map it without upgrading any proof level.
 
 ## Machine-readable enforcement
 
@@ -226,13 +228,47 @@ also enforces honesty invariants that are awkward to express declaratively:
 valid proof-level values, inferred association status, unknown unavailable
 association, and counter prerequisites for complete coverage.
 
-## C2PA alignment
+## C2PA
 
-`c2pa_mapping` is explicitly marked
-`mapping_only_not_an_embedded_c2pa_manifest`. It demonstrates how selected
-hash, ingredient, action, and unobserved records may map to C2PA concepts.
+Two sections carry C2PA data and they are not interchangeable.
 
-It is not a conforming embedded C2PA manifest or production C2PA signature.
+`c2pa_mapping` is a descriptive projection of internal evidence onto C2PA
+assertion labels. It is not signed, not embedded, and not conformant. It stays
+in the manifest because downstream readers already parse it.
+
+`c2pa_claim` records the real claim produced by `daemon/c2pa_engine` and signed
+into (or beside) the asset with the c2pa-rs SDK.
+
+| Field | Meaning |
+|---|---|
+| `status` | `embedded` (WAV, manifest appended as a top-level `C2PA` RIFF chunk), `sidecar` (AIFF, a separate `.c2pa` file), or `unavailable` |
+| `signed_asset` | Path and SHA-256 of the signed copy. The detected export is never rewritten; the signed copy is written under `manifests/artifacts/` |
+| `hard_binding` | The `c2pa.hash.data` binding, its exclusions, and the source digest. `source_sha256` equals `export.sha256` |
+| `validation` | The state read back from the signed asset: `verified`, `registered_but_changed`, `mark_found_claim_not_trusted`, or `nothing_found` |
+| `signer` | The self-issued signing identity, always `signer_identity: not_established` and `apw:proof_level: user_declared` |
+| `ingredients` | Per-node title, relationship, digest, what the digest is, and proof level |
+| `unresolved_ingredient_references` | Project sample references that could not be hashed, with the reason |
+
+The signing act and the hard binding are `directly_observed`. The signer
+identity is not. `validation.trust_anchor_scope` is always
+`self_issued_local_root_only`: a `verified` state means the claim chains to the
+root this machine generated, not to any external trust list, registry, or
+verified creator identity. `daemon/schema.py` rejects a manifest that presents
+a self-issued signer as `externally_verified`.
+
+An `unavailable` claim (unsupported container, 32-bit float export, missing
+provider, or a c2pa library that is not installed) carries its reason and
+`unknown_unobserved`. It is a statement about this pipeline, never about the
+audio.
+
+`c2pa_claim` is not a required key. `ManifestBuilder.build` always emits it, so
+requiring it would only reject manifests written before the section existed;
+those verify as before and get a `c2pa_claim_missing` warning instead. Every
+rule above is enforced whenever the section is present.
+
+`c2pa_claim` is assembled before both signing steps, so the portable Ed25519
+signature and the signed-content hash cover it. Editing any field inside it
+invalidates both.
 
 ## Unknown and unobserved facts
 

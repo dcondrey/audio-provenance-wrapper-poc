@@ -1,0 +1,67 @@
+name: Headless DAW lifecycle and soak
+
+on:
+  push:
+    paths:
+      - "CMakeLists.txt"
+      - "src/**"
+      - "tests/cpp/**"
+      - ".github/workflows/headless-daw-soak.yml"
+  pull_request:
+    paths:
+      - "CMakeLists.txt"
+      - "src/**"
+      - "tests/cpp/**"
+      - ".github/workflows/headless-daw-soak.yml"
+  schedule:
+    - cron: "17 6 * * 0"
+  workflow_dispatch:
+    inputs:
+      full_soak:
+        description: "Run the eight-hour soak on the dedicated self-hosted runner"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: headless-daw-soak-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  lifecycle-smoke:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - name: Configure native Release host tests
+        run: >-
+          cmake -S . -B build-headless-ci
+          -DBUILD_TESTING=ON
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_OSX_ARCHITECTURES="$(uname -m)"
+          -DAPW_HEADLESS_SOAK_SECONDS=5
+      - name: Build headless host
+        run: cmake --build build-headless-ci --config Release --target AudioProvenanceHeadlessHostTests --parallel 3
+      - name: Run lifecycle matrix and short soak
+        run: ctest --test-dir build-headless-ci -C Release --output-on-failure -R '^plugin_headless_daw_matrix$'
+
+  deterministic-eight-hour-soak:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.full_soak)
+    runs-on: [self-hosted, macOS, apw-soak]
+    timeout-minutes: 540
+    steps:
+      - uses: actions/checkout@v6
+      - name: Configure deterministic eight-hour gate
+        run: >-
+          cmake -S . -B build-headless-soak
+          -DBUILD_TESTING=ON
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_OSX_ARCHITECTURES="$(uname -m)"
+          -DAPW_HEADLESS_SOAK_SECONDS=28800
+      - name: Build headless host
+        run: cmake --build build-headless-soak --config Release --target AudioProvenanceHeadlessHostTests --parallel 3
+      - name: Run the eight-hour lifecycle soak gate
+        run: ctest --test-dir build-headless-soak -C Release --verbose -R '^plugin_headless_daw_matrix$'

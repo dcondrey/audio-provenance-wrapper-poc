@@ -1,4 +1,4 @@
-# Audio Provenance Wrapper POC - Build Spec (superseded)
+# Audio Provenance - Build Spec (superseded)
 
 **This spec is superseded and kept only as a pointer.** It described the build-out
 from the original scaffolded state; everything it listed under "What Needs to Be

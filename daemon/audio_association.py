@@ -3,7 +3,6 @@ from __future__ import annotations
 import math
 import statistics
 import struct
-import warnings
 from pathlib import Path
 from typing import Iterator
 
@@ -59,11 +58,106 @@ def _feature(samples: list[float]) -> Feature:
     return {"rms": rms, "zcr": zcr, "crest": crest, "envelope": tuple(envelope)}
 
 
+def _extended80(data: bytes) -> float:
+    """Decode the IEEE 754 80-bit extended sample rate an AIFF COMM chunk stores."""
+    exponent, high, low = struct.unpack(">HII", data[:10])
+    sign = -1.0 if exponent & 0x8000 else 1.0
+    exponent &= 0x7FFF
+    if exponent == 0 and high == 0 and low == 0:
+        return 0.0
+    if exponent == 0x7FFF:
+        raise ValueError("AIFF sample rate is not a finite number")
+    exponent -= 16383
+    return sign * (high * 2.0 ** (exponent - 31) + low * 2.0 ** (exponent - 63))
+
+
+# AIFC compression identifiers that are still linear PCM, with their byte order.
+_AIFC_PCM_ORDER = {b"NONE": "big", b"twos": "big", b"sowt": "little", b"in24": "big", b"in32": "big"}
+
+
+class _AiffReader:
+    """Minimal PCM AIFF/AIFC reader with the subset of the wave API used here.
+
+    IMPORTANT: the stdlib aifc module was removed in Python 3.13, which is the
+    pinned runtime. Routing AIFF through it made every AIFF export report an
+    unavailable stem-to-export association while the runbook still told the
+    presenter to export AIFF.
+    """
+
+    def __init__(self, path: Path) -> None:
+        self._handle = path.open("rb")
+        try:
+            header = self._handle.read(12)
+            if len(header) < 12 or header[:4] != b"FORM" or header[8:12] not in {b"AIFF", b"AIFC"}:
+                raise ValueError("not an AIFF/AIFC file")
+            is_aifc = header[8:12] == b"AIFC"
+            size = path.stat().st_size
+            comm: bytes | None = None
+            self._data_start = 0
+            self._data_bytes = 0
+            offset = 12
+            while offset + 8 <= size:
+                self._handle.seek(offset)
+                chunk_header = self._handle.read(8)
+                if len(chunk_header) < 8:
+                    break
+                chunk_id = chunk_header[:4]
+                (length,) = struct.unpack(">I", chunk_header[4:])
+                if length > size - offset - 8:
+                    raise ValueError(f"AIFF chunk {chunk_id!r} declares more bytes than the file holds")
+                if chunk_id == b"COMM":
+                    comm = self._handle.read(min(length, 64))
+                elif chunk_id == b"SSND":
+                    if length < 8:
+                        raise ValueError("truncated AIFF SSND chunk")
+                    ssnd_offset, _block_size = struct.unpack(">II", self._handle.read(8))
+                    self._data_start = offset + 16 + ssnd_offset
+                    self._data_bytes = max(0, length - 8 - ssnd_offset)
+                offset += 8 + length + (length & 1)
+            if comm is None or len(comm) < 18:
+                raise ValueError("AIFF file has no usable COMM chunk")
+            channels, frames, bits = struct.unpack(">hIh", comm[:8])
+            self._rate = int(round(_extended80(comm[8:18])))
+            compression = comm[18:22] if is_aifc and len(comm) >= 22 else b"NONE"
+            if compression not in _AIFC_PCM_ORDER:
+                raise ValueError(f"compressed AIFF is not supported: {compression!r}")
+            self.byte_order = _AIFC_PCM_ORDER[compression]
+            if channels <= 0 or bits <= 0 or bits % 8:
+                raise ValueError("unsupported AIFF frame layout")
+            self._channels = int(channels)
+            self._width = bits // 8
+            frame_bytes = self._channels * self._width
+            self._frames = min(int(frames), self._data_bytes // frame_bytes) if frame_bytes else 0
+            self._position = 0
+            self._handle.seek(self._data_start)
+        except Exception:
+            self._handle.close()
+            raise
+
+    def getframerate(self) -> int:
+        return self._rate
+
+    def getnchannels(self) -> int:
+        return self._channels
+
+    def getsampwidth(self) -> int:
+        return self._width
+
+    def readframes(self, count: int) -> bytes:
+        available = min(count, self._frames - self._position)
+        if available <= 0:
+            return b""
+        self._position += available
+        return self._handle.read(available * self._channels * self._width)
+
+    def close(self) -> None:
+        self._handle.close()
+
+
 def _open_pcm(path: Path):
     """Open a PCM export. Contract: unsupported or unreadable formats raise
     ValueError so callers degrade to an honest "unavailable" association;
-    wave.Error/aifc.Error are Exception subclasses outside callers' tuples,
-    and aifc left the stdlib in Python 3.13."""
+    wave.Error is an Exception subclass outside callers' tuples."""
     if path.suffix.lower() == ".wav":
         import wave
 
@@ -77,22 +171,10 @@ def _open_pcm(path: Path):
         return handle, "little"
     if path.suffix.lower() in {".aif", ".aiff"}:
         try:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", DeprecationWarning)
-                import aifc
-        except ModuleNotFoundError as exc:
-            raise ValueError(
-                "AIFF association requires the stdlib aifc module, removed in Python 3.13"
-            ) from exc
-
-        try:
-            handle = aifc.open(str(path), "rb")
-        except aifc.Error as exc:
+            reader = _AiffReader(path)
+        except (OSError, struct.error) as exc:
             raise ValueError(f"unsupported AIFF format: {exc}") from exc
-        if handle.getcomptype() not in {b"NONE", "NONE"}:
-            handle.close()
-            raise ValueError("compressed AIFF is not supported")
-        return handle, "big"
+        return reader, reader.byte_order
     raise ValueError("only PCM WAV and AIFF exports are supported")
 
 
@@ -353,11 +435,14 @@ def _unavailable(reason: str) -> dict[str, object]:
         "status": "unavailable",
         "method": METHOD,
         "method_version": METHOD_VERSION,
+        # IMPORTANT: null, not 0.0. A quantitative zero reads as "the routed stem
+        # was measured and is not in the export", which is the absence-as-evidence
+        # inversion the charter forbids; nothing was measured at all.
         "confidence": None,
-        "matched_coverage": 0.0,
-        "routed_coverage": 0.0,
-        "matched_window_count": 0,
-        "comparable_window_count": 0,
+        "matched_coverage": None,
+        "routed_coverage": None,
+        "matched_window_count": None,
+        "comparable_window_count": None,
         "reason": reason,
         "alignment_series": [],
         "alignment_similarity": [],

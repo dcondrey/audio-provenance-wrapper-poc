@@ -14,6 +14,13 @@ COVERAGE_STATUSES = {
     "partial_observed_path",
     "unknown_coverage",
 }
+C2PA_CLAIM_STATUSES = {"embedded", "sidecar", "unavailable"}
+C2PA_VALIDATION_STATES = {
+    "verified",
+    "registered_but_changed",
+    "mark_found_claim_not_trusted",
+    "nothing_found",
+}
 
 
 def validate_manifest_invariants(data: object) -> list[str]:
@@ -82,7 +89,9 @@ def validate_manifest_invariants(data: object) -> list[str]:
                     "windows_hashed", "buffer_hash_events_received", "fifo_samples_dropped",
                     "fifo_windows_dropped", "udp_sends_failed", "sequence_gaps",
                     "hash_chain_breaks", "events_prepared", "events_received",
-                    "daemon_acknowledgements_sent", "daemon_acknowledgements_failed",
+                    "packets_received", "daemon_acknowledgements_sent",
+                    "daemon_acknowledgements_failed",
+                    "bypassed_buffers",
                 ):
                     if key not in counters:
                         errors.append(f"complete_observed_path missing counter: {key}")
@@ -92,19 +101,27 @@ def validate_manifest_invariants(data: object) -> list[str]:
                     errors.append("complete_observed_path requires the prepared/received event prefix to agree")
                 for key in (
                     "fifo_samples_dropped", "fifo_windows_dropped", "midi_events_dropped",
+                    "bypassed_buffers",
                     "udp_sends_failed", "sequence_gaps", "hash_chain_breaks",
                     "stream_evictions", "daemon_acknowledgements_failed",
+                    "plugin_telemetry_regressions",
                 ):
                     if counters.get(key, 0) != 0:
                         errors.append(f"complete_observed_path requires {key}=0")
-                if counters.get("daemon_acknowledgements_sent") != counters.get("events_received"):
-                    errors.append("complete_observed_path requires one daemon ACK dispatch per received event")
+                # IMPORTANT: per received PACKET, not per accepted event. The daemon
+                # acknowledges every datagram including rejections, so requiring
+                # parity with events_received made one stray packet produce a
+                # manifest the daemon's own verifier rejected as schema_invalid.
+                if counters.get("daemon_acknowledgements_sent") != counters.get("packets_received"):
+                    errors.append("complete_observed_path requires one daemon ACK dispatch per received packet")
 
     receipt = data.get("daemon_receipt_acknowledgement")
     if isinstance(receipt, dict):
         _require_proof(receipt, "daemon_receipt_acknowledgement", errors)
         if receipt.get("status") not in {"issued", "degraded", "unknown"}:
             errors.append("invalid daemon receipt acknowledgement status")
+
+    _validate_c2pa_claim(data.get("c2pa_claim"), errors)
 
     portable = data.get("portable_signature")
     if isinstance(portable, dict):
@@ -114,6 +131,74 @@ def validate_manifest_invariants(data: object) -> list[str]:
             errors.append("portable signature trust scope is invalid")
 
     return errors
+
+
+def _validate_c2pa_claim(claim: object, errors: list[str]) -> None:
+    """A real signed claim may never read as externally verified identity.
+
+    The chain is issued by a root this machine generated, so a 'verified'
+    validation state means the claim chains to our own anchor and nothing more.
+
+    IMPORTANT: absence is not an error. ManifestBuilder.build always emits the
+    section, so requiring it would only reject manifests written before it
+    existed; verify.py raises c2pa_claim_missing for those instead.
+    """
+    if claim is None:
+        return
+    if not isinstance(claim, dict):
+        errors.append("c2pa_claim must be an object")
+        return
+    _require_proof(claim, "c2pa_claim", errors)
+    status = claim.get("status")
+    if status not in C2PA_CLAIM_STATUSES:
+        errors.append(f"invalid c2pa_claim status: {status}")
+        return
+    if status == "unavailable":
+        if claim.get("apw:proof_level") != "unknown_unobserved":
+            errors.append("an unavailable c2pa_claim must be unknown_unobserved")
+        if not claim.get("reason"):
+            errors.append("an unavailable c2pa_claim must state a reason")
+        return
+
+    if claim.get("apw:proof_level") != "directly_observed":
+        errors.append("a signed c2pa_claim records a directly observed signing act")
+    if not isinstance(claim.get("hard_binding"), dict):
+        errors.append("a signed c2pa_claim must record its hard binding")
+    if claim.get("source_sha256_matches_export") is not True:
+        errors.append("the c2pa_claim hard binding must cover the hashed export bytes")
+
+    validation = claim.get("validation")
+    if not isinstance(validation, dict):
+        errors.append("a signed c2pa_claim must record its validation result")
+    elif validation.get("state") not in C2PA_VALIDATION_STATES:
+        errors.append(f"invalid c2pa_claim validation state: {validation.get('state')}")
+    elif validation.get("trust_anchor_scope") != "self_issued_local_root_only":
+        errors.append("c2pa_claim trust must stay scoped to the self-issued local root")
+
+    signer = claim.get("signer")
+    if not isinstance(signer, dict):
+        errors.append("a signed c2pa_claim must record its signer")
+    else:
+        _require_proof(signer, "c2pa_claim.signer", errors)
+        if signer.get("apw:proof_level") == "externally_verified":
+            errors.append("a self-issued c2pa signer identity must not be externally_verified")
+        if signer.get("signer_identity") != "not_established":
+            errors.append("c2pa_claim signer identity must remain not_established")
+
+    ingredients = claim.get("ingredients")
+    if not isinstance(ingredients, list):
+        errors.append("c2pa_claim ingredients must be a list")
+    else:
+        for index, ingredient in enumerate(ingredients):
+            if not isinstance(ingredient, dict):
+                errors.append(f"c2pa_claim.ingredients[{index}] must be an object")
+                continue
+            _require_proof(ingredient, f"c2pa_claim.ingredients[{index}]", errors)
+            if not ingredient.get("sha256"):
+                errors.append(
+                    f"c2pa_claim.ingredients[{index}] must record a digest even when "
+                    "it has no provenance of its own"
+                )
 
 
 # Real manifests nest ~6 levels; a crafted deeply-nested one must produce a

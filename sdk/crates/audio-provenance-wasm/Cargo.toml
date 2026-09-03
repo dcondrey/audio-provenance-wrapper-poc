@@ -1,0 +1,37 @@
+[package]
+name = "audio-provenance-wasm"
+description = "The wasm-bindgen surface over audio-provenance-sdk: verify and inspect audio provenance in a browser or in Node."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[lints]
+workspace = true
+
+[dependencies]
+genomark = { workspace = true }
+audio-provenance-audio = { workspace = true, features = ["codecs"] }
+audio-provenance-core = { workspace = true, features = ["std"] }
+audio-provenance-registry = { workspace = true }
+# IMPORTANT: the workspace entry is default-features = false, which drops
+# `audio-provenance-registry/http`, whose ureq -> rustls -> ring chain has no wasm32-unknown-unknown build.
+# Nothing here loses a capability by it: a browser cannot open a raw socket anyway, and the JS side
+# supplies the records instead.
+audio-provenance-sdk = { workspace = true }
+genotrace = { workspace = true }
+hex = { workspace = true, features = ["std"] }
+js-sys = "0.3.104"
+serde = { workspace = true, features = ["std"] }
+serde_json = { workspace = true, features = ["std"] }
+wasm-bindgen = "0.2.127"
+
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+console_error_panic_hook = "0.1.7"
+# REQUIRED: getrandom 0.4 refuses to build for wasm32-unknown-unknown until a backend is named.
+getrandom = { workspace = true, features = ["wasm_js"] }

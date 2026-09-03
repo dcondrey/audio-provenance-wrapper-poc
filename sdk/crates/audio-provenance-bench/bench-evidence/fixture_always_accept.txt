@@ -1,0 +1,80 @@
+audio-provenance-bench audio-provenance-bench/1
+codec      : fixture_always_accept (BENCH FIXTURE, not a product watermark)
+corpus     : 7 items at 48000 Hz, 2 ch
+payload    : 4754019ac35e0011 (8 bytes)   seed: 7450482583528238693
+channels   : 37 expected, 37 reported
+
+channel                                          trials  exact    ber  noPay    fpr   det ms v    
+------------------------------------------------------------------------------------------------------
+identity                                              7  1.000  0.000  0.000  1.000     0.00 FAIL 
+mp3_320                                               7  1.000  0.000  0.000  1.000     0.00 FAIL 
+mp3_192                                               7  1.000  0.000  0.000  1.000     0.00 FAIL 
+mp3_128                                               7  1.000  0.000  0.000  1.000     0.00 FAIL 
+mp3_96                                                7  1.000  0.000  0.000  1.000     0.00 FAIL 
+mp3_64                                                7  1.000  0.000  0.000  1.000     0.00 FAIL 
+aac_256                                               7  1.000  0.000  0.000  1.000     0.00 FAIL 
+aac_128                                               7  1.000  0.000  0.000  1.000     0.00 FAIL 
+aac_64                                                7  1.000  0.000  0.000  1.000     0.00 FAIL 
+opus_128                                              7  1.000  0.000  0.000  1.000     0.00 FAIL 
+opus_64                                               7  1.000  0.000  0.000  1.000     0.00 FAIL 
+resample_via_44100                                    7  1.000  0.000  0.000  1.000     0.00 FAIL 
+resample_via_22050                                    7  1.000  0.000  0.000  1.000     0.00 FAIL 
+requantize_16bit                                      7  1.000  0.000  0.000  1.000     0.00 FAIL 
+requantize_8bit                                       7  1.000  0.000  0.000  1.000     0.00 FAIL 
+gain_minus_12db                                       7  1.000  0.000  0.000  1.000     0.00 FAIL 
+gain_minus_6db                                        7  1.000  0.000  0.000  1.000     0.00 FAIL 
+gain_plus_6db                                         7  1.000  0.000  0.000  1.000     0.00 FAIL 
+normalize_peak                                        7  1.000  0.000  0.000  1.000     0.00 FAIL 
+crop_0s5                                              7  1.000  0.000  0.000  1.000     0.00 FAIL 
+crop_2s                                               7  1.000  0.000  0.000  1.000     0.00 FAIL 
+crop_7s3                                              7      -      -      -      -        - ERR  
+    !! channel_input_too_short :: every trial errored; first: input is 240000 frames, shorter than the 350401 this channel consumes
+    !! 7 of 7 trials errored
+drift_plus_0p1pct                                     7  1.000  0.000  0.000  1.000     0.00 FAIL 
+drift_minus_0p1pct                                    7  1.000  0.000  0.000  1.000     0.00 FAIL 
+noise_snr_40db                                        7  1.000  0.000  0.000  1.000     0.00 FAIL 
+noise_snr_30db                                        7  1.000  0.000  0.000  1.000     0.00 FAIL 
+noise_snr_20db                                        7  1.000  0.000  0.000  1.000     0.00 FAIL 
+lowpass_16k                                           7  1.000  0.000  0.000  1.000     0.00 FAIL 
+lowpass_11k                                           7  1.000  0.000  0.000  1.000     0.00 FAIL 
+compress_dynamic                                      7  1.000  0.000  0.000  1.000     0.00 FAIL 
+limit_brickwall                                       7  1.000  0.000  0.000  1.000     0.00 FAIL 
+acoustic_small_room                                   7  1.000  0.000  0.000  1.000     0.00 FAIL 
+    ~~ simulated physical path, not a measurement of one
+acoustic_medium_room                                  7  1.000  0.000  0.000  1.000     0.00 FAIL 
+    ~~ simulated physical path, not a measurement of one
+acoustic_large_room                                   7  1.000  0.000  0.000  1.000     0.00 FAIL 
+    ~~ simulated physical path, not a measurement of one
+chain_transcode_mp3_128_aac_128                       7  1.000  0.000  0.000  1.000     0.00 FAIL 
+chain_broadcast_limit_mp3_192                         7  1.000  0.000  0.000  1.000     0.00 FAIL 
+chain_worst_case_limit_mp3_128_acoustic_mp3_192       7  1.000  0.000  0.000  1.000     0.00 FAIL 
+    ~~ simulated physical path, not a measurement of one
+------------------------------------------------------------------------------------------------------
+ber is measured ONLY over trials that returned a payload; noPay is the rate at which the
+detector declined to answer. A low ber beside a high noPay means silent, not accurate.
+rows       : 0 pass, 36 fail, 0 recorded-no-threshold, 1 error
+false pos  : 252 accepts in 259 unmarked trials -> 1.000
+
+perceptual (original vs marked)   segSNR dB     NMR dB  NMRmax dB resid dBFS
+----------------------------------------------------------------------------
+synth_sine_sweep                     100.00    -200.00    -200.00          -
+synth_white_noise                    100.00    -200.00    -200.00          -
+synth_pink_noise                     100.00    -200.00    -200.00          -
+synth_transient_pattern              100.00    -200.00    -200.00          -
+synth_harmonic_pad                   100.00    -200.00    -200.00          -
+synth_near_silence                   100.00    -200.00    -200.00          -
+synth_square_full_scale              100.00    -200.00    -200.00          -
+
+VERDICT: FAIL
+  - 36 channel row(s) missed their threshold
+  - 1 channel row(s) could not run
+  - false-positive rate 1.0000 over 252 unmarked trials exceeds the 0.0000 ceiling
+
+* The codec measured in this run is a BENCH FIXTURE: a deliberately simple stand-in that exists to validate the bench. Its numbers describe the fixture and say nothing about GenoMark or any product watermark.
+
+* SIMULATED acoustic path. The impulse response is synthesised (exponentially decaying noise plus discrete early reflections), the transducer curve is a fixed filter cascade, and the room noise is Gaussian. This row is NOT a speaker-to-microphone measurement and may not be reported as one. A real over-the-air result requires playing the file through a loudspeaker and capturing it with a microphone in a room.
+
+* The false-positive arm runs the detector over UNMARKED audio through the same channel. A rate of 0.0 over N trials bounds the rate at roughly 3/N with 95% confidence; it does not establish that the rate is zero. The trial count is reported next to it so the bound can be computed rather than assumed.
+
+* WHAT THESE NUMBERS ARE. Segmental SNR is an energy ratio per short frame; it says how much smaller the embedding residual is than the signal, and nothing about whether a listener can hear it. The masking measure is a noise-to-mask ratio computed from a Schroeder spreading function over a half-Bark partition, a fixed tonality assumption (alpha = 0.5) rather than a measured one, and an absolute-threshold curve anchored by assuming digital full scale is 96 dB SPL. Band energies are normalised into per-sample power so that floor is comparable at all; the divisor is exact for noise-like content and understates a tonal masker by roughly 5 dB, which errs toward calling a residual audible rather than inaudible. Both figures are measured per channel and reported for the WORST channel, never for a mixdown, which would halve a residual living in one channel. WHAT THEY ARE NOT. Neither is PEAQ (ITU-R BS.1387), neither yields an ODG, and neither is a listening test. A negative NMR means the residual sits below this model's threshold in this model's terms; it is evidence for inaudibility, not a measurement of it. Only a blinded ABX panel can retire that gap.
+

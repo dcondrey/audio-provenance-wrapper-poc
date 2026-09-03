@@ -1,7 +1,11 @@
 # AGENTS.md
 
 ## Project
-`audio-provenance-wrapper-poc` is a macOS + Ableton Live proof of concept for opt-in audio provenance capture.
+`audio-provenance` is the unified monorepo for opt-in audio provenance capture and verification.
+
+- The repository root contains the macOS + Ableton Live capture application.
+- `rust/` contains the Rust capture-engine implementation.
+- `sdk/` contains the Rust/TypeScript signing, registry, recovery, trust, watermark, and verification SDK.
 
 ## Core Principle
 Never claim full Ableton provenance. Only report what was routed, observed, hashed, declared, verified, bypassed, or missed.
@@ -19,7 +23,9 @@ A producer can:
 - Local UDP for plugin-to-daemon events.
 - macOS daemon/process for event collection and export watching.
 - JSON fight-card manifest first.
-- C2PA sidecar/signing later.
+- Real C2PA signing via c2pa-rs: embedded for 16-bit PCM WAV, `.c2pa` sidecar
+  for AIFF. Signed under a self-issued chain, so it is key possession and hard
+  binding, never verified identity.
 
 ## Milestones
 - v0.1: pass-through plugin.
@@ -27,11 +33,10 @@ A producer can:
 - v0.3: UDP event stream to daemon.
 - v0.4: daemon stores session state.
 - v0.5: daemon detects final export and hashes the file.
-- v1.0: JSON manifest generated end-to-end, plus the manual Ableton
-  validation gate in docs/ROADMAP.md ("v1.0") and docs/VALIDATION.md
-  ("Manual v1.0 gate"). Automated and synthetic results do not close
-  that gate; two steps (transparency/null test, project
-  save/close/reload) remain open.
+- v1.0 capture gate: closed by the manual Ableton validation recorded in
+  `docs/VALIDATION.md`; automated and synthetic results did not close it.
+- SDK alpha: implemented under `sdk/`; its robustness, null-test, trust-format,
+  and security gates remain separate from the closed capture gate.
 
 ## Proof Levels
 Every manifest field must include one of:
@@ -54,6 +59,8 @@ Before editing, read:
 3. `docs/ROADMAP.md`
 4. `docs/ARCHITECTURE.md`
 5. `docs/MANIFEST_SCHEMA.md`
+6. `docs/SDK_INTEGRATION.md`
+7. For SDK work, `sdk/README.md` and `sdk/STATUS.md`
 
 When making changes:
 - Keep edits small and milestone-scoped.

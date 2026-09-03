@@ -18,6 +18,14 @@ class AudioObserver final : private juce::Thread
 public:
     using EventCallback = std::function<void (const juce::String& jsonEvent)>;
 
+    struct ShutdownReport
+    {
+        std::uint64_t readySamplesBeforeFlush = 0;
+        std::uint64_t windowsFlushed = 0;
+        std::uint64_t samplesDiscardedAfterFlush = 0;
+        std::uint64_t maximumWindows = 0;
+    };
+
     AudioObserver();
     ~AudioObserver() override;
 
@@ -30,6 +38,9 @@ public:
     void updateTransportState (juce::AudioPlayHead* playHead);
     void updateSessionConfig (int sampleRate, int channelCount, int bufferSize);
     void recordExternalAudioDrop (int numSamples) noexcept;
+    void recordBypassedBlock (int numSamples) noexcept;
+    void setBypassActive (bool active) noexcept;
+    void markLifecycleDiscontinuity() noexcept;
 
     // Thread-safe stats for the UI.
     int getWindowSize() const noexcept;
@@ -41,6 +52,11 @@ public:
     std::uint64_t getFifoWindowsDropped() const noexcept;
     std::uint64_t getMidiEventsDropped() const noexcept;
     std::uint64_t getUnsupportedMidiEventsDropped() const noexcept;
+    std::uint64_t getSubThresholdCcChangesDiscarded() const noexcept;
+    std::uint64_t getBypassedBuffers() const noexcept;
+    std::uint64_t getBypassedSamples() const noexcept;
+    std::uint64_t getObservationDiscontinuities() const noexcept;
+    ShutdownReport getShutdownReport() const noexcept;
     juce::String getLastHash() const;
 
 private:
@@ -50,7 +66,11 @@ private:
     void checkTransportChanges();
     void checkSessionConfigChanges();
 
-    void drainReadyWindows (bool stopOnExitSignal);
+    int drainReadyWindows (bool stopOnExitSignal, int maxWindows = -1);
+    void applyPendingSessionConfig();
+    void applyPendingObservationBoundary();
+    void discardQueuedAudio() noexcept;
+    void resetFeatureContinuity();
     void flushKnobTurn (int channelIndex, int ccNumber, juce::int64 samplePos);
     void flushExpiredKnobTurns (std::uint64_t nowMs, juce::int64 samplePos);
     void flushAllKnobTurns (juce::int64 samplePos);
@@ -71,6 +91,7 @@ private:
     static constexpr int kWindowSize    = 1 << kFFTOrder;            // 4096
     static constexpr int kFifoCapacity  = kWindowSize * 16;          // ~1.5 s at 44.1 kHz
     static constexpr int kMidiQueueSize = 256;
+    static constexpr int kMaxShutdownFlushWindows = 4;
     static constexpr double kSilenceThreshold       = 0.001;         // RMS ~-60 dBFS
     static constexpr double kSpectralShiftThreshold  = 500.0;        // Hz
 
@@ -102,11 +123,24 @@ private:
     int  prevTransportBpmX100   = 0;
 
     // ── Session config ──
+    // Staged by prepareToPlay, adopted by the observer thread once the audio
+    // captured under the previous configuration has left the FIFO.
     std::atomic<int> sessionSampleRate   { 44100 };
     std::atomic<int> sessionChannelCount { 2 };
     std::atomic<int> sessionBufferSize   { 512 };
+    std::atomic<int> pendingSampleRate   { 44100 };
+    std::atomic<int> pendingChannelCount { 2 };
+    std::atomic<int> pendingBufferSize   { 512 };
+    std::atomic<bool> sessionConfigChangePending { false };
     int prevSessionSampleRate   = 0;
     int prevSessionChannelCount = 0;
+
+    // ── Lifecycle / bypass continuity ──
+    // Audio-thread and host-lifecycle calls only publish atomics. The observer
+    // thread owns the actual FIFO discard and hash/feature-chain reset.
+    std::atomic<bool> bypassActive { false };
+    std::atomic<std::uint64_t> observationBoundaryGeneration { 0 };
+    std::uint64_t appliedObservationBoundaryGeneration = 0;
 
     // ── Hash chain ──
     juce::String previousHash;
@@ -146,6 +180,13 @@ private:
     std::atomic<std::uint64_t> fifoWindowsDropped { 0 };
     std::atomic<std::uint64_t> midiEventsDropped { 0 };
     std::atomic<std::uint64_t> unsupportedMidiEventsDropped { 0 };
+    std::atomic<std::uint64_t> subThresholdCcChangesDiscarded { 0 };
+    std::atomic<std::uint64_t> bypassedBuffers { 0 };
+    std::atomic<std::uint64_t> bypassedSamples { 0 };
+    std::atomic<std::uint64_t> observationDiscontinuities { 0 };
+    std::atomic<std::uint64_t> shutdownReadySamplesBeforeFlush { 0 };
+    std::atomic<std::uint64_t> shutdownWindowsFlushed { 0 };
+    std::atomic<std::uint64_t> shutdownSamplesDiscardedAfterFlush { 0 };
     mutable juce::SpinLock lastHashLock;
     juce::String lastHashHex;
 

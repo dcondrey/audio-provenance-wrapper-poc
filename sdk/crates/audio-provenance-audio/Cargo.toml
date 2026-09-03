@@ -1,0 +1,26 @@
+[package]
+name = "audio-provenance-audio"
+description = "Audio decoding, WAV encoding, FFT/STFT/MDCT, metrics, resampling and filters for the Audio Provenance provenance stack."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+default = ["fs", "codecs"]
+fs = []
+codecs = ["dep:symphonia"]
+
+[dependencies]
+audio-provenance-core = { workspace = true }
+hound = { workspace = true }
+realfft = { workspace = true }
+rubato = { workspace = true }
+rustfft = { workspace = true }
+symphonia = { workspace = true, optional = true }
+thiserror = { workspace = true, features = ["std"] }

@@ -1,0 +1,80 @@
+{
+  "schema": "audio-provenance-classical-qualification-v1",
+  "generated_at": "2026-09-01T00:00:00Z",
+  "production_implementation": "genomark-lepqim-v1",
+  "experimental_implementations_included": [],
+  "feature_isolation": "classical-genomark default feature; genomark-n absent from dependency graph",
+  "seed": 4706347393385544497,
+  "qualification_complete": true,
+  "meets_predeclared_targets": false,
+  "false_positive": {
+    "trials": 37000,
+    "accepts": 0,
+    "measured_rate": 0.0,
+    "upper_bound_95": 0.003003003003003003
+  },
+  "mark_recovery": {
+    "trials": 740,
+    "exact_recoveries": 512,
+    "exact_recovery_rate": 0.6918918918918919
+  },
+  "recording_association": {
+    "trials": 585,
+    "passed": 566,
+    "failed": 19,
+    "errors": 0,
+    "association_recovery_rate": 0.9816849816849816,
+    "alteration_rejection_rate": 0.9551282051282052,
+    "local_region_seconds": 0.5,
+    "maximum_unexplained_gap_seconds": 0.75,
+    "minimum_local_coverage": 0.8
+  },
+  "adversarial": {
+    "trials": 591,
+    "successful_attacks": 273,
+    "collusion_trials": 6,
+    "collusion_successes": 6
+  },
+  "dataset_coverage": {
+    "null_items": 1000,
+    "recovery_items": 20,
+    "recovery_real_items": 13,
+    "association_items": 13,
+    "adversarial_items": 13,
+    "required_null_items": 1000,
+    "required_characterisation_items": 13,
+    "complete": true
+  },
+  "artifacts": [
+    {
+      "path": "bench-out/null-v1/genomark-lepqim-v1-null-test.json",
+      "sha256": "54d4d23fdf1e03ec3f9c7e13f4fd0ceb3f801b7c22bb740d4797600ec27c0599"
+    },
+    {
+      "path": "bench-out/real-corpus-final/genomark-lepqim-v1-real-corpus.json",
+      "sha256": "f2e1b321c1f3da74c1b084fce9122039e140d1250a59cb0a815968f177e8a777"
+    },
+    {
+      "path": "qualification/reports/classical-genomark/association.json",
+      "sha256": "276f251b521b98a4bdf89c643aea4e2aa748678e92c69575446ab20ae4079efa"
+    },
+    {
+      "path": "qualification/reports/classical-genomark/attacks.json",
+      "sha256": "f673d3f84d40084d945740d4d55d46d438986b72e7031c641c8c5867af5c978b"
+    },
+    {
+      "path": "corpus/MANIFEST-null.json",
+      "sha256": "d84a7af4fc991b719990afc5ea6f3e3dc67ad528176b7e7cc7d79a5776036e05"
+    },
+    {
+      "path": "qualification/watermark-adversarial-v1.json",
+      "sha256": "27feeb42de65982a34fabcd61faf90fc45e48b06727e4ea964ab834249d86837"
+    }
+  ],
+  "runs": [],
+  "notes": [
+    "Locator recovery is measured separately from recording association and is not authentication.",
+    "A zero observed false-positive rate is accompanied by the rule-of-three 95% upper bound.",
+    "Simulated acoustic rows are not physical re-recording measurements."
+  ]
+}

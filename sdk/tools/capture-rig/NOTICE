@@ -1,0 +1,32 @@
+NOTICE — third-party material in audio-provenance-sdk/tools/capture-rig
+
+NOTHING IS VENDORED. This directory contains no third-party source and no third-party model weights.
+Every file under src/, tests/ and configs/ was written for this project.
+
+Reimplemented from published descriptions, with no third-party code consulted line by line:
+
+  - Farina's exponential sine sweep and its amplitude-corrected time-reversed inverse filter, and the
+    harmonic pre-arrival relation dt_k = T*ln(k)/ln(f2/f1), in src/capture_rig/signals.py and
+    src/capture_rig/sweep.py. Published method (Farina, AES 108, 2000).
+  - Schroeder backward integration and T30 extrapolation, in src/capture_rig/acoustics.py.
+    Independently implemented rather than imported from ../../training, which is owned by another
+    workstream; the two are cross-checked in tests/test_acoustics.py.
+  - Lundeby-style noise-floor truncation of the decay curve, in src/capture_rig/acoustics.py.
+  - The IEC 61672-1 A-weighting transfer function, evaluated analytically. Verified against the
+    published table at 31.5 Hz, 100 Hz, 1 kHz, 10 kHz and 20 kHz in tests/test_acoustics.py.
+  - The ACE Challenge direct-to-reverberant ratio convention (a +/- 2.5 ms window around the direct
+    peak), in src/capture_rig/acoustics.py.
+  - Generalised cross-correlation with phase transform (Knapp and Carter, 1976), in
+    src/capture_rig/alignment/locate.py.
+
+Runtime dependencies are declared in pyproject.toml and installed from PyPI; their licences are their
+own and none of their source is copied into this tree. They are numpy, scipy, soundfile (libsndfile),
+sounddevice (PortAudio) and PyYAML.
+
+NO WATERMARKING MODEL, CODE OR WEIGHTS OF ANY KIND IS PRESENT HERE. This tool plays audio, records
+audio, measures rooms, and calls a detector through an adapter. Which detector is a runtime argument.
+The licence constraints recorded in ../../training/NOTICE — AudioSeal MIT on code and weights,
+SilentCipher weights carrying no grant, DeepAWR's defective chain of title, DeAR unlicensed — apply
+to whatever is placed behind that adapter, and this directory carries none of it.
+
+This directory is part of audio-provenance-sdk and is Apache-2.0, matching the workspace.

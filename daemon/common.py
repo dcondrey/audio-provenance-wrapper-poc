@@ -9,6 +9,8 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
+APW_VERSION = "0.9.0"
+
 DEFAULT_EVIDENCE_MAX_BYTES = 64 * 1024 * 1024
 DEFAULT_EVIDENCE_BACKUPS = 3
 

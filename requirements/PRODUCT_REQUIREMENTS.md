@@ -1,7 +1,7 @@
 # Product Requirements
 
 ## Project
-Audio Provenance Wrapper POC
+Audio Provenance
 
 ## Objective
 Build a macOS + Ableton Live proof of concept for opt-in audio provenance capture.

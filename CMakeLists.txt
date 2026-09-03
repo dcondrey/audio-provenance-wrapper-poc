@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(AudioProvenanceWrapperPoc
+project(AudioProvenance
     VERSION 0.9.0
     LANGUAGES C CXX)
 
@@ -9,12 +9,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(APPLE AND (NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET OR CMAKE_OSX_DEPLOYMENT_TARGET STREQUAL ""))
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS deployment target" FORCE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS deployment target" FORCE)
+endif()
+
+# REQUIRED: redistributable builds must load in Intel and Rosetta hosts, not just arm64.
+if(APPLE AND (NOT DEFINED CMAKE_OSX_ARCHITECTURES OR CMAKE_OSX_ARCHITECTURES STREQUAL ""))
+    set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Universal binary slices" FORCE)
 endif()
 
 set(APW_JUCE_DIR "" CACHE PATH "Path to a local JUCE checkout")
 set(APW_JUCE_TAG "8.0.15" CACHE STRING "Pinned JUCE release used when no local checkout is supplied")
 option(APW_FETCH_JUCE "Fetch the pinned JUCE release when JUCE is not installed" ON)
+set(APW_HEADLESS_SOAK_SECONDS "0" CACHE STRING
+    "Wall-clock duration for the deterministic AudioProcessorPlayer soak CTest (0 disables soak phase)")
 
 if(APW_JUCE_DIR)
     add_subdirectory("${APW_JUCE_DIR}" "${CMAKE_BINARY_DIR}/JUCE")
@@ -47,12 +54,13 @@ juce_add_plugin(AudioProvenanceCapture
     COPY_PLUGIN_AFTER_BUILD FALSE
     PLUGIN_MANUFACTURER_CODE ApPr
     PLUGIN_CODE ApCa
-    FORMATS VST3
+    FORMATS VST3 AU
     PRODUCT_NAME "Audio Provenance Capture")
 
 target_sources(AudioProvenanceCapture
     PRIVATE
         src/AudioObserver.cpp
+        src/AcknowledgementLogic.cpp
         src/EventEmitter.cpp
         src/PluginEditor.cpp
         src/PluginProcessor.cpp)
@@ -77,3 +85,81 @@ target_link_libraries(AudioProvenanceCapture
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
+
+include(CTest)
+
+if(BUILD_TESTING)
+    juce_add_console_app(AudioProvenanceCaptureTests
+        PRODUCT_NAME "Audio Provenance Capture Tests")
+
+    target_sources(AudioProvenanceCaptureTests
+        PRIVATE
+            tests/cpp/PluginRealtimeTests.cpp
+            src/AudioObserver.cpp
+            src/AcknowledgementLogic.cpp
+            src/EventEmitter.cpp
+            src/PluginEditor.cpp
+            src/PluginProcessor.cpp)
+
+    target_include_directories(AudioProvenanceCaptureTests PRIVATE src)
+
+    target_compile_definitions(AudioProvenanceCaptureTests
+        PRIVATE
+            JucePlugin_Name="Audio Provenance Capture"
+            JUCE_WEB_BROWSER=0
+            JUCE_USE_CURL=0
+            JUCE_VST3_CAN_REPLACE_VST2=0)
+
+    target_link_libraries(AudioProvenanceCaptureTests
+        PRIVATE
+            juce::juce_audio_processors
+            juce::juce_cryptography
+            juce::juce_dsp
+            juce::juce_gui_basics
+            juce::juce_recommended_config_flags
+            juce::juce_recommended_warning_flags)
+
+    add_test(NAME plugin_realtime_lifecycle COMMAND AudioProvenanceCaptureTests)
+
+    juce_add_console_app(AudioProvenanceHeadlessHostTests
+        PRODUCT_NAME "Audio Provenance Headless DAW Lifecycle Tests")
+
+    target_sources(AudioProvenanceHeadlessHostTests
+        PRIVATE
+            tests/cpp/HeadlessDawLifecycleTests.cpp
+            src/AudioObserver.cpp
+            src/AcknowledgementLogic.cpp
+            src/EventEmitter.cpp
+            src/PluginEditor.cpp
+            src/PluginProcessor.cpp)
+
+    target_include_directories(AudioProvenanceHeadlessHostTests PRIVATE src)
+
+    target_compile_definitions(AudioProvenanceHeadlessHostTests
+        PRIVATE
+            JucePlugin_Name="Audio Provenance Capture"
+            JUCE_WEB_BROWSER=0
+            JUCE_USE_CURL=0
+            JUCE_VST3_CAN_REPLACE_VST2=0)
+
+    target_link_libraries(AudioProvenanceHeadlessHostTests
+        PRIVATE
+            juce::juce_audio_processors
+            juce::juce_audio_utils
+            juce::juce_cryptography
+            juce::juce_dsp
+            juce::juce_gui_basics
+            juce::juce_recommended_config_flags
+            juce::juce_recommended_warning_flags)
+
+    add_test(
+        NAME plugin_headless_daw_matrix
+        COMMAND AudioProvenanceHeadlessHostTests
+                --soak-seconds ${APW_HEADLESS_SOAK_SECONDS}
+                --seed 4706347393385544497)
+    set_tests_properties(plugin_headless_daw_matrix PROPERTIES TIMEOUT 33000)
+    add_test(
+        NAME plugin_realtime_source_audit
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONDONTWRITEBYTECODE=1
+                python3 ${CMAKE_SOURCE_DIR}/scripts/audit_plugin_realtime.py)
+endif()

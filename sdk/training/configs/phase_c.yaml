@@ -1,0 +1,75 @@
+# The real run: spec 9.3's full curriculum at spec 9.5's schedule.
+#
+# THIS IS NOT RUNNABLE ON THE DEVELOPMENT MACHINE IN ANY USEFUL SENSE. Spec 9.6 is explicit: MPS is
+# the development, debugging and smoke-test path, not the training path. Run `scripts/smoke.sh`
+# first and read `projected_320k_days` out of runs/*/train_log.jsonl before believing any budget;
+# kill criterion K8 fires at 14 days.
+#
+# `data.manifests` and `rir.corpus_dirs` are empty here because no licence-cleared corpus is on this
+# machine. Fill them in before training: JSONL manifests, one line per item, each declaring its own
+# licence. The loader REFUSES anything outside the commercial allowlist rather than skipping it.
+
+run:
+  seed: 20260831
+  device: auto
+  out_dir: runs/phase_c
+  log_every: 50
+  checkpoint_every: 2000
+  deterministic: true
+
+data:
+  manifests: []          # e.g. ["/data/jamendo_cc/manifest.jsonl", "/data/vctk/manifest.jsonl"]
+  noise_manifests: []    # e.g. ["/data/musan/manifest.jsonl"]
+  synthetic_items: 0     # non-zero only when no real corpus is available; not a training corpus
+  source_clip_seconds: 10.0
+  analysis_seconds: [3.0, 5.0]
+  num_workers: 8
+
+rir:
+  corpus_dirs: []        # Stage 0 measured IRs first, then MIT Traer/McDermott (CC BY 4.0), EchoThief
+  synthetic_fraction: 0.5
+  pool_size: 512
+  max_order: 12
+  max_ir_seconds: 1.5
+  rt60_s: [0.18, 0.80]
+  source_distance_m: [0.3, 3.0]
+
+optim:
+  lr: 1.0e-4
+  betas: [0.9, 0.99]
+  weight_decay: 1.0e-2
+  warmup_steps: 2000
+  total_steps: 320000
+  min_lr: 1.0e-6
+  grad_clip: 1.0
+  batch_size: 16
+  ema_decay: 0.9999
+  unmarked_fraction: 0.5
+
+curriculum:
+  phase_a_end: 60000
+  phase_b_end: 180000
+  phase_c_end: 320000
+
+loss:
+  message: 1.0
+  message_per_frame: 0.2
+  detection: 1.0
+  perceptual: 20.0
+  spectral: 4.0
+  q_coexistence: 5.0
+  adversarial: 0.1
+  adversarial_enabled: false   # spec 9.4: off for the first full run
+
+detector:
+  window_seconds: 30.0
+  window_hop_seconds: 15.0
+  presence_window_seconds: 10.0
+  min_presence_span_seconds: 8.0
+  max_windows: 64
+
+evaluation:
+  corpus_items: 200
+  clip_seconds: 30.0
+  false_positive_trials: 5000     # spec 3.5 / K5a: the minimum that supports a 1e-3 claim
+  target_false_positive_rate: 1.0e-3

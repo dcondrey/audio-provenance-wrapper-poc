@@ -14,13 +14,39 @@ PROOF_LABELS = {
 }
 
 
+# Keyed by upper case: str.title() splits on digits, so 'c2pa' becomes 'C2Pa'
+# rather than 'C2pa', and a literal-case map silently misses it.
+_ACRONYMS = {
+    "C2PA": "C2PA", "UDP": "UDP", "MIDI": "MIDI", "DAW": "DAW", "ACK": "ACK",
+    "HMAC": "HMAC", "SHA256": "SHA-256", "JSON": "JSON", "WAV": "WAV",
+    "AIFF": "AIFF", "RMS": "RMS", "POC": "POC", "ID": "ID", "PCM": "PCM",
+}
+
+
+def _humanize(value: object, fallback: str = "") -> str:
+    """Title-case an identifier without mangling the acronyms in it.
+
+    str.title() renders 'embedded_c2pa_claim' as 'Embedded C2Pa Claim', which is
+    the vendor standard misspelt in the fight card's headline summary.
+    """
+    words = str(value or fallback).replace("_", " ").title().split()
+    return " ".join(_ACRONYMS.get(word.upper(), word) for word in words)
+
+
 def _escape(value: object) -> str:
     return html.escape(str(value), quote=True)
 
 
+def _percentage(value: object) -> str:
+    """Unmeasured is not zero: an unavailable comparison has no coverage number."""
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return f"{float(value) * 100:.1f}%"
+    return "Unavailable"
+
+
 def _proof_badge(proof_level: object) -> str:
     proof = str(proof_level or "unknown_unobserved")
-    label = PROOF_LABELS.get(proof, proof.replace("_", " ").title())
+    label = PROOF_LABELS.get(proof, _humanize(proof))
     return f'<span class="proof proof-{_escape(proof)}">{_escape(label)}</span>'
 
 
@@ -52,14 +78,61 @@ def render_html_report(manifest: dict[str, object]) -> str:
         if isinstance(manifest.get("local_verification_summary"), dict)
         else {}
     )
+    c2pa_claim = (
+        manifest.get("c2pa_claim")
+        if isinstance(manifest.get("c2pa_claim"), dict)
+        else {}
+    )
+    c2pa_validation = (
+        c2pa_claim.get("validation")
+        if isinstance(c2pa_claim.get("validation"), dict)
+        else {}
+    )
+    c2pa_binding = (
+        c2pa_claim.get("hard_binding")
+        if isinstance(c2pa_claim.get("hard_binding"), dict)
+        else {}
+    )
+    c2pa_signed = c2pa_claim.get("status") in {"embedded", "sidecar"}
+    c2pa_ingredients = (
+        c2pa_claim.get("ingredients")
+        if isinstance(c2pa_claim.get("ingredients"), list)
+        else []
+    )
+    c2pa_unresolved_refs = (
+        c2pa_claim.get("unresolved_ingredient_references")
+        if isinstance(c2pa_claim.get("unresolved_ingredient_references"), list)
+        else []
+    )
+    c2pa_ingredient_rows = "".join(
+        """
+            <tr>
+              <td>{title}</td>
+              <td>{relationship}</td>
+              <td><code title="{full_hash}">{digest}</code></td>
+              <td>{meaning}</td>
+              <td>{badge}</td>
+            </tr>
+            """.format(
+            title=_escape(node.get("title", "unknown")),
+            relationship=_escape(node.get("relationship", "unknown")),
+            full_hash=_escape(node.get("sha256", "")),
+            digest=_escape(_short_hash(node.get("sha256"))),
+            meaning=_escape(node.get("digest_meaning", "")),
+            badge=_proof_badge(node.get("apw:proof_level")),
+        )
+        for node in c2pa_ingredients
+        if isinstance(node, dict)
+    )
+    unresolved_refs = "".join(
+        f"<li>{_escape(item.get('reference', ''))} — {_escape(item.get('reason', ''))}</li>"
+        for item in c2pa_unresolved_refs
+        if isinstance(item, dict)
+    )
+
     handoff = (
         manifest.get("downstream_registration_handoff")
         if isinstance(manifest.get("downstream_registration_handoff"), dict)
-        else {}
-    )
-    capture_session = (
-        manifest.get("capture_session")
-        if isinstance(manifest.get("capture_session"), dict)
         else {}
     )
     presentation = (
@@ -117,7 +190,7 @@ def render_html_report(manifest: dict[str, object]) -> str:
               <p>{evidence}</p>
             </article>
             """.format(
-                claim=_escape(str(raw_claim.get("claim", "claim")).replace("_", " ").title()),
+                claim=_escape(_humanize(raw_claim.get("claim"), "claim")),
                 badge=_proof_badge(raw_claim.get("apw:proof_level")),
                 value=_escape(display_value),
                 evidence=_escape(raw_claim.get("evidence", "")),
@@ -275,7 +348,7 @@ def render_html_report(manifest: dict[str, object]) -> str:
   <section>
     <h2>Stem-to-export association</h2>
     <div class="panel association">{association_badge}<strong> {association_status}</strong>
-      <p>{association_basis}</p></div>
+      <p>{association_basis}</p>{association_reason}</div>
   </section>
 
   <section>
@@ -299,6 +372,28 @@ def render_html_report(manifest: dict[str, object]) -> str:
     <h2>Verification status</h2>
     <div class="panel association">{verification_badge}<strong> {verification_outcome}</strong>
       <p>Local POC integrity result only. Signer identity, authorship, ownership, consent, and registry status are not established.</p></div>
+  </section>
+
+  <section>
+    <h2>Embedded C2PA claim</h2>
+    <div class="panel association">{c2pa_badge}<strong> {c2pa_status}</strong>
+      <p>{c2pa_detail}</p></div>
+    <div class="panel" style="margin-top:12px">
+      <div class="metrics">
+        <div class="metric"><span>Validation state</span><strong>{c2pa_state}</strong></div>
+        <div class="metric"><span>Library state</span><strong>{c2pa_library_state}</strong></div>
+        <div class="metric"><span>Hard binding</span><strong>{c2pa_binding_type}</strong></div>
+        <div class="metric"><span>Trust scope</span><strong>{c2pa_trust_scope}</strong></div>
+        <div class="metric"><span>Signer key</span><strong>{c2pa_key_id}</strong></div>
+        <div class="metric"><span>Signer identity</span><strong>{c2pa_signer_identity}</strong></div>
+      </div>
+      <table>
+        <thead><tr><th>Ingredient</th><th>Relationship</th><th>Digest</th><th>What the digest is</th><th>Proof</th></tr></thead>
+        <tbody>{c2pa_ingredient_rows}</tbody>
+      </table>
+    </div>
+    <p>{c2pa_caveat}</p>
+    <div class="panel"><ul class="unknowns">{c2pa_unresolved}</ul></div>
   </section>
 
   <section>
@@ -339,7 +434,7 @@ def render_html_report(manifest: dict[str, object]) -> str:
         export_name=_escape(export.get("file_name", "No export detected")),
         export_hash_full=_escape(export.get("sha256", "")),
         export_hash=_escape(_short_hash(export.get("sha256"))),
-        coverage_status=_escape(str(coverage.get("status", "unknown_coverage")).replace("_", " ").title()),
+        coverage_status=_escape(_humanize(coverage.get("status"), "unknown_coverage")),
         window_count=sum(
             int(stem.get("hash_chain_length", 0))
             for stem in stems
@@ -348,20 +443,25 @@ def render_html_report(manifest: dict[str, object]) -> str:
         claim_cards="".join(claim_cards),
         stem_rows="".join(stem_rows) or '<tr><td colspan="5">No routed-audio evidence was received.</td></tr>',
         association_badge=_proof_badge(association.get("apw:proof_level")),
-        association_status=_escape(str(association.get("status", "not established")).replace("_", " ").title()),
+        association_status=_escape(_humanize(association.get("status"), "not established")),
         association_basis=_escape(association.get("basis", "")),
+        association_reason=(
+            f'<p class="reason">Cause: {_escape(association["reason"])}</p>'
+            if association.get("reason") else ""
+        ),
         association_method=_escape(
             f"{association.get('method', 'unavailable')} v{association.get('method_version', 'unknown')}"
         ),
-        association_confidence=_escape(
-            f"{float(association.get('confidence')) * 100:.1f}%"
-            if isinstance(association.get("confidence"), (int, float)) else "Unavailable"
+        association_confidence=_escape(_percentage(association.get("confidence"))),
+        matched_coverage=_escape(_percentage(association.get("matched_coverage"))),
+        matched_windows=_escape(
+            association.get("matched_window_count")
+            if association.get("matched_window_count") is not None else "Unavailable"
         ),
-        matched_coverage=_escape(
-            f"{float(association.get('matched_coverage', 0)) * 100:.1f}%"
+        comparable_windows=_escape(
+            association.get("comparable_window_count")
+            if association.get("comparable_window_count") is not None else "Unavailable"
         ),
-        matched_windows=_escape(association.get("matched_window_count", 0)),
-        comparable_windows=_escape(association.get("comparable_window_count", 0)),
         best_offset=_escape(
             f"{association.get('best_offset_seconds')} s"
             if association.get("best_offset_seconds") is not None else "Unavailable"
@@ -372,13 +472,39 @@ def render_html_report(manifest: dict[str, object]) -> str:
         emitted_count=_escape((coverage.get("counters") or {}).get("udp_sends_attempted", 0)),
         sequence_gaps=_escape((coverage.get("counters") or {}).get("sequence_gaps", 0)),
         chain_breaks=_escape((coverage.get("counters") or {}).get("hash_chain_breaks", 0)),
-        receipt_status=_escape(str(receipt.get("status", "unknown")).replace("_", " ").title()),
+        receipt_status=_escape(_humanize(receipt.get("status"), "unknown")),
         highest_contiguous=_escape(first_receipt_stream.get("highest_contiguous_sequence", 0)),
-        verification_outcome=_escape(str(verification.get("outcome", "untrusted")).replace("_", " ").title()),
+        verification_outcome=_escape(_humanize(verification.get("outcome"), "untrusted")),
         verification_badge=_proof_badge(
             "directly_observed" if verification.get("outcome") == "verified" else "unknown_unobserved"
         ),
-        handoff_status=_escape(str(handoff.get("status", "not prepared")).replace("_", " ").title()),
+        c2pa_badge=_proof_badge(c2pa_claim.get("apw:proof_level")),
+        c2pa_status=_escape(_humanize(c2pa_claim.get("status"), "unavailable")),
+        c2pa_detail=_escape(
+            c2pa_validation.get("detail", "")
+            if c2pa_signed
+            else c2pa_claim.get("reason", "No C2PA claim was produced for this export.")
+        ),
+        c2pa_state=_escape(_humanize(c2pa_validation.get("state"), "none")),
+        c2pa_library_state=_escape(c2pa_validation.get("library_validation_state") or "Unavailable"),
+        c2pa_binding_type=_escape(c2pa_binding.get("type") or "Unavailable"),
+        c2pa_trust_scope=_escape(
+            _humanize(c2pa_validation.get("trust_anchor_scope"), "unavailable")
+        ),
+        c2pa_key_id=_escape(
+            (c2pa_claim.get("signer") or {}).get("key_id", "Unavailable")
+            if isinstance(c2pa_claim.get("signer"), dict) else "Unavailable"
+        ),
+        c2pa_signer_identity=_escape("Not established"),
+        c2pa_ingredient_rows=c2pa_ingredient_rows
+        or '<tr><td colspan="5">No ingredients were recorded in the claim.</td></tr>',
+        c2pa_caveat=_escape(
+            c2pa_claim.get("scope")
+            or "No C2PA claim was produced, which is not evidence about the audio itself."
+        ),
+        c2pa_unresolved=unresolved_refs
+        or "<li>Every referenced ingredient was resolved and hashed.</li>",
+        handoff_status=_escape(_humanize(handoff.get("status"), "not prepared")),
         handoff_items=handoff_items,
         handoff_href=_escape(presentation.get("downstream_handoff", "#")),
         bundle_href=_escape(presentation.get("evidence_bundle", "#")),

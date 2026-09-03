@@ -1,0 +1,8312 @@
+{
+ "python": {
+  "executable": "/Volumes/A/audio-provenance/.venv/bin/python",
+  "version": "3.13.9"
+ },
+ "sample_rate_hz": 44100,
+ "window_frames": 4096,
+ "window_seconds": 0.09287981859410431,
+ "round_cases": [
+  [
+   0.0625,
+   0,
+   0.0
+  ],
+  [
+   0.0625,
+   1,
+   0.1
+  ],
+  [
+   0.0625,
+   2,
+   0.06
+  ],
+  [
+   0.0625,
+   3,
+   0.062
+  ],
+  [
+   0.0625,
+   4,
+   0.0625
+  ],
+  [
+   0.0625,
+   8,
+   0.0625
+  ],
+  [
+   -0.0625,
+   0,
+   -0.0
+  ],
+  [
+   -0.0625,
+   1,
+   -0.1
+  ],
+  [
+   -0.0625,
+   2,
+   -0.06
+  ],
+  [
+   -0.0625,
+   3,
+   -0.062
+  ],
+  [
+   -0.0625,
+   4,
+   -0.0625
+  ],
+  [
+   -0.0625,
+   8,
+   -0.0625
+  ],
+  [
+   0.03125,
+   0,
+   0.0
+  ],
+  [
+   0.03125,
+   1,
+   0.0
+  ],
+  [
+   0.03125,
+   2,
+   0.03
+  ],
+  [
+   0.03125,
+   3,
+   0.031
+  ],
+  [
+   0.03125,
+   4,
+   0.0312
+  ],
+  [
+   0.03125,
+   8,
+   0.03125
+  ],
+  [
+   2.5,
+   0,
+   2.0
+  ],
+  [
+   2.5,
+   1,
+   2.5
+  ],
+  [
+   2.5,
+   2,
+   2.5
+  ],
+  [
+   2.5,
+   3,
+   2.5
+  ],
+  [
+   2.5,
+   4,
+   2.5
+  ],
+  [
+   2.5,
+   8,
+   2.5
+  ],
+  [
+   0.5,
+   0,
+   0.0
+  ],
+  [
+   0.5,
+   1,
+   0.5
+  ],
+  [
+   0.5,
+   2,
+   0.5
+  ],
+  [
+   0.5,
+   3,
+   0.5
+  ],
+  [
+   0.5,
+   4,
+   0.5
+  ],
+  [
+   0.5,
+   8,
+   0.5
+  ],
+  [
+   1.5,
+   0,
+   2.0
+  ],
+  [
+   1.5,
+   1,
+   1.5
+  ],
+  [
+   1.5,
+   2,
+   1.5
+  ],
+  [
+   1.5,
+   3,
+   1.5
+  ],
+  [
+   1.5,
+   4,
+   1.5
+  ],
+  [
+   1.5,
+   8,
+   1.5
+  ],
+  [
+   -0.5,
+   0,
+   -0.0
+  ],
+  [
+   -0.5,
+   1,
+   -0.5
+  ],
+  [
+   -0.5,
+   2,
+   -0.5
+  ],
+  [
+   -0.5,
+   3,
+   -0.5
+  ],
+  [
+   -0.5,
+   4,
+   -0.5
+  ],
+  [
+   -0.5,
+   8,
+   -0.5
+  ],
+  [
+   -2.5,
+   0,
+   -2.0
+  ],
+  [
+   -2.5,
+   1,
+   -2.5
+  ],
+  [
+   -2.5,
+   2,
+   -2.5
+  ],
+  [
+   -2.5,
+   3,
+   -2.5
+  ],
+  [
+   -2.5,
+   4,
+   -2.5
+  ],
+  [
+   -2.5,
+   8,
+   -2.5
+  ],
+  [
+   0.0,
+   0,
+   0.0
+  ],
+  [
+   0.0,
+   1,
+   0.0
+  ],
+  [
+   0.0,
+   2,
+   0.0
+  ],
+  [
+   0.0,
+   3,
+   0.0
+  ],
+  [
+   0.0,
+   4,
+   0.0
+  ],
+  [
+   0.0,
+   8,
+   0.0
+  ],
+  [
+   -0.0,
+   0,
+   -0.0
+  ],
+  [
+   -0.0,
+   1,
+   -0.0
+  ],
+  [
+   -0.0,
+   2,
+   -0.0
+  ],
+  [
+   -0.0,
+   3,
+   -0.0
+  ],
+  [
+   -0.0,
+   4,
+   -0.0
+  ],
+  [
+   -0.0,
+   8,
+   -0.0
+  ],
+  [
+   0.3333333333333333,
+   0,
+   0.0
+  ],
+  [
+   0.3333333333333333,
+   1,
+   0.3
+  ],
+  [
+   0.3333333333333333,
+   2,
+   0.33
+  ],
+  [
+   0.3333333333333333,
+   3,
+   0.333
+  ],
+  [
+   0.3333333333333333,
+   4,
+   0.3333
+  ],
+  [
+   0.3333333333333333,
+   8,
+   0.33333333
+  ],
+  [
+   0.6666666666666666,
+   0,
+   1.0
+  ],
+  [
+   0.6666666666666666,
+   1,
+   0.7
+  ],
+  [
+   0.6666666666666666,
+   2,
+   0.67
+  ],
+  [
+   0.6666666666666666,
+   3,
+   0.667
+  ],
+  [
+   0.6666666666666666,
+   4,
+   0.6667
+  ],
+  [
+   0.6666666666666666,
+   8,
+   0.66666667
+  ],
+  [
+   3.141592653589793,
+   0,
+   3.0
+  ],
+  [
+   3.141592653589793,
+   1,
+   3.1
+  ],
+  [
+   3.141592653589793,
+   2,
+   3.14
+  ],
+  [
+   3.141592653589793,
+   3,
+   3.142
+  ],
+  [
+   3.141592653589793,
+   4,
+   3.1416
+  ],
+  [
+   3.141592653589793,
+   8,
+   3.14159265
+  ],
+  [
+   2.718281828459045,
+   0,
+   3.0
+  ],
+  [
+   2.718281828459045,
+   1,
+   2.7
+  ],
+  [
+   2.718281828459045,
+   2,
+   2.72
+  ],
+  [
+   2.718281828459045,
+   3,
+   2.718
+  ],
+  [
+   2.718281828459045,
+   4,
+   2.7183
+  ],
+  [
+   2.718281828459045,
+   8,
+   2.71828183
+  ],
+  [
+   0.72,
+   0,
+   1.0
+  ],
+  [
+   0.72,
+   1,
+   0.7
+  ],
+  [
+   0.72,
+   2,
+   0.72
+  ],
+  [
+   0.72,
+   3,
+   0.72
+  ],
+  [
+   0.72,
+   4,
+   0.72
+  ],
+  [
+   0.72,
+   8,
+   0.72
+  ],
+  [
+   0.985,
+   0,
+   1.0
+  ],
+  [
+   0.985,
+   1,
+   1.0
+  ],
+  [
+   0.985,
+   2,
+   0.98
+  ],
+  [
+   0.985,
+   3,
+   0.985
+  ],
+  [
+   0.985,
+   4,
+   0.985
+  ],
+  [
+   0.985,
+   8,
+   0.985
+  ],
+  [
+   1.005,
+   0,
+   1.0
+  ],
+  [
+   1.005,
+   1,
+   1.0
+  ],
+  [
+   1.005,
+   2,
+   1.0
+  ],
+  [
+   1.005,
+   3,
+   1.005
+  ],
+  [
+   1.005,
+   4,
+   1.005
+  ],
+  [
+   1.005,
+   8,
+   1.005
+  ],
+  [
+   12345.678,
+   0,
+   12346.0
+  ],
+  [
+   12345.678,
+   1,
+   12345.7
+  ],
+  [
+   12345.678,
+   2,
+   12345.68
+  ],
+  [
+   12345.678,
+   3,
+   12345.678
+  ],
+  [
+   12345.678,
+   4,
+   12345.678
+  ],
+  [
+   12345.678,
+   8,
+   12345.678
+  ],
+  [
+   0.30000000000000004,
+   0,
+   0.0
+  ],
+  [
+   0.30000000000000004,
+   1,
+   0.3
+  ],
+  [
+   0.30000000000000004,
+   2,
+   0.3
+  ],
+  [
+   0.30000000000000004,
+   3,
+   0.3
+  ],
+  [
+   0.30000000000000004,
+   4,
+   0.3
+  ],
+  [
+   0.30000000000000004,
+   8,
+   0.3
+  ],
+  [
+   1e-05,
+   0,
+   0.0
+  ],
+  [
+   1e-05,
+   1,
+   0.0
+  ],
+  [
+   1e-05,
+   2,
+   0.0
+  ],
+  [
+   1e-05,
+   3,
+   0.0
+  ],
+  [
+   1e-05,
+   4,
+   0.0
+  ],
+  [
+   1e-05,
+   8,
+   1e-05
+  ],
+  [
+   1e-07,
+   0,
+   0.0
+  ],
+  [
+   1e-07,
+   1,
+   0.0
+  ],
+  [
+   1e-07,
+   2,
+   0.0
+  ],
+  [
+   1e-07,
+   3,
+   0.0
+  ],
+  [
+   1e-07,
+   4,
+   0.0
+  ],
+  [
+   1e-07,
+   8,
+   1e-07
+  ],
+  [
+   3.0517578125e-05,
+   0,
+   0.0
+  ],
+  [
+   3.0517578125e-05,
+   1,
+   0.0
+  ],
+  [
+   3.0517578125e-05,
+   2,
+   0.0
+  ],
+  [
+   3.0517578125e-05,
+   3,
+   0.0
+  ],
+  [
+   3.0517578125e-05,
+   4,
+   0.0
+  ],
+  [
+   3.0517578125e-05,
+   8,
+   3.052e-05
+  ],
+  [
+   5e-324,
+   0,
+   0.0
+  ],
+  [
+   5e-324,
+   1,
+   0.0
+  ],
+  [
+   5e-324,
+   2,
+   0.0
+  ],
+  [
+   5e-324,
+   3,
+   0.0
+  ],
+  [
+   5e-324,
+   4,
+   0.0
+  ],
+  [
+   5e-324,
+   8,
+   0.0
+  ],
+  [
+   1.7976931348623157e+308,
+   0,
+   1.7976931348623157e+308
+  ],
+  [
+   1.7976931348623157e+308,
+   1,
+   1.7976931348623157e+308
+  ],
+  [
+   1.7976931348623157e+308,
+   2,
+   1.7976931348623157e+308
+  ],
+  [
+   1.7976931348623157e+308,
+   3,
+   1.7976931348623157e+308
+  ],
+  [
+   1.7976931348623157e+308,
+   4,
+   1.7976931348623157e+308
+  ],
+  [
+   1.7976931348623157e+308,
+   8,
+   1.7976931348623157e+308
+  ],
+  [
+   0.915,
+   0,
+   1.0
+  ],
+  [
+   0.915,
+   1,
+   0.9
+  ],
+  [
+   0.915,
+   2,
+   0.92
+  ],
+  [
+   0.915,
+   3,
+   0.915
+  ],
+  [
+   0.915,
+   4,
+   0.915
+  ],
+  [
+   0.915,
+   8,
+   0.915
+  ],
+  [
+   0.7199999999999999,
+   0,
+   1.0
+  ],
+  [
+   0.7199999999999999,
+   1,
+   0.7
+  ],
+  [
+   0.7199999999999999,
+   2,
+   0.72
+  ],
+  [
+   0.7199999999999999,
+   3,
+   0.72
+  ],
+  [
+   0.7199999999999999,
+   4,
+   0.72
+  ],
+  [
+   0.7199999999999999,
+   8,
+   0.72
+  ],
+  [
+   0.7200000000000001,
+   0,
+   1.0
+  ],
+  [
+   0.7200000000000001,
+   1,
+   0.7
+  ],
+  [
+   0.7200000000000001,
+   2,
+   0.72
+  ],
+  [
+   0.7200000000000001,
+   3,
+   0.72
+  ],
+  [
+   0.7200000000000001,
+   4,
+   0.72
+  ],
+  [
+   0.7200000000000001,
+   8,
+   0.72
+  ],
+  [
+   1.0,
+   0,
+   1.0
+  ],
+  [
+   1.0,
+   1,
+   1.0
+  ],
+  [
+   1.0,
+   2,
+   1.0
+  ],
+  [
+   1.0,
+   3,
+   1.0
+  ],
+  [
+   1.0,
+   4,
+   1.0
+  ],
+  [
+   1.0,
+   8,
+   1.0
+  ],
+  [
+   0.9999999999999999,
+   0,
+   1.0
+  ],
+  [
+   0.9999999999999999,
+   1,
+   1.0
+  ],
+  [
+   0.9999999999999999,
+   2,
+   1.0
+  ],
+  [
+   0.9999999999999999,
+   3,
+   1.0
+  ],
+  [
+   0.9999999999999999,
+   4,
+   1.0
+  ],
+  [
+   0.9999999999999999,
+   8,
+   1.0
+  ],
+  [
+   10.7666015625,
+   0,
+   11.0
+  ],
+  [
+   10.7666015625,
+   1,
+   10.8
+  ],
+  [
+   10.7666015625,
+   2,
+   10.77
+  ],
+  [
+   10.7666015625,
+   3,
+   10.767
+  ],
+  [
+   10.7666015625,
+   4,
+   10.7666
+  ],
+  [
+   10.7666015625,
+   8,
+   10.76660156
+  ],
+  [
+   0.09287981859410431,
+   0,
+   0.0
+  ],
+  [
+   0.09287981859410431,
+   1,
+   0.1
+  ],
+  [
+   0.09287981859410431,
+   2,
+   0.09
+  ],
+  [
+   0.09287981859410431,
+   3,
+   0.093
+  ],
+  [
+   0.09287981859410431,
+   4,
+   0.0929
+  ],
+  [
+   0.09287981859410431,
+   8,
+   0.09287982
+  ],
+  [
+   0.18575963718820862,
+   0,
+   0.0
+  ],
+  [
+   0.18575963718820862,
+   1,
+   0.2
+  ],
+  [
+   0.18575963718820862,
+   2,
+   0.19
+  ],
+  [
+   0.18575963718820862,
+   3,
+   0.186
+  ],
+  [
+   0.18575963718820862,
+   4,
+   0.1858
+  ],
+  [
+   0.18575963718820862,
+   8,
+   0.18575964
+  ],
+  [
+   123456789.12345679,
+   0,
+   123456789.0
+  ],
+  [
+   123456789.12345679,
+   1,
+   123456789.1
+  ],
+  [
+   123456789.12345679,
+   2,
+   123456789.12
+  ],
+  [
+   123456789.12345679,
+   3,
+   123456789.123
+  ],
+  [
+   123456789.12345679,
+   4,
+   123456789.1235
+  ],
+  [
+   123456789.12345679,
+   8,
+   123456789.12345679
+  ],
+  [
+   2.675,
+   0,
+   3.0
+  ],
+  [
+   2.675,
+   1,
+   2.7
+  ],
+  [
+   2.675,
+   2,
+   2.67
+  ],
+  [
+   2.675,
+   3,
+   2.675
+  ],
+  [
+   2.675,
+   4,
+   2.675
+  ],
+  [
+   2.675,
+   8,
+   2.675
+  ],
+  [
+   -2.675,
+   0,
+   -3.0
+  ],
+  [
+   -2.675,
+   1,
+   -2.7
+  ],
+  [
+   -2.675,
+   2,
+   -2.67
+  ],
+  [
+   -2.675,
+   3,
+   -2.675
+  ],
+  [
+   -2.675,
+   4,
+   -2.675
+  ],
+  [
+   -2.675,
+   8,
+   -2.675
+  ],
+  [
+   0.15625,
+   0,
+   0.0
+  ],
+  [
+   0.15625,
+   1,
+   0.2
+  ],
+  [
+   0.15625,
+   2,
+   0.16
+  ],
+  [
+   0.15625,
+   3,
+   0.156
+  ],
+  [
+   0.15625,
+   4,
+   0.1562
+  ],
+  [
+   0.15625,
+   8,
+   0.15625
+  ],
+  [
+   1023.5,
+   0,
+   1024.0
+  ],
+  [
+   1023.5,
+   1,
+   1023.5
+  ],
+  [
+   1023.5,
+   2,
+   1023.5
+  ],
+  [
+   1023.5,
+   3,
+   1023.5
+  ],
+  [
+   1023.5,
+   4,
+   1023.5
+  ],
+  [
+   1023.5,
+   8,
+   1023.5
+  ],
+  [
+   1024.5,
+   0,
+   1024.0
+  ],
+  [
+   1024.5,
+   1,
+   1024.5
+  ],
+  [
+   1024.5,
+   2,
+   1024.5
+  ],
+  [
+   1024.5,
+   3,
+   1024.5
+  ],
+  [
+   1024.5,
+   4,
+   1024.5
+  ],
+  [
+   1024.5,
+   8,
+   1024.5
+  ]
+ ],
+ "comparison_cases": [
+  {
+   "name": "identical_sequences",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "synthetic": {
+     "seed": 3,
+     "count": 24,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "ce"
+    }
+   },
+   "exported": {
+    "synthetic": {
+     "seed": 3,
+     "count": 24,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "ce"
+    }
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 1.0,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 24,
+    "comparable_window_count": 24,
+    "overlap_window_count": 24,
+    "routed_window_count": 24,
+    "export_window_count": 24,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 8,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 9,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 10,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 11,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 12,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 13,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 14,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 15,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 16,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 17,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 18,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 19,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 20,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 21,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 22,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 23,
+      "similarity": 1.0,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "dyadic_gain_and_offset",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "synthetic": {
+     "seed": 3,
+     "count": 24,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "ce"
+    }
+   },
+   "exported": {
+    "synthetic": {
+     "seed": 3,
+     "count": 30,
+     "start": -6,
+     "gain": 0.5,
+     "axes": "ce"
+    }
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.9905,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 24,
+    "comparable_window_count": 24,
+    "overlap_window_count": 24,
+    "routed_window_count": 24,
+    "export_window_count": 30,
+    "best_offset_windows": 6,
+    "best_offset_seconds": 0.5573,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 8,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 9,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 10,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 11,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 12,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 13,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 14,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 15,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 16,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 17,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 18,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 19,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 20,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 21,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 22,
+      "similarity": 0.989,
+      "matched": true
+     },
+     {
+      "relative_window": 23,
+      "similarity": 0.989,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989,
+     0.989
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "shifted_seed_sequences",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "synthetic": {
+     "seed": 3,
+     "count": 24,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "ce"
+    }
+   },
+   "exported": {
+    "synthetic": {
+     "seed": 41,
+     "count": 24,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "ce"
+    }
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.8001,
+    "matched_coverage": 0.9048,
+    "routed_coverage": 0.875,
+    "matched_window_count": 19,
+    "comparable_window_count": 21,
+    "overlap_window_count": 21,
+    "routed_window_count": 24,
+    "export_window_count": 24,
+    "best_offset_windows": -3,
+    "best_offset_seconds": -0.2786,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.922,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.721,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.393,
+      "matched": false
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.721,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.823,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.875,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.901,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.917,
+      "matched": true
+     },
+     {
+      "relative_window": 8,
+      "similarity": 0.721,
+      "matched": true
+     },
+     {
+      "relative_window": 9,
+      "similarity": 0.731,
+      "matched": true
+     },
+     {
+      "relative_window": 10,
+      "similarity": 0.791,
+      "matched": true
+     },
+     {
+      "relative_window": 11,
+      "similarity": 0.774,
+      "matched": true
+     },
+     {
+      "relative_window": 12,
+      "similarity": 0.856,
+      "matched": true
+     },
+     {
+      "relative_window": 13,
+      "similarity": 0.52,
+      "matched": false
+     },
+     {
+      "relative_window": 14,
+      "similarity": 0.91,
+      "matched": true
+     },
+     {
+      "relative_window": 15,
+      "similarity": 0.923,
+      "matched": true
+     },
+     {
+      "relative_window": 16,
+      "similarity": 0.721,
+      "matched": true
+     },
+     {
+      "relative_window": 17,
+      "similarity": 0.769,
+      "matched": true
+     },
+     {
+      "relative_window": 18,
+      "similarity": 0.721,
+      "matched": true
+     },
+     {
+      "relative_window": 19,
+      "similarity": 0.829,
+      "matched": true
+     },
+     {
+      "relative_window": 20,
+      "similarity": 0.877,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.922,
+     0.721,
+     0.393,
+     0.721,
+     0.823,
+     0.875,
+     0.901,
+     0.917,
+     0.721,
+     0.731,
+     0.791,
+     0.774,
+     0.856,
+     0.52,
+     0.91,
+     0.923,
+     0.721,
+     0.769,
+     0.721,
+     0.829,
+     0.877
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "offsets_exactly_at_the_bound",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "synthetic": {
+     "seed": 3,
+     "count": 401,
+     "start": 0,
+     "gain": 1.0,
+     "axes": ""
+    }
+   },
+   "exported": {
+    "synthetic": {
+     "seed": 3,
+     "count": 401,
+     "start": 0,
+     "gain": 1.0,
+     "axes": ""
+    }
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 1.0,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 401,
+    "comparable_window_count": 401,
+    "overlap_window_count": 401,
+    "routed_window_count": 401,
+    "export_window_count": 401,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 8,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 16,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 24,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 32,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 40,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 48,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 56,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 64,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 72,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 80,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 88,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 96,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 104,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 112,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 120,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 128,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 136,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 144,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 152,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 160,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 168,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 176,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 184,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 192,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 200,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 208,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 216,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 224,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 232,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 240,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 248,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 256,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 264,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 272,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 280,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 288,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 296,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 304,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 312,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 320,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 328,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 336,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 344,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 352,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 360,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 368,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 376,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 384,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 392,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 400,
+      "similarity": 1.0,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "offsets_one_past_the_bound_subsamples",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "synthetic": {
+     "seed": 3,
+     "count": 401,
+     "start": 0,
+     "gain": 1.0,
+     "axes": ""
+    }
+   },
+   "exported": {
+    "synthetic": {
+     "seed": 3,
+     "count": 402,
+     "start": 0,
+     "gain": 1.0,
+     "axes": ""
+    }
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 1.0,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 401,
+    "comparable_window_count": 401,
+    "overlap_window_count": 401,
+    "routed_window_count": 401,
+    "export_window_count": 402,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 8,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 16,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 24,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 32,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 40,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 48,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 56,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 64,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 72,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 80,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 88,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 96,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 104,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 112,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 120,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 128,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 136,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 144,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 152,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 160,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 168,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 176,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 184,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 192,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 200,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 208,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 216,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 224,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 232,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 240,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 248,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 256,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 264,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 272,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 280,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 288,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 296,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 304,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 312,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 320,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 328,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 336,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 344,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 352,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 360,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 368,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 376,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 384,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 392,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 400,
+      "similarity": 1.0,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "overlap_601_strides_the_comparison",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "synthetic": {
+     "seed": 5,
+     "count": 601,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "e"
+    }
+   },
+   "exported": {
+    "synthetic": {
+     "seed": 5,
+     "count": 601,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "e"
+    }
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 1.0,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 301,
+    "comparable_window_count": 301,
+    "overlap_window_count": 601,
+    "routed_window_count": 601,
+    "export_window_count": 601,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 12,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 18,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 24,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 30,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 36,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 42,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 48,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 54,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 60,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 66,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 72,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 78,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 84,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 90,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 96,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 102,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 108,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 114,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 120,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 126,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 132,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 138,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 144,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 150,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 156,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 162,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 168,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 174,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 180,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 186,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 192,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 198,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 204,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 210,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 216,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 222,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 228,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 234,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 240,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 246,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 252,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 258,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 264,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 270,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 276,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 282,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 288,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 294,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 300,
+      "similarity": 1.0,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "comparable_56_windows",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "synthetic": {
+     "seed": 9,
+     "count": 56,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "ce"
+    }
+   },
+   "exported": {
+    "synthetic": {
+     "seed": 9,
+     "count": 56,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "ce"
+    }
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 1.0,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 56,
+    "comparable_window_count": 56,
+    "overlap_window_count": 56,
+    "routed_window_count": 56,
+    "export_window_count": 56,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 8,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 9,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 10,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 11,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 12,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 13,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 14,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 15,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 16,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 17,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 18,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 19,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 20,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 21,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 22,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 23,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 24,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 25,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 26,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 27,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 28,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 29,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 30,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 31,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 32,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 33,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 34,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 35,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 36,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 37,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 38,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 39,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 40,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 41,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 42,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 43,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 44,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 45,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 46,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 47,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 48,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 49,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 50,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 51,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 52,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 53,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 54,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 55,
+      "similarity": 1.0,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "comparable_57_windows_strides_the_chart",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "synthetic": {
+     "seed": 9,
+     "count": 57,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "ce"
+    }
+   },
+   "exported": {
+    "synthetic": {
+     "seed": 9,
+     "count": 57,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "ce"
+    }
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 1.0,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 57,
+    "comparable_window_count": 57,
+    "overlap_window_count": 57,
+    "routed_window_count": 57,
+    "export_window_count": 57,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 8,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 10,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 12,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 14,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 16,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 18,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 20,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 22,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 24,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 26,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 28,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 30,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 32,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 34,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 36,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 38,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 40,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 42,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 44,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 46,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 48,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 50,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 52,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 54,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 56,
+      "similarity": 1.0,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "overlap_exactly_three",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "rms": 0.171875,
+      "zcr": 0.029296875,
+      "crest": 1.375,
+      "envelope": [
+       0.75,
+       0.25,
+       1.0,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.2734375,
+      "zcr": 0.0859375,
+      "crest": 1.5,
+      "envelope": [
+       1.0,
+       0.5,
+       0.0,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.375,
+      "zcr": 0.0390625,
+      "crest": 1.625,
+      "envelope": [
+       0.0,
+       0.75,
+       0.25,
+       1.0
+      ]
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "rms": 0.171875,
+      "zcr": 0.029296875,
+      "crest": 1.375,
+      "envelope": [
+       0.75,
+       0.25,
+       1.0,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.2734375,
+      "zcr": 0.0859375,
+      "crest": 1.5,
+      "envelope": [
+       1.0,
+       0.5,
+       0.0,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.375,
+      "zcr": 0.0390625,
+      "crest": 1.625,
+      "envelope": [
+       0.0,
+       0.75,
+       0.25,
+       1.0
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 1.0,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 3,
+    "comparable_window_count": 3,
+    "overlap_window_count": 3,
+    "routed_window_count": 3,
+    "export_window_count": 3,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 1.0,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "overlap_two_has_no_usable_overlap",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "rms": 0.171875,
+      "zcr": 0.029296875,
+      "crest": 1.375,
+      "envelope": [
+       0.75,
+       0.25,
+       1.0,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.2734375,
+      "zcr": 0.0859375,
+      "crest": 1.5,
+      "envelope": [
+       1.0,
+       0.5,
+       0.0,
+       0.75
+      ]
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "rms": 0.171875,
+      "zcr": 0.029296875,
+      "crest": 1.375,
+      "envelope": [
+       0.75,
+       0.25,
+       1.0,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.2734375,
+      "zcr": 0.0859375,
+      "crest": 1.5,
+      "envelope": [
+       1.0,
+       0.5,
+       0.0,
+       0.75
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "feature sequences had no usable overlap",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "routed_coverage_exactly_at_the_floor",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "rms": 0.609375,
+      "zcr": 0.00390625,
+      "crest": 1.5,
+      "envelope": [
+       0.25,
+       1.0,
+       0.5,
+       0.0
+      ]
+     },
+     {
+      "rms": 0.7109375,
+      "zcr": 0.060546875,
+      "crest": 1.625,
+      "envelope": [
+       0.5,
+       0.0,
+       0.75,
+       0.25
+      ]
+     },
+     {
+      "rms": 0.0546875,
+      "zcr": 0.013671875,
+      "crest": 1.75,
+      "envelope": [
+       0.75,
+       0.25,
+       1.0,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.15625,
+      "zcr": 0.0703125,
+      "crest": 1.0,
+      "envelope": [
+       1.0,
+       0.5,
+       0.0,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.2578125,
+      "zcr": 0.0234375,
+      "crest": 1.125,
+      "envelope": [
+       0.0,
+       0.75,
+       0.25,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.359375,
+      "zcr": 0.080078125,
+      "crest": 1.25,
+      "envelope": [
+       0.25,
+       1.0,
+       0.5,
+       0.0
+      ]
+     },
+     {
+      "rms": 0.4609375,
+      "zcr": 0.033203125,
+      "crest": 1.375,
+      "envelope": [
+       0.5,
+       0.0,
+       0.75,
+       0.25
+      ]
+     },
+     {
+      "rms": 0.5625,
+      "zcr": 0.08984375,
+      "crest": 1.5,
+      "envelope": [
+       0.75,
+       0.25,
+       1.0,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.6640625,
+      "zcr": 0.04296875,
+      "crest": 1.625,
+      "envelope": [
+       1.0,
+       0.5,
+       0.0,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.0078125,
+      "zcr": 0.099609375,
+      "crest": 1.75,
+      "envelope": [
+       0.0,
+       0.75,
+       0.25,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.109375,
+      "zcr": 0.052734375,
+      "crest": 1.0,
+      "envelope": [
+       0.25,
+       1.0,
+       0.5,
+       0.0
+      ]
+     },
+     {
+      "rms": 0.2109375,
+      "zcr": 0.005859375,
+      "crest": 1.125,
+      "envelope": [
+       0.5,
+       0.0,
+       0.75,
+       0.25
+      ]
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "rms": 0.0078125,
+      "zcr": 0.099609375,
+      "crest": 1.75,
+      "envelope": [
+       0.0,
+       0.75,
+       0.25,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.109375,
+      "zcr": 0.052734375,
+      "crest": 1.0,
+      "envelope": [
+       0.25,
+       1.0,
+       0.5,
+       0.0
+      ]
+     },
+     {
+      "rms": 0.2109375,
+      "zcr": 0.005859375,
+      "crest": 1.125,
+      "envelope": [
+       0.5,
+       0.0,
+       0.75,
+       0.25
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.8741,
+    "matched_coverage": 1.0,
+    "routed_coverage": 0.25,
+    "matched_window_count": 3,
+    "comparable_window_count": 3,
+    "overlap_window_count": 3,
+    "routed_window_count": 12,
+    "export_window_count": 3,
+    "best_offset_windows": -9,
+    "best_offset_seconds": -0.8359,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.852,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.852,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.852,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.852,
+     0.852,
+     0.852
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "matched_coverage_three_of_five",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "rms": 0.71875,
+      "zcr": 0.0234375,
+      "crest": 1.75,
+      "envelope": [
+       0.75,
+       0.25,
+       1.0,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.0625,
+      "zcr": 0.080078125,
+      "crest": 1.0,
+      "envelope": [
+       1.0,
+       0.5,
+       0.0,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.1640625,
+      "zcr": 0.033203125,
+      "crest": 1.125,
+      "envelope": [
+       0.0,
+       0.75,
+       0.25,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.265625,
+      "zcr": 0.08984375,
+      "crest": 1.25,
+      "envelope": [
+       0.25,
+       1.0,
+       0.5,
+       0.0
+      ]
+     },
+     {
+      "rms": 0.3671875,
+      "zcr": 0.04296875,
+      "crest": 1.375,
+      "envelope": [
+       0.5,
+       0.0,
+       0.75,
+       0.25
+      ]
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "rms": 0.71875,
+      "zcr": 0.0234375,
+      "crest": 1.75,
+      "envelope": [
+       0.75,
+       0.25,
+       1.0,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.0625,
+      "zcr": 0.080078125,
+      "crest": 1.0,
+      "envelope": [
+       1.0,
+       0.5,
+       0.0,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.1640625,
+      "zcr": 0.033203125,
+      "crest": 1.125,
+      "envelope": [
+       0.0,
+       0.75,
+       0.25,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.5,
+      "zcr": 0.4,
+      "crest": 6.0,
+      "envelope": [
+       1.5,
+       0.1,
+       1.5,
+       0.1
+      ]
+     },
+     {
+      "rms": 0.004,
+      "zcr": 0.02,
+      "crest": 9.0,
+      "envelope": [
+       0.0,
+       1.9,
+       0.0,
+       1.9
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "not_established",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.628,
+    "matched_coverage": 0.6,
+    "routed_coverage": 1.0,
+    "matched_window_count": 3,
+    "comparable_window_count": 5,
+    "overlap_window_count": 5,
+    "routed_window_count": 5,
+    "export_window_count": 5,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.93,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.93,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.93,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.089,
+      "matched": false
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.285,
+      "matched": false
+     }
+    ],
+    "alignment_similarity": [
+     0.93,
+     0.93,
+     0.93,
+     0.089,
+     0.285
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": "bounded routed/export feature similarity did not meet the inference threshold",
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "every_axis_at_an_intermediate_distance",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "rms": 0.25,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       0.5,
+       0.5625,
+       0.625,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.265625,
+      "zcr": 0.101953125,
+      "crest": 2.25,
+      "envelope": [
+       0.5625,
+       0.625,
+       0.6875,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.28125,
+      "zcr": 0.10390625,
+      "crest": 2.5,
+      "envelope": [
+       0.625,
+       0.6875,
+       0.5,
+       0.5625
+      ]
+     },
+     {
+      "rms": 0.296875,
+      "zcr": 0.105859375,
+      "crest": 2.0,
+      "envelope": [
+       0.6875,
+       0.5,
+       0.5625,
+       0.625
+      ]
+     },
+     {
+      "rms": 0.3125,
+      "zcr": 0.1078125,
+      "crest": 2.25,
+      "envelope": [
+       0.5,
+       0.5625,
+       0.625,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.109765625,
+      "crest": 2.5,
+      "envelope": [
+       0.5625,
+       0.625,
+       0.6875,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.265625,
+      "zcr": 0.11171875,
+      "crest": 2.0,
+      "envelope": [
+       0.625,
+       0.6875,
+       0.5,
+       0.5625
+      ]
+     },
+     {
+      "rms": 0.28125,
+      "zcr": 0.1,
+      "crest": 2.25,
+      "envelope": [
+       0.6875,
+       0.5,
+       0.5625,
+       0.625
+      ]
+     },
+     {
+      "rms": 0.296875,
+      "zcr": 0.101953125,
+      "crest": 2.5,
+      "envelope": [
+       0.5,
+       0.5625,
+       0.625,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.3125,
+      "zcr": 0.10390625,
+      "crest": 2.0,
+      "envelope": [
+       0.5625,
+       0.625,
+       0.6875,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.105859375,
+      "crest": 2.25,
+      "envelope": [
+       0.625,
+       0.6875,
+       0.5,
+       0.5625
+      ]
+     },
+     {
+      "rms": 0.265625,
+      "zcr": 0.1078125,
+      "crest": 2.5,
+      "envelope": [
+       0.6875,
+       0.5,
+       0.5625,
+       0.625
+      ]
+     },
+     {
+      "rms": 0.28125,
+      "zcr": 0.109765625,
+      "crest": 2.0,
+      "envelope": [
+       0.5,
+       0.5625,
+       0.625,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.296875,
+      "zcr": 0.11171875,
+      "crest": 2.25,
+      "envelope": [
+       0.5625,
+       0.625,
+       0.6875,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.3125,
+      "zcr": 0.1,
+      "crest": 2.5,
+      "envelope": [
+       0.625,
+       0.6875,
+       0.5,
+       0.5625
+      ]
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.101953125,
+      "crest": 2.0,
+      "envelope": [
+       0.6875,
+       0.5,
+       0.5625,
+       0.625
+      ]
+     },
+     {
+      "rms": 0.265625,
+      "zcr": 0.10390625,
+      "crest": 2.25,
+      "envelope": [
+       0.5,
+       0.5625,
+       0.625,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.28125,
+      "zcr": 0.105859375,
+      "crest": 2.5,
+      "envelope": [
+       0.5625,
+       0.625,
+       0.6875,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.296875,
+      "zcr": 0.1078125,
+      "crest": 2.0,
+      "envelope": [
+       0.625,
+       0.6875,
+       0.5,
+       0.5625
+      ]
+     },
+     {
+      "rms": 0.3125,
+      "zcr": 0.109765625,
+      "crest": 2.25,
+      "envelope": [
+       0.6875,
+       0.5,
+       0.5625,
+       0.625
+      ]
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.11171875,
+      "crest": 2.5,
+      "envelope": [
+       0.5,
+       0.5625,
+       0.625,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.265625,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       0.5625,
+       0.625,
+       0.6875,
+       0.5
+      ]
+     },
+     {
+      "rms": 0.28125,
+      "zcr": 0.101953125,
+      "crest": 2.25,
+      "envelope": [
+       0.625,
+       0.6875,
+       0.5,
+       0.5625
+      ]
+     },
+     {
+      "rms": 0.296875,
+      "zcr": 0.10390625,
+      "crest": 2.5,
+      "envelope": [
+       0.6875,
+       0.5,
+       0.5625,
+       0.625
+      ]
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "rms": 0.1875,
+      "zcr": 0.11,
+      "crest": 2.5,
+      "envelope": [
+       0.4375,
+       0.625,
+       0.5625,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.1162109375,
+      "zcr": 0.1129296875,
+      "crest": 3.09375,
+      "envelope": [
+       0.4375,
+       0.75,
+       0.5625,
+       0.625
+      ]
+     },
+     {
+      "rms": 0.2109375,
+      "zcr": 0.115859375,
+      "crest": 3.75,
+      "envelope": [
+       0.4375,
+       0.875,
+       0.3125,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.1298828125,
+      "zcr": 0.115859375,
+      "crest": 3.25,
+      "envelope": [
+       0.625,
+       0.5625,
+       0.5,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.234375,
+      "zcr": 0.1187890625,
+      "crest": 2.8125,
+      "envelope": [
+       0.375,
+       0.6875,
+       0.5,
+       0.8125
+      ]
+     },
+     {
+      "rms": 0.109375,
+      "zcr": 0.12171875,
+      "crest": 3.4375,
+      "envelope": [
+       0.375,
+       0.8125,
+       0.5,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.19921875,
+      "zcr": 0.12171875,
+      "crest": 3.0,
+      "envelope": [
+       0.5625,
+       0.75,
+       0.4375,
+       0.625
+      ]
+     },
+     {
+      "rms": 0.123046875,
+      "zcr": 0.1109765625,
+      "crest": 3.65625,
+      "envelope": [
+       0.5625,
+       0.625,
+       0.4375,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.22265625,
+      "zcr": 0.11390625,
+      "crest": 3.125,
+      "envelope": [
+       0.3125,
+       0.75,
+       0.4375,
+       0.875
+      ]
+     },
+     {
+      "rms": 0.13671875,
+      "zcr": 0.11390625,
+      "crest": 2.75,
+      "envelope": [
+       0.5,
+       0.6875,
+       0.625,
+       0.5625
+      ]
+     },
+     {
+      "rms": 0.1875,
+      "zcr": 0.1168359375,
+      "crest": 3.375,
+      "envelope": [
+       0.5,
+       0.8125,
+       0.375,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.1162109375,
+      "zcr": 0.119765625,
+      "crest": 4.0625,
+      "envelope": [
+       0.5,
+       0.6875,
+       0.375,
+       0.8125
+      ]
+     },
+     {
+      "rms": 0.2109375,
+      "zcr": 0.119765625,
+      "crest": 2.5,
+      "envelope": [
+       0.4375,
+       0.625,
+       0.5625,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.1298828125,
+      "zcr": 0.1226953125,
+      "crest": 3.09375,
+      "envelope": [
+       0.4375,
+       0.75,
+       0.5625,
+       0.625
+      ]
+     },
+     {
+      "rms": 0.234375,
+      "zcr": 0.111953125,
+      "crest": 3.75,
+      "envelope": [
+       0.4375,
+       0.875,
+       0.3125,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.109375,
+      "zcr": 0.111953125,
+      "crest": 3.25,
+      "envelope": [
+       0.625,
+       0.5625,
+       0.5,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.19921875,
+      "zcr": 0.1148828125,
+      "crest": 2.8125,
+      "envelope": [
+       0.375,
+       0.6875,
+       0.5,
+       0.8125
+      ]
+     },
+     {
+      "rms": 0.123046875,
+      "zcr": 0.1178125,
+      "crest": 3.4375,
+      "envelope": [
+       0.375,
+       0.8125,
+       0.5,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.22265625,
+      "zcr": 0.1178125,
+      "crest": 3.0,
+      "envelope": [
+       0.5625,
+       0.75,
+       0.4375,
+       0.625
+      ]
+     },
+     {
+      "rms": 0.13671875,
+      "zcr": 0.1207421875,
+      "crest": 3.65625,
+      "envelope": [
+       0.5625,
+       0.625,
+       0.4375,
+       0.75
+      ]
+     },
+     {
+      "rms": 0.1875,
+      "zcr": 0.123671875,
+      "crest": 3.125,
+      "envelope": [
+       0.3125,
+       0.75,
+       0.4375,
+       0.875
+      ]
+     },
+     {
+      "rms": 0.1162109375,
+      "zcr": 0.11,
+      "crest": 2.75,
+      "envelope": [
+       0.5,
+       0.6875,
+       0.625,
+       0.5625
+      ]
+     },
+     {
+      "rms": 0.2109375,
+      "zcr": 0.1129296875,
+      "crest": 3.375,
+      "envelope": [
+       0.5,
+       0.8125,
+       0.375,
+       0.6875
+      ]
+     },
+     {
+      "rms": 0.1298828125,
+      "zcr": 0.115859375,
+      "crest": 4.0625,
+      "envelope": [
+       0.5,
+       0.6875,
+       0.375,
+       0.8125
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.8555,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 24,
+    "comparable_window_count": 24,
+    "overlap_window_count": 24,
+    "routed_window_count": 24,
+    "export_window_count": 24,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.868,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.835,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.799,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.844,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.842,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.809,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.85,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.819,
+      "matched": true
+     },
+     {
+      "relative_window": 8,
+      "similarity": 0.816,
+      "matched": true
+     },
+     {
+      "relative_window": 9,
+      "similarity": 0.86,
+      "matched": true
+     },
+     {
+      "relative_window": 10,
+      "similarity": 0.825,
+      "matched": true
+     },
+     {
+      "relative_window": 11,
+      "similarity": 0.793,
+      "matched": true
+     },
+     {
+      "relative_window": 12,
+      "similarity": 0.868,
+      "matched": true
+     },
+     {
+      "relative_window": 13,
+      "similarity": 0.835,
+      "matched": true
+     },
+     {
+      "relative_window": 14,
+      "similarity": 0.799,
+      "matched": true
+     },
+     {
+      "relative_window": 15,
+      "similarity": 0.844,
+      "matched": true
+     },
+     {
+      "relative_window": 16,
+      "similarity": 0.842,
+      "matched": true
+     },
+     {
+      "relative_window": 17,
+      "similarity": 0.809,
+      "matched": true
+     },
+     {
+      "relative_window": 18,
+      "similarity": 0.85,
+      "matched": true
+     },
+     {
+      "relative_window": 19,
+      "similarity": 0.819,
+      "matched": true
+     },
+     {
+      "relative_window": 20,
+      "similarity": 0.816,
+      "matched": true
+     },
+     {
+      "relative_window": 21,
+      "similarity": 0.86,
+      "matched": true
+     },
+     {
+      "relative_window": 22,
+      "similarity": 0.825,
+      "matched": true
+     },
+     {
+      "relative_window": 23,
+      "similarity": 0.793,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.868,
+     0.835,
+     0.799,
+     0.844,
+     0.842,
+     0.809,
+     0.85,
+     0.819,
+     0.816,
+     0.86,
+     0.825,
+     0.793,
+     0.868,
+     0.835,
+     0.799,
+     0.844,
+     0.842,
+     0.809,
+     0.85,
+     0.819,
+     0.816,
+     0.86,
+     0.825,
+     0.793
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "zcr_threshold_sweep",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "rms": 0.25,
+      "zcr": 0.222396
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22239620000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22239640000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2223966
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2223968
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.222397
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22239720000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22239740000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2223976
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2223978
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.222398
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22239820000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2223984
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2223986
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2223988
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.222399
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22239920000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22239940000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2223996
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2223998
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22240000000000001
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22240020000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224004
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224006
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224008
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22240100000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22240120000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224014
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224016
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224018
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22240200000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22240220000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224024
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224026
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224028
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22240300000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22240320000000002
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224034
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224036
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.2224038
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.22240400000000002
+     }
+    ]
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.8535,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 41,
+    "comparable_window_count": 41,
+    "overlap_window_count": 41,
+    "routed_window_count": 41,
+    "export_window_count": 41,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 8,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 9,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 10,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 11,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 12,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 13,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 14,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 15,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 16,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 17,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 18,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 19,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 20,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 21,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 22,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 23,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 24,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 25,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 26,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 27,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 28,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 29,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 30,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 31,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 32,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 33,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 34,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 35,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 36,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 37,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 38,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 39,
+      "similarity": 0.828,
+      "matched": true
+     },
+     {
+      "relative_window": 40,
+      "similarity": 0.828,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828,
+     0.828
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "confidence_just_at_the_floor",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "zcr": 0.05
+     },
+     {
+      "zcr": 0.14
+     },
+     {
+      "zcr": 0.22999999999999998
+     },
+     {
+      "zcr": 0.32
+     },
+     {
+      "zcr": 0.41
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "zcr": 0.061200000000000004
+     },
+     {
+      "zcr": 0.1512
+     },
+     {
+      "zcr": 0.24119999999999997
+     },
+     {
+      "zcr": 0.3502588235294118
+     },
+     {
+      "zcr": 0.44025882352941176
+     }
+    ]
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.74,
+    "matched_coverage": 0.6,
+    "routed_coverage": 1.0,
+    "matched_window_count": 3,
+    "comparable_window_count": 5,
+    "overlap_window_count": 5,
+    "routed_window_count": 5,
+    "export_window_count": 5,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.86,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.86,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.86,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.622,
+      "matched": false
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.622,
+      "matched": false
+     }
+    ],
+    "alignment_similarity": [
+     0.86,
+     0.86,
+     0.86,
+     0.622,
+     0.622
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "confidence_just_below_the_floor",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "zcr": 0.05
+     },
+     {
+      "zcr": 0.14
+     },
+     {
+      "zcr": 0.22999999999999998
+     },
+     {
+      "zcr": 0.32
+     },
+     {
+      "zcr": 0.41
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "zcr": 0.061200000000000004
+     },
+     {
+      "zcr": 0.1512
+     },
+     {
+      "zcr": 0.24119999999999997
+     },
+     {
+      "zcr": 0.35025882352941184
+     },
+     {
+      "zcr": 0.4402588235294118
+     }
+    ]
+   },
+   "expected": {
+    "status": "not_established",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.74,
+    "matched_coverage": 0.6,
+    "routed_coverage": 1.0,
+    "matched_window_count": 3,
+    "comparable_window_count": 5,
+    "overlap_window_count": 5,
+    "routed_window_count": 5,
+    "export_window_count": 5,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.86,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.86,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.86,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.622,
+      "matched": false
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.622,
+      "matched": false
+     }
+    ],
+    "alignment_similarity": [
+     0.86,
+     0.86,
+     0.86,
+     0.622,
+     0.622
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": "bounded routed/export feature similarity did not meet the inference threshold",
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "matched_coverage_five_of_nine",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "zcr": 0.05
+     },
+     {
+      "zcr": 0.14
+     },
+     {
+      "zcr": 0.22999999999999998
+     },
+     {
+      "zcr": 0.32
+     },
+     {
+      "zcr": 0.41
+     },
+     {
+      "zcr": 0.49999999999999994
+     },
+     {
+      "zcr": 0.5900000000000001
+     },
+     {
+      "zcr": 0.68
+     },
+     {
+      "zcr": 0.77
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "zcr": 0.054000000000000006
+     },
+     {
+      "zcr": 0.14400000000000002
+     },
+     {
+      "zcr": 0.23399999999999999
+     },
+     {
+      "zcr": 0.324
+     },
+     {
+      "zcr": 0.414
+     },
+     {
+      "zcr": 0.5256
+     },
+     {
+      "zcr": 0.6156
+     },
+     {
+      "zcr": 0.7056
+     },
+     {
+      "zcr": 0.7956
+     }
+    ]
+   },
+   "expected": {
+    "status": "not_established",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.7888,
+    "matched_coverage": 0.5556,
+    "routed_coverage": 1.0,
+    "matched_window_count": 5,
+    "comparable_window_count": 9,
+    "overlap_window_count": 9,
+    "routed_window_count": 9,
+    "export_window_count": 9,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.95,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.95,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.95,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.95,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.95,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.68,
+      "matched": false
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.68,
+      "matched": false
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.68,
+      "matched": false
+     },
+     {
+      "relative_window": 8,
+      "similarity": 0.68,
+      "matched": false
+     }
+    ],
+    "alignment_similarity": [
+     0.95,
+     0.95,
+     0.95,
+     0.95,
+     0.95,
+     0.68,
+     0.68,
+     0.68,
+     0.68
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": "bounded routed/export feature similarity did not meet the inference threshold",
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "tied_objectives_keep_the_first_offset",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "rms": 0.25,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "rms": 0.25,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.25,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 1.0,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 3,
+    "comparable_window_count": 3,
+    "overlap_window_count": 3,
+    "routed_window_count": 3,
+    "export_window_count": 5,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 1.0,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "levels_just_above_the_silence_floor",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "rms": 1e-07,
+      "zcr": 0.05
+     },
+     {
+      "rms": 1.02e-07,
+      "zcr": 0.14
+     },
+     {
+      "rms": 1.05e-07,
+      "zcr": 0.22999999999999998
+     },
+     {
+      "rms": 1.08e-07,
+      "zcr": 0.32
+     },
+     {
+      "rms": 1.03e-07,
+      "zcr": 0.41
+     },
+     {
+      "rms": 1.06e-07,
+      "zcr": 0.49999999999999994
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "rms": 0.01,
+      "zcr": 0.05
+     },
+     {
+      "rms": 0.0102,
+      "zcr": 0.14
+     },
+     {
+      "rms": 0.0105,
+      "zcr": 0.22999999999999998
+     },
+     {
+      "rms": 0.0108,
+      "zcr": 0.32
+     },
+     {
+      "rms": 0.0103,
+      "zcr": 0.41
+     },
+     {
+      "rms": 0.0106,
+      "zcr": 0.49999999999999994
+     }
+    ]
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.9982,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 6,
+    "comparable_window_count": 6,
+    "overlap_window_count": 6,
+    "routed_window_count": 6,
+    "export_window_count": 6,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.998,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.998,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.998,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.998,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.998,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.998,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.998,
+     0.998,
+     0.998,
+     0.998,
+     0.998,
+     0.998
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "silence_and_absent_axes",
+   "window_seconds": 0.5,
+   "routed": {
+    "explicit": [
+     {
+      "rms": 0.0,
+      "zcr": 0.0,
+      "crest": 0.0,
+      "envelope": [
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     {
+      "rms": 1e-07,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "rms": 1e-07,
+      "zcr": 0.1,
+      "crest": 2.0
+     },
+     {
+      "rms": 1e-09,
+      "zcr": 0.1
+     },
+     {
+      "rms": 0.3,
+      "zcr": 0.1,
+      "crest": 0.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.3,
+      "zcr": 0.1,
+      "crest": 3.0,
+      "envelope": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "zcr": 0.1
+     },
+     {}
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "rms": 0.0,
+      "zcr": 0.0,
+      "crest": 0.0,
+      "envelope": [
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     {
+      "rms": 0.2,
+      "zcr": 0.1,
+      "crest": 2.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "rms": 1e-07,
+      "zcr": 0.1,
+      "crest": 2.0
+     },
+     {
+      "rms": 1e-09,
+      "zcr": 0.1
+     },
+     {
+      "rms": 0.3,
+      "zcr": 0.1,
+      "crest": 4.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "rms": 0.3,
+      "zcr": 0.1,
+      "crest": 3.0,
+      "envelope": [
+       1.0,
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "zcr": 0.4
+     },
+     {}
+    ]
+   },
+   "expected": {
+    "status": "not_established",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.7234,
+    "matched_coverage": 0.75,
+    "routed_coverage": 1.0,
+    "matched_window_count": 6,
+    "comparable_window_count": 8,
+    "overlap_window_count": 8,
+    "routed_window_count": 8,
+    "export_window_count": 8,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.75,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.0,
+      "matched": false
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.0,
+      "matched": false
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     0.75,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     0.0,
+     0.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": "bounded routed/export feature similarity did not meet the inference threshold",
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "even_gain_reference_median",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": [
+     {
+      "rms": 0.1,
+      "zcr": 0.05
+     },
+     {
+      "rms": 0.2,
+      "zcr": 0.05
+     },
+     {
+      "rms": 0.3,
+      "zcr": 0.05
+     },
+     {
+      "rms": 0.4,
+      "zcr": 0.05
+     }
+    ]
+   },
+   "exported": {
+    "explicit": [
+     {
+      "rms": 0.05,
+      "zcr": 0.05
+     },
+     {
+      "rms": 0.1,
+      "zcr": 0.05
+     },
+     {
+      "rms": 0.15,
+      "zcr": 0.05
+     },
+     {
+      "rms": 0.2,
+      "zcr": 0.05
+     }
+    ]
+   },
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 1.0,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 4,
+    "comparable_window_count": 4,
+    "overlap_window_count": 4,
+    "routed_window_count": 4,
+    "export_window_count": 4,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 1.0,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ]
+   }
+  },
+  {
+   "name": "empty_routed",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "explicit": []
+   },
+   "exported": {
+    "synthetic": {
+     "seed": 3,
+     "count": 8,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "ce"
+    }
+   },
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "no routed feature windows were received",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "empty_export",
+   "window_seconds": 0.09287981859410431,
+   "routed": {
+    "synthetic": {
+     "seed": 3,
+     "count": 8,
+     "start": 0,
+     "gain": 1.0,
+     "axes": "ce"
+    }
+   },
+   "exported": {
+    "explicit": []
+   },
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "no comparable export feature windows were extracted",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  }
+ ],
+ "wav_cases": [
+  {
+   "name": "exact_export",
+   "file": "exact.wav",
+   "spec": {
+    "windows": 16
+   },
+   "sha256": "63b9af68622135f554816449220191645c87f6cf9ba850efbbe1da5c8b5aa097",
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 1.0,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 16,
+    "comparable_window_count": 16,
+    "overlap_window_count": 16,
+    "routed_window_count": 16,
+    "export_window_count": 16,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 8,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 9,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 10,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 11,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 12,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 13,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 14,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 15,
+      "similarity": 1.0,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+     "sample_rate_hz": 44100,
+     "channel_count": 1,
+     "sample_width_bytes": 2,
+     "window_size_frames": 4096,
+     "window_duration_seconds": 0.09287982,
+     "truncated_at_window_limit": false,
+     "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000
+   }
+  },
+  {
+   "name": "gain_and_offset_export",
+   "file": "transformed.wav",
+   "spec": {
+    "windows": 16,
+    "gain_numerator": 43,
+    "gain_denominator": 100,
+    "lead_silence_frames": 8192
+   },
+   "sha256": "3a85367b7d76946ea2717cffc1d10b9ad60245a6a2563dd58359587de283a2ef",
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.9999,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 16,
+    "comparable_window_count": 16,
+    "overlap_window_count": 16,
+    "routed_window_count": 16,
+    "export_window_count": 18,
+    "best_offset_windows": 2,
+    "best_offset_seconds": 0.1858,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 8,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 9,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 10,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 11,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 12,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 13,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 14,
+      "similarity": 1.0,
+      "matched": true
+     },
+     {
+      "relative_window": 15,
+      "similarity": 1.0,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+     "sample_rate_hz": 44100,
+     "channel_count": 1,
+     "sample_width_bytes": 2,
+     "window_size_frames": 4096,
+     "window_duration_seconds": 0.09287982,
+     "truncated_at_window_limit": false,
+     "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000
+   }
+  },
+  {
+   "name": "unrelated_export",
+   "file": "unrelated.wav",
+   "spec": {
+    "windows": 16,
+    "samples": "noise",
+    "seed": 17
+   },
+   "sha256": "b45d7e62f3d719d07ee129ed7cf89685e3da1ce07c864964d1fc81bf7df3b85e",
+   "expected": {
+    "status": "not_established",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.3527,
+    "matched_coverage": 0.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 0,
+    "comparable_window_count": 16,
+    "overlap_window_count": 16,
+    "routed_window_count": 16,
+    "export_window_count": 16,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.402,
+      "matched": false
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.48,
+      "matched": false
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.418,
+      "matched": false
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.317,
+      "matched": false
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.466,
+      "matched": false
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.497,
+      "matched": false
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.331,
+      "matched": false
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.337,
+      "matched": false
+     },
+     {
+      "relative_window": 8,
+      "similarity": 0.487,
+      "matched": false
+     },
+     {
+      "relative_window": 9,
+      "similarity": 0.453,
+      "matched": false
+     },
+     {
+      "relative_window": 10,
+      "similarity": 0.456,
+      "matched": false
+     },
+     {
+      "relative_window": 11,
+      "similarity": 0.384,
+      "matched": false
+     },
+     {
+      "relative_window": 12,
+      "similarity": 0.403,
+      "matched": false
+     },
+     {
+      "relative_window": 13,
+      "similarity": 0.474,
+      "matched": false
+     },
+     {
+      "relative_window": 14,
+      "similarity": 0.418,
+      "matched": false
+     },
+     {
+      "relative_window": 15,
+      "similarity": 0.316,
+      "matched": false
+     }
+    ],
+    "alignment_similarity": [
+     0.402,
+     0.48,
+     0.418,
+     0.317,
+     0.466,
+     0.497,
+     0.331,
+     0.337,
+     0.487,
+     0.453,
+     0.456,
+     0.384,
+     0.403,
+     0.474,
+     0.418,
+     0.316
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": "bounded routed/export feature similarity did not meet the inference threshold",
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+     "sample_rate_hz": 44100,
+     "channel_count": 1,
+     "sample_width_bytes": 2,
+     "window_size_frames": 4096,
+     "window_duration_seconds": 0.09287982,
+     "truncated_at_window_limit": false,
+     "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000
+   }
+  },
+  {
+   "name": "stereo_export",
+   "file": "stereo.wav",
+   "spec": {
+    "windows": 8,
+    "channels": 2
+   },
+   "sha256": "5a4e41a8581447b9c24d7b59d2041ce209a4cca31eebb39051c0bc4e4fbf78ea",
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.983,
+    "matched_coverage": 1.0,
+    "routed_coverage": 0.5,
+    "matched_window_count": 8,
+    "comparable_window_count": 8,
+    "overlap_window_count": 8,
+    "routed_window_count": 16,
+    "export_window_count": 8,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.98,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+     "sample_rate_hz": 44100,
+     "channel_count": 2,
+     "sample_width_bytes": 2,
+     "window_size_frames": 4096,
+     "window_duration_seconds": 0.09287982,
+     "truncated_at_window_limit": false,
+     "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000
+   }
+  },
+  {
+   "name": "eight_bit_export",
+   "file": "eight_bit.wav",
+   "spec": {
+    "windows": 8,
+    "sample_width": 1
+   },
+   "sha256": "8741268442c4492e66f747cefa1691a4f525dc7daf3e371129e3faac08e7ab5d",
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.9789,
+    "matched_coverage": 1.0,
+    "routed_coverage": 0.5,
+    "matched_window_count": 8,
+    "comparable_window_count": 8,
+    "overlap_window_count": 8,
+    "routed_window_count": 16,
+    "export_window_count": 8,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.982,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.976,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.974,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.982,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.972,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.977,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.957,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.982,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.982,
+     0.976,
+     0.974,
+     0.982,
+     0.972,
+     0.977,
+     0.957,
+     0.982
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+     "sample_rate_hz": 44100,
+     "channel_count": 1,
+     "sample_width_bytes": 1,
+     "window_size_frames": 4096,
+     "window_duration_seconds": 0.09287982,
+     "truncated_at_window_limit": false,
+     "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000
+   }
+  },
+  {
+   "name": "twenty_four_bit_export",
+   "file": "twenty_four.wav",
+   "spec": {
+    "windows": 8,
+    "sample_width": 3
+   },
+   "sha256": "7894f16b8e221d13c9a5ec8f6cfe39a4ea31fc77363f84d1e47d69a9c63d527d",
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.983,
+    "matched_coverage": 1.0,
+    "routed_coverage": 0.5,
+    "matched_window_count": 8,
+    "comparable_window_count": 8,
+    "overlap_window_count": 8,
+    "routed_window_count": 16,
+    "export_window_count": 8,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.98,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+     "sample_rate_hz": 44100,
+     "channel_count": 1,
+     "sample_width_bytes": 3,
+     "window_size_frames": 4096,
+     "window_duration_seconds": 0.09287982,
+     "truncated_at_window_limit": false,
+     "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000
+   }
+  },
+  {
+   "name": "thirty_two_bit_export",
+   "file": "thirty_two.wav",
+   "spec": {
+    "windows": 8,
+    "sample_width": 4
+   },
+   "sha256": "ecc7ed4e85a36b28a09bc68454d524bed4ee4d3f88e77a5865006a0cf9f14492",
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.983,
+    "matched_coverage": 1.0,
+    "routed_coverage": 0.5,
+    "matched_window_count": 8,
+    "comparable_window_count": 8,
+    "overlap_window_count": 8,
+    "routed_window_count": 16,
+    "export_window_count": 8,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.98,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+     "sample_rate_hz": 44100,
+     "channel_count": 1,
+     "sample_width_bytes": 4,
+     "window_size_frames": 4096,
+     "window_duration_seconds": 0.09287982,
+     "truncated_at_window_limit": false,
+     "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000
+   }
+  },
+  {
+   "name": "junk_chunk_is_skipped",
+   "file": "junk.wav",
+   "spec": {
+    "windows": 8,
+    "junk_chunk": true
+   },
+   "sha256": "749ee68a9018e2b4fd7694c35aa59eb9fb8f450c9e5a9758cd631eb653b07e61",
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.983,
+    "matched_coverage": 1.0,
+    "routed_coverage": 0.5,
+    "matched_window_count": 8,
+    "comparable_window_count": 8,
+    "overlap_window_count": 8,
+    "routed_window_count": 16,
+    "export_window_count": 8,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.98,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+     "sample_rate_hz": 44100,
+     "channel_count": 1,
+     "sample_width_bytes": 2,
+     "window_size_frames": 4096,
+     "window_duration_seconds": 0.09287982,
+     "truncated_at_window_limit": false,
+     "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000
+   }
+  },
+  {
+   "name": "extensible_pcm_export",
+   "file": "extensible_pcm.wav",
+   "spec": {
+    "windows": 8,
+    "format_tag": 65534,
+    "subtype": [
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     16,
+     0,
+     128,
+     0,
+     0,
+     170,
+     0,
+     56,
+     155,
+     113
+    ]
+   },
+   "sha256": "539951364df8ed25393f522c4f27b6879682f578b979717016e5c2d4393f5915",
+   "expected": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.983,
+    "matched_coverage": 1.0,
+    "routed_coverage": 0.5,
+    "matched_window_count": 8,
+    "comparable_window_count": 8,
+    "overlap_window_count": 8,
+    "routed_window_count": 16,
+    "export_window_count": 8,
+    "best_offset_windows": 0,
+    "best_offset_seconds": 0.0,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+     {
+      "relative_window": 0,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 1,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 2,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 3,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 4,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 5,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 6,
+      "similarity": 0.98,
+      "matched": true
+     },
+     {
+      "relative_window": 7,
+      "similarity": 0.98,
+      "matched": true
+     }
+    ],
+    "alignment_similarity": [
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98,
+     0.98
+    ],
+    "feature_dimensions": [
+     "relative_rms",
+     "zero_crossing_rate",
+     "crest_factor",
+     "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+     "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+     "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+     "A failed or unavailable match does not prove that routed audio is absent from the export.",
+     "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+     "sample_rate_hz": 44100,
+     "channel_count": 1,
+     "sample_width_bytes": 2,
+     "window_size_frames": 4096,
+     "window_duration_seconds": 0.09287982,
+     "truncated_at_window_limit": false,
+     "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000
+   }
+  },
+  {
+   "name": "extensible_float_is_refused",
+   "file": "extensible_float.wav",
+   "spec": {
+    "windows": 8,
+    "sample_width": 4,
+    "format_tag": 65534,
+    "float_format": true,
+    "subtype": [
+     3,
+     0,
+     0,
+     0,
+     0,
+     0,
+     16,
+     0,
+     128,
+     0,
+     0,
+     170,
+     0,
+     56,
+     155,
+     113
+    ]
+   },
+   "sha256": "c3fd1d1635074c2fb1f2d470957994c5245daf12da8be55f574d27b07d675d4a",
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "unsupported WAV format: unknown extended format: 00000003-0000-0010-8000-00aa00389b71",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "float_tag_is_refused",
+   "file": "float.wav",
+   "spec": {
+    "windows": 8,
+    "sample_width": 4,
+    "format_tag": 3,
+    "float_format": true
+   },
+   "sha256": "88389f8a90b84af2b7376009a8c2a5b119aa39880ad08fe808b5665a7064aa16",
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "unsupported WAV format: unknown format: 3",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "sixty_four_bit_width_is_refused",
+   "file": "sixty_four.wav",
+   "spec": {
+    "windows": 8,
+    "sample_width": 8
+   },
+   "sha256": "ecb867af19df6755f00d5b3e1092db1abc84247d5e3cebb48a3b5442d25466ad",
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "unsupported PCM sample width: 8 bytes",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "zero_sample_rate",
+   "file": "zero_rate.wav",
+   "spec": {
+    "windows": 8,
+    "sample_rate": 0
+   },
+   "sha256": "c66659ea6b5bfdaba9c04c540ced52aa1798ed340b81a97d8df4d3c5e0e5328d",
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "invalid audio format metadata",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "data_before_fmt",
+   "file": "data_first.wav",
+   "spec": {
+    "windows": 2,
+    "data_before_fmt": true
+   },
+   "sha256": "480337fdb1d5f4193d37de0d3a4ab4095603c34589b973495b62d4ae68efefd2",
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "unsupported WAV format: data chunk before fmt chunk",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "truncated_fmt_chunk",
+   "file": "short_fmt.wav",
+   "spec": {
+    "windows": 2,
+    "truncate_fmt_to": 12
+   },
+   "sha256": "0f62fd2f8b3cd6185783eef43502415763c88b06a6171967260f31eb857eba82",
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "shorter_than_one_window",
+   "file": "tiny.wav",
+   "spec": {
+    "windows": 1,
+    "window_frames": 512
+   },
+   "sha256": "48b02be9e48aef9092a1ec9789896c3a229ee1a3c2d2b809a791b005eb6c4000",
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "no comparable export feature windows were extracted",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ],
+    "export_feature_extraction": {
+     "sample_rate_hz": 44100,
+     "channel_count": 1,
+     "sample_width_bytes": 2,
+     "window_size_frames": 4096,
+     "window_duration_seconds": 0.09287982,
+     "truncated_at_window_limit": false,
+     "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000
+   }
+  },
+  {
+   "name": "not_a_riff_file",
+   "file": "garbage.wav",
+   "raw": "not an audio file",
+   "sha256": "040f3f316319e64628b4fb26ef26a012911db96654b0285a78870001e8402c1e",
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "unsupported WAV format: file does not start with RIFF id",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "riff_header_shorter_than_eight_bytes",
+   "file": "stub.wav",
+   "raw": "RIFF!",
+   "sha256": "ef856cf88a52b74c23efdb717f092a10245654c1f2cf37b9da058b67d6fa60c2",
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "empty_file",
+   "file": "empty.wav",
+   "raw": "",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "unsupported_suffix",
+   "file": "unsupported.mp3",
+   "raw": "not an audio file",
+   "sha256": "040f3f316319e64628b4fb26ef26a012911db96654b0285a78870001e8402c1e",
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "only PCM WAV and AIFF exports are supported",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  },
+  {
+   "name": "missing_file",
+   "file": "absent.wav",
+   "missing": true,
+   "sha256": null,
+   "expected": {
+    "status": "unavailable",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": null,
+    "matched_coverage": null,
+    "routed_coverage": null,
+    "matched_window_count": null,
+    "comparable_window_count": null,
+    "reason": "[Errno 2] No such file or directory: '<DIR>/absent.wav'",
+    "alignment_series": [],
+    "alignment_similarity": [],
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+     "Unavailable comparison is not evidence that routed audio was absent from the export."
+    ]
+   }
+  }
+ ],
+ "extraction_cases": [
+  {
+   "name": "bounded_extraction",
+   "file": "exact.wav",
+   "target_window_seconds": 0.09287981859410431,
+   "max_windows": 4,
+   "features": [
+    {
+     "rms": 0.06335246352988497,
+     "zcr": 0.05396825396825397,
+     "crest": 1.2524485821702989,
+     "envelope": [
+      0.6262242910851494,
+      1.2524485821702989,
+      0.8767140075192092,
+      1.127203723953269
+     ]
+    },
+    {
+     "rms": 0.14767253853260462,
+     "zcr": 0.4,
+     "crest": 2.0872366800577917,
+     "envelope": [
+      0.625627216677234,
+      1.2528854413464456,
+      0.8766394056242726,
+      1.1271078072312075
+     ]
+    },
+    {
+     "rms": 0.0648300496674979,
+     "zcr": 0.10525030525030525,
+     "crest": 2.1653671421661578,
+     "envelope": [
+      0.6260243113597859,
+      1.251543603289766,
+      0.8768032219859112,
+      1.128250096639083
+     ]
+    },
+    {
+     "rms": 0.4936922083345093,
+     "zcr": 0.0,
+     "crest": 2.0254917244801427,
+     "envelope": [
+      0.6506252071905965,
+      1.1738173488821617,
+      0.9095615764689587,
+      1.1711265558609576
+     ]
+    }
+   ],
+   "details": {
+    "sample_rate_hz": 44100,
+    "channel_count": 1,
+    "sample_width_bytes": 2,
+    "window_size_frames": 4096,
+    "window_duration_seconds": 0.09287982,
+    "truncated_at_window_limit": true,
+    "streaming_extraction": true
+   }
+  },
+  {
+   "name": "full_extraction",
+   "file": "stereo.wav",
+   "target_window_seconds": 0.09287981859410431,
+   "max_windows": 12000,
+   "features": [
+    {
+     "rms": 0.05068197082390797,
+     "zcr": 0.05396825396825397,
+     "crest": 1.252448582170299,
+     "envelope": [
+      0.6262242910851495,
+      1.252448582170299,
+      0.8767140075192094,
+      1.127203723953269
+     ]
+    },
+    {
+     "rms": 0.1181364392562977,
+     "zcr": 0.4,
+     "crest": 2.0872647999406757,
+     "envelope": [
+      0.6256356453160318,
+      1.2529023205974736,
+      0.8766340033199328,
+      1.1270885673161297
+     ]
+    },
+    {
+     "rms": 0.05185924847756748,
+     "zcr": 0.10525030525030525,
+     "crest": 2.1655671996207024,
+     "envelope": [
+      0.6259889875251451,
+      1.2515625911472659,
+      0.8768012691756512,
+      1.128250150591593
+     ]
+    },
+    {
+     "rms": 0.39495315222487726,
+     "zcr": 0.0,
+     "crest": 2.0254871487244177,
+     "envelope": [
+      0.6506258497712141,
+      1.1738147349716876,
+      0.9095626202273533,
+      1.1711280081434237
+     ]
+    },
+    {
+     "rms": 0.120857007349319,
+     "zcr": 0.18192918192918192,
+     "crest": 1.252448582170299,
+     "envelope": [
+      0.6262242910851495,
+      1.252448582170299,
+      0.8767140075192094,
+      1.127203723953269
+     ]
+    },
+    {
+     "rms": 0.10373319920012072,
+     "zcr": 0.028083028083028084,
+     "crest": 2.165260270886725,
+     "envelope": [
+      0.6247702945833501,
+      1.252634637642894,
+      0.8773917560563835,
+      1.1272764745118145
+     ]
+    },
+    {
+     "rms": 0.029245454469746385,
+     "zcr": 0.05396825396825397,
+     "crest": 2.170476186843489,
+     "envelope": [
+      0.6226034469133179,
+      1.256302962544476,
+      0.8811860321060523,
+      1.1214182943999174
+     ]
+    },
+    {
+     "rms": 0.2653906243364805,
+     "zcr": 0.4,
+     "crest": 2.787385935729587,
+     "envelope": [
+      0.6268178527311017,
+      1.2506122880650758,
+      0.8775409012099031,
+      1.1282686963405115
+     ]
+    }
+   ],
+   "details": {
+    "sample_rate_hz": 44100,
+    "channel_count": 2,
+    "sample_width_bytes": 2,
+    "window_size_frames": 4096,
+    "window_duration_seconds": 0.09287982,
+    "truncated_at_window_limit": false,
+    "streaming_extraction": true
+   }
+  },
+  {
+   "name": "floored_window_length",
+   "file": "exact.wav",
+   "target_window_seconds": 1e-06,
+   "max_windows": 6,
+   "features": [
+    {
+     "rms": 0.0396728515625,
+     "zcr": 0.047244094488188976,
+     "crest": 1.0,
+     "envelope": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "rms": 0.0396728515625,
+     "zcr": 0.05511811023622047,
+     "crest": 1.0,
+     "envelope": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "rms": 0.0396728515625,
+     "zcr": 0.05511811023622047,
+     "crest": 1.0,
+     "envelope": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "rms": 0.0396728515625,
+     "zcr": 0.05511811023622047,
+     "crest": 1.0,
+     "envelope": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "rms": 0.0396728515625,
+     "zcr": 0.05511811023622047,
+     "crest": 1.0,
+     "envelope": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "rms": 0.0396728515625,
+     "zcr": 0.05511811023622047,
+     "crest": 1.0,
+     "envelope": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   ],
+   "details": {
+    "sample_rate_hz": 44100,
+    "channel_count": 1,
+    "sample_width_bytes": 2,
+    "window_size_frames": 128,
+    "window_duration_seconds": 0.00290249,
+    "truncated_at_window_limit": true,
+    "streaming_extraction": true
+   }
+  }
+ ],
+ "routed_events": [
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.06335246352988497,
+   "zero_crossing_rate": 0.05396825396825397,
+   "crest_factor": 1.2524485821702989,
+   "energy_envelope": [
+    0.6262242910851494,
+    1.2524485821702989,
+    0.8767140075192092,
+    1.127203723953269
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.14767253853260462,
+   "zero_crossing_rate": 0.4,
+   "crest_factor": 2.0872366800577917,
+   "energy_envelope": [
+    0.625627216677234,
+    1.2528854413464456,
+    0.8766394056242726,
+    1.1271078072312075
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.0648300496674979,
+   "zero_crossing_rate": 0.10525030525030525,
+   "crest_factor": 2.1653671421661578,
+   "energy_envelope": [
+    0.6260243113597859,
+    1.251543603289766,
+    0.8768032219859112,
+    1.128250096639083
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.4936922083345093,
+   "zero_crossing_rate": 0.0,
+   "crest_factor": 2.0254917244801427,
+   "energy_envelope": [
+    0.6506252071905965,
+    1.1738173488821617,
+    0.9095615764689587,
+    1.1711265558609576
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.15107125918664877,
+   "zero_crossing_rate": 0.18192918192918192,
+   "crest_factor": 1.252448582170299,
+   "energy_envelope": [
+    0.6262242910851495,
+    1.252448582170299,
+    0.8767140075192092,
+    1.127203723953269
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.12967306602484716,
+   "zero_crossing_rate": 0.028083028083028084,
+   "crest_factor": 2.165150615750862,
+   "energy_envelope": [
+    0.6247812379882705,
+    1.252629008063436,
+    0.8774050247245504,
+    1.127266337386142
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.036563210097045856,
+   "zero_crossing_rate": 0.05396825396825397,
+   "crest_factor": 2.170096742446878,
+   "energy_envelope": [
+    0.622694881213252,
+    1.2562612266996964,
+    0.8812025920311581,
+    1.1214012693943927
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.3317386080539462,
+   "zero_crossing_rate": 0.4,
+   "crest_factor": 2.7873831828375284,
+   "energy_envelope": [
+    0.6268189387615081,
+    1.250611480312373,
+    0.8775421610261563,
+    1.1282680084724268
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.11208512778364263,
+   "zero_crossing_rate": 0.10525030525030525,
+   "crest_factor": 1.252448582170299,
+   "energy_envelope": [
+    0.6262242910851495,
+    1.252448582170299,
+    0.8767140075192092,
+    1.127203723953269
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.1882056669468362,
+   "zero_crossing_rate": 0.6666666666666666,
+   "crest_factor": 1.9620168792091064,
+   "energy_envelope": [
+    0.6266260627368472,
+    1.251918303785383,
+    0.8762976109200814,
+    1.127893095661909
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.08793737592306879,
+   "zero_crossing_rate": 0.18168498168498168,
+   "crest_factor": 2.1516332775329543,
+   "energy_envelope": [
+    0.6259275367519769,
+    1.2522169882895167,
+    0.8767190554552605,
+    1.1276218474188815
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.08896586669125124,
+   "zero_crossing_rate": 0.7887667887667887,
+   "crest_factor": 9.467509142276798,
+   "energy_envelope": [
+    0.6363896675651449,
+    1.2379153028812035,
+    0.8665407120168425,
+    1.145286465617317
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.06335246352988497,
+   "zero_crossing_rate": 0.054212454212454214,
+   "crest_factor": 1.2524485821702989,
+   "energy_envelope": [
+    0.6262242910851494,
+    1.2524485821702989,
+    0.8767140075192092,
+    1.127203723953269
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.14768083140375102,
+   "zero_crossing_rate": 0.4,
+   "crest_factor": 2.087119473344671,
+   "energy_envelope": [
+    0.6261358420034013,
+    1.2528150868026127,
+    0.8758289192787938,
+    1.1275335781223514
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.06485176298892556,
+   "zero_crossing_rate": 0.10525030525030525,
+   "crest_factor": 2.164642145487582,
+   "energy_envelope": [
+    0.6254704219061641,
+    1.2518136690800061,
+    0.8768774568013273,
+    1.1281999889109267
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  },
+  {
+   "event_type": "buffer_hash",
+   "rms_level": 0.4936922083345093,
+   "zero_crossing_rate": 0.0,
+   "crest_factor": 2.0254917244801427,
+   "energy_envelope": [
+    0.6506252071905965,
+    1.1738173488821617,
+    0.9095615764689587,
+    1.1711265558609576
+   ],
+   "sample_rate_hz": 44100,
+   "window_size_samples": 4096
+  }
+ ]
+}

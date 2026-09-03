@@ -1,0 +1,41 @@
+[package]
+name = "audio-provenance-nulltest"
+description = "Runs the GenoMark null test: detection over a large corpus of never-marked audio across the whole channel matrix, and emits the bench report the verifier's --null-test gate consumes."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+default = ["classical-genomark"]
+classical-genomark = []
+
+[dependencies]
+genomark = { workspace = true, features = ["bench"] }
+genotrace = { workspace = true }
+audio-provenance-audio = { workspace = true, features = ["fs"] }
+audio-provenance-bench = { workspace = true }
+audio-provenance-core = { workspace = true }
+serde = { workspace = true, features = ["std"] }
+serde_json = { workspace = true, features = ["std"] }
+
+[[bin]]
+name = "audio-provenance-null-test"
+path = "src/bin/audio-provenance-null-test.rs"
+
+[[bin]]
+name = "audio-provenance-corpus-bench"
+path = "src/bin/audio-provenance-corpus-bench.rs"
+
+[[bin]]
+name = "audio-provenance-association-test"
+path = "src/bin/audio-provenance-association-test.rs"
+
+[[bin]]
+name = "audio-provenance-qualify"
+path = "src/bin/audio-provenance-qualify.rs"

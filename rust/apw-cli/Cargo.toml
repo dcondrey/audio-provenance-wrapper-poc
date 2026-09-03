@@ -1,0 +1,39 @@
+[package]
+name = "apw-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+name = "apw_cli"
+path = "src/lib.rs"
+
+[[bin]]
+name = "apw"
+path = "src/main.rs"
+
+[lints.rust]
+warnings = "deny"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+
+[dependencies]
+apw-core.workspace = true
+apw-assoc.workspace = true
+apw-c2pa.workspace = true
+apw-provenance.workspace = true
+apw-daemon.workspace = true
+clap.workspace = true
+serde_json.workspace = true
+log.workspace = true
+env_logger.workspace = true
+thiserror.workspace = true
+libc.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

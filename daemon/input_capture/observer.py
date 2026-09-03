@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import time
 from pathlib import Path
 
 log = logging.getLogger(__name__)

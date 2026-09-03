@@ -107,6 +107,8 @@ def _events(
                 "fifo_samples_dropped": 0,
                 "fifo_windows_dropped": 0,
                 "midi_events_dropped": 0,
+                "bypassed_buffers": 0,
+                "bypassed_samples": 0,
                 "events_prepared": sequence,
                 "udp_sends_attempted": sequence,
                 "udp_sends_failed": 0,
@@ -169,13 +171,23 @@ def run(
     export_only: bool = False,
     open_artifacts: bool = False,
     time_anchor_url: str | None = None,
+    sdk_adapter: bool = False,
+    sdk_cli: str | None = None,
 ) -> Path:
+    if sdk_adapter:
+        sdk_cli = _resolve_sdk_cli(sdk_cli)
+    else:
+        sdk_cli = sdk_cli or "audio-provenance"
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     session = output.expanduser().resolve() / f"synthetic-{stamp}-{time.time_ns() % 1_000_000:06d}"
     evidence = session / "evidence"
     samples_dir = session / "samples"
     exports = session / "exports"
     manifests = session / "manifests"
+    local_integrity_key = session / "keys" / "local-integrity.key"
+    portable_private_key = session / "keys" / "portable-private.key"
+    portable_public_key = session / "keys" / "portable-public.key"
+    provenance_store = session / "provenance"
     for path in (samples_dir, exports, manifests):
         path.mkdir(parents=True, exist_ok=True)
 
@@ -188,7 +200,14 @@ def run(
         session_id=session.name,
         stem_id="synthetic-stem",
         source_category="generator",
+        signing_key_path=local_integrity_key,
+        portable_private_key_path=portable_private_key,
+        portable_public_key_path=portable_public_key,
+        provenance_store=provenance_store,
         time_anchor_url=time_anchor_url,
+        sdk_adapter_enabled=sdk_adapter,
+        sdk_cli=sdk_cli,
+        sdk_development_key=session / "sdk-development.key",
     )
     port = daemon.receiver.sock.getsockname()[1]
     thread = threading.Thread(target=daemon.run, daemon=True)
@@ -230,6 +249,11 @@ def run(
                     bundle_name and index_name
                     and (manifests / bundle_name).exists()
                     and (manifests / index_name).exists()
+                    and (
+                        not sdk_adapter
+                        or daemon._last_sdk_receipt_path is not None
+                        or daemon._last_sdk_error is not None
+                    )
                 ):
                     manifest_path = candidate
                     break
@@ -242,12 +266,21 @@ def run(
         daemon.stop()
         thread.join(timeout=3)
 
-    result = verify_manifest(manifest_path, signing_key_path=None)
+    result = verify_manifest(
+        manifest_path,
+        signing_key_path=None,
+        public_key_path=portable_public_key,
+        trust_anchor_path=provenance_store / "ca" / "root_cert.pem",
+    )
     data = json.loads(manifest_path.read_text())
     presentation = data.get("presentation", {})
     bundle_path = manifests / str(presentation.get("evidence_bundle", ""))
     bundle_index_path = manifests / str(presentation.get("bundle_index", ""))
-    bundle_errors = verify_evidence_bundle(bundle_index_path, bundle_path)
+    bundle_errors = verify_evidence_bundle(
+        bundle_index_path,
+        bundle_path,
+        portable_public_key,
+    )
     summary = {
         "session": str(session),
         "dashboard": str(session / "dashboard.html"),
@@ -261,6 +294,17 @@ def run(
         "association_offset_seconds": data["stem_export_association"].get("best_offset_seconds"),
         "acknowledgement": acknowledgement_summary,
         "bundle_integrity": "verified" if not bundle_errors else bundle_errors,
+        "sdk_adapter": {
+            "enabled": sdk_adapter,
+            "record_id": daemon._last_sdk_record_id,
+            "verification_status": daemon._last_sdk_verification_status,
+            "receipt": (
+                str(daemon._last_sdk_receipt_path)
+                if daemon._last_sdk_receipt_path is not None
+                else None
+            ),
+            "error": daemon._last_sdk_error,
+        },
     }
     print(json.dumps(summary, indent=2))
     if result.outcome != "verified":
@@ -269,6 +313,10 @@ def run(
         raise RuntimeError(f"synthetic evidence bundle failed: {bundle_errors}")
     if not export_only and data["stem_export_association"]["status"] != "inferred_match":
         raise RuntimeError("synthetic transformed export did not establish inferred alignment")
+    if sdk_adapter and daemon._last_sdk_error:
+        raise RuntimeError(f"synthetic SDK adapter failed: {daemon._last_sdk_error}")
+    if sdk_adapter and not daemon._last_sdk_record_id:
+        raise RuntimeError("synthetic SDK adapter produced no record id")
     if open_artifacts:
         subprocess.run(["open", str(session / "dashboard.html")], check=False)
         subprocess.run(
@@ -278,11 +326,73 @@ def run(
     return manifest_path
 
 
+def _resolve_sdk_cli(explicit: str | None) -> str:
+    """Build and locate this checkout's CLI when the one-command gate has no override."""
+    if explicit:
+        return explicit
+
+    repository = Path(__file__).resolve().parent.parent
+    manifest = repository / "sdk" / "Cargo.toml"
+    build = subprocess.run(
+        [
+            "cargo",
+            "build",
+            "--manifest-path",
+            str(manifest),
+            "-p",
+            "audio-provenance-cli",
+        ],
+        check=False,
+    )
+    if build.returncode != 0:
+        raise RuntimeError(f"could not build the Rust SDK CLI (cargo exit {build.returncode})")
+
+    metadata = subprocess.run(
+        [
+            "cargo",
+            "metadata",
+            "--no-deps",
+            "--format-version",
+            "1",
+            "--manifest-path",
+            str(manifest),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if metadata.returncode != 0:
+        raise RuntimeError(
+            f"could not locate the Rust SDK CLI (cargo metadata exit {metadata.returncode})"
+        )
+    try:
+        target_directory = Path(json.loads(metadata.stdout)["target_directory"])
+    except (json.JSONDecodeError, KeyError, TypeError) as exc:
+        raise RuntimeError("cargo metadata omitted its target_directory") from exc
+    executable = target_directory / "debug" / "audio-provenance"
+    if not executable.is_file():
+        raise RuntimeError(f"built Rust SDK CLI is missing at {executable}")
+    return str(executable)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a synthetic end-to-end provenance rehearsal.")
     parser.add_argument("--output", type=Path, default=Path("demo-output/rehearsals"))
     parser.add_argument("--export-only", action="store_true")
     parser.add_argument("--open", action="store_true", dest="open_artifacts")
+    parser.add_argument(
+        "--sdk-adapter",
+        action="store_true",
+        help="Run capture handoff -> Rust SDK sign/sidecar -> public SDK verify in this rehearsal.",
+    )
+    parser.add_argument(
+        "--sdk-cli",
+        default=None,
+        help=(
+            "Path to the Rust audio-provenance CLI used by --sdk-adapter. "
+            "When omitted, build and locate this checkout's CLI automatically."
+        ),
+    )
     parser.add_argument(
         "--time-anchor",
         nargs="?",
@@ -292,7 +402,14 @@ def main() -> int:
         help="Anchor the export hash at an RFC 3161 TSA during sealing (needs network).",
     )
     args = parser.parse_args()
-    run(args.output, args.export_only, args.open_artifacts, args.time_anchor)
+    run(
+        args.output,
+        args.export_only,
+        args.open_artifacts,
+        args.time_anchor,
+        args.sdk_adapter,
+        args.sdk_cli,
+    )
     return 0
 
 

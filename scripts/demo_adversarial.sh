@@ -19,8 +19,8 @@ echo "1/4 Original bundle"
 "${SCRIPT_DIR}/verify_demo.sh" "${MANIFEST}"
 
 echo "2/4 Disposable altered export"
-cp "${EXPORT}" "${COPY_DIR}/altered-export$(basename "${EXPORT}" | sed 's/^[^.]*//')"
 ALTERED_EXPORT="${COPY_DIR}/altered-export$(basename "${EXPORT}" | sed 's/^[^.]*//')"
+cat "${EXPORT}" > "${ALTERED_EXPORT}"
 printf 'tamper' >> "${ALTERED_EXPORT}"
 if env python3 -m daemon.verify "${MANIFEST}" --public-only --export "${ALTERED_EXPORT}"; then
     echo "Expected altered export verification to fail" >&2
@@ -28,7 +28,13 @@ if env python3 -m daemon.verify "${MANIFEST}" --public-only --export "${ALTERED_
 fi
 
 echo "3/4 Disposable altered manifest"
-cp "${MANIFEST}" "${COPY_DIR}/altered-manifest.json"
+cat "${MANIFEST}" > "${COPY_DIR}/altered-manifest.json"
+# The verifier resolves presentation.html_report beside the manifest, so without the
+# fight card the copy reports a missing report that the tampering did not cause.
+FIGHT_CARD="$(env python3 -c 'import json,sys; print((json.load(open(sys.argv[1])).get("presentation") or {}).get("html_report") or "")' "${MANIFEST}")"
+if [[ -n "${FIGHT_CARD}" && -f "$(dirname "${MANIFEST}")/${FIGHT_CARD}" ]]; then
+    cat "$(dirname "${MANIFEST}")/${FIGHT_CARD}" > "${COPY_DIR}/${FIGHT_CARD}"
+fi
 perl -0pi -e 's/Never claim full DAW provenance\./Altered demo claim./' "${COPY_DIR}/altered-manifest.json"
 if env python3 -m daemon.verify "${COPY_DIR}/altered-manifest.json" --public-only; then
     echo "Expected altered manifest verification to fail" >&2

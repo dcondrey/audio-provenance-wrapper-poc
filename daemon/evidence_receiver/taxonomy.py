@@ -101,6 +101,9 @@ NETWORK_NUMERIC_FIELDS: dict[str, tuple[str, ...]] = {
     EventType.BUFFER_HASH: (
         "rms_level", "zero_crossing_rate", "window_size_samples",
         "sample_rate_hz", "spectral_centroid_hz", "crest_factor",
+        # Read by generator.py as int(); omitting them let one datagram sent
+        # before the plug-in's first window abort every export in the session.
+        "timestamp_ms", "channel_count",
     ),
     EventType.SPECTRAL_SHIFT: ("prev_spectral_centroid_hz", "new_spectral_centroid_hz"),
     EventType.SESSION_CONFIG: ("sample_rate_hz", "channel_count"),
@@ -110,6 +113,58 @@ NETWORK_NUMERIC_FIELDS: dict[str, tuple[str, ...]] = {
     ),
     EventType.MIDI_EVENT: ("midi_channel",),
 }
+
+
+# IMPORTANT: honesty constraint 1 again, for the nested telemetry map. These
+# counters are copied into the daemon's coverage map and signed into the
+# manifest as observation coverage, so an unvalidated value from an
+# unauthenticated socket writes directly into a signed claim.
+MAX_TELEMETRY_ENTRIES = 32
+MAX_TELEMETRY_KEY_CHARS = 64
+MAX_COUNTER_VALUE = 2**53
+MAX_STREAM_KEY_CHARS = 128
+# json.loads accepts arbitrarily deep structures; the evidence writer refuses
+# them, so the boundary must too or stream state advances for an event that is
+# never persisted.
+MAX_EVENT_DEPTH = 8
+
+
+def _validate_telemetry(telemetry: object) -> str:
+    if not isinstance(telemetry, Mapping):
+        return "Field 'telemetry' must be an object of cumulative integer counters"
+    if len(telemetry) > MAX_TELEMETRY_ENTRIES:
+        return f"Field 'telemetry' carries more than {MAX_TELEMETRY_ENTRIES} counters"
+    for key, value in telemetry.items():
+        if not isinstance(key, str) or not key or len(key) > MAX_TELEMETRY_KEY_CHARS:
+            return "Telemetry counter names must be non-empty strings of at most 64 characters"
+        if isinstance(value, bool) or not isinstance(value, int):
+            return f"Telemetry counter {key!r} must be an integer"
+        if not 0 <= value <= MAX_COUNTER_VALUE:
+            return f"Telemetry counter {key!r} is outside the plausible cumulative range"
+    return ""
+
+
+def _is_serialisable(value: object, depth: int = 0) -> bool:
+    """Reject anything the evidence writer would refuse after state has moved.
+
+    Validation was a per-field whitelist while serialization is whole-object with
+    allow_nan=False, so a NaN in any unlisted field advanced the chain head and
+    then raised inside the evidence write.
+    """
+    if depth > MAX_EVENT_DEPTH:
+        return False
+    if isinstance(value, bool):
+        return True
+    if isinstance(value, float):
+        return math.isfinite(value)
+    if isinstance(value, Mapping):
+        return all(
+            isinstance(key, str) and _is_serialisable(child, depth + 1)
+            for key, child in value.items()
+        )
+    if isinstance(value, (list, tuple)):
+        return all(_is_serialisable(child, depth + 1) for child in value)
+    return True
 
 
 def validate_event(event: Mapping[str, object]) -> tuple[bool, str]:
@@ -149,6 +204,25 @@ def validate_network_event(event: Mapping[str, object]) -> tuple[bool, str]:
         return False, (
             f"Proof level '{proof_level}' exceeds network cap '{cap}' for {event_type}"
         )
+
+    if not _is_serialisable(event):
+        return False, (
+            "Event contains a non-finite number, a non-string key, or exceeds "
+            f"{MAX_EVENT_DEPTH} levels of nesting"
+        )
+
+    for key in ("plugin_instance_id", "plugin_capture_session_id"):
+        value = event.get(key)
+        if value is not None and (
+            not isinstance(value, str) or len(value) > MAX_STREAM_KEY_CHARS
+        ):
+            return False, f"Field '{key}' must be a string of at most {MAX_STREAM_KEY_CHARS} characters"
+
+    telemetry = event.get("telemetry")
+    if telemetry is not None:
+        error = _validate_telemetry(telemetry)
+        if error:
+            return False, error
 
     for field in NETWORK_NUMERIC_FIELDS.get(event_type, ()):
         value = event.get(field)

@@ -20,7 +20,7 @@ session state.
 | Studio | Repeatable session hygiene and a reviewable handoff policy |
 | Label / rights team | Better evidence for intake questions and later disputes, without treating declarations as verified rights |
 | Platform | More structured provenance at ingest, subject to its own trust policy |
-| Genotone | Potential creation-stage context that can enrich master-stage registration while leaving identity, soft binding, recovery, signing policy, and registry authority downstream |
+| Audio Provenance | Potential creation-stage context that can enrich master-stage registration while leaving identity, soft binding, recovery, signing policy, and registry authority downstream |
 
 ## Pilot opportunity
 

@@ -1,0 +1,13 @@
+{
+  "name": "audio-provenance-workspace",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm --filter @writerslogic/audio-provenance-sdk run build",
+    "test": "pnpm --filter @writerslogic/audio-provenance-sdk run test"
+  },
+  "packageManager": "pnpm@11.20.0"
+}

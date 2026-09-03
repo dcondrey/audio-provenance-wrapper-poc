@@ -1,1 +1,5 @@
 cryptography>=45,<50
+# c2pa-python 0.37.8 bundles the c2pa-rs SDK reported by c2pa.sdk_version() as
+# 0.90.15; pin the distribution, not the SDK string.
+c2pa-python==0.37.8
+cbor2==6.1.4

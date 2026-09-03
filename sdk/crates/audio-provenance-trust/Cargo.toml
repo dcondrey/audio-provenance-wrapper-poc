@@ -1,0 +1,23 @@
+[package]
+name = "audio-provenance-trust"
+description = "The identity layer: Ed25519 trust anchors, signed signer records, revocation, and the chain evaluation that turns a proven key into a name."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+audio-provenance-core = { workspace = true, features = ["std"] }
+genotrace = { workspace = true }
+hex = { workspace = true, features = ["std"] }
+serde = { workspace = true, features = ["std"] }
+serde_json = { workspace = true, features = ["std"] }
+thiserror = { workspace = true, features = ["std"] }
+
+[dev-dependencies]
+tempfile = { workspace = true }

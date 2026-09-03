@@ -1,0 +1,42 @@
+[package]
+name = "audio-provenance-sdk"
+description = "The Audio Provenance public facade: verify, inspect, sign, embed and publish audio provenance."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+default = ["http"]
+http = ["audio-provenance-registry/http", "dep:async-trait", "dep:reqwest", "dep:tokio"]
+
+[dependencies]
+genomark = { workspace = true }
+audio-provenance-audio = { workspace = true }
+audio-provenance-core = { workspace = true, features = ["std"] }
+audio-provenance-manifest = { workspace = true, features = ["std"] }
+audio-provenance-registry = { workspace = true }
+async-trait = { workspace = true, optional = true }
+ed25519-dalek = { workspace = true }
+genotrace = { workspace = true }
+getrandom = { workspace = true }
+hex = { workspace = true, features = ["std"] }
+reqwest = { workspace = true, optional = true }
+serde = { workspace = true, features = ["std"] }
+serde_json = { workspace = true, features = ["std"] }
+sha2 = { workspace = true }
+thiserror = { workspace = true, features = ["std"] }
+tokio = { workspace = true, optional = true, features = ["rt", "time"] }
+
+[dev-dependencies]
+audio-provenance-audio = { workspace = true }
+audio-provenance-registry = { workspace = true }
+serde_json = { workspace = true, features = ["std"] }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+wiremock = "0.6.5"

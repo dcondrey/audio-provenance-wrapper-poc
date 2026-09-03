@@ -1,0 +1,180 @@
+[
+  {
+    "name": "empty_object",
+    "value": {},
+    "canonical_utf8": "{}",
+    "canonical_ascii": "{}",
+    "pretty": "{}\n"
+  },
+  {
+    "name": "empty_array",
+    "value": [],
+    "canonical_utf8": "[]",
+    "canonical_ascii": "[]",
+    "pretty": "[]\n"
+  },
+  {
+    "name": "scalars",
+    "value": [
+      null,
+      true,
+      false,
+      "",
+      0,
+      0,
+      "0"
+    ],
+    "canonical_utf8": "[null,true,false,\"\",0,0,\"0\"]",
+    "canonical_ascii": "[null,true,false,\"\",0,0,\"0\"]",
+    "pretty": "[\n  null,\n  true,\n  false,\n  \"\",\n  0,\n  0,\n  \"0\"\n]\n"
+  },
+  {
+    "name": "float_thresholds",
+    "value": {
+      "fixed_low": 0.0001,
+      "exp_low": 1e-05,
+      "exp_lower": 1e-07,
+      "quantum": 3.0517578125e-05,
+      "fixed_high": 1000000000000000.0,
+      "fixed_high_edge": 9999999999999998.0,
+      "exp_high": 1e+16,
+      "exp_high_carry": 2.000000000000001e+16,
+      "zero": 0.0,
+      "negative_zero": -0.0,
+      "denormal_min": 5e-324,
+      "float_max": 1.7976931348623157e+308,
+      "tenth": 0.1,
+      "negative": -2.5,
+      "big_e21": 1e+21
+    },
+    "canonical_utf8": "{\"big_e21\":1e+21,\"denormal_min\":5e-324,\"exp_high\":1e+16,\"exp_high_carry\":2.000000000000001e+16,\"exp_low\":1e-05,\"exp_lower\":1e-07,\"fixed_high\":1000000000000000.0,\"fixed_high_edge\":9999999999999998.0,\"fixed_low\":0.0001,\"float_max\":1.7976931348623157e+308,\"negative\":-2.5,\"negative_zero\":-0.0,\"quantum\":3.0517578125e-05,\"tenth\":0.1,\"zero\":0.0}",
+    "canonical_ascii": "{\"big_e21\":1e+21,\"denormal_min\":5e-324,\"exp_high\":1e+16,\"exp_high_carry\":2.000000000000001e+16,\"exp_low\":1e-05,\"exp_lower\":1e-07,\"fixed_high\":1000000000000000.0,\"fixed_high_edge\":9999999999999998.0,\"fixed_low\":0.0001,\"float_max\":1.7976931348623157e+308,\"negative\":-2.5,\"negative_zero\":-0.0,\"quantum\":3.0517578125e-05,\"tenth\":0.1,\"zero\":0.0}",
+    "pretty": "{\n  \"fixed_low\": 0.0001,\n  \"exp_low\": 1e-05,\n  \"exp_lower\": 1e-07,\n  \"quantum\": 3.0517578125e-05,\n  \"fixed_high\": 1000000000000000.0,\n  \"fixed_high_edge\": 9999999999999998.0,\n  \"exp_high\": 1e+16,\n  \"exp_high_carry\": 2.000000000000001e+16,\n  \"zero\": 0.0,\n  \"negative_zero\": -0.0,\n  \"denormal_min\": 5e-324,\n  \"float_max\": 1.7976931348623157e+308,\n  \"tenth\": 0.1,\n  \"negative\": -2.5,\n  \"big_e21\": 1e+21\n}\n"
+  },
+  {
+    "name": "int_versus_float_sample_rate",
+    "value": {
+      "int_rate": 44100,
+      "float_rate": 44100.0,
+      "int_one": 1,
+      "float_one": 1.0
+    },
+    "canonical_utf8": "{\"float_one\":1.0,\"float_rate\":44100.0,\"int_one\":1,\"int_rate\":44100}",
+    "canonical_ascii": "{\"float_one\":1.0,\"float_rate\":44100.0,\"int_one\":1,\"int_rate\":44100}",
+    "pretty": "{\n  \"int_rate\": 44100,\n  \"float_rate\": 44100.0,\n  \"int_one\": 1,\n  \"float_one\": 1.0\n}\n"
+  },
+  {
+    "name": "integer_extremes",
+    "value": {
+      "i64_min": -9223372036854775808,
+      "i64_max": 9223372036854775807,
+      "u64_max": 18446744073709551615,
+      "zero": 0,
+      "negative_one": -1
+    },
+    "canonical_utf8": "{\"i64_max\":9223372036854775807,\"i64_min\":-9223372036854775808,\"negative_one\":-1,\"u64_max\":18446744073709551615,\"zero\":0}",
+    "canonical_ascii": "{\"i64_max\":9223372036854775807,\"i64_min\":-9223372036854775808,\"negative_one\":-1,\"u64_max\":18446744073709551615,\"zero\":0}",
+    "pretty": "{\n  \"i64_min\": -9223372036854775808,\n  \"i64_max\": 9223372036854775807,\n  \"u64_max\": 18446744073709551615,\n  \"zero\": 0,\n  \"negative_one\": -1\n}\n"
+  },
+  {
+    "name": "escapes",
+    "value": {
+      "control": "\u0000\u0001\u001f",
+      "shortforms": "\b\t\n\f\r",
+      "quote_backslash_solidus": "\"\\/",
+      "delete": "",
+      "tab_in_key\t": "value"
+    },
+    "canonical_utf8": "{\"control\":\"\\u0000\\u0001\\u001f\",\"delete\":\"\",\"quote_backslash_solidus\":\"\\\"\\\\/\",\"shortforms\":\"\\b\\t\\n\\f\\r\",\"tab_in_key\\t\":\"value\"}",
+    "canonical_ascii": "{\"control\":\"\\u0000\\u0001\\u001f\",\"delete\":\"\\u007f\",\"quote_backslash_solidus\":\"\\\"\\\\/\",\"shortforms\":\"\\b\\t\\n\\f\\r\",\"tab_in_key\\t\":\"value\"}",
+    "pretty": "{\n  \"control\": \"\\u0000\\u0001\\u001f\",\n  \"shortforms\": \"\\b\\t\\n\\f\\r\",\n  \"quote_backslash_solidus\": \"\\\"\\\\/\",\n  \"delete\": \"\",\n  \"tab_in_key\\t\": \"value\"\n}\n"
+  },
+  {
+    "name": "non_ascii",
+    "value": {
+      "cafe": "Café",
+      "astral": "😀",
+      "cjk": "音声",
+      "combining": "é",
+      "surrogate_pair_boundary": "𐀀􏿿"
+    },
+    "canonical_utf8": "{\"astral\":\"😀\",\"cafe\":\"Café\",\"cjk\":\"音声\",\"combining\":\"é\",\"surrogate_pair_boundary\":\"𐀀􏿿\"}",
+    "canonical_ascii": "{\"astral\":\"\\ud83d\\ude00\",\"cafe\":\"Caf\\u00e9\",\"cjk\":\"\\u97f3\\u58f0\",\"combining\":\"e\\u0301\",\"surrogate_pair_boundary\":\"\\ud800\\udc00\\udbff\\udfff\"}",
+    "pretty": "{\n  \"cafe\": \"Café\",\n  \"astral\": \"😀\",\n  \"cjk\": \"音声\",\n  \"combining\": \"é\",\n  \"surrogate_pair_boundary\": \"𐀀􏿿\"\n}\n"
+  },
+  {
+    "name": "key_ordering",
+    "value": {
+      "éclair": 1,
+      "zebra": 2,
+      "Zebra": 3,
+      "apple": 4,
+      "Apple": 5,
+      "": 6,
+      "apw:proof_level": "directly_observed",
+      "😀": 7,
+      "a.b": 8,
+      "a b": 9
+    },
+    "canonical_utf8": "{\"\":6,\"Apple\":5,\"Zebra\":3,\"a b\":9,\"a.b\":8,\"apple\":4,\"apw:proof_level\":\"directly_observed\",\"zebra\":2,\"éclair\":1,\"😀\":7}",
+    "canonical_ascii": "{\"\":6,\"Apple\":5,\"Zebra\":3,\"a b\":9,\"a.b\":8,\"apple\":4,\"apw:proof_level\":\"directly_observed\",\"zebra\":2,\"\\u00e9clair\":1,\"\\ud83d\\ude00\":7}",
+    "pretty": "{\n  \"éclair\": 1,\n  \"zebra\": 2,\n  \"Zebra\": 3,\n  \"apple\": 4,\n  \"Apple\": 5,\n  \"\": 6,\n  \"apw:proof_level\": \"directly_observed\",\n  \"😀\": 7,\n  \"a.b\": 8,\n  \"a b\": 9\n}\n"
+  },
+  {
+    "name": "nested_manifest_shape",
+    "value": {
+      "apw_version": "0.9.0",
+      "schema": "audio-provenance-manifest-v0",
+      "session_id": "sess-é-01",
+      "created_at": "2025-08-31T00:26:40.500000Z",
+      "observed_stems": [
+        {
+          "stem_id": "stem-1",
+          "hash_chain_length": 12,
+          "first_observed_ms": -1,
+          "sample_rate_hz": 44100,
+          "rms": 0.0001220703125,
+          "plugin_instance_ids": [],
+          "apw:proof_level": "directly_observed",
+          "source": {
+            "category": "Café synth",
+            "apw:proof_level": "user_declared"
+          }
+        }
+      ],
+      "export": {
+        "file_name": "Bounce – final.wav",
+        "duration_seconds": 12.345678901234567,
+        "sample_rate_hz": 44100.0,
+        "channel_count": 2,
+        "apw:proof_level": "directly_observed"
+      },
+      "apw:unobserved": [
+        "hidden_plugin_state",
+        "bypassed_routing"
+      ],
+      "observation_coverage": {
+        "status": "unknown_coverage",
+        "counters": {}
+      },
+      "empty_list": [],
+      "empty_object": {},
+      "deep": {
+        "a": {
+          "b": {
+            "c": {
+              "d": [
+                {
+                  "e": null
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "canonical_utf8": "{\"apw:unobserved\":[\"hidden_plugin_state\",\"bypassed_routing\"],\"apw_version\":\"0.9.0\",\"created_at\":\"2025-08-31T00:26:40.500000Z\",\"deep\":{\"a\":{\"b\":{\"c\":{\"d\":[{\"e\":null}]}}}},\"empty_list\":[],\"empty_object\":{},\"export\":{\"apw:proof_level\":\"directly_observed\",\"channel_count\":2,\"duration_seconds\":12.345678901234567,\"file_name\":\"Bounce – final.wav\",\"sample_rate_hz\":44100.0},\"observation_coverage\":{\"counters\":{},\"status\":\"unknown_coverage\"},\"observed_stems\":[{\"apw:proof_level\":\"directly_observed\",\"first_observed_ms\":-1,\"hash_chain_length\":12,\"plugin_instance_ids\":[],\"rms\":0.0001220703125,\"sample_rate_hz\":44100,\"source\":{\"apw:proof_level\":\"user_declared\",\"category\":\"Café synth\"},\"stem_id\":\"stem-1\"}],\"schema\":\"audio-provenance-manifest-v0\",\"session_id\":\"sess-é-01\"}",
+    "canonical_ascii": "{\"apw:unobserved\":[\"hidden_plugin_state\",\"bypassed_routing\"],\"apw_version\":\"0.9.0\",\"created_at\":\"2025-08-31T00:26:40.500000Z\",\"deep\":{\"a\":{\"b\":{\"c\":{\"d\":[{\"e\":null}]}}}},\"empty_list\":[],\"empty_object\":{},\"export\":{\"apw:proof_level\":\"directly_observed\",\"channel_count\":2,\"duration_seconds\":12.345678901234567,\"file_name\":\"Bounce \\u2013 final.wav\",\"sample_rate_hz\":44100.0},\"observation_coverage\":{\"counters\":{},\"status\":\"unknown_coverage\"},\"observed_stems\":[{\"apw:proof_level\":\"directly_observed\",\"first_observed_ms\":-1,\"hash_chain_length\":12,\"plugin_instance_ids\":[],\"rms\":0.0001220703125,\"sample_rate_hz\":44100,\"source\":{\"apw:proof_level\":\"user_declared\",\"category\":\"Caf\\u00e9 synth\"},\"stem_id\":\"stem-1\"}],\"schema\":\"audio-provenance-manifest-v0\",\"session_id\":\"sess-\\u00e9-01\"}",
+    "pretty": "{\n  \"apw_version\": \"0.9.0\",\n  \"schema\": \"audio-provenance-manifest-v0\",\n  \"session_id\": \"sess-é-01\",\n  \"created_at\": \"2025-08-31T00:26:40.500000Z\",\n  \"observed_stems\": [\n    {\n      \"stem_id\": \"stem-1\",\n      \"hash_chain_length\": 12,\n      \"first_observed_ms\": -1,\n      \"sample_rate_hz\": 44100,\n      \"rms\": 0.0001220703125,\n      \"plugin_instance_ids\": [],\n      \"apw:proof_level\": \"directly_observed\",\n      \"source\": {\n        \"category\": \"Café synth\",\n        \"apw:proof_level\": \"user_declared\"\n      }\n    }\n  ],\n  \"export\": {\n    \"file_name\": \"Bounce – final.wav\",\n    \"duration_seconds\": 12.345678901234567,\n    \"sample_rate_hz\": 44100.0,\n    \"channel_count\": 2,\n    \"apw:proof_level\": \"directly_observed\"\n  },\n  \"apw:unobserved\": [\n    \"hidden_plugin_state\",\n    \"bypassed_routing\"\n  ],\n  \"observation_coverage\": {\n    \"status\": \"unknown_coverage\",\n    \"counters\": {}\n  },\n  \"empty_list\": [],\n  \"empty_object\": {},\n  \"deep\": {\n    \"a\": {\n      \"b\": {\n        \"c\": {\n          \"d\": [\n            {\n              \"e\": null\n            }\n          ]\n        }\n      }\n    }\n  }\n}\n"
+  }
+]

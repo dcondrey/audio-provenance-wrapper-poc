@@ -1,0 +1,1145 @@
+{
+  "apw_version": "0.9.0",
+  "schema": "audio-provenance-manifest-v0",
+  "session_id": "capture-20260828T220130Z-87760",
+  "capture_session": {
+    "id": "capture-20260828T220130Z-87760",
+    "scope": "local_daemon_runtime",
+    "apw:proof_level": "directly_observed",
+    "started_at": "2026-08-28T22:01:31.213819Z",
+    "state_at_manifest": "active"
+  },
+  "created_at": "2026-08-28T22:10:00.103747Z",
+  "core_principle": "Never claim full DAW provenance.",
+  "daemon_receipt_acknowledgement": {
+    "protocol": "apw-local-udp-ack-v1",
+    "status": "issued",
+    "daemon_instance_id": "receiver-f856e2e1217d",
+    "daemon_capture_session_id": "capture-20260828T220130Z-87760",
+    "streams": [
+      {
+        "plugin_instance_id": "plugin-b2a1d238de3b",
+        "plugin_capture_session_id": "plugin-session-1975e6cf5bdb",
+        "highest_accepted_sequence": 4025,
+        "highest_contiguous_sequence": 4025,
+        "gaps": 0,
+        "rejections": 0,
+        "chain_breaks": 0
+      }
+    ],
+    "counters": {
+      "attempted": 4025,
+      "sent": 4025,
+      "failed": 0
+    },
+    "scope": "The daemon directly observed validation, persistence, and local acknowledgement dispatch. It cannot observe whether every UDP acknowledgement reached the plug-in UI.",
+    "apw:proof_level": "directly_observed"
+  },
+  "observed_stems": [
+    {
+      "stem_id": "stem-87760",
+      "hash_chain_root": "b0a178f77e5a046cce4f9a3c618da37026ff61031abd61caf57fe5bb948952d8",
+      "hash_chain_genesis": "genesis",
+      "hash_chain_length": 4010,
+      "first_observed_ms": 1087079512,
+      "last_observed_ms": 1087439456,
+      "first_received_at": "2026-08-28T22:04:00.138000Z",
+      "last_received_at": "2026-08-28T22:10:00.087000Z",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "source_category": "unknown",
+      "source_category_proof_level": "unknown_unobserved",
+      "source": {
+        "category": "unknown",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "plugin_instance_ids": [
+        "plugin-b2a1d238de3b"
+      ],
+      "apw:proof_level": "directly_observed"
+    }
+  ],
+  "export": {
+    "file_path": "/Volumes/A/audio-provenance/demo-output/sessions/capture-20260828T220130Z-87760/exports/demo-source-bounce.wav",
+    "file_name": "demo-source-bounce.wav",
+    "sha256": "48df5ac102f9598d97ce56a6c3d3dadb3adcd8f9dc654d65de5ca4eff7574bcc",
+    "format": "wav",
+    "file_size_bytes": 1411280,
+    "duration_seconds": 8.0,
+    "sample_rate_hz": 44100,
+    "channel_count": 2,
+    "exported_at": "2026-08-28T22:10:00Z",
+    "export_version": 1,
+    "apw:proof_level": "directly_observed"
+  },
+  "ingredients": [
+    {
+      "file_name": "demo-source.wav",
+      "sha256": "73b698733ba844ef91e2d906d965126a51b8a8fd5615e80181744887b5dd57a4",
+      "apw:proof_level": "directly_observed",
+      "correlation_confidence": null,
+      "audio_fingerprint": {
+        "rms": null,
+        "zero_crossing_rate": null
+      }
+    }
+  ],
+  "edit_history": [
+    {
+      "event_type": "composite_edit",
+      "proof_level": "inferred",
+      "timestamp_ms": 1087285891,
+      "edit_type": "playback_started",
+      "confidence": 0.75,
+      "contributing_events": [
+        {
+          "layer": "transport",
+          "event_type": "transport_change",
+          "timestamp_ms": 1087285861,
+          "source_timestamp_ms": 1087285861,
+          "event_id": "capture-20260828T220130Z-87760:2225"
+        },
+        {
+          "layer": "audio_buffer",
+          "event_type": "audio_transition",
+          "timestamp_ms": 1087285891,
+          "source_timestamp_ms": 1087285890,
+          "event_id": "capture-20260828T220130Z-87760:2227"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "event_type": "composite_edit",
+      "proof_level": "inferred",
+      "timestamp_ms": 1087437071,
+      "edit_type": "playback_started",
+      "confidence": 0.75,
+      "contributing_events": [
+        {
+          "layer": "audio_buffer",
+          "event_type": "audio_transition",
+          "timestamp_ms": 1087437029,
+          "source_timestamp_ms": 1087437028,
+          "event_id": "capture-20260828T220130Z-87760:3859"
+        },
+        {
+          "layer": "transport",
+          "event_type": "transport_change",
+          "timestamp_ms": 1087437071,
+          "source_timestamp_ms": 1087437062,
+          "event_id": "capture-20260828T220130Z-87760:3993"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "apw:unobserved": [
+    "hidden_plugin_state",
+    "internal_preset_logic",
+    "bypassed_routing",
+    "daw_internal_processing",
+    "unverifiable_upstream_provenance",
+    "layer_input_capture_not_active",
+    "layer_project_differ_not_active",
+    "layer_screen_observer_not_active"
+  ],
+  "observation_coverage": {
+    "status": "partial_observed_path",
+    "basis": "Routed audio was observed, but one or more counters show or cannot exclude loss.",
+    "counters": {
+      "buffers_submitted": 32227,
+      "samples_submitted": 16500224,
+      "windows_hashed": 4010,
+      "fifo_samples_dropped": 74753,
+      "fifo_windows_dropped": 147,
+      "events_prepared": 4022,
+      "udp_sends_attempted": 4022,
+      "udp_sends_failed": 0,
+      "daemon_acknowledgements_processed": 4021,
+      "daemon_highest_accepted_sequence": 4021,
+      "daemon_highest_contiguous_sequence": 4021,
+      "daemon_ack_session_mismatches_ignored": 0,
+      "daemon_restarts_observed": 0,
+      "packets_received": 4022,
+      "events_received": 4022,
+      "events_rejected": 0,
+      "sequence_gaps": 0,
+      "events_missing_sequence": 0,
+      "sequence_out_of_order": 0,
+      "hash_chain_breaks": 0,
+      "daemon_acknowledgements_attempted": 4022,
+      "daemon_acknowledgements_sent": 4022,
+      "daemon_acknowledgements_failed": 0,
+      "udp_sends_locally_emitted": 4022,
+      "buffer_hash_events_received": 4010,
+      "feature_windows_dropped_from_alignment_buffer": 0
+    },
+    "apw:proof_level": "inferred"
+  },
+  "session_diagnostics": {
+    "receiver": {
+      "packets_received": 4024,
+      "events_received": 4023,
+      "events_rejected": 0,
+      "sequence_gaps": 0,
+      "events_missing_sequence": 0,
+      "sequence_out_of_order": 0,
+      "hash_chain_breaks": 0,
+      "daemon_acknowledgements_attempted": 4023,
+      "daemon_acknowledgements_sent": 4023,
+      "daemon_acknowledgements_failed": 0
+    },
+    "correlation": {
+      "buffer_events": 22,
+      "buffer_max_events": 512,
+      "capacity_drops": 0,
+      "duplicate_matches_suppressed": 45,
+      "composite_events_emitted": 2,
+      "clock": "daemon_monotonic_ms"
+    },
+    "session_memory": {
+      "events_retained": 4026,
+      "max_events": 50000,
+      "events_dropped_from_memory_only": 0
+    },
+    "daemon_receipt_acknowledgement": {
+      "protocol": "apw-local-udp-ack-v1",
+      "status": "degraded",
+      "daemon_instance_id": "receiver-f856e2e1217d",
+      "daemon_capture_session_id": "capture-20260828T220130Z-87760",
+      "streams": [
+        {
+          "plugin_instance_id": "plugin-b2a1d238de3b",
+          "plugin_capture_session_id": "plugin-session-1975e6cf5bdb",
+          "highest_accepted_sequence": 4024,
+          "highest_contiguous_sequence": 4024,
+          "gaps": 0,
+          "rejections": 0,
+          "chain_breaks": 0
+        }
+      ],
+      "counters": {
+        "attempted": 4023,
+        "sent": 4023,
+        "failed": 0
+      },
+      "scope": "The daemon directly observed validation, persistence, and local acknowledgement dispatch. It cannot observe whether every UDP acknowledgement reached the plug-in UI.",
+      "apw:proof_level": "directly_observed"
+    },
+    "apw:proof_level": "directly_observed"
+  },
+  "stem_export_association": {
+    "status": "not_established",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.9916,
+    "matched_coverage": 1.0,
+    "routed_coverage": 0.0214,
+    "matched_window_count": 86,
+    "comparable_window_count": 86,
+    "overlap_window_count": 86,
+    "routed_window_count": 4010,
+    "export_window_count": 86,
+    "best_offset_windows": -2653,
+    "best_offset_seconds": -246.4102,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+      {
+        "relative_window": 0,
+        "similarity": 0.901,
+        "matched": true
+      },
+      {
+        "relative_window": 2,
+        "similarity": 0.977,
+        "matched": true
+      },
+      {
+        "relative_window": 4,
+        "similarity": 0.988,
+        "matched": true
+      },
+      {
+        "relative_window": 6,
+        "similarity": 0.991,
+        "matched": true
+      },
+      {
+        "relative_window": 8,
+        "similarity": 0.995,
+        "matched": true
+      },
+      {
+        "relative_window": 10,
+        "similarity": 0.989,
+        "matched": true
+      },
+      {
+        "relative_window": 12,
+        "similarity": 0.989,
+        "matched": true
+      },
+      {
+        "relative_window": 14,
+        "similarity": 0.984,
+        "matched": true
+      },
+      {
+        "relative_window": 16,
+        "similarity": 0.99,
+        "matched": true
+      },
+      {
+        "relative_window": 18,
+        "similarity": 0.997,
+        "matched": true
+      },
+      {
+        "relative_window": 20,
+        "similarity": 0.991,
+        "matched": true
+      },
+      {
+        "relative_window": 22,
+        "similarity": 0.991,
+        "matched": true
+      },
+      {
+        "relative_window": 24,
+        "similarity": 0.991,
+        "matched": true
+      },
+      {
+        "relative_window": 26,
+        "similarity": 0.995,
+        "matched": true
+      },
+      {
+        "relative_window": 28,
+        "similarity": 0.998,
+        "matched": true
+      },
+      {
+        "relative_window": 30,
+        "similarity": 0.995,
+        "matched": true
+      },
+      {
+        "relative_window": 32,
+        "similarity": 0.994,
+        "matched": true
+      },
+      {
+        "relative_window": 34,
+        "similarity": 0.996,
+        "matched": true
+      },
+      {
+        "relative_window": 36,
+        "similarity": 0.997,
+        "matched": true
+      },
+      {
+        "relative_window": 38,
+        "similarity": 0.995,
+        "matched": true
+      },
+      {
+        "relative_window": 40,
+        "similarity": 0.993,
+        "matched": true
+      },
+      {
+        "relative_window": 42,
+        "similarity": 0.994,
+        "matched": true
+      },
+      {
+        "relative_window": 44,
+        "similarity": 0.995,
+        "matched": true
+      },
+      {
+        "relative_window": 46,
+        "similarity": 0.993,
+        "matched": true
+      },
+      {
+        "relative_window": 48,
+        "similarity": 0.989,
+        "matched": true
+      },
+      {
+        "relative_window": 50,
+        "similarity": 0.987,
+        "matched": true
+      },
+      {
+        "relative_window": 52,
+        "similarity": 0.988,
+        "matched": true
+      },
+      {
+        "relative_window": 54,
+        "similarity": 0.993,
+        "matched": true
+      },
+      {
+        "relative_window": 56,
+        "similarity": 0.993,
+        "matched": true
+      },
+      {
+        "relative_window": 58,
+        "similarity": 0.985,
+        "matched": true
+      },
+      {
+        "relative_window": 60,
+        "similarity": 0.986,
+        "matched": true
+      },
+      {
+        "relative_window": 62,
+        "similarity": 0.989,
+        "matched": true
+      },
+      {
+        "relative_window": 64,
+        "similarity": 0.997,
+        "matched": true
+      },
+      {
+        "relative_window": 66,
+        "similarity": 0.992,
+        "matched": true
+      },
+      {
+        "relative_window": 68,
+        "similarity": 0.992,
+        "matched": true
+      },
+      {
+        "relative_window": 70,
+        "similarity": 0.991,
+        "matched": true
+      },
+      {
+        "relative_window": 72,
+        "similarity": 0.996,
+        "matched": true
+      },
+      {
+        "relative_window": 74,
+        "similarity": 0.996,
+        "matched": true
+      },
+      {
+        "relative_window": 76,
+        "similarity": 0.995,
+        "matched": true
+      },
+      {
+        "relative_window": 78,
+        "similarity": 0.993,
+        "matched": true
+      },
+      {
+        "relative_window": 80,
+        "similarity": 0.992,
+        "matched": true
+      },
+      {
+        "relative_window": 82,
+        "similarity": 0.988,
+        "matched": true
+      },
+      {
+        "relative_window": 84,
+        "similarity": 0.979,
+        "matched": true
+      }
+    ],
+    "alignment_similarity": [
+      0.901,
+      0.977,
+      0.988,
+      0.991,
+      0.995,
+      0.989,
+      0.989,
+      0.984,
+      0.99,
+      0.997,
+      0.991,
+      0.991,
+      0.991,
+      0.995,
+      0.998,
+      0.995,
+      0.994,
+      0.996,
+      0.997,
+      0.995,
+      0.993,
+      0.994,
+      0.995,
+      0.993,
+      0.989,
+      0.987,
+      0.988,
+      0.993,
+      0.993,
+      0.985,
+      0.986,
+      0.989,
+      0.997,
+      0.992,
+      0.992,
+      0.991,
+      0.996,
+      0.996,
+      0.995,
+      0.993,
+      0.992,
+      0.988,
+      0.979
+    ],
+    "feature_dimensions": [
+      "relative_rms",
+      "zero_crossing_rate",
+      "crest_factor",
+      "energy_envelope_4"
+    ],
+    "reason": "bounded routed/export feature similarity did not meet the inference threshold",
+    "apw:proof_level": "unknown_unobserved",
+    "limitations": [
+      "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+      "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+      "A failed or unavailable match does not prove that routed audio is absent from the export.",
+      "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "sample_width_bytes": 2,
+      "window_size_frames": 4096,
+      "window_duration_seconds": 0.09287982,
+      "truncated_at_window_limit": false,
+      "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000,
+    "capture_session_id": "capture-20260828T220130Z-87760",
+    "stem_ids": [
+      "stem-87760"
+    ],
+    "export_file_name": "demo-source-bounce.wav",
+    "basis": "A bounded sequence of relative RMS, zero-crossing, crest-factor, and coarse energy-envelope features emitted from accepted routed plug-in windows was compared with equivalent streaming-extracted export features using time-offset search. The relationship remains inferred and does not establish complete routing."
+  },
+  "claim_summary": [
+    {
+      "claim": "observation_coverage",
+      "value": "partial_observed_path",
+      "evidence": "Routed audio was observed, but one or more counters show or cannot exclude loss.",
+      "apw:proof_level": "inferred"
+    },
+    {
+      "claim": "routed_audio_observed",
+      "value": true,
+      "evidence": "4010 hash windows received",
+      "apw:proof_level": "directly_observed"
+    },
+    {
+      "claim": "daemon_receipt_acknowledgement",
+      "value": "issued",
+      "evidence": "Daemon dispatched 4025 local ACK packets; plug-in processing of each packet is outside daemon observability.",
+      "apw:proof_level": "directly_observed"
+    },
+    {
+      "claim": "export_file_hashed",
+      "value": true,
+      "evidence": "48df5ac102f9598d97ce56a6c3d3dadb3adcd8f9dc654d65de5ca4eff7574bcc",
+      "apw:proof_level": "directly_observed"
+    },
+    {
+      "claim": "observed_stem_linked_to_export",
+      "value": false,
+      "evidence": "routed_feature_sequence_offset_search: confidence 0.9916 / coverage 1.0",
+      "apw:proof_level": "unknown_unobserved"
+    },
+    {
+      "claim": "source_category",
+      "value": "unknown",
+      "evidence": "producer declaration",
+      "apw:proof_level": "unknown_unobserved"
+    },
+    {
+      "claim": "full_ableton_provenance",
+      "value": false,
+      "evidence": "Only audio routed through the capture plugin was observed",
+      "apw:proof_level": "unknown_unobserved"
+    }
+  ],
+  "c2pa_mapping": {
+    "status": "mapping_only_not_an_embedded_c2pa_manifest",
+    "claim_generator": "AudioProvenanceCapture/0.9.0",
+    "assertions": [
+      {
+        "label": "c2pa.hash.data",
+        "data": {
+          "name": "demo-source-bounce.wav",
+          "hash": "48df5ac102f9598d97ce56a6c3d3dadb3adcd8f9dc654d65de5ca4eff7574bcc",
+          "algorithm": "sha256"
+        }
+      },
+      {
+        "label": "c2pa.ingredient",
+        "data": {
+          "title": "stem-87760",
+          "relationship": "componentOf",
+          "apw:hash_chain_root": "b0a178f77e5a046cce4f9a3c618da37026ff61031abd61caf57fe5bb948952d8",
+          "apw:proof_level": "directly_observed"
+        }
+      },
+      {
+        "label": "c2pa.ingredient",
+        "data": {
+          "title": "demo-source.wav",
+          "relationship": "inputTo",
+          "hash": "73b698733ba844ef91e2d906d965126a51b8a8fd5615e80181744887b5dd57a4",
+          "apw:proof_level": "directly_observed"
+        }
+      },
+      {
+        "label": "c2pa.actions",
+        "data": {
+          "actions": [
+            {
+              "action": "c2pa.unknown",
+              "when": 1087285891,
+              "apw:edit_type": "playback_started",
+              "apw:confidence": 0.75,
+              "apw:proof_level": "inferred"
+            },
+            {
+              "action": "c2pa.unknown",
+              "when": 1087437071,
+              "apw:edit_type": "playback_started",
+              "apw:confidence": 0.75,
+              "apw:proof_level": "inferred"
+            }
+          ]
+        }
+      },
+      {
+        "label": "apw.unobserved",
+        "data": {
+          "items": [
+            "hidden_plugin_state",
+            "internal_preset_logic",
+            "bypassed_routing",
+            "daw_internal_processing",
+            "unverifiable_upstream_provenance",
+            "layer_input_capture_not_active",
+            "layer_project_differ_not_active",
+            "layer_screen_observer_not_active"
+          ]
+        }
+      }
+    ]
+  },
+  "evidence_binding": {
+    "evidence_directory": "/Volumes/A/audio-provenance/demo-output/sessions/capture-20260828T220130Z-87760/evidence",
+    "evidence_file_hashes": {
+      "composite_events.jsonl": "10f647ed93a18cfb695e2e7bf0dad3292889e4a2edc0926d747f44f79329db97",
+      "plugin_events.jsonl": "8c5a16148fb2cf63bfd41b791b15976e4fcd1ceccefc602292ea54991c0259a2",
+      "sample_import_events.jsonl": "3d2d1bb5e92b9f65b4c63663d065a5a5c4f996a1a10858b1c491a8afcb6a61e5",
+      "session_events.jsonl": "74ab782d48d06acf42ce194771c8ed6ac865a6572ddf37b1fef6a045907c14ba"
+    },
+    "evidence_files": {
+      "composite_events.jsonl": {
+        "sha256": "10f647ed93a18cfb695e2e7bf0dad3292889e4a2edc0926d747f44f79329db97",
+        "byte_length": 988,
+        "binding_scope": "file_prefix_at_manifest_creation"
+      },
+      "plugin_events.jsonl": {
+        "sha256": "8c5a16148fb2cf63bfd41b791b15976e4fcd1ceccefc602292ea54991c0259a2",
+        "byte_length": 5576360,
+        "binding_scope": "file_prefix_at_manifest_creation"
+      },
+      "sample_import_events.jsonl": {
+        "sha256": "3d2d1bb5e92b9f65b4c63663d065a5a5c4f996a1a10858b1c491a8afcb6a61e5",
+        "byte_length": 742,
+        "binding_scope": "file_prefix_at_manifest_creation"
+      },
+      "session_events.jsonl": {
+        "sha256": "74ab782d48d06acf42ce194771c8ed6ac865a6572ddf37b1fef6a045907c14ba",
+        "byte_length": 218,
+        "binding_scope": "file_prefix_at_manifest_creation"
+      }
+    },
+    "last_window_hash": "b0a178f77e5a046cce4f9a3c618da37026ff61031abd61caf57fe5bb948952d8",
+    "chain_length": 4010,
+    "apw:proof_level": "directly_observed"
+  },
+  "presentation": {
+    "html_report": "demo-source-bounce_provenance.html",
+    "derived_from": "demo-source-bounce_manifest.json",
+    "verifier_result": "artifacts/demo-source-bounce_verification.json",
+    "downstream_handoff": "artifacts/demo-source-bounce_handoff.json",
+    "bundle_index": "artifacts/demo-source-bounce_bundle_index.json",
+    "evidence_bundle": "artifacts/demo-source-bounce_evidence_bundle.zip",
+    "apw:proof_level": "directly_observed"
+  },
+  "downstream_registration_handoff": {
+    "record_type": "downstream_provenance_registration_handoff",
+    "status": "candidate_input_not_submitted",
+    "capture_session_id": "capture-20260828T220130Z-87760",
+    "export_hard_hash": {
+      "algorithm": "sha256",
+      "value": "48df5ac102f9598d97ce56a6c3d3dadb3adcd8f9dc654d65de5ca4eff7574bcc",
+      "apw:proof_level": "directly_observed"
+    },
+    "routed_observation_commitment": {
+      "hash_chain_root": "b5c5b84381bc0d71a173d494e251429e34bfbb3af587e8645ecf55f139e60731",
+      "hash_chain_length": 4013,
+      "apw:proof_level": "directly_observed"
+    },
+    "coverage": {
+      "status": "partial_observed_path",
+      "basis": "Routed audio was observed, but one or more counters show or cannot exclude loss.",
+      "counters": {
+        "buffers_submitted": 32227,
+        "samples_submitted": 16500224,
+        "windows_hashed": 4010,
+        "fifo_samples_dropped": 74753,
+        "fifo_windows_dropped": 147,
+        "events_prepared": 4022,
+        "udp_sends_attempted": 4022,
+        "udp_sends_failed": 0,
+        "daemon_acknowledgements_processed": 4021,
+        "daemon_highest_accepted_sequence": 4021,
+        "daemon_highest_contiguous_sequence": 4021,
+        "daemon_ack_session_mismatches_ignored": 0,
+        "daemon_restarts_observed": 0,
+        "packets_received": 4022,
+        "events_received": 4022,
+        "events_rejected": 0,
+        "sequence_gaps": 0,
+        "events_missing_sequence": 0,
+        "sequence_out_of_order": 0,
+        "hash_chain_breaks": 0,
+        "daemon_acknowledgements_attempted": 4022,
+        "daemon_acknowledgements_sent": 4022,
+        "daemon_acknowledgements_failed": 0,
+        "udp_sends_locally_emitted": 4022,
+        "buffer_hash_events_received": 4010,
+        "feature_windows_dropped_from_alignment_buffer": 0
+      },
+      "apw:proof_level": "inferred"
+    },
+    "audio_association": {
+      "status": "not_established",
+      "method": "routed_feature_sequence_offset_search",
+      "method_version": "2.0.0",
+      "confidence": 0.9916,
+      "matched_coverage": 1.0,
+      "routed_coverage": 0.0214,
+      "matched_window_count": 86,
+      "comparable_window_count": 86,
+      "overlap_window_count": 86,
+      "routed_window_count": 4010,
+      "export_window_count": 86,
+      "best_offset_windows": -2653,
+      "best_offset_seconds": -246.4102,
+      "alignment_threshold": 0.72,
+      "alignment_series": [
+        {
+          "relative_window": 0,
+          "similarity": 0.901,
+          "matched": true
+        },
+        {
+          "relative_window": 2,
+          "similarity": 0.977,
+          "matched": true
+        },
+        {
+          "relative_window": 4,
+          "similarity": 0.988,
+          "matched": true
+        },
+        {
+          "relative_window": 6,
+          "similarity": 0.991,
+          "matched": true
+        },
+        {
+          "relative_window": 8,
+          "similarity": 0.995,
+          "matched": true
+        },
+        {
+          "relative_window": 10,
+          "similarity": 0.989,
+          "matched": true
+        },
+        {
+          "relative_window": 12,
+          "similarity": 0.989,
+          "matched": true
+        },
+        {
+          "relative_window": 14,
+          "similarity": 0.984,
+          "matched": true
+        },
+        {
+          "relative_window": 16,
+          "similarity": 0.99,
+          "matched": true
+        },
+        {
+          "relative_window": 18,
+          "similarity": 0.997,
+          "matched": true
+        },
+        {
+          "relative_window": 20,
+          "similarity": 0.991,
+          "matched": true
+        },
+        {
+          "relative_window": 22,
+          "similarity": 0.991,
+          "matched": true
+        },
+        {
+          "relative_window": 24,
+          "similarity": 0.991,
+          "matched": true
+        },
+        {
+          "relative_window": 26,
+          "similarity": 0.995,
+          "matched": true
+        },
+        {
+          "relative_window": 28,
+          "similarity": 0.998,
+          "matched": true
+        },
+        {
+          "relative_window": 30,
+          "similarity": 0.995,
+          "matched": true
+        },
+        {
+          "relative_window": 32,
+          "similarity": 0.994,
+          "matched": true
+        },
+        {
+          "relative_window": 34,
+          "similarity": 0.996,
+          "matched": true
+        },
+        {
+          "relative_window": 36,
+          "similarity": 0.997,
+          "matched": true
+        },
+        {
+          "relative_window": 38,
+          "similarity": 0.995,
+          "matched": true
+        },
+        {
+          "relative_window": 40,
+          "similarity": 0.993,
+          "matched": true
+        },
+        {
+          "relative_window": 42,
+          "similarity": 0.994,
+          "matched": true
+        },
+        {
+          "relative_window": 44,
+          "similarity": 0.995,
+          "matched": true
+        },
+        {
+          "relative_window": 46,
+          "similarity": 0.993,
+          "matched": true
+        },
+        {
+          "relative_window": 48,
+          "similarity": 0.989,
+          "matched": true
+        },
+        {
+          "relative_window": 50,
+          "similarity": 0.987,
+          "matched": true
+        },
+        {
+          "relative_window": 52,
+          "similarity": 0.988,
+          "matched": true
+        },
+        {
+          "relative_window": 54,
+          "similarity": 0.993,
+          "matched": true
+        },
+        {
+          "relative_window": 56,
+          "similarity": 0.993,
+          "matched": true
+        },
+        {
+          "relative_window": 58,
+          "similarity": 0.985,
+          "matched": true
+        },
+        {
+          "relative_window": 60,
+          "similarity": 0.986,
+          "matched": true
+        },
+        {
+          "relative_window": 62,
+          "similarity": 0.989,
+          "matched": true
+        },
+        {
+          "relative_window": 64,
+          "similarity": 0.997,
+          "matched": true
+        },
+        {
+          "relative_window": 66,
+          "similarity": 0.992,
+          "matched": true
+        },
+        {
+          "relative_window": 68,
+          "similarity": 0.992,
+          "matched": true
+        },
+        {
+          "relative_window": 70,
+          "similarity": 0.991,
+          "matched": true
+        },
+        {
+          "relative_window": 72,
+          "similarity": 0.996,
+          "matched": true
+        },
+        {
+          "relative_window": 74,
+          "similarity": 0.996,
+          "matched": true
+        },
+        {
+          "relative_window": 76,
+          "similarity": 0.995,
+          "matched": true
+        },
+        {
+          "relative_window": 78,
+          "similarity": 0.993,
+          "matched": true
+        },
+        {
+          "relative_window": 80,
+          "similarity": 0.992,
+          "matched": true
+        },
+        {
+          "relative_window": 82,
+          "similarity": 0.988,
+          "matched": true
+        },
+        {
+          "relative_window": 84,
+          "similarity": 0.979,
+          "matched": true
+        }
+      ],
+      "alignment_similarity": [
+        0.901,
+        0.977,
+        0.988,
+        0.991,
+        0.995,
+        0.989,
+        0.989,
+        0.984,
+        0.99,
+        0.997,
+        0.991,
+        0.991,
+        0.991,
+        0.995,
+        0.998,
+        0.995,
+        0.994,
+        0.996,
+        0.997,
+        0.995,
+        0.993,
+        0.994,
+        0.995,
+        0.993,
+        0.989,
+        0.987,
+        0.988,
+        0.993,
+        0.993,
+        0.985,
+        0.986,
+        0.989,
+        0.997,
+        0.992,
+        0.992,
+        0.991,
+        0.996,
+        0.996,
+        0.995,
+        0.993,
+        0.992,
+        0.988,
+        0.979
+      ],
+      "feature_dimensions": [
+        "relative_rms",
+        "zero_crossing_rate",
+        "crest_factor",
+        "energy_envelope_4"
+      ],
+      "reason": "bounded routed/export feature similarity did not meet the inference threshold",
+      "apw:proof_level": "unknown_unobserved",
+      "limitations": [
+        "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+        "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+        "A failed or unavailable match does not prove that routed audio is absent from the export.",
+        "Only the retained bounded routed-feature prefix participates in long-session alignment."
+      ],
+      "export_feature_extraction": {
+        "sample_rate_hz": 44100,
+        "channel_count": 2,
+        "sample_width_bytes": 2,
+        "window_size_frames": 4096,
+        "window_duration_seconds": 0.09287982,
+        "truncated_at_window_limit": false,
+        "streaming_extraction": true
+      },
+      "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+      "bounded_routed_window_limit": 12000,
+      "capture_session_id": "capture-20260828T220130Z-87760",
+      "stem_ids": [
+        "stem-87760"
+      ],
+      "export_file_name": "demo-source-bounce.wav",
+      "basis": "A bounded sequence of relative RMS, zero-crossing, crest-factor, and coarse energy-envelope features emitted from accepted routed plug-in windows was compared with equivalent streaming-extracted export features using time-offset search. The relationship remains inferred and does not establish complete routing."
+    },
+    "creator_declarations": [
+      {
+        "name": "source_category",
+        "value": "unknown",
+        "apw:proof_level": "unknown_unobserved"
+      }
+    ],
+    "signing_key": {
+      "algorithm": "Ed25519",
+      "public_key_hex": "70d1d07976ea842af202ba98273afb0affdab5e426888a980e7767177931b112",
+      "public_key_file": "/Users/davidcondrey/.apw/demo_ed25519_public.key",
+      "trust_scope": "self_generated_demo_key_integrity",
+      "signer_identity": "not_established",
+      "apw:proof_level": "unknown_unobserved"
+    },
+    "evidence_bundle": {
+      "manifest": "/Volumes/A/audio-provenance/demo-output/sessions/capture-20260828T220130Z-87760/manifests/demo-source-bounce_manifest.json",
+      "export": "/Volumes/A/audio-provenance/demo-output/sessions/capture-20260828T220130Z-87760/exports/demo-source-bounce.wav",
+      "evidence_directory": "/Volumes/A/audio-provenance/demo-output/sessions/capture-20260828T220130Z-87760/evidence",
+      "files": {
+        "composite_events.jsonl": {
+          "sha256": "10f647ed93a18cfb695e2e7bf0dad3292889e4a2edc0926d747f44f79329db97",
+          "byte_length": 988,
+          "binding_scope": "file_prefix_at_manifest_creation"
+        },
+        "plugin_events.jsonl": {
+          "sha256": "8c5a16148fb2cf63bfd41b791b15976e4fcd1ceccefc602292ea54991c0259a2",
+          "byte_length": 5576360,
+          "binding_scope": "file_prefix_at_manifest_creation"
+        },
+        "sample_import_events.jsonl": {
+          "sha256": "3d2d1bb5e92b9f65b4c63663d065a5a5c4f996a1a10858b1c491a8afcb6a61e5",
+          "byte_length": 742,
+          "binding_scope": "file_prefix_at_manifest_creation"
+        },
+        "session_events.jsonl": {
+          "sha256": "74ab782d48d06acf42ce194771c8ed6ac865a6572ddf37b1fef6a045907c14ba",
+          "byte_length": 218,
+          "binding_scope": "file_prefix_at_manifest_creation"
+        }
+      },
+      "downloadable_archive": "artifacts/demo-source-bounce_evidence_bundle.zip",
+      "signed_bundle_index": "artifacts/demo-source-bounce_bundle_index.json",
+      "index_scope": "all archive payload entries; the signed index is not self-hashed",
+      "apw:proof_level": "directly_observed"
+    },
+    "tentative_c2pa_assertion_mapping": {
+      "status": "mapping_only_not_a_production_c2pa_claim",
+      "assertions": [
+        "c2pa.hash.data",
+        "c2pa.ingredient",
+        "c2pa.actions",
+        "apw.unobserved"
+      ],
+      "apw:proof_level": "inferred"
+    },
+    "missing_downstream_requirements": [
+      "verified creator or institution identity",
+      "author-controlled credential and key policy",
+      "production certificate chain",
+      "audio-native soft binding or watermark",
+      "resilient recovery from the audio",
+      "registry publication",
+      "production C2PA claim generation and conformance validation",
+      "consent and rights verification"
+    ],
+    "boundary": "This neutral handoff is not a provider-specific API payload and claims no compatibility with proprietary watermark, recovery, identity, signing, or registry technology."
+  },
+  "portable_signature": {
+    "algorithm": "Ed25519",
+    "canonicalization": "apw-json-sort-v1",
+    "public_key_hex": "70d1d07976ea842af202ba98273afb0affdab5e426888a980e7767177931b112",
+    "public_key_file": "/Users/davidcondrey/.apw/demo_ed25519_public.key",
+    "signer_id": "733c3f5f8418ea4c",
+    "signature_hex": "2ae49471efeff6fd737070036bdae46865963c5a15b584258a84ba4e4b61e21122a8cd007a734f057b629f2821df78f6b0c5057ab65389bd7b6f35f41b318f0e",
+    "signed_content_hash": "399f7d062c6c7189da1bda8abd0b927e2ddde5cb854a44c6a1b16118105332ff",
+    "trust_scope": "self_generated_demo_key_integrity",
+    "signer_identity": "not_established",
+    "signer_identity_proof_level": "unknown_unobserved",
+    "apw:proof_level": "directly_observed",
+    "notes": "The public key independently verifies canonical manifest integrity. A valid self-generated signature proves key possession, not creator identity, authorship, or external trust."
+  },
+  "manifest_signature": {
+    "algorithm": "hmac-sha256-local",
+    "device_id": "55d3124c9afb31b3",
+    "public_key_hex": "",
+    "signature_hex": "21aa6b9da9a10d93039faab272accbdc48a47f3fa4aff8533d6da2652236c20b",
+    "signed_content_hash": "65c8429625ce64fb43c17fdaf2689e92eeddcf4989718385e2a88994ce1092ff",
+    "trust_scope": "local_software_integrity",
+    "hardware_attested": false,
+    "apw:proof_level": "unknown_unobserved",
+    "notes": "The local HMAC seal detects changes when checked with the same secret key; it is not hardware attestation or third-party identity verification."
+  }
+}

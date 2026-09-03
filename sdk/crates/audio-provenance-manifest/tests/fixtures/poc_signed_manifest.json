@@ -1,0 +1,1145 @@
+{
+  "apw_version": "0.9.0",
+  "schema": "audio-provenance-manifest-v0",
+  "session_id": "synthetic-20260831T090819Z-124000",
+  "capture_session": {
+    "id": "synthetic-20260831T090819Z-124000",
+    "scope": "local_daemon_runtime",
+    "apw:proof_level": "directly_observed",
+    "started_at": "2026-08-31T09:08:19.813564Z",
+    "state_at_manifest": "active"
+  },
+  "created_at": "2026-08-31T09:08:23.333577Z",
+  "core_principle": "Never claim full DAW provenance.",
+  "daemon_receipt_acknowledgement": {
+    "protocol": "apw-local-udp-ack-v1",
+    "status": "issued",
+    "daemon_instance_id": "receiver-c617e0b6cd42",
+    "daemon_capture_session_id": "synthetic-20260831T090819Z-124000",
+    "streams": [
+      {
+        "plugin_instance_id": "synthetic-plugin-001",
+        "plugin_capture_session_id": "synthetic-plugin-session-001",
+        "highest_accepted_sequence": 40,
+        "highest_contiguous_sequence": 40,
+        "gaps": 0,
+        "rejections": 0,
+        "chain_breaks": 0
+      }
+    ],
+    "counters": {
+      "attempted": 40,
+      "sent": 40,
+      "failed": 0
+    },
+    "stream_evictions": 0,
+    "scope": "The daemon directly observed validation, persistence, and local acknowledgement dispatch. It cannot observe whether every UDP acknowledgement reached the plug-in UI.",
+    "apw:proof_level": "directly_observed"
+  },
+  "observed_stems": [
+    {
+      "stem_id": "synthetic-stem",
+      "hash_chain_root": "5a6fa08d159ed3513a21319675f40dd6a0803ce9593b1b2ccc18e1d077649291",
+      "hash_chain_genesis": "genesis",
+      "hash_chain_length": 40,
+      "first_observed_ms": 10000,
+      "last_observed_ms": 13622,
+      "first_received_at": "2026-08-31T09:08:20.106000Z",
+      "last_received_at": "2026-08-31T09:08:20.141000Z",
+      "sample_rate_hz": 44100,
+      "channel_count": 1,
+      "source_category": "generator",
+      "source_category_proof_level": "user_declared",
+      "source": {
+        "category": "generator",
+        "apw:proof_level": "user_declared"
+      },
+      "plugin_instance_ids": [
+        "synthetic-plugin-001"
+      ],
+      "apw:proof_level": "directly_observed"
+    }
+  ],
+  "export": {
+    "file_path": "/private/tmp/claude-501/-Volumes-A-audio-provenance/0dc3ebea-f6f6-4e73-95f4-08725675534d/scratchpad/fallback1/synthetic-20260831T090819Z-124000/exports/presenter_export.wav",
+    "file_name": "presenter_export.wav",
+    "sha256": "ff7c90bef31e27d8b9494f36205e61ad6aa4389b6d36a57065e76a4e05e66fcf",
+    "format": "wav",
+    "file_size_bytes": 352300,
+    "duration_seconds": 3.9938321995464854,
+    "sample_rate_hz": 44100,
+    "channel_count": 1,
+    "exported_at": "2026-08-31T09:08:23Z",
+    "export_version": 1,
+    "apw:proof_level": "directly_observed"
+  },
+  "forgery_analysis": {
+    "apw:proof_level": "inferred",
+    "method": "statistical_screen_v1",
+    "scope": "Statistical screening of the routed-audio stream and hash chain for synthetic or scripted patterns. An empty flag list is not proof of authenticity; a flag is a lead, not a verdict.",
+    "suspicion_score": 0.0,
+    "analyzers": {
+      "audio_stream": {
+        "suspicion_score": 0.0,
+        "sample_count": 40,
+        "flags": []
+      },
+      "hash_chain": {
+        "suspicion_score": 0.0,
+        "sample_count": 40,
+        "flags": []
+      },
+      "input_behavior": {
+        "suspicion_score": 0.0,
+        "sample_count": 0,
+        "flags": [],
+        "note": "The input_capture layer is not active in this session; no keystroke statistics were available to analyze."
+      }
+    }
+  },
+  "apw:unobserved": [
+    "hidden_plugin_state",
+    "internal_preset_logic",
+    "bypassed_routing",
+    "daw_internal_processing",
+    "unverifiable_upstream_provenance",
+    "layer_input_capture_not_active",
+    "layer_midi_not_active",
+    "layer_project_differ_not_active",
+    "layer_screen_observer_not_active",
+    "layer_session_not_active",
+    "layer_transport_not_active"
+  ],
+  "observation_coverage": {
+    "status": "complete_observed_path",
+    "basis": "All submitted routed windows represented by the plug-in counters were received, and the prepared/received event prefix agrees with no reported FIFO loss, UDP send failure, sequence gap, chain break, or daemon acknowledgement dispatch failure. Scope ends at the last received telemetry event; plug-in processing of each ACK is not observable from the daemon.",
+    "counters": {
+      "buffers_submitted": 320,
+      "samples_submitted": 163840,
+      "windows_hashed": 40,
+      "fifo_samples_dropped": 0,
+      "fifo_windows_dropped": 0,
+      "midi_events_dropped": 0,
+      "events_prepared": 40,
+      "udp_sends_attempted": 40,
+      "udp_sends_failed": 0,
+      "daemon_acknowledgements_processed": 39,
+      "daemon_highest_accepted_sequence": 39,
+      "daemon_highest_contiguous_sequence": 39,
+      "daemon_ack_session_mismatches_ignored": 0,
+      "daemon_restarts_observed": 0,
+      "packets_received": 40,
+      "events_received": 40,
+      "events_rejected": 0,
+      "sequence_gaps": 0,
+      "events_missing_sequence": 0,
+      "sequence_out_of_order": 0,
+      "hash_chain_breaks": 0,
+      "stream_evictions": 0,
+      "daemon_acknowledgements_attempted": 40,
+      "daemon_acknowledgements_sent": 40,
+      "daemon_acknowledgements_failed": 0,
+      "udp_sends_locally_emitted": 40,
+      "buffer_hash_events_received": 40,
+      "feature_windows_dropped_from_alignment_buffer": 0
+    },
+    "apw:proof_level": "inferred"
+  },
+  "session_diagnostics": {
+    "receiver": {
+      "packets_received": 40,
+      "events_received": 40,
+      "events_rejected": 0,
+      "sequence_gaps": 0,
+      "events_missing_sequence": 0,
+      "sequence_out_of_order": 0,
+      "hash_chain_breaks": 0,
+      "stream_evictions": 0,
+      "daemon_acknowledgements_attempted": 40,
+      "daemon_acknowledgements_sent": 40,
+      "daemon_acknowledgements_failed": 0
+    },
+    "correlation": {
+      "buffer_events": 40,
+      "buffer_max_events": 512,
+      "capacity_drops": 0,
+      "duplicate_matches_suppressed": 0,
+      "composite_events_emitted": 0,
+      "clock": "daemon_monotonic_ms"
+    },
+    "session_memory": {
+      "events_retained": 40,
+      "max_events": 50000,
+      "events_dropped_from_memory_only": 0
+    },
+    "daemon_receipt_acknowledgement": {
+      "protocol": "apw-local-udp-ack-v1",
+      "status": "issued",
+      "daemon_instance_id": "receiver-c617e0b6cd42",
+      "daemon_capture_session_id": "synthetic-20260831T090819Z-124000",
+      "streams": [
+        {
+          "plugin_instance_id": "synthetic-plugin-001",
+          "plugin_capture_session_id": "synthetic-plugin-session-001",
+          "highest_accepted_sequence": 40,
+          "highest_contiguous_sequence": 40,
+          "gaps": 0,
+          "rejections": 0,
+          "chain_breaks": 0
+        }
+      ],
+      "counters": {
+        "attempted": 40,
+        "sent": 40,
+        "failed": 0
+      },
+      "stream_evictions": 0,
+      "scope": "The daemon directly observed validation, persistence, and local acknowledgement dispatch. It cannot observe whether every UDP acknowledgement reached the plug-in UI.",
+      "apw:proof_level": "directly_observed"
+    },
+    "apw:proof_level": "directly_observed"
+  },
+  "stem_export_association": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 1.0,
+    "matched_coverage": 1.0,
+    "routed_coverage": 1.0,
+    "matched_window_count": 40,
+    "comparable_window_count": 40,
+    "overlap_window_count": 40,
+    "routed_window_count": 40,
+    "export_window_count": 43,
+    "best_offset_windows": 3,
+    "best_offset_seconds": 0.2786,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+      {
+        "relative_window": 0,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 1,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 2,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 3,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 4,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 5,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 6,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 7,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 8,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 9,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 10,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 11,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 12,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 13,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 14,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 15,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 16,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 17,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 18,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 19,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 20,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 21,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 22,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 23,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 24,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 25,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 26,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 27,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 28,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 29,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 30,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 31,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 32,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 33,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 34,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 35,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 36,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 37,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 38,
+        "similarity": 1.0,
+        "matched": true
+      },
+      {
+        "relative_window": 39,
+        "similarity": 1.0,
+        "matched": true
+      }
+    ],
+    "alignment_similarity": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "feature_dimensions": [
+      "relative_rms",
+      "zero_crossing_rate",
+      "crest_factor",
+      "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+      "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+      "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+      "A failed or unavailable match does not prove that routed audio is absent from the export.",
+      "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+      "sample_rate_hz": 44100,
+      "channel_count": 1,
+      "sample_width_bytes": 2,
+      "window_size_frames": 4096,
+      "window_duration_seconds": 0.09287982,
+      "truncated_at_window_limit": false,
+      "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000,
+    "capture_session_id": "synthetic-20260831T090819Z-124000",
+    "stem_ids": [
+      "synthetic-stem"
+    ],
+    "export_file_name": "presenter_export.wav",
+    "basis": "A bounded sequence of relative RMS, zero-crossing, crest-factor, and coarse energy-envelope features emitted from accepted routed plug-in windows was compared with equivalent streaming-extracted export features using time-offset search. The relationship remains inferred and does not establish complete routing."
+  },
+  "claim_summary": [
+    {
+      "claim": "observation_coverage",
+      "value": "complete_observed_path",
+      "evidence": "All submitted routed windows represented by the plug-in counters were received, and the prepared/received event prefix agrees with no reported FIFO loss, UDP send failure, sequence gap, chain break, or daemon acknowledgement dispatch failure. Scope ends at the last received telemetry event; plug-in processing of each ACK is not observable from the daemon.",
+      "apw:proof_level": "inferred"
+    },
+    {
+      "claim": "routed_audio_observed",
+      "value": true,
+      "evidence": "40 hash windows received",
+      "apw:proof_level": "directly_observed"
+    },
+    {
+      "claim": "daemon_receipt_acknowledgement",
+      "value": "issued",
+      "evidence": "Daemon dispatched 40 local ACK packets; plug-in processing of each packet is outside daemon observability.",
+      "apw:proof_level": "directly_observed"
+    },
+    {
+      "claim": "export_file_hashed",
+      "value": true,
+      "evidence": "ff7c90bef31e27d8b9494f36205e61ad6aa4389b6d36a57065e76a4e05e66fcf",
+      "apw:proof_level": "directly_observed"
+    },
+    {
+      "claim": "observed_stem_linked_to_export",
+      "value": true,
+      "evidence": "routed_feature_sequence_offset_search: confidence 1.0 / coverage 1.0",
+      "apw:proof_level": "inferred"
+    },
+    {
+      "claim": "source_category",
+      "value": "generator",
+      "evidence": "producer declaration",
+      "apw:proof_level": "user_declared"
+    },
+    {
+      "claim": "full_ableton_provenance",
+      "value": false,
+      "evidence": "Only audio routed through the capture plugin was observed",
+      "apw:proof_level": "unknown_unobserved"
+    },
+    {
+      "claim": "embedded_c2pa_claim",
+      "value": "embedded",
+      "evidence": "embedded claim, validation state verified; trust evaluated against this machine's own root only",
+      "apw:proof_level": "directly_observed"
+    }
+  ],
+  "c2pa_mapping": {
+    "status": "descriptive_projection_see_c2pa_claim_for_the_signed_claim",
+    "claim_generator": "AudioProvenanceCapture/0.9.0",
+    "assertions": [
+      {
+        "label": "c2pa.hash.data",
+        "data": {
+          "name": "presenter_export.wav",
+          "hash": "ff7c90bef31e27d8b9494f36205e61ad6aa4389b6d36a57065e76a4e05e66fcf",
+          "algorithm": "sha256"
+        }
+      },
+      {
+        "label": "c2pa.ingredient",
+        "data": {
+          "title": "synthetic-stem",
+          "relationship": "componentOf",
+          "apw:hash_chain_root": "5a6fa08d159ed3513a21319675f40dd6a0803ce9593b1b2ccc18e1d077649291",
+          "apw:proof_level": "directly_observed"
+        }
+      },
+      {
+        "label": "apw.unobserved",
+        "data": {
+          "items": [
+            "hidden_plugin_state",
+            "internal_preset_logic",
+            "bypassed_routing",
+            "daw_internal_processing",
+            "unverifiable_upstream_provenance",
+            "layer_input_capture_not_active",
+            "layer_midi_not_active",
+            "layer_project_differ_not_active",
+            "layer_screen_observer_not_active",
+            "layer_session_not_active",
+            "layer_transport_not_active"
+          ]
+        }
+      }
+    ]
+  },
+  "c2pa_claim": {
+    "status": "embedded",
+    "mime": "audio/wav",
+    "claim_generator": [
+      {
+        "name": "audio-provenance-wrapper",
+        "version": "1.0.0"
+      }
+    ],
+    "signed_asset": {
+      "file_name": "presenter_export_c2pa.wav",
+      "file_path": "/private/tmp/claude-501/-Volumes-A-audio-provenance/0dc3ebea-f6f6-4e73-95f4-08725675534d/scratchpad/fallback1/synthetic-20260831T090819Z-124000/manifests/artifacts/presenter_export_c2pa.wav",
+      "relative_path": "artifacts/presenter_export_c2pa.wav",
+      "sha256": "cd3862138e65c6f7b7911b03f97359ce953ae2fecfc5934986e9e609038ed2be",
+      "apw:proof_level": "directly_observed"
+    },
+    "sidecar_manifest": null,
+    "source_export_sha256": "ff7c90bef31e27d8b9494f36205e61ad6aa4389b6d36a57065e76a4e05e66fcf",
+    "source_sha256_matches_export": true,
+    "hard_binding": {
+      "type": "c2pa.hash.data",
+      "algorithm": "sha256",
+      "covers": "every original asset byte except the RIFF size field, which is rewritten to count the appended manifest chunk",
+      "excluded_region": {
+        "start": 352300,
+        "length": 14270
+      },
+      "rewritten_header_field": {
+        "start": 4,
+        "length": 4
+      },
+      "container_rewrite_tolerance": "manifest chunk only",
+      "source_sha256": "ff7c90bef31e27d8b9494f36205e61ad6aa4389b6d36a57065e76a4e05e66fcf"
+    },
+    "validation": {
+      "state": "verified",
+      "library_validation_state": "Trusted",
+      "failure_codes": [],
+      "assertion_labels": [
+        "c2pa.actions.v2",
+        "apw.unobserved"
+      ],
+      "trust_evaluated": true,
+      "trust_anchor_scope": "self_issued_local_root_only",
+      "detail": "signing credential trusted and hard binding intact"
+    },
+    "signer": {
+      "key_id": "fecaf8b3fb73d7be",
+      "subject_common_name": "Audio Provenance Wrapper Local Creator",
+      "algorithm": "es256",
+      "identity_evidence": "locally_generated_key_no_external_attestation",
+      "revoked": false,
+      "created_at_ms": 1788164460000,
+      "trust_anchor_sha256": "f3777a76f1529e53da77f1de5c89decd2f2803f903a05c4f7d0a7763ca4d7d29",
+      "apw:proof_level": "user_declared",
+      "limits": "The certificate binds a key to a name this machine chose. No external party verified that the name belongs to the creator.",
+      "signer_identity": "not_established",
+      "trust_anchor_pem": "-----BEGIN CERTIFICATE-----\nMIIB7jCCAZWgAwIBAgIUSrgyO5gUbwERh6bp1dkbYZT/wjQwCgYIKoZIzj0EAwIw\nVDEvMC0GA1UEAwwmQXVkaW8gUHJvdmVuYW5jZSBXcmFwcGVyIExvY2FsIFJvb3Qg\nQ0ExITAfBgNVBAoMGEF1ZGlvIFByb3ZlbmFuY2UgV3JhcHBlcjAeFw0yNjA4MzEw\nODIxMDBaFw0zNjA4MjgwODI2MDBaMFQxLzAtBgNVBAMMJkF1ZGlvIFByb3ZlbmFu\nY2UgV3JhcHBlciBMb2NhbCBSb290IENBMSEwHwYDVQQKDBhBdWRpbyBQcm92ZW5h\nbmNlIFdyYXBwZXIwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASRFLYEPEYFxuqF\nHOeROg7FuyMIl0OdiEWCSshsOr6skf/pMrW0igWFvkrgXLnmSgnlsrGHbM+9zRh1\nWiMBaH+/o0UwQzASBgNVHRMBAf8ECDAGAQH/AgEBMA4GA1UdDwEB/wQEAwIBBjAd\nBgNVHQ4EFgQU2rzghxy/rwOs6U9gf9gg3CtuESUwCgYIKoZIzj0EAwIDRwAwRAIg\nWLj52wr2qsLZG3JIOy9G75Ux0NNxy0xSKKp+KcFeAzMCIExMRsxCtWqUDLweFGe/\nAND40ub/pyUTDtvo+14/oIdb\n-----END CERTIFICATE-----\n"
+    },
+    "ingredients": [
+      {
+        "title": "synthetic-stem",
+        "ingredient_id": "synthetic-stem-5a6fa08d",
+        "relationship": "componentOf",
+        "sha256": "5a6fa08d159ed3513a21319675f40dd6a0803ce9593b1b2ccc18e1d077649291",
+        "digest_meaning": "rolling hash-chain root over the observed routed windows, not a file digest",
+        "apw:proof_level": "directly_observed"
+      }
+    ],
+    "unresolved_ingredient_references": [],
+    "scope": "A real C2PA claim signed with a locally issued X.509 chain and bound to the asset by a SHA-256 hard binding. The signing act and the binding are directly observed. The signer identity is self-asserted: a 'verified' validation state means the claim chains to this machine's own root certificate, not to any external trust list, registry, or verified creator identity.",
+    "apw:proof_level": "directly_observed"
+  },
+  "evidence_binding": {
+    "evidence_directory": "/private/tmp/claude-501/-Volumes-A-audio-provenance/0dc3ebea-f6f6-4e73-95f4-08725675534d/scratchpad/fallback1/synthetic-20260831T090819Z-124000/evidence",
+    "evidence_file_hashes": {
+      "plugin_events.jsonl": "4ad46a9f2e3407c9c9958d8d0f08a4fe62da8acf4abeab1da7d617d800cab1e8",
+      "session_events.jsonl": "9d2cc8c631ceb3182d5cc3d0488b9f6264f39882824c485846d989fd117e956b"
+    },
+    "evidence_files": {
+      "plugin_events.jsonl": {
+        "sha256": "4ad46a9f2e3407c9c9958d8d0f08a4fe62da8acf4abeab1da7d617d800cab1e8",
+        "byte_length": 55382,
+        "binding_scope": "file_prefix_at_manifest_creation"
+      },
+      "session_events.jsonl": {
+        "sha256": "9d2cc8c631ceb3182d5cc3d0488b9f6264f39882824c485846d989fd117e956b",
+        "byte_length": 225,
+        "binding_scope": "file_prefix_at_manifest_creation"
+      }
+    },
+    "last_window_hash": "5a6fa08d159ed3513a21319675f40dd6a0803ce9593b1b2ccc18e1d077649291",
+    "chain_length": 40,
+    "apw:proof_level": "directly_observed"
+  },
+  "presentation": {
+    "html_report": "presenter_export_provenance.html",
+    "derived_from": "presenter_export_manifest.json",
+    "verifier_result": "artifacts/presenter_export_verification.json",
+    "downstream_handoff": "artifacts/presenter_export_handoff.json",
+    "bundle_index": "artifacts/presenter_export_bundle_index.json",
+    "evidence_bundle": "artifacts/presenter_export_evidence_bundle.zip",
+    "c2pa_signed_asset": "artifacts/presenter_export_c2pa.wav",
+    "c2pa_sidecar_manifest": null,
+    "apw:proof_level": "directly_observed"
+  },
+  "downstream_registration_handoff": {
+    "record_type": "downstream_provenance_registration_handoff",
+    "status": "candidate_input_not_submitted",
+    "capture_session_id": "synthetic-20260831T090819Z-124000",
+    "export_hard_hash": {
+      "algorithm": "sha256",
+      "value": "ff7c90bef31e27d8b9494f36205e61ad6aa4389b6d36a57065e76a4e05e66fcf",
+      "apw:proof_level": "directly_observed"
+    },
+    "routed_observation_commitment": {
+      "hash_chain_root": "5a6fa08d159ed3513a21319675f40dd6a0803ce9593b1b2ccc18e1d077649291",
+      "hash_chain_length": 40,
+      "apw:proof_level": "directly_observed"
+    },
+    "coverage": {
+      "status": "complete_observed_path",
+      "basis": "All submitted routed windows represented by the plug-in counters were received, and the prepared/received event prefix agrees with no reported FIFO loss, UDP send failure, sequence gap, chain break, or daemon acknowledgement dispatch failure. Scope ends at the last received telemetry event; plug-in processing of each ACK is not observable from the daemon.",
+      "counters": {
+        "buffers_submitted": 320,
+        "samples_submitted": 163840,
+        "windows_hashed": 40,
+        "fifo_samples_dropped": 0,
+        "fifo_windows_dropped": 0,
+        "midi_events_dropped": 0,
+        "events_prepared": 40,
+        "udp_sends_attempted": 40,
+        "udp_sends_failed": 0,
+        "daemon_acknowledgements_processed": 39,
+        "daemon_highest_accepted_sequence": 39,
+        "daemon_highest_contiguous_sequence": 39,
+        "daemon_ack_session_mismatches_ignored": 0,
+        "daemon_restarts_observed": 0,
+        "packets_received": 40,
+        "events_received": 40,
+        "events_rejected": 0,
+        "sequence_gaps": 0,
+        "events_missing_sequence": 0,
+        "sequence_out_of_order": 0,
+        "hash_chain_breaks": 0,
+        "stream_evictions": 0,
+        "daemon_acknowledgements_attempted": 40,
+        "daemon_acknowledgements_sent": 40,
+        "daemon_acknowledgements_failed": 0,
+        "udp_sends_locally_emitted": 40,
+        "buffer_hash_events_received": 40,
+        "feature_windows_dropped_from_alignment_buffer": 0
+      },
+      "apw:proof_level": "inferred"
+    },
+    "audio_association": {
+      "status": "inferred_match",
+      "method": "routed_feature_sequence_offset_search",
+      "method_version": "2.0.0",
+      "confidence": 1.0,
+      "matched_coverage": 1.0,
+      "routed_coverage": 1.0,
+      "matched_window_count": 40,
+      "comparable_window_count": 40,
+      "overlap_window_count": 40,
+      "routed_window_count": 40,
+      "export_window_count": 43,
+      "best_offset_windows": 3,
+      "best_offset_seconds": 0.2786,
+      "alignment_threshold": 0.72,
+      "alignment_series": [
+        {
+          "relative_window": 0,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 1,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 2,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 3,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 4,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 5,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 6,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 7,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 8,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 9,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 10,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 11,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 12,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 13,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 14,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 15,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 16,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 17,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 18,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 19,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 20,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 21,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 22,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 23,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 24,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 25,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 26,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 27,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 28,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 29,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 30,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 31,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 32,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 33,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 34,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 35,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 36,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 37,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 38,
+          "similarity": 1.0,
+          "matched": true
+        },
+        {
+          "relative_window": 39,
+          "similarity": 1.0,
+          "matched": true
+        }
+      ],
+      "alignment_similarity": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "feature_dimensions": [
+        "relative_rms",
+        "zero_crossing_rate",
+        "crest_factor",
+        "energy_envelope_4"
+      ],
+      "reason": null,
+      "apw:proof_level": "inferred",
+      "limitations": [
+        "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+        "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+        "A failed or unavailable match does not prove that routed audio is absent from the export.",
+        "Only the retained bounded routed-feature prefix participates in long-session alignment."
+      ],
+      "export_feature_extraction": {
+        "sample_rate_hz": 44100,
+        "channel_count": 1,
+        "sample_width_bytes": 2,
+        "window_size_frames": 4096,
+        "window_duration_seconds": 0.09287982,
+        "truncated_at_window_limit": false,
+        "streaming_extraction": true
+      },
+      "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+      "bounded_routed_window_limit": 12000,
+      "capture_session_id": "synthetic-20260831T090819Z-124000",
+      "stem_ids": [
+        "synthetic-stem"
+      ],
+      "export_file_name": "presenter_export.wav",
+      "basis": "A bounded sequence of relative RMS, zero-crossing, crest-factor, and coarse energy-envelope features emitted from accepted routed plug-in windows was compared with equivalent streaming-extracted export features using time-offset search. The relationship remains inferred and does not establish complete routing."
+    },
+    "creator_declarations": [
+      {
+        "name": "source_category",
+        "value": "generator",
+        "apw:proof_level": "user_declared"
+      }
+    ],
+    "signing_key": {
+      "algorithm": "Ed25519",
+      "public_key_hex": "70d1d07976ea842af202ba98273afb0affdab5e426888a980e7767177931b112",
+      "public_key_file": "/Users/davidcondrey/.apw/demo_ed25519_public.key",
+      "trust_scope": "self_generated_demo_key_integrity",
+      "signer_identity": "not_established",
+      "apw:proof_level": "unknown_unobserved"
+    },
+    "evidence_bundle": {
+      "manifest": "/private/tmp/claude-501/-Volumes-A-audio-provenance/0dc3ebea-f6f6-4e73-95f4-08725675534d/scratchpad/fallback1/synthetic-20260831T090819Z-124000/manifests/presenter_export_manifest.json",
+      "export": "/private/tmp/claude-501/-Volumes-A-audio-provenance/0dc3ebea-f6f6-4e73-95f4-08725675534d/scratchpad/fallback1/synthetic-20260831T090819Z-124000/exports/presenter_export.wav",
+      "evidence_directory": "/private/tmp/claude-501/-Volumes-A-audio-provenance/0dc3ebea-f6f6-4e73-95f4-08725675534d/scratchpad/fallback1/synthetic-20260831T090819Z-124000/evidence",
+      "files": {
+        "plugin_events.jsonl": {
+          "sha256": "4ad46a9f2e3407c9c9958d8d0f08a4fe62da8acf4abeab1da7d617d800cab1e8",
+          "byte_length": 55382,
+          "binding_scope": "file_prefix_at_manifest_creation"
+        },
+        "session_events.jsonl": {
+          "sha256": "9d2cc8c631ceb3182d5cc3d0488b9f6264f39882824c485846d989fd117e956b",
+          "byte_length": 225,
+          "binding_scope": "file_prefix_at_manifest_creation"
+        }
+      },
+      "downloadable_archive": "artifacts/presenter_export_evidence_bundle.zip",
+      "signed_bundle_index": "artifacts/presenter_export_bundle_index.json",
+      "index_scope": "all archive payload entries; the signed index is not self-hashed",
+      "apw:proof_level": "directly_observed"
+    },
+    "c2pa_claim": {
+      "status": "embedded",
+      "signed_asset": "artifacts/presenter_export_c2pa.wav",
+      "signed_asset_sha256": "cd3862138e65c6f7b7911b03f97359ce953ae2fecfc5934986e9e609038ed2be",
+      "sidecar_manifest": null,
+      "hard_binding_algorithm": "sha256",
+      "validation_state": "verified",
+      "trust_anchor_scope": "self_issued_local_root_only",
+      "signer_key_id": "fecaf8b3fb73d7be",
+      "signer_identity": "not_established",
+      "boundary": "The claim is signed with a certificate chain this machine issued to itself. A downstream registrar must re-issue under its own credential policy before the claim carries any identity meaning.",
+      "apw:proof_level": "directly_observed"
+    },
+    "descriptive_c2pa_assertion_mapping": {
+      "status": "descriptive_projection_not_the_signed_claim",
+      "assertions": [
+        "c2pa.hash.data",
+        "c2pa.ingredient",
+        "c2pa.actions",
+        "apw.unobserved"
+      ],
+      "apw:proof_level": "inferred"
+    },
+    "missing_downstream_requirements": [
+      "verified creator or institution identity",
+      "author-controlled credential and key policy",
+      "production certificate chain issued by a recognised authority",
+      "publication on a recognised C2PA trust list",
+      "audio-native soft binding or watermark",
+      "resilient recovery from the audio",
+      "registry publication",
+      "consent and rights verification"
+    ],
+    "boundary": "This neutral handoff is not a provider-specific API payload and claims no compatibility with proprietary watermark, recovery, identity, signing, or registry technology."
+  },
+  "hardware_binding": {
+    "chain_root_hash": "5a6fa08d159ed3513a21319675f40dd6a0803ce9593b1b2ccc18e1d077649291",
+    "device_id": "55d3124c9afb31b3",
+    "monotonic_counter": 1,
+    "clock_ms": 1788167303434,
+    "signature_hex": "d1199b3c07478158d744f6209a0d7c7f1216f72ab80703cf44b152737677d786",
+    "public_key_hex": "",
+    "hardware_attested": false,
+    "apw:proof_level": "unknown_unobserved"
+  },
+  "portable_signature": {
+    "algorithm": "Ed25519",
+    "canonicalization": "apw-json-sort-v1",
+    "public_key_hex": "70d1d07976ea842af202ba98273afb0affdab5e426888a980e7767177931b112",
+    "public_key_file": "/Users/davidcondrey/.apw/demo_ed25519_public.key",
+    "signer_id": "733c3f5f8418ea4c",
+    "signature_hex": "4279ec2dcc62e25315f10dac71a9e9b22bbcee953897e55083c674b36ff276110eb39ecdf993c7da16f759d36435de40aa5032b66d6ef60641d856d8684af607",
+    "signed_content_hash": "5ab3c1842ab91d57892e30e5614669e33028722b9d1302709e830b981f6a484d",
+    "trust_scope": "self_generated_demo_key_integrity",
+    "signer_identity": "not_established",
+    "signer_identity_proof_level": "unknown_unobserved",
+    "apw:proof_level": "directly_observed",
+    "notes": "The public key independently verifies canonical manifest integrity. A valid self-generated signature proves key possession, not creator identity, authorship, or external trust."
+  },
+  "manifest_signature": {
+    "algorithm": "hmac-sha256-local",
+    "device_id": "55d3124c9afb31b3",
+    "public_key_hex": "",
+    "signature_hex": "839e9b6ee57098c7d48faf2311379728fc3acc740b577d01e4f91867eb9898a1",
+    "signed_content_hash": "5697e91b55200039ceb1169c6dc5d955a0ad073be7b75490f87865f0020f752e",
+    "trust_scope": "local_software_integrity",
+    "hardware_attested": false,
+    "apw:proof_level": "unknown_unobserved",
+    "notes": "The local HMAC seal detects changes when checked with the same secret key; it is not hardware attestation or third-party identity verification.",
+    "hardware_cosignature": {
+      "entangled_hash": "afc9519058d2b19ddd668742d8bda8bdb75ee71333fc361eb0137b5e0bc396f8",
+      "content_hash": "5697e91b55200039ceb1169c6dc5d955a0ad073be7b75490f87865f0020f752e",
+      "hardware_clock_ms": 1788167303436,
+      "monotonic_counter": 2,
+      "device_id": "55d3124c9afb31b3",
+      "signature_hex": "c8df01ff63331616ae078fbd2435802a251fc31d3a3c6d50cea4b2762ca8b51c",
+      "previous_cosignature_hash": "genesis"
+    }
+  }
+}

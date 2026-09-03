@@ -1,0 +1,19 @@
+{
+ "recipe": "json.dumps(v, sort_keys=True, separators=(\",\",\":\"), ensure_ascii=False, allow_nan=False).encode(\"utf-8\")",
+ "cases": [
+  {
+   "name": "integer_beyond_u64",
+   "reason": "Python integers are arbitrary precision. serde_json::Value stores an integer outside i64/u64 range as f64, so precision is lost by the parser before canonicalisation sees the value.",
+   "input": "18446744073709551616",
+   "python": "18446744073709551616",
+   "rust": "1.8446744073709552e+19"
+  },
+  {
+   "name": "negative_integer_beyond_i64",
+   "reason": "Same cause as integer_beyond_u64, on the negative side.",
+   "input": "-9223372036854775809",
+   "python": "-9223372036854775809",
+   "rust": "-9.223372036854776e+18"
+  }
+ ]
+}

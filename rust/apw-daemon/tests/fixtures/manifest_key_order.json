@@ -1,0 +1,28 @@
+{
+  "source": "demo-output/founder-package/evidence-package-20260831T091551Z/presenter_export_manifest.json",
+  "keys": [
+    "apw_version",
+    "schema",
+    "session_id",
+    "capture_session",
+    "created_at",
+    "core_principle",
+    "daemon_receipt_acknowledgement",
+    "observed_stems",
+    "export",
+    "forgery_analysis",
+    "apw:unobserved",
+    "observation_coverage",
+    "session_diagnostics",
+    "stem_export_association",
+    "claim_summary",
+    "c2pa_mapping",
+    "c2pa_claim",
+    "evidence_binding",
+    "presentation",
+    "downstream_registration_handoff",
+    "hardware_binding",
+    "portable_signature",
+    "manifest_signature"
+  ]
+}

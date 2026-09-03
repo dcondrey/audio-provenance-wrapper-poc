@@ -1,0 +1,30 @@
+[package]
+name = "apw-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lints.rust]
+warnings = "deny"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+sha2.workspace = true
+subtle.workspace = true
+zeroize.workspace = true
+ed25519-dalek.workspace = true
+rand_core.workspace = true
+time.workspace = true
+log.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

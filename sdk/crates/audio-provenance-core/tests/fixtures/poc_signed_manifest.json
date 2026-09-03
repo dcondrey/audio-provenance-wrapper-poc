@@ -1,0 +1,1394 @@
+{
+  "apw_version": "0.9.0",
+  "schema": "audio-provenance-manifest-v0",
+  "session_id": "capture-20260830T021208Z-11629",
+  "capture_session": {
+    "id": "capture-20260830T021208Z-11629",
+    "scope": "local_daemon_runtime",
+    "apw:proof_level": "directly_observed",
+    "started_at": "2026-08-30T02:12:09.068913Z",
+    "state_at_manifest": "active"
+  },
+  "created_at": "2026-08-30T02:19:26.350552Z",
+  "core_principle": "Never claim full DAW provenance.",
+  "daemon_receipt_acknowledgement": {
+    "protocol": "apw-local-udp-ack-v1",
+    "status": "issued",
+    "daemon_instance_id": "receiver-a794fa02e3e9",
+    "daemon_capture_session_id": "capture-20260830T021208Z-11629",
+    "streams": [
+      {
+        "plugin_instance_id": "plugin-1507dc4bdd37",
+        "plugin_capture_session_id": "plugin-session-377a6ee8c410",
+        "highest_accepted_sequence": 783,
+        "highest_contiguous_sequence": 783,
+        "gaps": 0,
+        "rejections": 0,
+        "chain_breaks": 0
+      }
+    ],
+    "counters": {
+      "attempted": 783,
+      "sent": 783,
+      "failed": 0
+    },
+    "stream_evictions": 0,
+    "scope": "The daemon directly observed validation, persistence, and local acknowledgement dispatch. It cannot observe whether every UDP acknowledgement reached the plug-in UI.",
+    "apw:proof_level": "directly_observed"
+  },
+  "observed_stems": [
+    {
+      "stem_id": "stem-11629",
+      "hash_chain_root": "e8fbfaaf92a463e2e09628ed29e351625b695298f5e440fa300654fee76d0059",
+      "hash_chain_genesis": "genesis",
+      "hash_chain_length": 777,
+      "first_observed_ms": 1188409490,
+      "last_observed_ms": 1188481569,
+      "first_received_at": "2026-08-30T02:12:50.276000Z",
+      "last_received_at": "2026-08-30T02:14:02.353000Z",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "source_category": "imported_sample",
+      "source_category_proof_level": "user_declared",
+      "source": {
+        "category": "imported_sample",
+        "apw:proof_level": "user_declared"
+      },
+      "plugin_instance_ids": [
+        "plugin-1507dc4bdd37"
+      ],
+      "apw:proof_level": "directly_observed"
+    }
+  ],
+  "export": {
+    "file_path": "/Volumes/A/audio-provenance/demo-output/sessions/capture-20260830T021208Z-11629/exports/session-b-take2.wav",
+    "file_name": "session-b-take2.wav",
+    "sha256": "5612bcc5a0f5951626b61041ebe0d352095dd9335b2e84305ca0c4cfe83d747f",
+    "format": "wav",
+    "file_size_bytes": 4233680,
+    "duration_seconds": 24.0,
+    "sample_rate_hz": 44100,
+    "channel_count": 2,
+    "exported_at": "2026-08-30T02:19:26Z",
+    "export_version": 1,
+    "apw:proof_level": "directly_observed"
+  },
+  "edit_history": [
+    {
+      "event_type": "composite_edit",
+      "proof_level": "inferred",
+      "timestamp_ms": 1188423613,
+      "edit_type": "playback_started",
+      "confidence": 0.75,
+      "contributing_events": [
+        {
+          "layer": "transport",
+          "event_type": "transport_change",
+          "timestamp_ms": 1188423563,
+          "source_timestamp_ms": 1188423562,
+          "event_id": "capture-20260830T021208Z-11629:155"
+        },
+        {
+          "layer": "audio_buffer",
+          "event_type": "audio_transition",
+          "timestamp_ms": 1188423613,
+          "source_timestamp_ms": 1188423612,
+          "event_id": "capture-20260830T021208Z-11629:157"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "forgery_analysis": {
+    "apw:proof_level": "inferred",
+    "method": "statistical_screen_v1",
+    "scope": "Statistical screening of the routed-audio stream and hash chain for synthetic or scripted patterns. An empty flag list is not proof of authenticity; a flag is a lead, not a verdict.",
+    "suspicion_score": 0.0,
+    "analyzers": {
+      "audio_stream": {
+        "suspicion_score": 0.0,
+        "sample_count": 777,
+        "flags": []
+      },
+      "hash_chain": {
+        "suspicion_score": 0.0,
+        "sample_count": 777,
+        "flags": []
+      },
+      "input_behavior": {
+        "suspicion_score": 0.0,
+        "sample_count": 0,
+        "flags": [],
+        "note": "The input_capture layer is not active in this session; no keystroke statistics were available to analyze."
+      }
+    }
+  },
+  "apw:unobserved": [
+    "hidden_plugin_state",
+    "internal_preset_logic",
+    "bypassed_routing",
+    "daw_internal_processing",
+    "unverifiable_upstream_provenance",
+    "layer_input_capture_not_active",
+    "layer_midi_not_active",
+    "layer_screen_observer_not_active"
+  ],
+  "observation_coverage": {
+    "status": "complete_observed_path",
+    "basis": "All submitted routed windows represented by the plug-in counters were received, and the prepared/received event prefix agrees with no reported FIFO loss, UDP send failure, sequence gap, chain break, or daemon acknowledgement dispatch failure. Scope ends at the last received telemetry event; plug-in processing of each ACK is not observable from the daemon.",
+    "counters": {
+      "buffers_submitted": 6216,
+      "samples_submitted": 3182592,
+      "windows_hashed": 777,
+      "fifo_samples_dropped": 0,
+      "fifo_windows_dropped": 0,
+      "midi_events_dropped": 0,
+      "midi_unsupported_dropped": 0,
+      "events_prepared": 783,
+      "udp_sends_attempted": 783,
+      "udp_sends_failed": 0,
+      "daemon_acknowledgements_processed": 782,
+      "daemon_highest_accepted_sequence": 782,
+      "daemon_highest_contiguous_sequence": 782,
+      "daemon_ack_session_mismatches_ignored": 0,
+      "daemon_restarts_observed": 0,
+      "packets_received": 783,
+      "events_received": 783,
+      "events_rejected": 0,
+      "sequence_gaps": 0,
+      "events_missing_sequence": 0,
+      "sequence_out_of_order": 0,
+      "hash_chain_breaks": 0,
+      "stream_evictions": 0,
+      "daemon_acknowledgements_attempted": 783,
+      "daemon_acknowledgements_sent": 783,
+      "daemon_acknowledgements_failed": 0,
+      "udp_sends_locally_emitted": 783,
+      "buffer_hash_events_received": 777,
+      "feature_windows_dropped_from_alignment_buffer": 0
+    },
+    "apw:proof_level": "inferred"
+  },
+  "session_diagnostics": {
+    "receiver": {
+      "packets_received": 783,
+      "events_received": 783,
+      "events_rejected": 0,
+      "sequence_gaps": 0,
+      "events_missing_sequence": 0,
+      "sequence_out_of_order": 0,
+      "hash_chain_breaks": 0,
+      "stream_evictions": 0,
+      "daemon_acknowledgements_attempted": 783,
+      "daemon_acknowledgements_sent": 783,
+      "daemon_acknowledgements_failed": 0
+    },
+    "correlation": {
+      "buffer_events": 22,
+      "buffer_max_events": 512,
+      "capacity_drops": 0,
+      "duplicate_matches_suppressed": 21,
+      "composite_events_emitted": 1,
+      "clock": "daemon_monotonic_ms"
+    },
+    "session_memory": {
+      "events_retained": 784,
+      "max_events": 50000,
+      "events_dropped_from_memory_only": 0
+    },
+    "daemon_receipt_acknowledgement": {
+      "protocol": "apw-local-udp-ack-v1",
+      "status": "issued",
+      "daemon_instance_id": "receiver-a794fa02e3e9",
+      "daemon_capture_session_id": "capture-20260830T021208Z-11629",
+      "streams": [
+        {
+          "plugin_instance_id": "plugin-1507dc4bdd37",
+          "plugin_capture_session_id": "plugin-session-377a6ee8c410",
+          "highest_accepted_sequence": 783,
+          "highest_contiguous_sequence": 783,
+          "gaps": 0,
+          "rejections": 0,
+          "chain_breaks": 0
+        }
+      ],
+      "counters": {
+        "attempted": 783,
+        "sent": 783,
+        "failed": 0
+      },
+      "stream_evictions": 0,
+      "scope": "The daemon directly observed validation, persistence, and local acknowledgement dispatch. It cannot observe whether every UDP acknowledgement reached the plug-in UI.",
+      "apw:proof_level": "directly_observed"
+    },
+    "apw:proof_level": "directly_observed"
+  },
+  "stem_export_association": {
+    "status": "inferred_match",
+    "method": "routed_feature_sequence_offset_search",
+    "method_version": "2.0.0",
+    "confidence": 0.8538,
+    "matched_coverage": 0.8178,
+    "routed_coverage": 0.332,
+    "matched_window_count": 211,
+    "comparable_window_count": 258,
+    "overlap_window_count": 258,
+    "routed_window_count": 777,
+    "export_window_count": 258,
+    "best_offset_windows": -110,
+    "best_offset_seconds": -10.2168,
+    "alignment_threshold": 0.72,
+    "alignment_series": [
+      {
+        "relative_window": 0,
+        "similarity": 0.358,
+        "matched": false
+      },
+      {
+        "relative_window": 5,
+        "similarity": 0.359,
+        "matched": false
+      },
+      {
+        "relative_window": 10,
+        "similarity": 0.363,
+        "matched": false
+      },
+      {
+        "relative_window": 15,
+        "similarity": 0.362,
+        "matched": false
+      },
+      {
+        "relative_window": 20,
+        "similarity": 0.363,
+        "matched": false
+      },
+      {
+        "relative_window": 25,
+        "similarity": 0.362,
+        "matched": false
+      },
+      {
+        "relative_window": 30,
+        "similarity": 0.36,
+        "matched": false
+      },
+      {
+        "relative_window": 35,
+        "similarity": 0.362,
+        "matched": false
+      },
+      {
+        "relative_window": 40,
+        "similarity": 0.36,
+        "matched": false
+      },
+      {
+        "relative_window": 45,
+        "similarity": 0.966,
+        "matched": true
+      },
+      {
+        "relative_window": 50,
+        "similarity": 0.969,
+        "matched": true
+      },
+      {
+        "relative_window": 55,
+        "similarity": 0.974,
+        "matched": true
+      },
+      {
+        "relative_window": 60,
+        "similarity": 0.976,
+        "matched": true
+      },
+      {
+        "relative_window": 65,
+        "similarity": 0.968,
+        "matched": true
+      },
+      {
+        "relative_window": 70,
+        "similarity": 0.964,
+        "matched": true
+      },
+      {
+        "relative_window": 75,
+        "similarity": 0.957,
+        "matched": true
+      },
+      {
+        "relative_window": 80,
+        "similarity": 0.954,
+        "matched": true
+      },
+      {
+        "relative_window": 85,
+        "similarity": 0.664,
+        "matched": false
+      },
+      {
+        "relative_window": 90,
+        "similarity": 0.974,
+        "matched": true
+      },
+      {
+        "relative_window": 95,
+        "similarity": 0.977,
+        "matched": true
+      },
+      {
+        "relative_window": 100,
+        "similarity": 0.965,
+        "matched": true
+      },
+      {
+        "relative_window": 105,
+        "similarity": 0.952,
+        "matched": true
+      },
+      {
+        "relative_window": 110,
+        "similarity": 0.965,
+        "matched": true
+      },
+      {
+        "relative_window": 115,
+        "similarity": 0.975,
+        "matched": true
+      },
+      {
+        "relative_window": 120,
+        "similarity": 0.975,
+        "matched": true
+      },
+      {
+        "relative_window": 125,
+        "similarity": 0.975,
+        "matched": true
+      },
+      {
+        "relative_window": 130,
+        "similarity": 0.963,
+        "matched": true
+      },
+      {
+        "relative_window": 135,
+        "similarity": 0.965,
+        "matched": true
+      },
+      {
+        "relative_window": 140,
+        "similarity": 0.96,
+        "matched": true
+      },
+      {
+        "relative_window": 145,
+        "similarity": 0.969,
+        "matched": true
+      },
+      {
+        "relative_window": 150,
+        "similarity": 0.973,
+        "matched": true
+      },
+      {
+        "relative_window": 155,
+        "similarity": 0.977,
+        "matched": true
+      },
+      {
+        "relative_window": 160,
+        "similarity": 0.968,
+        "matched": true
+      },
+      {
+        "relative_window": 165,
+        "similarity": 0.954,
+        "matched": true
+      },
+      {
+        "relative_window": 170,
+        "similarity": 0.887,
+        "matched": true
+      },
+      {
+        "relative_window": 175,
+        "similarity": 0.971,
+        "matched": true
+      },
+      {
+        "relative_window": 180,
+        "similarity": 0.978,
+        "matched": true
+      },
+      {
+        "relative_window": 185,
+        "similarity": 0.973,
+        "matched": true
+      },
+      {
+        "relative_window": 190,
+        "similarity": 0.962,
+        "matched": true
+      },
+      {
+        "relative_window": 195,
+        "similarity": 0.955,
+        "matched": true
+      },
+      {
+        "relative_window": 200,
+        "similarity": 0.962,
+        "matched": true
+      },
+      {
+        "relative_window": 205,
+        "similarity": 0.967,
+        "matched": true
+      },
+      {
+        "relative_window": 210,
+        "similarity": 0.974,
+        "matched": true
+      },
+      {
+        "relative_window": 215,
+        "similarity": 0.969,
+        "matched": true
+      },
+      {
+        "relative_window": 220,
+        "similarity": 0.972,
+        "matched": true
+      },
+      {
+        "relative_window": 225,
+        "similarity": 0.969,
+        "matched": true
+      },
+      {
+        "relative_window": 230,
+        "similarity": 0.963,
+        "matched": true
+      },
+      {
+        "relative_window": 235,
+        "similarity": 0.957,
+        "matched": true
+      },
+      {
+        "relative_window": 240,
+        "similarity": 0.97,
+        "matched": true
+      },
+      {
+        "relative_window": 245,
+        "similarity": 0.978,
+        "matched": true
+      },
+      {
+        "relative_window": 250,
+        "similarity": 0.975,
+        "matched": true
+      },
+      {
+        "relative_window": 255,
+        "similarity": 0.937,
+        "matched": true
+      }
+    ],
+    "alignment_similarity": [
+      0.358,
+      0.359,
+      0.363,
+      0.362,
+      0.363,
+      0.362,
+      0.36,
+      0.362,
+      0.36,
+      0.966,
+      0.969,
+      0.974,
+      0.976,
+      0.968,
+      0.964,
+      0.957,
+      0.954,
+      0.664,
+      0.974,
+      0.977,
+      0.965,
+      0.952,
+      0.965,
+      0.975,
+      0.975,
+      0.975,
+      0.963,
+      0.965,
+      0.96,
+      0.969,
+      0.973,
+      0.977,
+      0.968,
+      0.954,
+      0.887,
+      0.971,
+      0.978,
+      0.973,
+      0.962,
+      0.955,
+      0.962,
+      0.967,
+      0.974,
+      0.969,
+      0.972,
+      0.969,
+      0.963,
+      0.957,
+      0.97,
+      0.978,
+      0.975,
+      0.937
+    ],
+    "feature_dimensions": [
+      "relative_rms",
+      "zero_crossing_rate",
+      "crest_factor",
+      "energy_envelope_4"
+    ],
+    "reason": null,
+    "apw:proof_level": "inferred",
+    "limitations": [
+      "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+      "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+      "A failed or unavailable match does not prove that routed audio is absent from the export.",
+      "Only the retained bounded routed-feature prefix participates in long-session alignment."
+    ],
+    "export_feature_extraction": {
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "sample_width_bytes": 2,
+      "window_size_frames": 4096,
+      "window_duration_seconds": 0.09287982,
+      "truncated_at_window_limit": false,
+      "streaming_extraction": true
+    },
+    "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+    "bounded_routed_window_limit": 12000,
+    "capture_session_id": "capture-20260830T021208Z-11629",
+    "stem_ids": [
+      "stem-11629"
+    ],
+    "export_file_name": "session-b-take2.wav",
+    "basis": "A bounded sequence of relative RMS, zero-crossing, crest-factor, and coarse energy-envelope features emitted from accepted routed plug-in windows was compared with equivalent streaming-extracted export features using time-offset search. The relationship remains inferred and does not establish complete routing."
+  },
+  "claim_summary": [
+    {
+      "claim": "observation_coverage",
+      "value": "complete_observed_path",
+      "evidence": "All submitted routed windows represented by the plug-in counters were received, and the prepared/received event prefix agrees with no reported FIFO loss, UDP send failure, sequence gap, chain break, or daemon acknowledgement dispatch failure. Scope ends at the last received telemetry event; plug-in processing of each ACK is not observable from the daemon.",
+      "apw:proof_level": "inferred"
+    },
+    {
+      "claim": "routed_audio_observed",
+      "value": true,
+      "evidence": "777 hash windows received",
+      "apw:proof_level": "directly_observed"
+    },
+    {
+      "claim": "daemon_receipt_acknowledgement",
+      "value": "issued",
+      "evidence": "Daemon dispatched 783 local ACK packets; plug-in processing of each packet is outside daemon observability.",
+      "apw:proof_level": "directly_observed"
+    },
+    {
+      "claim": "export_file_hashed",
+      "value": true,
+      "evidence": "5612bcc5a0f5951626b61041ebe0d352095dd9335b2e84305ca0c4cfe83d747f",
+      "apw:proof_level": "directly_observed"
+    },
+    {
+      "claim": "observed_stem_linked_to_export",
+      "value": true,
+      "evidence": "routed_feature_sequence_offset_search: confidence 0.8538 / coverage 0.8178",
+      "apw:proof_level": "inferred"
+    },
+    {
+      "claim": "source_category",
+      "value": "imported_sample",
+      "evidence": "producer declaration",
+      "apw:proof_level": "user_declared"
+    },
+    {
+      "claim": "full_ableton_provenance",
+      "value": false,
+      "evidence": "Only audio routed through the capture plugin was observed",
+      "apw:proof_level": "unknown_unobserved"
+    }
+  ],
+  "c2pa_mapping": {
+    "status": "mapping_only_not_an_embedded_c2pa_manifest",
+    "claim_generator": "AudioProvenanceCapture/0.9.0",
+    "assertions": [
+      {
+        "label": "c2pa.hash.data",
+        "data": {
+          "name": "session-b-take2.wav",
+          "hash": "5612bcc5a0f5951626b61041ebe0d352095dd9335b2e84305ca0c4cfe83d747f",
+          "algorithm": "sha256"
+        }
+      },
+      {
+        "label": "c2pa.ingredient",
+        "data": {
+          "title": "stem-11629",
+          "relationship": "componentOf",
+          "apw:hash_chain_root": "e8fbfaaf92a463e2e09628ed29e351625b695298f5e440fa300654fee76d0059",
+          "apw:proof_level": "directly_observed"
+        }
+      },
+      {
+        "label": "c2pa.actions",
+        "data": {
+          "actions": [
+            {
+              "action": "c2pa.unknown",
+              "when": 1188423613,
+              "apw:edit_type": "playback_started",
+              "apw:confidence": 0.75,
+              "apw:proof_level": "inferred"
+            }
+          ]
+        }
+      },
+      {
+        "label": "apw.unobserved",
+        "data": {
+          "items": [
+            "hidden_plugin_state",
+            "internal_preset_logic",
+            "bypassed_routing",
+            "daw_internal_processing",
+            "unverifiable_upstream_provenance",
+            "layer_input_capture_not_active",
+            "layer_midi_not_active",
+            "layer_screen_observer_not_active"
+          ]
+        }
+      }
+    ]
+  },
+  "session_facts": {
+    "apw:proof_level": "inferred",
+    "observation_basis": "Structural facts inferred by parsing the saved Ableton .als file; Ableton does not provide this project with a supported semantic API.",
+    "bpm": 120.0,
+    "time_signature": "4/4",
+    "loop_on": false,
+    "track_count": 6,
+    "clip_count": 128,
+    "sample_refs": [
+      "../../../../../../Reverb Default.adv",
+      "../../../../../../Users/nsh/Library/Application Support/Ableton/Live 11 Core Library/Devices/Audio Effects/Simple Delay/Dotted Eighth Note.adv",
+      "/Dotted Eighth Note.adv",
+      "/Reverb Default.adv",
+      "/Users/davidcondrey/Music/Ableton/User Library/Samples/Imported/demo-source.wav",
+      "/Users/nsh/Library/Application Support/Ableton/Live 11 Core Library/Devices/Audio Effects/Simple Delay/Dotted Eighth Note.adv",
+      "Devices/Audio Effects/Simple Delay/Dotted Eighth Note.adv",
+      "Samples/Imported/demo-source.wav"
+    ],
+    "tracks": [
+      {
+        "name": "1-MIDI",
+        "type": "MidiTrack",
+        "devices": [],
+        "device_presets": [],
+        "sample_paths": [],
+        "clips": [],
+        "clip_count": 32,
+        "midi_note_count": 0,
+        "automation_point_count": 0,
+        "routing_input": "AudioIn/External/S0",
+        "routing_output": "AudioOut/Main",
+        "sends": [],
+        "group_id": "-1",
+        "is_frozen": false,
+        "color_index": -1
+      },
+      {
+        "name": "2-MIDI",
+        "type": "MidiTrack",
+        "devices": [],
+        "device_presets": [],
+        "sample_paths": [],
+        "clips": [],
+        "clip_count": 32,
+        "midi_note_count": 0,
+        "automation_point_count": 0,
+        "routing_input": "AudioIn/External/S0",
+        "routing_output": "AudioOut/Main",
+        "sends": [],
+        "group_id": "-1",
+        "is_frozen": false,
+        "color_index": -1
+      },
+      {
+        "name": "3-demo-source",
+        "type": "AudioTrack",
+        "devices": [],
+        "device_presets": [],
+        "sample_paths": [
+          "Samples/Imported/demo-source.wav",
+          "/Users/davidcondrey/Music/Ableton/User Library/Samples/Imported/demo-source.wav",
+          "Samples/Imported/demo-source.wav",
+          "Samples/Imported/demo-source.wav",
+          "Samples/Imported/demo-source.wav",
+          "Samples/Imported/demo-source.wav",
+          "Samples/Imported/demo-source.wav"
+        ],
+        "clips": [],
+        "clip_count": 32,
+        "midi_note_count": 0,
+        "automation_point_count": 0,
+        "routing_input": "AudioIn/External/M0",
+        "routing_output": "AudioOut/Main",
+        "sends": [],
+        "group_id": "-1",
+        "is_frozen": false,
+        "color_index": -1
+      },
+      {
+        "name": "4-Audio",
+        "type": "AudioTrack",
+        "devices": [],
+        "device_presets": [],
+        "sample_paths": [],
+        "clips": [],
+        "clip_count": 32,
+        "midi_note_count": 0,
+        "automation_point_count": 0,
+        "routing_input": "AudioIn/External/M1",
+        "routing_output": "AudioOut/Main",
+        "sends": [],
+        "group_id": "-1",
+        "is_frozen": false,
+        "color_index": -1
+      },
+      {
+        "name": "A-Reverb",
+        "type": "ReturnTrack",
+        "devices": [
+          "Reverb",
+          "Reverb"
+        ],
+        "device_presets": [
+          "",
+          ""
+        ],
+        "sample_paths": [
+          "../../../../../../Reverb Default.adv",
+          "/Reverb Default.adv"
+        ],
+        "clips": [],
+        "clip_count": 0,
+        "midi_note_count": 0,
+        "automation_point_count": 0,
+        "routing_input": "AudioIn/External/S0",
+        "routing_output": "AudioOut/Main",
+        "sends": [],
+        "group_id": "-1",
+        "is_frozen": false,
+        "color_index": -1
+      },
+      {
+        "name": "B-Delay",
+        "type": "ReturnTrack",
+        "devices": [
+          "Delay",
+          "Delay"
+        ],
+        "device_presets": [
+          "",
+          ""
+        ],
+        "sample_paths": [
+          "../../../../../../Users/nsh/Library/Application Support/Ableton/Live 11 Core Library/Devices/Audio Effects/Simple Delay/Dotted Eighth Note.adv",
+          "/Users/nsh/Library/Application Support/Ableton/Live 11 Core Library/Devices/Audio Effects/Simple Delay/Dotted Eighth Note.adv",
+          "Devices/Audio Effects/Simple Delay/Dotted Eighth Note.adv",
+          "/Dotted Eighth Note.adv",
+          "../../../../../../Users/nsh/Library/Application Support/Ableton/Live 11 Core Library/Devices/Audio Effects/Simple Delay/Dotted Eighth Note.adv"
+        ],
+        "clips": [],
+        "clip_count": 0,
+        "midi_note_count": 0,
+        "automation_point_count": 0,
+        "routing_input": "AudioIn/External/S0",
+        "routing_output": "AudioOut/Main",
+        "sends": [],
+        "group_id": "-1",
+        "is_frozen": false,
+        "color_index": -1
+      }
+    ]
+  },
+  "evidence_binding": {
+    "evidence_directory": "/Volumes/A/audio-provenance/demo-output/sessions/capture-20260830T021208Z-11629/evidence",
+    "evidence_file_hashes": {
+      "composite_events.jsonl": "a977f614e4764c07ab10bae659b77e4cd1ba131d315aa165d155e8e5ea96db44",
+      "plugin_events.jsonl": "4c335f057a65e13d4b2dbd64e3d574b893dfece3d0d567799d4b543ab7817cce",
+      "session_events.jsonl": "66baca48402f75720932737ab5cacc658c6f8b2eaaad7d153a309b3d0a8b6c7b"
+    },
+    "evidence_files": {
+      "composite_events.jsonl": {
+        "sha256": "a977f614e4764c07ab10bae659b77e4cd1ba131d315aa165d155e8e5ea96db44",
+        "byte_length": 492,
+        "binding_scope": "file_prefix_at_manifest_creation"
+      },
+      "plugin_events.jsonl": {
+        "sha256": "4c335f057a65e13d4b2dbd64e3d574b893dfece3d0d567799d4b543ab7817cce",
+        "byte_length": 1130303,
+        "binding_scope": "file_prefix_at_manifest_creation"
+      },
+      "session_events.jsonl": {
+        "sha256": "66baca48402f75720932737ab5cacc658c6f8b2eaaad7d153a309b3d0a8b6c7b",
+        "byte_length": 218,
+        "binding_scope": "file_prefix_at_manifest_creation"
+      }
+    },
+    "last_window_hash": "e8fbfaaf92a463e2e09628ed29e351625b695298f5e440fa300654fee76d0059",
+    "chain_length": 777,
+    "apw:proof_level": "directly_observed"
+  },
+  "presentation": {
+    "html_report": "session-b-take2_provenance.html",
+    "derived_from": "session-b-take2_manifest.json",
+    "verifier_result": "artifacts/session-b-take2_verification.json",
+    "downstream_handoff": "artifacts/session-b-take2_handoff.json",
+    "bundle_index": "artifacts/session-b-take2_bundle_index.json",
+    "evidence_bundle": "artifacts/session-b-take2_evidence_bundle.zip",
+    "apw:proof_level": "directly_observed"
+  },
+  "downstream_registration_handoff": {
+    "record_type": "downstream_provenance_registration_handoff",
+    "status": "candidate_input_not_submitted",
+    "capture_session_id": "capture-20260830T021208Z-11629",
+    "export_hard_hash": {
+      "algorithm": "sha256",
+      "value": "5612bcc5a0f5951626b61041ebe0d352095dd9335b2e84305ca0c4cfe83d747f",
+      "apw:proof_level": "directly_observed"
+    },
+    "routed_observation_commitment": {
+      "hash_chain_root": "e8fbfaaf92a463e2e09628ed29e351625b695298f5e440fa300654fee76d0059",
+      "hash_chain_length": 777,
+      "apw:proof_level": "directly_observed"
+    },
+    "coverage": {
+      "status": "complete_observed_path",
+      "basis": "All submitted routed windows represented by the plug-in counters were received, and the prepared/received event prefix agrees with no reported FIFO loss, UDP send failure, sequence gap, chain break, or daemon acknowledgement dispatch failure. Scope ends at the last received telemetry event; plug-in processing of each ACK is not observable from the daemon.",
+      "counters": {
+        "buffers_submitted": 6216,
+        "samples_submitted": 3182592,
+        "windows_hashed": 777,
+        "fifo_samples_dropped": 0,
+        "fifo_windows_dropped": 0,
+        "midi_events_dropped": 0,
+        "midi_unsupported_dropped": 0,
+        "events_prepared": 783,
+        "udp_sends_attempted": 783,
+        "udp_sends_failed": 0,
+        "daemon_acknowledgements_processed": 782,
+        "daemon_highest_accepted_sequence": 782,
+        "daemon_highest_contiguous_sequence": 782,
+        "daemon_ack_session_mismatches_ignored": 0,
+        "daemon_restarts_observed": 0,
+        "packets_received": 783,
+        "events_received": 783,
+        "events_rejected": 0,
+        "sequence_gaps": 0,
+        "events_missing_sequence": 0,
+        "sequence_out_of_order": 0,
+        "hash_chain_breaks": 0,
+        "stream_evictions": 0,
+        "daemon_acknowledgements_attempted": 783,
+        "daemon_acknowledgements_sent": 783,
+        "daemon_acknowledgements_failed": 0,
+        "udp_sends_locally_emitted": 783,
+        "buffer_hash_events_received": 777,
+        "feature_windows_dropped_from_alignment_buffer": 0
+      },
+      "apw:proof_level": "inferred"
+    },
+    "audio_association": {
+      "status": "inferred_match",
+      "method": "routed_feature_sequence_offset_search",
+      "method_version": "2.0.0",
+      "confidence": 0.8538,
+      "matched_coverage": 0.8178,
+      "routed_coverage": 0.332,
+      "matched_window_count": 211,
+      "comparable_window_count": 258,
+      "overlap_window_count": 258,
+      "routed_window_count": 777,
+      "export_window_count": 258,
+      "best_offset_windows": -110,
+      "best_offset_seconds": -10.2168,
+      "alignment_threshold": 0.72,
+      "alignment_series": [
+        {
+          "relative_window": 0,
+          "similarity": 0.358,
+          "matched": false
+        },
+        {
+          "relative_window": 5,
+          "similarity": 0.359,
+          "matched": false
+        },
+        {
+          "relative_window": 10,
+          "similarity": 0.363,
+          "matched": false
+        },
+        {
+          "relative_window": 15,
+          "similarity": 0.362,
+          "matched": false
+        },
+        {
+          "relative_window": 20,
+          "similarity": 0.363,
+          "matched": false
+        },
+        {
+          "relative_window": 25,
+          "similarity": 0.362,
+          "matched": false
+        },
+        {
+          "relative_window": 30,
+          "similarity": 0.36,
+          "matched": false
+        },
+        {
+          "relative_window": 35,
+          "similarity": 0.362,
+          "matched": false
+        },
+        {
+          "relative_window": 40,
+          "similarity": 0.36,
+          "matched": false
+        },
+        {
+          "relative_window": 45,
+          "similarity": 0.966,
+          "matched": true
+        },
+        {
+          "relative_window": 50,
+          "similarity": 0.969,
+          "matched": true
+        },
+        {
+          "relative_window": 55,
+          "similarity": 0.974,
+          "matched": true
+        },
+        {
+          "relative_window": 60,
+          "similarity": 0.976,
+          "matched": true
+        },
+        {
+          "relative_window": 65,
+          "similarity": 0.968,
+          "matched": true
+        },
+        {
+          "relative_window": 70,
+          "similarity": 0.964,
+          "matched": true
+        },
+        {
+          "relative_window": 75,
+          "similarity": 0.957,
+          "matched": true
+        },
+        {
+          "relative_window": 80,
+          "similarity": 0.954,
+          "matched": true
+        },
+        {
+          "relative_window": 85,
+          "similarity": 0.664,
+          "matched": false
+        },
+        {
+          "relative_window": 90,
+          "similarity": 0.974,
+          "matched": true
+        },
+        {
+          "relative_window": 95,
+          "similarity": 0.977,
+          "matched": true
+        },
+        {
+          "relative_window": 100,
+          "similarity": 0.965,
+          "matched": true
+        },
+        {
+          "relative_window": 105,
+          "similarity": 0.952,
+          "matched": true
+        },
+        {
+          "relative_window": 110,
+          "similarity": 0.965,
+          "matched": true
+        },
+        {
+          "relative_window": 115,
+          "similarity": 0.975,
+          "matched": true
+        },
+        {
+          "relative_window": 120,
+          "similarity": 0.975,
+          "matched": true
+        },
+        {
+          "relative_window": 125,
+          "similarity": 0.975,
+          "matched": true
+        },
+        {
+          "relative_window": 130,
+          "similarity": 0.963,
+          "matched": true
+        },
+        {
+          "relative_window": 135,
+          "similarity": 0.965,
+          "matched": true
+        },
+        {
+          "relative_window": 140,
+          "similarity": 0.96,
+          "matched": true
+        },
+        {
+          "relative_window": 145,
+          "similarity": 0.969,
+          "matched": true
+        },
+        {
+          "relative_window": 150,
+          "similarity": 0.973,
+          "matched": true
+        },
+        {
+          "relative_window": 155,
+          "similarity": 0.977,
+          "matched": true
+        },
+        {
+          "relative_window": 160,
+          "similarity": 0.968,
+          "matched": true
+        },
+        {
+          "relative_window": 165,
+          "similarity": 0.954,
+          "matched": true
+        },
+        {
+          "relative_window": 170,
+          "similarity": 0.887,
+          "matched": true
+        },
+        {
+          "relative_window": 175,
+          "similarity": 0.971,
+          "matched": true
+        },
+        {
+          "relative_window": 180,
+          "similarity": 0.978,
+          "matched": true
+        },
+        {
+          "relative_window": 185,
+          "similarity": 0.973,
+          "matched": true
+        },
+        {
+          "relative_window": 190,
+          "similarity": 0.962,
+          "matched": true
+        },
+        {
+          "relative_window": 195,
+          "similarity": 0.955,
+          "matched": true
+        },
+        {
+          "relative_window": 200,
+          "similarity": 0.962,
+          "matched": true
+        },
+        {
+          "relative_window": 205,
+          "similarity": 0.967,
+          "matched": true
+        },
+        {
+          "relative_window": 210,
+          "similarity": 0.974,
+          "matched": true
+        },
+        {
+          "relative_window": 215,
+          "similarity": 0.969,
+          "matched": true
+        },
+        {
+          "relative_window": 220,
+          "similarity": 0.972,
+          "matched": true
+        },
+        {
+          "relative_window": 225,
+          "similarity": 0.969,
+          "matched": true
+        },
+        {
+          "relative_window": 230,
+          "similarity": 0.963,
+          "matched": true
+        },
+        {
+          "relative_window": 235,
+          "similarity": 0.957,
+          "matched": true
+        },
+        {
+          "relative_window": 240,
+          "similarity": 0.97,
+          "matched": true
+        },
+        {
+          "relative_window": 245,
+          "similarity": 0.978,
+          "matched": true
+        },
+        {
+          "relative_window": 250,
+          "similarity": 0.975,
+          "matched": true
+        },
+        {
+          "relative_window": 255,
+          "similarity": 0.937,
+          "matched": true
+        }
+      ],
+      "alignment_similarity": [
+        0.358,
+        0.359,
+        0.363,
+        0.362,
+        0.363,
+        0.362,
+        0.36,
+        0.362,
+        0.36,
+        0.966,
+        0.969,
+        0.974,
+        0.976,
+        0.968,
+        0.964,
+        0.957,
+        0.954,
+        0.664,
+        0.974,
+        0.977,
+        0.965,
+        0.952,
+        0.965,
+        0.975,
+        0.975,
+        0.975,
+        0.963,
+        0.965,
+        0.96,
+        0.969,
+        0.973,
+        0.977,
+        0.968,
+        0.954,
+        0.887,
+        0.971,
+        0.978,
+        0.973,
+        0.962,
+        0.955,
+        0.962,
+        0.967,
+        0.974,
+        0.969,
+        0.972,
+        0.969,
+        0.963,
+        0.957,
+        0.97,
+        0.978,
+        0.975,
+        0.937
+      ],
+      "feature_dimensions": [
+        "relative_rms",
+        "zero_crossing_rate",
+        "crest_factor",
+        "energy_envelope_4"
+      ],
+      "reason": null,
+      "apw:proof_level": "inferred",
+      "limitations": [
+        "This bounded feature comparison is not a perceptual watermark, identity system, or registry lookup.",
+        "Gain normalization tolerates fixed level changes, but mastering, edits, silence, and channel mixing can reduce confidence.",
+        "A failed or unavailable match does not prove that routed audio is absent from the export.",
+        "Only the retained bounded routed-feature prefix participates in long-session alignment."
+      ],
+      "export_feature_extraction": {
+        "sample_rate_hz": 44100,
+        "channel_count": 2,
+        "sample_width_bytes": 2,
+        "window_size_frames": 4096,
+        "window_duration_seconds": 0.09287982,
+        "truncated_at_window_limit": false,
+        "streaming_extraction": true
+      },
+      "routed_feature_source": "accepted buffer_hash events emitted from routed plug-in observations",
+      "bounded_routed_window_limit": 12000,
+      "capture_session_id": "capture-20260830T021208Z-11629",
+      "stem_ids": [
+        "stem-11629"
+      ],
+      "export_file_name": "session-b-take2.wav",
+      "basis": "A bounded sequence of relative RMS, zero-crossing, crest-factor, and coarse energy-envelope features emitted from accepted routed plug-in windows was compared with equivalent streaming-extracted export features using time-offset search. The relationship remains inferred and does not establish complete routing."
+    },
+    "creator_declarations": [
+      {
+        "name": "source_category",
+        "value": "imported_sample",
+        "apw:proof_level": "user_declared"
+      }
+    ],
+    "signing_key": {
+      "algorithm": "Ed25519",
+      "public_key_hex": "70d1d07976ea842af202ba98273afb0affdab5e426888a980e7767177931b112",
+      "public_key_file": "/Users/davidcondrey/.apw/demo_ed25519_public.key",
+      "trust_scope": "self_generated_demo_key_integrity",
+      "signer_identity": "not_established",
+      "apw:proof_level": "unknown_unobserved"
+    },
+    "evidence_bundle": {
+      "manifest": "/Volumes/A/audio-provenance/demo-output/sessions/capture-20260830T021208Z-11629/manifests/session-b-take2_manifest.json",
+      "export": "/Volumes/A/audio-provenance/demo-output/sessions/capture-20260830T021208Z-11629/exports/session-b-take2.wav",
+      "evidence_directory": "/Volumes/A/audio-provenance/demo-output/sessions/capture-20260830T021208Z-11629/evidence",
+      "files": {
+        "composite_events.jsonl": {
+          "sha256": "a977f614e4764c07ab10bae659b77e4cd1ba131d315aa165d155e8e5ea96db44",
+          "byte_length": 492,
+          "binding_scope": "file_prefix_at_manifest_creation"
+        },
+        "plugin_events.jsonl": {
+          "sha256": "4c335f057a65e13d4b2dbd64e3d574b893dfece3d0d567799d4b543ab7817cce",
+          "byte_length": 1130303,
+          "binding_scope": "file_prefix_at_manifest_creation"
+        },
+        "session_events.jsonl": {
+          "sha256": "66baca48402f75720932737ab5cacc658c6f8b2eaaad7d153a309b3d0a8b6c7b",
+          "byte_length": 218,
+          "binding_scope": "file_prefix_at_manifest_creation"
+        }
+      },
+      "downloadable_archive": "artifacts/session-b-take2_evidence_bundle.zip",
+      "signed_bundle_index": "artifacts/session-b-take2_bundle_index.json",
+      "index_scope": "all archive payload entries; the signed index is not self-hashed",
+      "apw:proof_level": "directly_observed"
+    },
+    "tentative_c2pa_assertion_mapping": {
+      "status": "mapping_only_not_a_production_c2pa_claim",
+      "assertions": [
+        "c2pa.hash.data",
+        "c2pa.ingredient",
+        "c2pa.actions",
+        "apw.unobserved"
+      ],
+      "apw:proof_level": "inferred"
+    },
+    "missing_downstream_requirements": [
+      "verified creator or institution identity",
+      "author-controlled credential and key policy",
+      "production certificate chain",
+      "audio-native soft binding or watermark",
+      "resilient recovery from the audio",
+      "registry publication",
+      "production C2PA claim generation and conformance validation",
+      "consent and rights verification"
+    ],
+    "boundary": "This neutral handoff is not a provider-specific API payload and claims no compatibility with proprietary watermark, recovery, identity, signing, or registry technology."
+  },
+  "hardware_binding": {
+    "chain_root_hash": "e8fbfaaf92a463e2e09628ed29e351625b695298f5e440fa300654fee76d0059",
+    "device_id": "55d3124c9afb31b3",
+    "monotonic_counter": 3,
+    "clock_ms": 1788056366829,
+    "signature_hex": "8d0122889137c15eb89b1a6c789ab4ae73382fd6e3ccd6fd3a2da8bba2f86cf7",
+    "public_key_hex": "",
+    "hardware_attested": false,
+    "apw:proof_level": "unknown_unobserved"
+  },
+  "portable_signature": {
+    "algorithm": "Ed25519",
+    "canonicalization": "apw-json-sort-v1",
+    "public_key_hex": "70d1d07976ea842af202ba98273afb0affdab5e426888a980e7767177931b112",
+    "public_key_file": "/Users/davidcondrey/.apw/demo_ed25519_public.key",
+    "signer_id": "733c3f5f8418ea4c",
+    "signature_hex": "8192b0d9442decad06666931051f93e0005891bb25bd1a7e2ab646ed8d393c1fdfb53414a41b8483e7c89a2c5e98369e5926d01e7475cf4c5353ddc6cefc0e08",
+    "signed_content_hash": "00632bd3ecb351ed7dec8e9ce3511f75d2b48a40a7aac7fd857bdd22c7980c57",
+    "trust_scope": "self_generated_demo_key_integrity",
+    "signer_identity": "not_established",
+    "signer_identity_proof_level": "unknown_unobserved",
+    "apw:proof_level": "directly_observed",
+    "notes": "The public key independently verifies canonical manifest integrity. A valid self-generated signature proves key possession, not creator identity, authorship, or external trust."
+  },
+  "manifest_signature": {
+    "algorithm": "hmac-sha256-local",
+    "device_id": "55d3124c9afb31b3",
+    "public_key_hex": "",
+    "signature_hex": "4ad7e8ef021a55eec37cbbc44d3bd1c38240295312a8f1751957a27c0ce68a36",
+    "signed_content_hash": "1501b50b234a684801526d664ef79c8969007cccd20031d30e5d8c49aea3306a",
+    "trust_scope": "local_software_integrity",
+    "hardware_attested": false,
+    "apw:proof_level": "unknown_unobserved",
+    "notes": "The local HMAC seal detects changes when checked with the same secret key; it is not hardware attestation or third-party identity verification.",
+    "hardware_cosignature": {
+      "entangled_hash": "683037f27ccf02597e334102ae637d78c388e5ce09ee2fea1959bf6b50a9672b",
+      "content_hash": "1501b50b234a684801526d664ef79c8969007cccd20031d30e5d8c49aea3306a",
+      "hardware_clock_ms": 1788056366830,
+      "monotonic_counter": 4,
+      "device_id": "55d3124c9afb31b3",
+      "signature_hex": "43dea14fa3dafbe64579619c519ea548ed17d6c35f854dae667c69dad3e05256",
+      "previous_cosignature_hash": "d98c9c3992dca6027303e47932024c35172ebb4bbc8aafb5cb2de49a4e6c0ad3"
+    }
+  }
+}

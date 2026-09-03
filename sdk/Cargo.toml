@@ -1,0 +1,62 @@
+[workspace]
+resolver = "3"
+# audio-provenance-core, audio-provenance-audio, audio-provenance-registry and audio-provenance-bench are the planned members.
+# The glob is deliberate: cargo refuses to load the whole workspace if a named member's directory
+# is absent, so listing crates that other authors have not created yet breaks every build here.
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.96"
+license = "Apache-2.0"
+repository = "https://github.com/writerslogic/audio-provenance"
+authors = ["Audio Provenance contributors"]
+
+[workspace.dependencies]
+async-trait = { version = "0.1.89" }
+ciborium = { version = "0.2.2", default-features = false }
+ed25519-dalek = { version = "3.0.0", default-features = false, features = ["alloc", "fast", "zeroize"] }
+genomark = { path = "crates/genomark", version = "0.1.0", default-features = false }
+audio-provenance-audio = { path = "crates/audio-provenance-audio", version = "0.1.0", default-features = false }
+audio-provenance-bench = { path = "crates/audio-provenance-bench", version = "0.1.0" }
+audio-provenance-core = { path = "crates/audio-provenance-core", version = "0.1.0", default-features = false }
+audio-provenance-manifest = { path = "crates/audio-provenance-manifest", version = "0.1.0", default-features = false }
+audio-provenance-registry = { path = "crates/audio-provenance-registry", version = "0.1.0", default-features = false, features = ["std", "local"] }
+audio-provenance-sdk = { path = "crates/audio-provenance-sdk", version = "0.1.0", default-features = false }
+audio-provenance-trust = { path = "crates/audio-provenance-trust", version = "0.1.0" }
+genotrace = { path = "crates/genotrace", version = "0.1.0" }
+getrandom = { version = "0.4.3" }
+hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
+hound = { version = "3.5.1" }
+realfft = { version = "3.5.0" }
+reqwest = { version = "0.12.28", default-features = false, features = ["json", "rustls-tls"] }
+rubato = { version = "5.0.0" }
+rustfft = { version = "6.4.1" }
+serde = { version = "1.0.229", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1.0.151", default-features = false, features = ["alloc", "float_roundtrip"] }
+sha2 = { version = "0.11.0", default-features = false, features = ["alloc"] }
+symphonia = { version = "0.6.1", default-features = false, features = ["aac", "adpcm", "aiff", "alac", "flac", "isomp4", "mp3", "ogg", "pcm", "vorbis", "wav"] }
+tempfile = { version = "3.27.0" }
+thiserror = { version = "2.0.20", default-features = false }
+tokio = { version = "1.49.0" }
+ureq = { version = "3.4.0", default-features = false, features = ["rustls"] }
+web-time = { version = "1.1.0" }
+zeroize = { version = "1.9.0", default-features = false, features = ["alloc"] }
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+undocumented_unsafe_blocks = "deny"
+mem_forget = "deny"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

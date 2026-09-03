@@ -1,0 +1,65 @@
+{
+  "name": "@writerslogic/audio-provenance-sdk",
+  "version": "0.1.0",
+  "description": "Audio provenance you can verify from the file alone: verify, inspect and locate Audio Provenance records in Node or the browser.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/writerslogic/audio-provenance.git",
+    "directory": "sdk/packages/sdk"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/browser.js",
+      "node": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "default": "./dist/browser.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "wasm/node/package.json",
+    "wasm/node/audio_provenance_wasm.js",
+    "wasm/node/audio_provenance_wasm.d.ts",
+    "wasm/node/audio_provenance_wasm_bg.wasm",
+    "wasm/node/audio_provenance_wasm_bg.wasm.d.ts",
+    "wasm/bundler/package.json",
+    "wasm/bundler/audio_provenance_wasm.js",
+    "wasm/bundler/audio_provenance_wasm.d.ts",
+    "wasm/bundler/audio_provenance_wasm_bg.js",
+    "wasm/bundler/audio_provenance_wasm_bg.wasm",
+    "wasm/bundler/audio_provenance_wasm_bg.wasm.d.ts",
+    "README.md"
+  ],
+  "scripts": {
+    "build:wasm": "wasm-pack build ../../crates/audio-provenance-wasm --target nodejs --release --out-dir ../../packages/sdk/wasm/node --out-name audio_provenance_wasm && wasm-pack build ../../crates/audio-provenance-wasm --target bundler --release --out-dir ../../packages/sdk/wasm/bundler --out-name audio_provenance_wasm && rm -f wasm/node/.gitignore wasm/bundler/.gitignore && printf '{ \"type\": \"commonjs\" }\\n' > wasm/node/package.json && printf '{ \"type\": \"module\" }\\n' > wasm/bundler/package.json",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test test/verify.test.js",
+    "example": "node examples/verify.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "@types/node": "^22.15.3"
+  },
+  "keywords": [
+    "provenance",
+    "c2pa",
+    "watermark",
+    "audio",
+    "wasm"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

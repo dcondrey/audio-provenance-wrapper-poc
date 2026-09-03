@@ -1,4 +1,5 @@
 build/
+build-rt-*/
 .deps/
 demo-output/
 cmake-build-*/
@@ -11,3 +12,25 @@ __pycache__/
 *.pyc
 demo-rehearsal/
 .venv/
+build-dist/
+*.dmg
+.playwright-mcp/
+node_modules/
+.wrangler/
+
+# Demo signing keys must never be committed: the root CA is shipped as a trust anchor,
+# so a leaked leaf or mark key mints material that verifies against it. The whole store
+# is ignored rather than a key glob; package_installer.sh regenerates it, rewrites
+# demo-root-ca.pem from its root and re-signs the demo clip before staging, so a fresh
+# clone self-heals and no private key ever lands in git.
+packaging/assets/demo-provenance-store/
+*-key.pem
+*.p12
+
+# Rust/SDK trees added 2026-09-02: source only, not corpora or build output.
+sdk/corpus/
+sdk/training/runs/
+sdk/bench-out/
+rust/dist/
+**/node_modules/
+**/target/

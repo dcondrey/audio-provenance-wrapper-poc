@@ -1,0 +1,65 @@
+# Spec 9.6's MANDATORY SMOKE TEST, scaled to 300 steps: "500 steps on the target hardware with the
+# full Phase C distortion layer enabled, wall-clocked", whose measured seconds/step is what kill
+# criterion K8 reads rather than any estimate in the spec's prose.
+#
+# IT IS NOT A TRAINING RUN AND PRODUCES NO USABLE MODEL. 300 steps at batch 2 over synthesized
+# audio is 1/1000th of spec 9.5's schedule on data that is not a music corpus. What it establishes:
+# gradients flow through the whole distortion chain including the real ffmpeg round trip, the loss
+# moves in the right direction, the export runs, and the Rust crate loads the result.
+#
+# The curriculum is spec 9.3's 60k/180k/320k shape divided by ~1000, so the run passes through
+# Phase A, ramps through Phase B and finishes under the full Phase C ranges. `optim.total_steps`
+# must equal the step count: the cosine schedule reads it, so leaving it at 12 would run steps
+# 12..299 at min_lr and flatten the curve for a reason that has nothing to do with the model.
+run:
+  seed: 20260831
+  device: cpu
+  out_dir: runs/smoke300
+  log_every: 1
+  checkpoint_every: 100
+  deterministic: true
+
+data:
+  synthetic_items: 48
+  source_clip_seconds: 6.0
+  analysis_seconds: [3.0, 3.5]
+  num_workers: 0
+
+optim:
+  batch_size: 2
+  lr: 3.0e-4
+  warmup_steps: 15
+  total_steps: 300
+  ema_decay: 0.99
+  unmarked_fraction: 0.5
+
+curriculum:
+  phase_a_end: 60
+  phase_b_end: 180
+  phase_c_end: 300
+
+rir:
+  max_order: 6
+  max_ir_seconds: 0.6
+  pool_size: 4
+  rt60_s: [0.20, 0.45]
+  source_distance_m: [0.5, 1.5]
+
+distortion:
+  capture_codec_p: 0.5
+  source_codec_p: 0.0
+
+detector:
+  window_seconds: 3.0
+  window_hop_seconds: 1.5
+  presence_window_seconds: 1.5
+  min_presence_span_seconds: 1.0
+  min_locator_seconds: 1.0
+  max_windows: 8
+
+evaluation:
+  channels: ["identity", "mp3_128", "acoustic_1m_room"]
+  corpus_items: 12
+  clip_seconds: 4.0
+  false_positive_trials: 48
+  target_false_positive_rate: 1.0e-3

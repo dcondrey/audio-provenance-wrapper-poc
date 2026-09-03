@@ -1,0 +1,132 @@
+{
+  "schema": "audio-provenance-watermark-adversarial-v1",
+  "production_implementation": "genomark-lepqim-v1",
+  "experimental_implementations": ["genomark-n"],
+  "measurements": [
+    "false_acceptance",
+    "locator_recovery",
+    "recording_association_rejection"
+  ],
+  "policy": {
+    "locator_recovery_is_authentication": false,
+    "materially_altered_signed_audio": "changed",
+    "unmeasured_case": "fails_qualification"
+  },
+  "cases": [
+    {
+      "id": "interior_replacement_1_through_50_percent",
+      "tags": ["interior_replacement"],
+      "parameters": {"percent": [1, 2, 5, 10, 25, 50]},
+      "measures": ["locator_recovery", "recording_association_rejection"],
+      "expected": {"association": "rejected", "status": "changed"},
+      "gate": "genotrace::fingerprint::reference::local_association_tests"
+    },
+    {
+      "id": "head_and_tail_replacement",
+      "tags": ["head_replacement", "tail_replacement"],
+      "parameters": {"percent": [1, 5, 25, 50]},
+      "measures": ["locator_recovery", "recording_association_rejection"],
+      "expected": {"association": "rejected", "status": "changed"},
+      "gate": "genotrace::fingerprint::reference::local_association_tests"
+    },
+    {
+      "id": "arbitrary_crops",
+      "tags": ["crop", "arbitrary_crop_offset"],
+      "parameters": {"offset_seconds": [0.137, 3.37, 7.3, 31.113]},
+      "measures": ["locator_recovery"],
+      "expected": {"association": "associated"},
+      "gate": "genotrace::fingerprint::interior_substitution_cannot_hide_between_aligned_edges"
+    },
+    {
+      "id": "reordered_and_duplicated_sections",
+      "tags": ["reorder", "duplicated_section"],
+      "measures": ["locator_recovery", "recording_association_rejection"],
+      "expected": {"association": "rejected", "status": "changed"},
+      "gate": "genotrace::fingerprint::score::discontinuity_tests"
+    },
+    {
+      "id": "mark_lifting_onto_unrelated_audio",
+      "tags": ["mark_lifting", "unrelated_audio"],
+      "measures": ["false_acceptance", "locator_recovery", "recording_association_rejection"],
+      "expected": {"locator": "may_recover", "association": "rejected", "status": "changed"},
+      "gate": "audio-provenance-cli::brief_invocation::spliced"
+    },
+    {
+      "id": "overlay_another_recording",
+      "tags": ["overlay"],
+      "parameters": {"mix_db": [-24, -12, -6, 0]},
+      "measures": ["locator_recovery", "recording_association_rejection"],
+      "expected": {"material_overlay": "rejected"},
+      "gate": "nightly_association_corpus"
+    },
+    {
+      "id": "gain_normalization_and_compression",
+      "tags": ["gain", "normalization", "dynamic_compression"],
+      "measures": ["false_acceptance", "locator_recovery"],
+      "expected": {"locator": "recovered", "association": "associated"},
+      "gate": "audio-provenance-bench::default_matrix"
+    },
+    {
+      "id": "mp3_and_aac_transcoding",
+      "tags": ["mp3", "aac"],
+      "parameters": {"mp3_kbps": [320, 192, 128, 96, 64], "aac_kbps": [256, 128, 64]},
+      "measures": ["false_acceptance", "locator_recovery"],
+      "expected": {"thresholds": "predeclared_channel_rows"},
+      "gate": "audio-provenance-bench::default_matrix"
+    },
+    {
+      "id": "requantization_and_resampling",
+      "tags": ["requantization", "resampling"],
+      "parameters": {"bits": [16, 8], "sample_rate_hz": [22050, 44100, 48000, 96000]},
+      "measures": ["false_acceptance", "locator_recovery"],
+      "expected": {"thresholds": "predeclared_channel_rows"},
+      "gate": "audio-provenance-bench::default_matrix"
+    },
+    {
+      "id": "playback_rate_drift",
+      "tags": ["playback_rate_drift"],
+      "parameters": {"ppm": [-3000, -1000, 1000, 3000]},
+      "measures": ["false_acceptance", "locator_recovery"],
+      "expected": {"thresholds": "predeclared_channel_rows"},
+      "gate": "genomark::properties::playback_rate_drift_decodes_across_the_searched_range"
+    },
+    {
+      "id": "material_classes",
+      "tags": ["silence", "near_silence", "speech", "tonal", "dense_music"],
+      "measures": ["false_acceptance", "locator_recovery"],
+      "expected": {"unsupported_material": "explicit_no_recovery", "false_acceptance": "zero_with_bound"},
+      "gate": "audio-provenance-corpus-bench"
+    },
+    {
+      "id": "multiple_encoding_passes",
+      "tags": ["multiple_encoding_passes"],
+      "parameters": {"passes": [2, 3, 5]},
+      "measures": ["false_acceptance", "locator_recovery"],
+      "expected": {"thresholds": "predeclared_chain_rows"},
+      "gate": "audio-provenance-bench::default_matrix"
+    },
+    {
+      "id": "differently_marked_copy_collusion",
+      "tags": ["collusion"],
+      "parameters": {"copies": [2, 4, 8, 16]},
+      "measures": ["false_acceptance", "locator_recovery", "recording_association_rejection"],
+      "expected": {"lifted_or_substituted_locator": "not_authenticated"},
+      "gate": "audio-provenance-bench::attacks::collusion"
+    },
+    {
+      "id": "very_short_and_multi_hour",
+      "tags": ["very_short", "multi_hour"],
+      "parameters": {"seconds": [0.1, 1, 5, 7200, 14400]},
+      "measures": ["false_acceptance", "locator_recovery"],
+      "expected": {"bounds": "explicit", "oversize_reference": "no_soft_verification"},
+      "gate": "genotrace::reference_bounds_and_short_query"
+    },
+    {
+      "id": "unmarked_and_unrelated_null_corpus",
+      "tags": ["unmarked_audio", "unrelated_audio"],
+      "measures": ["false_acceptance"],
+      "expected": {"false_acceptance": "predeclared_upper_bound"},
+      "gate": "genotrace::fingerprint_null_test + audio-provenance-null-test"
+    }
+  ]
+}

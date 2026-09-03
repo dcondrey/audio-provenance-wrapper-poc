@@ -2,6 +2,30 @@
 
 This page documents manual validation for the JUCE VST3 proof-of-concept milestones.
 
+## Core hardening gates (2026-09-01)
+
+The automated plug-in gate builds the JUCE lifecycle/pass-through test host and VST3, runs a
+callback-thread allocation probe, checks bit-identical mono/stereo float and double pass-through
+across block sizes 1 through 8192 (including bypass), exercises FIFO saturation, sample-rate and
+block-size changes, multiple-instance isolation, malformed/oversized state, ACK restart/scope
+logic, daemon startup ordering/restart, state-chunk save/delete/reload, rapid offline callbacks,
+plug-in deletion, exact FIFO conservation and bounded shutdown, then runs a static forbidden-call
+reachability audit. A scheduled self-hosted CI job runs this host for eight hours and replaces the
+manual Ableton soak. Ableton-only compatibility checks are listed in `PLUGIN_REALTIME_AUDIT.md`.
+
+The watermark fast gate covers the local-region/interior-gap predicate, signed duration and block
+distribution, discontinuity detection, actual-audio interior substitution, crop recovery, and the
+permanent adversarial-plan schema. The parallel full-corpus runner and its measured classical
+GenoMark baseline live under `sdk/qualification/reports/classical-genomark/`. The 2026-09-01
+baseline is complete but does not meet every declared quality target; the report preserves those
+failures rather than promoting the implementation.
+
+The development adapter gate starts a temporary capture session, accepts UDP observations, detects
+an export, builds and signs the handoff/bundle, invokes the Rust SDK through the Python
+orchestrator, attaches a development record, verifies it with the public SDK, and asserts unchanged
+proof levels and evidence hashes. It intentionally reports identity `not_established` and writes
+the post-sign result to an atomic receipt rather than mutating the signed capture manifest.
+
 ## v0.9 Demo Candidate
 
 Automated validation on 2026-08-27:
@@ -174,6 +198,34 @@ of the 2026-08-29 fix batches; rebuilt plug-in installed, binary
   (253,953 samples / 497 windows dropped), and the readiness panel showed
   READY TO EXPORT with a 14-second minimum against 55.4 routed seconds in the
   clean session.
+
+## External C2PA validation (2026-08-31)
+
+Validated with `c2patool 0.26.68`, the reference C2PA command-line tool, run
+outside our pipeline. It shares the c2pa-rs core with the `c2pa-python` binding
+that wrote these manifests, so this is a real tool reading our output, not two
+independent implementations agreeing. Round-tripping inside our own writer
+proves less than this; a second implementation would prove more.
+
+- Pipeline output
+  `demo-output/founder-package/evidence-package-20260831T091551Z/artifacts/presenter_export_c2pa.wav`,
+  carrying `c2pa.actions.v2`, a `c2pa.ingredient.v3` with `apw:` metadata keys,
+  and the non-registered `apw.unobserved` assertion. With no trust anchor:
+  `validation_state: Valid`, every `assertion.hashedURI.match` (including the
+  one over `apw.unobserved`) and `assertion.dataHash.match` succeeding, and
+  `signingCredential.untrusted` the sole failure. Re-run as
+  `c2patool <asset> trust --trust_anchors ~/.apw/provenance/ca/root_cert.pem`:
+  `validation_state: Trusted`, zero failures, one informational
+  `ingredient.unknownProvenance` for the routed stem, which carries no manifest
+  of its own.
+- Shipped demo asset
+  `packaging/assets/demo-project/apw-demo Project/Samples/Imported/apw-demo-signed.wav`
+  against the bundled `packaging/assets/demo-root-ca.pem`:
+  `validation_state: Trusted`, zero failures.
+
+Scope: the embedded WAV path only. The AIFF `.c2pa` sidecar has no c2pa-rs
+handler and was not externally validated. `signingCredential.untrusted` without
+an anchor is the expected result for a self-issued chain, not a defect.
 
 ## Historical Milestone Records
 

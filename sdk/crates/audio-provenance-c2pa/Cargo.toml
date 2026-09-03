@@ -1,0 +1,31 @@
+[package]
+name = "audio-provenance-c2pa"
+description = "C2PA claim-structure reading and assertion-store integrity, checked against c2patool rather than against our own writer."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+default = ["std"]
+std = ["audio-provenance-core/std", "audio-provenance-manifest/std", "hex/std", "thiserror/std"]
+
+[dependencies]
+ciborium = { workspace = true }
+audio-provenance-core = { workspace = true }
+audio-provenance-manifest = { workspace = true }
+hex = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+# IMPORTANT: a TEST dependency only. `validation.rs` claims every row of its mapping has a
+# counterpart in `genotrace::derive_status`; `tests/status_correspondence.rs` calls that function
+# rather than restating the claim in prose. Reading a container must not pull the recovery ladder,
+# the codecs or the watermark into the library itself, so this never moves to [dependencies].
+genotrace = { workspace = true }
+serde_json = { workspace = true, features = ["std"] }

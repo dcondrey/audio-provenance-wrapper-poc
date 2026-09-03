@@ -1,18 +1,61 @@
-# Audio Provenance Capture
+# Audio Provenance
+
+One monorepo for creation-stage capture, signed provenance records, resilient audio recovery, and
+verification.
+
+## Repository layout
+
+| Path | Role |
+| --- | --- |
+| `src/`, `daemon/`, `scripts/`, `packaging/` | Ableton VST3/AU capture workflow, Python daemon, demo, and macOS distribution |
+| `rust/` | Rust implementation of the capture daemon, C2PA, association, provider, CLI, and FFI surfaces |
+| `sdk/` | Rust/TypeScript verification SDK, CLI, registry, trust, watermark, benches, training, and capture rig |
+| `docs/` | Product scope, architecture, schema, validation, provider contract, and integration boundary |
+
+The capture side records what happened during creation. The SDK side signs, locates, registers,
+and verifies the resulting audio and records. They share the same proof-level discipline and the
+`audio-provenance-manifest-v0` interoperability contract; the implemented development adapter and
+its deliberately deferred production infrastructure are documented in
+[SDK integration](docs/SDK_INTEGRATION.md).
+
+## Validation entry points
+
+```sh
+# Capture workflow
+./.venv/bin/pytest -q
+cargo test --manifest-path rust/Cargo.toml --workspace
+
+# Plug-in real-time and pass-through gate
+cmake -S . -B build-rt-audit -DBUILD_TESTING=ON
+cmake --build build-rt-audit --target AudioProvenanceCaptureTests AudioProvenanceCapture_VST3
+ctest --test-dir build-rt-audit --output-on-failure
+
+# SDK and verification engine
+cargo test --manifest-path sdk/Cargo.toml --workspace
+pnpm --dir sdk --filter @writerslogic/audio-provenance-sdk test
+sdk/scripts/watermark-adversarial-fast.sh
+
+# One-command development capture-to-SDK round trip
+./.venv/bin/python scripts/synthetic_rehearsal.py --sdk-adapter
+```
+
+## Capture application
 
 A macOS + Ableton Live proof of concept for opt-in, routed-audio provenance.
 The system observes audio that passes through a JUCE VST3, streams evidence to
 a local daemon, hashes a detected WAV/AIFF export, and produces both a JSON
 manifest and a human-readable HTML fight card.
 
-## Current State: v0.9 Evidence-Adapter Demo Candidate
+## Current State: v0.9 Demo Candidate, v1.0 Gate Closed
 
-The automated one-stem path is implemented and tested. A manual Ableton Live
-pass on the demonstration machine (2026-08-28, session
-`capture-20260828T221446Z-9959`) completed the one-stem path end to end with
-`complete_observed_path` coverage and `inferred_match` association. Final v1.0
-status still requires the transparency/null test and project save/close/reload
-recorded as open in `docs/VALIDATION.md`.
+The automated one-stem path is implemented and tested. The manual Ableton Live
+gate on the demonstration machine closed on 2026-08-29. Its graded pass
+(session `capture-20260830T021208Z-11629`) ran the one-stem path end to end
+with `complete_observed_path` coverage, `inferred_match` association, and a
+`verified` local verifier outcome; the transparency/null test and the project
+save/close/reload were performed live in the same sitting. Per-step evidence is
+in `docs/VALIDATION.md` and `docs/ROADMAP.md` records the closed gate. No
+automated or synthetic result was used to close it.
 
 ### VST3 capture plugin
 
@@ -92,7 +135,9 @@ Then:
 1. Open Ableton Live and rescan VST3 plug-ins.
 2. Insert **Audio Provenance Capture** on one audio track.
 3. Play the track until the plugin shows `Capture status: ACTIVE` and increasing hash windows.
-4. Export a WAV or AIFF into the timestamped folder opened by the launcher.
+4. Export **16-bit PCM WAV** into the timestamped folder opened by the launcher.
+   A 32-bit float render cannot be signed and grades the association
+   `unavailable`.
 5. The generated fight card opens automatically; the dashboard also links it.
 6. Verify the adjacent JSON manifest:
 
@@ -159,10 +204,17 @@ This project never claims full Ableton provenance.
   self-generated key proves possession and integrity, not identity or external trust.
 - Audio association uses simple feature sequences and remains `inferred`; a
   failed or unavailable result does not prove routed audio was absent.
-- The included C2PA structures are an alignment/mapping prototype, not an
-  embedded, conforming C2PA manifest.
-- The downstream record is a neutral provenance registration handoff, not a
-  Genotone API payload or compatibility claim.
+- Each supported export is signed into a real C2PA claim: embedded for 16-bit
+  PCM WAV, a `.c2pa` sidecar for AIFF. The signed copy lives under
+  `manifests/artifacts/`; the export itself is never rewritten.
+- That claim is signed under a certificate chain this machine issued to itself.
+  A `verified` validation state means it chains to our own root, not to any
+  external trust list, registry, or verified creator identity.
+- `c2pa_mapping` remains in the manifest as a descriptive projection of internal
+  evidence, not as the signed claim.
+- The downstream record is a neutral provenance registration handoff. The explicit adapter in
+  `docs/SDK_INTEGRATION.md` admits it, preserves proof levels, signs/attaches a development record,
+  and verifies it without promoting identity beyond `not_established`.
 
 ## Tests
 
@@ -183,7 +235,7 @@ focused bounded-growth, sequence-gap, and proof/coverage invariant regressions.
 - `docs/MANIFEST_SCHEMA.md` — evidence and proof-level model
 - `docs/ROADMAP.md` — milestones and remaining v1.0 validation
 - `docs/VALIDATION.md` — build and Ableton validation record
-- `docs/GENOTONE_ALIGNMENT.md` — complementary integration boundary
+- `docs/SDK_INTEGRATION.md` — complementary integration boundary
 - `docs/FOUNDER_DEMO_TALK_TRACK.md` — five-minute private demo and recovery
 - `docs/EXECUTIVE_PRODUCT_BRIEF.md` — wedge, pilot, risks, and 30/60/90 path
 - `docs/manifest.schema.json` — machine-readable JSON Schema

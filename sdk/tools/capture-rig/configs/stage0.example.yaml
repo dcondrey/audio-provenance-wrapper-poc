@@ -1,0 +1,108 @@
+# GenoMark-N Stage 0 physical capture campaign.
+#
+# The grid of spec section 10.1 is 3 rooms x 3 speakers x 3 microphones x 5 distances x 2 SPL
+# levels = 270 cells. Running 200 clips through all of them is roughly 450 hours of playback, which
+# is not a two-week campaign. The kill criteria do not ask for it either, so the work is staged:
+#
+#   rir_sweep    every cell, three sweeps each. Cheap, and it is the highest-value output in the
+#                whole programme: the measured impulse-response corpus spec 9.2 ranks first.
+#   room_noise   one background recording per room per microphone.
+#   k4_corpus    the decisive cell. 1.0 m only, 200 marked and 200 unmarked clips, over the >= 3
+#                rooms x >= 2 speakers x >= 2 microphones K4 demands.
+#   k6_ladder    the distance ladder K6 is defined on, at a reduced clip count.
+#
+# `capture-rig plan --campaign this-file` prints the hours before anything is recorded.
+
+schema: audio-provenance-capture-rig-campaign/1
+campaign_id: stage0
+output_dir: ../../../bench-out/capture-rig/stage0
+sample_rate: 48000
+capture_channels: 1
+
+distances_m: [0.15, 0.5, 1.0, 2.0, 3.0]
+spl_levels_dba: [70, 80]
+
+rooms:
+  - id: treated_small
+    role: treated
+    description: "Treated small room. Target RT60 ~0.25 s, background < 30 dBA."
+    rt60_target_seconds: 0.25
+    # Filled in by `capture-rig calibrate --meter-dba <reading>`; until then every SPL and dBA field
+    # in this room's capture records is null, which is the honest answer and not an omission.
+    # spl_calibration:
+    #   meter_reading_dba: 74.0
+    #   mic_rms_dbfs: -22.4
+    #   measured_at: '2026-09-01T10:00:00Z'
+    #   meter: 'Class 2 SLM, model and serial here'
+  - id: untreated_office
+    role: office
+    description: "Untreated office. Target RT60 ~0.45 s, background 35-40 dBA."
+    rt60_target_seconds: 0.45
+  - id: live_hard
+    role: live
+    description: "Live hard-surfaced room. Target RT60 ~0.8 s, background 40-45 dBA."
+    rt60_target_seconds: 0.8
+
+speakers:
+  - id: powered_monitor
+    description: "Consumer powered nearfield monitor."
+    output_device: "Scarlett 2i2 USB"
+  - id: bluetooth_puck
+    description: "Small Bluetooth speaker, paired as a CoreAudio output."
+    output_device: "SoundLink"
+  - id: laptop_internal
+    description: "Laptop internal speakers."
+    output_device: "MacBook Pro Speakers"
+
+microphones:
+  - id: usb_condenser
+    mode: live
+    description: "USB condenser on a stand, on axis."
+    input_device: "Scarlett 2i2 USB"
+  - id: iphone
+    mode: ingest
+    description: "Current iPhone, Voice Memos, 48 kHz. Not a CoreAudio input on this machine."
+  - id: android
+    mode: ingest
+    description: "Current Android phone, 48 kHz WAV recorder. Not a CoreAudio input on this machine."
+
+sweep:
+  f_start_hz: 20.0
+  f_end_hz: 20000.0
+  duration_seconds: 10.0
+  silence_seconds: 3.0
+  amplitude_dbfs: -12.0
+  repeats: 3
+  ir_seconds: 2.0
+  pre_seconds: 0.01
+
+clips:
+  marked_dir: ../corpus/marked
+  unmarked_dir: ../corpus/unmarked
+
+stages:
+  - name: rir_sweep
+    kind: sweep
+
+  - name: room_noise
+    kind: noise
+    noise_seconds: 60.0
+
+  - name: k4_corpus
+    kind: corpus
+    distances_m: [1.0]
+    spl_levels_dba: [75]
+    speakers: [powered_monitor, bluetooth_puck]
+    microphones: [usb_condenser, iphone]
+    arms: [marked, unmarked]
+    clips: 200
+
+  - name: k6_ladder
+    kind: corpus
+    distances_m: [0.15, 0.5, 1.0, 2.0, 3.0]
+    spl_levels_dba: [75]
+    rooms: [untreated_office]
+    speakers: [powered_monitor]
+    microphones: [usb_condenser]
+    arms: [marked, unmarked]
+    clips: 40

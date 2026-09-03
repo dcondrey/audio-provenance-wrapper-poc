@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import glob as _glob
 import hashlib
 import json
 import logging
@@ -12,10 +13,35 @@ from daemon.common import sha256_file, sha256_prefix
 from daemon.forgery_analysis.analyzer import HashChainAnalyzer
 from daemon.hardware_attestation.provider import SoftwareProvider
 from daemon.schema import validate_manifest_invariants
-from daemon.signing import verify_ed25519_signature
+from daemon.signing import pinned_public_key, verify_ed25519_signature
 
 log = logging.getLogger(__name__)
 DEFAULT_SIGNING_KEY = Path("~/.apw/demo_signing_key.bin")
+DEFAULT_TRUST_ANCHOR = Path("~/.apw/provenance/ca/root_cert.pem")
+
+_LOCAL_SEAL_ALGORITHM = "hmac-sha256-local"
+
+# IMPORTANT: "verified" is earned by running these, never by finding nothing
+# wrong. Every "I could not check this" path leaves its name here, and the
+# outcome degrades to "incomplete" instead of borrowing the strongest word the
+# tool has for a document in which nothing was actually checked.
+_REQUIRED_CHECKS: tuple[str, ...] = (
+    "export_binding",
+    "evidence_binding",
+    "portable_signature",
+    "c2pa_claim",
+)
+
+_CHECK_DESCRIPTIONS: dict[str, str] = {
+    "export_binding": "the export file was not available, so its hard binding was never checked",
+    "evidence_binding": "no bound evidence prefix could be hashed, so the coverage counters were never re-derived",
+    "portable_signature": "the portable Ed25519 signature was not verified against a pinned public key",
+    "c2pa_claim": "the C2PA claim was not re-verified against a locally held trust anchor",
+}
+
+# A crafted evidence file with no newline would otherwise be read to EOF in one
+# allocation by `for line in handle`.
+_MAX_EVIDENCE_LINE_BYTES = 1 << 20
 
 
 class Severity(str, Enum):
@@ -34,6 +60,14 @@ class Finding:
 @dataclass
 class VerificationResult:
     findings: list[Finding] = field(default_factory=list)
+    completed_checks: set[str] = field(default_factory=set)
+
+    def complete(self, check: str) -> None:
+        self.completed_checks.add(check)
+
+    @property
+    def unchecked(self) -> list[str]:
+        return [name for name in _REQUIRED_CHECKS if name not in self.completed_checks]
 
     @property
     def errors(self) -> list[Finding]:
@@ -67,12 +101,15 @@ class VerificationResult:
         changed_codes = {
             "export_hash_mismatch", "evidence_hash_mismatch", "evidence_truncated",
             "tampered", "signature_invalid", "portable_signature_invalid",
-            "stem_commitment_mismatch",
+            "stem_commitment_mismatch", "c2pa_asset_hash_mismatch",
+            "c2pa_hard_binding_broken",
         }
         if codes & changed_codes:
             return "changed"
         if self.errors or "portable_signature_missing" in codes:
             return "untrusted"
+        if self.unchecked:
+            return "incomplete"
         return "verified"
 
     def to_dict(self) -> dict[str, object]:
@@ -80,14 +117,81 @@ class VerificationResult:
             "verifier": "local_audio_provenance_poc",
             "outcome": self.outcome,
             "qualified_scope": (
-                "Local POC integrity outcome; not a Genotone registry, identity, rights, or authorship result."
+                "Local POC integrity outcome; not a registry, identity, rights, or "
+                "authorship result from any provider."
             ),
             "passed": self.passed,
+            "checks_not_run": [
+                {"check": name, "reason": _CHECK_DESCRIPTIONS[name]} for name in self.unchecked
+            ],
             "findings": [
                 {"severity": finding.severity.value, "code": finding.code, "message": finding.message}
                 for finding in self.findings
             ],
         }
+
+
+def _certificate_bodies(pem: str) -> tuple[str, ...]:
+    """Base64 bodies of the certificates in a PEM blob, order- and wrap-insensitive."""
+    bodies: list[str] = []
+    current: list[str] | None = None
+    for line in pem.splitlines():
+        stripped = line.strip()
+        if stripped == "-----BEGIN CERTIFICATE-----":
+            current = []
+        elif stripped == "-----END CERTIFICATE-----":
+            if current:
+                bodies.append("".join(current))
+            current = None
+        elif current is not None:
+            current.append(stripped)
+    return tuple(sorted(bodies))
+
+
+def _evidence_member(evidence_dir: Path, file_name: object) -> Path | None:
+    """Resolve one bound evidence file inside its directory, or None.
+
+    IMPORTANT: the names come from the untrusted manifest and are hashed before
+    any signature on that manifest is checked, so an unconstrained join is an
+    attacker-directed filesystem read plus a per-path hash oracle.
+    """
+    name = str(file_name)
+    if not name or name in {".", ".."} or "/" in name or "\\" in name:
+        return None
+    candidate = evidence_dir / name
+    if candidate.name != name:
+        return None
+    try:
+        root = evidence_dir.resolve()
+        if candidate.exists() and candidate.resolve().parent != root:
+            return None
+    except OSError:
+        return None
+    return candidate
+
+
+def _bounded_jsonl_lines(handle, byte_length: int):
+    """Yield whole JSONL records from the first *byte_length* bytes, line-bounded."""
+    consumed = 0
+    while consumed < byte_length:
+        raw = handle.readline(_MAX_EVIDENCE_LINE_BYTES)
+        if not raw:
+            return
+        consumed += len(raw)
+        if consumed > byte_length:
+            return
+        if raw.endswith(b"\n") or len(raw) < _MAX_EVIDENCE_LINE_BYTES:
+            # The second case is the file's final record, unterminated.
+            yield raw
+            continue
+        # An overlong record: discard the rest of it rather than buffering it.
+        while consumed < byte_length:
+            extra = handle.readline(_MAX_EVIDENCE_LINE_BYTES)
+            if not extra:
+                return
+            consumed += len(extra)
+            if extra.endswith(b"\n"):
+                break
 
 
 def _safe_path(value: object) -> Path | None:
@@ -122,13 +226,9 @@ def _check_coverage_against_evidence(
     recomputed_count = 0
     window_hashes: set[str] = set()
     for path, byte_length in verified_prefixes:
-        consumed = 0
         try:
             with path.open("rb") as handle:
-                for raw_line in handle:
-                    if consumed + len(raw_line) > byte_length:
-                        break
-                    consumed += len(raw_line)
+                for raw_line in _bounded_jsonl_lines(handle, byte_length):
                     stripped = raw_line.strip()
                     if not stripped:
                         continue
@@ -201,11 +301,205 @@ def _check_coverage_against_evidence(
         result.info("coverage_counters_rederived", detail)
 
 
+def _contained_artifact(manifest_path: Path, relative: object) -> Path | None:
+    """Resolve a manifest-relative artifact without leaving the session tree.
+
+    IMPORTANT: sidecar mode legitimately records ``../exports/take.aiff``, so the
+    manifest directory alone is too tight a fence; its parent is the session root
+    and is the widest an untrusted manifest may steer a read.
+    """
+    value = str(relative)
+    if not value or Path(value).is_absolute():
+        return None
+    parts = Path(value).parts
+    # At most one leading "..", so the fence does not widen with a shallow layout.
+    if parts.count("..") > 1 or ".." in parts[1:]:
+        return None
+    candidate = _safe_path(manifest_path.parent / value)
+    if candidate is None:
+        return None
+    try:
+        resolved = candidate.resolve()
+        root = manifest_path.resolve().parent.parent
+    except OSError:
+        return None
+    return candidate if resolved == root or root in resolved.parents else None
+
+
+def _check_c2pa_claim(
+    data: dict[str, object],
+    manifest_path: Path,
+    result: VerificationResult,
+    local_anchors_pem: str | None = None,
+    asset_override: Path | None = None,
+) -> None:
+    """Re-verify the recorded C2PA claim against the signed asset on disk.
+
+    IMPORTANT: trust is evaluated against an anchor this machine holds, never
+    against ``signer.trust_anchor_pem`` inside the manifest being verified. A
+    forger generates their own root, signs a fabricated asset with it, writes
+    that root into the manifest, and every layer downstream reports "verified".
+    """
+    claim = data.get("c2pa_claim")
+    if claim is None:
+        result.warn("c2pa_claim_missing", "Manifest records no C2PA claim section")
+        return
+    if not isinstance(claim, dict):
+        result.error("schema_invalid", "c2pa_claim must be an object")
+        return
+
+    status = claim.get("status")
+    if status == "unavailable":
+        result.warn(
+            "c2pa_claim_unavailable",
+            f"No C2PA claim was produced: {claim.get('reason', 'no reason recorded')}",
+        )
+        return
+
+    signer = claim.get("signer") if isinstance(claim.get("signer"), dict) else {}
+    if (
+        signer.get("signer_identity") != "not_established"
+        or signer.get("apw:proof_level") == "externally_verified"
+    ):
+        result.error(
+            "c2pa_signer_identity_overclaimed",
+            "The C2PA claim presents a self-issued signer as an established identity",
+        )
+
+    asset = claim.get("signed_asset") if isinstance(claim.get("signed_asset"), dict) else {}
+    asset_path = asset_override
+    if asset_path is None:
+        relative = asset.get("relative_path")
+        candidate = _contained_artifact(manifest_path, relative) if relative else None
+        if candidate is not None and candidate.is_file():
+            asset_path = candidate
+    if asset_path is None or not asset_path.is_file():
+        result.warn(
+            "c2pa_asset_unavailable",
+            "The C2PA-signed asset is unavailable, so its claim could not be re-read",
+        )
+        return
+
+    try:
+        actual = sha256_file(asset_path)
+    except OSError:
+        result.warn("c2pa_asset_unavailable", "The C2PA-signed asset could not be read")
+        return
+    if actual != asset.get("sha256"):
+        # Not a return: the recorded digest and the real hard binding are
+        # independent checks, and a tampered asset must exercise both.
+        result.error(
+            "c2pa_asset_hash_mismatch",
+            f"The C2PA-signed asset {asset_path.name} no longer matches the digest "
+            "recorded in the manifest",
+        )
+
+    recorded_anchors = signer.get("trust_anchor_pem")
+    if local_anchors_pem is None:
+        result.warn(
+            "c2pa_trust_anchor_unavailable",
+            "This machine holds no C2PA trust anchor, so the claim signer was not evaluated; "
+            "an anchor inside the manifest cannot vouch for the manifest",
+        )
+        return
+    if (
+        isinstance(recorded_anchors, str)
+        and "BEGIN CERTIFICATE" in recorded_anchors
+        and _certificate_bodies(recorded_anchors) != _certificate_bodies(local_anchors_pem)
+    ):
+        result.error(
+            "c2pa_trust_anchor_untrusted",
+            "The manifest names a trust root this machine does not hold; the claim was "
+            "signed under a certificate authority outside the configured anchor",
+        )
+        return
+    try:
+        from daemon.c2pa_engine.verifier import verify_asset
+    except ImportError:
+        result.warn(
+            "c2pa_engine_unavailable",
+            "The C2PA engine is not installed here; only the asset digest was re-checked",
+        )
+        return
+
+    sidecar = claim.get("sidecar_manifest")
+    sidecar_path = _contained_artifact(manifest_path, sidecar) if sidecar else None
+    try:
+        live = verify_asset(
+            asset_path,
+            str(claim.get("mime") or "audio/wav"),
+            trust_anchors_pem=local_anchors_pem,
+            sidecar_manifest=sidecar_path if sidecar_path and sidecar_path.is_file() else None,
+        )
+    except Exception as exc:
+        result.error("c2pa_claim_unreadable", f"The recorded C2PA claim could not be re-read: {exc}")
+        return
+
+    recorded = claim.get("validation", {})
+    recorded_state = recorded.get("state") if isinstance(recorded, dict) else None
+    if recorded_state != live.state:
+        result.warn(
+            "c2pa_claim_state_changed",
+            f"The C2PA claim now validates as {live.state}, not {recorded_state} as recorded",
+        )
+
+    if live.state == "verified":
+        result.complete("c2pa_claim")
+        result.info(
+            "c2pa_claim_verified",
+            "The C2PA claim chains to the trust anchor held by this machine and its "
+            "hard binding is intact; this is not an externally verified identity",
+        )
+    elif live.state == "registered_but_changed":
+        result.error(
+            "c2pa_hard_binding_broken",
+            f"The C2PA hard binding no longer covers the signed asset: {live.detail}",
+        )
+    elif live.state == "nothing_found":
+        result.error(
+            "c2pa_claim_absent",
+            "The manifest records a C2PA claim, but the signed asset carries none",
+        )
+    else:
+        result.error("c2pa_claim_untrusted", f"The C2PA claim is not trusted: {live.detail}")
+
+
+def _note_supersession(manifest_path: Path, result: VerificationResult) -> None:
+    """Explain an export-hash mismatch caused by a re-export, not a tamper.
+
+    The daemon versions the manifest but the DAW overwrites the audio in place,
+    leaving a complete earlier artifact set on disk that now reads as changed.
+    """
+    marker = manifest_path.with_name(manifest_path.stem + ".superseded.json")
+    try:
+        record = json.loads(marker.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError):
+        return
+    if isinstance(record, dict) and record.get("superseded_by"):
+        result.info(
+            "manifest_superseded",
+            f"The export was re-rendered under the same file name after this manifest was "
+            f"sealed; the current bytes are described by {record['superseded_by']}",
+        )
+
+
+def _load_trust_anchors(trust_anchor_path: Path | None) -> str | None:
+    if trust_anchor_path is None:
+        return None
+    try:
+        pem = trust_anchor_path.expanduser().read_text(encoding="ascii")
+    except (OSError, UnicodeDecodeError, RuntimeError, ValueError):
+        return None
+    return pem if "BEGIN CERTIFICATE" in pem else None
+
+
 def verify_manifest(
     manifest_path: Path,
     signing_key_path: Path | None = DEFAULT_SIGNING_KEY,
     public_key_path: Path | None = None,
     export_path_override: Path | None = None,
+    trust_anchor_path: Path | None = DEFAULT_TRUST_ANCHOR,
+    c2pa_asset_override: Path | None = None,
 ) -> VerificationResult:
     result = VerificationResult()
     if not manifest_path.is_file():
@@ -248,12 +542,18 @@ def verify_manifest(
                 except OSError:
                     result.warn("export_file_unavailable", "Export file could not be read for hash verification")
                 else:
+                    result.complete("export_binding")
                     if actual_export_hash != export.get("sha256"):
                         result.error("export_hash_mismatch", "Export file SHA-256 does not match manifest")
+                        _note_supersession(manifest_path, result)
                     else:
                         result.info("export_hash_valid", "Export file SHA-256 matches manifest")
             else:
-                result.warn("export_file_unavailable", "Export file is unavailable for hash verification")
+                result.warn(
+                    "export_file_unavailable",
+                    f"Export file is unavailable for hash verification: {export_path_value}. "
+                    "Pass --export <file> to verify the manifest against a copy you hold.",
+                )
 
     stems = data.get("observed_stems", [])
     if not isinstance(stems, list):
@@ -310,7 +610,13 @@ def verify_manifest(
             result.warn("path_unresolvable", "Evidence directory path cannot be resolved")
         if evidence_dir is not None and isinstance(evidence_files, dict) and evidence_files:
             for file_name, file_binding in evidence_files.items():
-                evidence_path = evidence_dir / str(file_name)
+                evidence_path = _evidence_member(evidence_dir, file_name)
+                if evidence_path is None:
+                    result.error(
+                        "evidence_binding_invalid",
+                        f"Evidence binding names a file outside its bound directory: {file_name}",
+                    )
+                    continue
                 if not isinstance(file_binding, dict):
                     result.error("evidence_binding_invalid", f"Invalid evidence binding: {file_name}")
                     continue
@@ -335,9 +641,9 @@ def verify_manifest(
                     stem_parts[0] if len(stem_parts) == 2 and stem_parts[1].isdigit()
                     else evidence_path.stem
                 )
-                candidates.extend(sorted(
-                    evidence_dir.glob(f"{rotation_stem}.*{evidence_path.suffix}")
-                ))
+                candidates.extend(sorted(evidence_dir.glob(
+                    f"{_glob.escape(rotation_stem)}.*{_glob.escape(evidence_path.suffix)}"
+                )))
                 matched_path = None
                 candidate_sizes: list[int] = []
                 for candidate in candidates:
@@ -359,6 +665,7 @@ def verify_manifest(
                     suffix = "" if matched_path == evidence_path else f" (now in rotation {matched_path.name})"
                     result.info("evidence_hash_valid", f"Evidence prefix hash matches: {file_name}{suffix}")
                     verified_prefixes.append((matched_path, byte_length))
+                    result.complete("evidence_binding")
                 elif not candidate_sizes:
                     result.warn("evidence_file_unavailable", f"Evidence file unavailable: {file_name}")
                 elif all(size < byte_length for size in candidate_sizes):
@@ -368,7 +675,13 @@ def verify_manifest(
             _check_coverage_against_evidence(data, binding, verified_prefixes, result)
         elif evidence_dir is not None and isinstance(evidence_hashes, dict):
             for file_name, expected_hash in evidence_hashes.items():
-                evidence_path = evidence_dir / str(file_name)
+                evidence_path = _evidence_member(evidence_dir, file_name)
+                if evidence_path is None:
+                    result.error(
+                        "evidence_binding_invalid",
+                        f"Evidence binding names a file outside its bound directory: {file_name}",
+                    )
+                    continue
                 if not evidence_path.is_file():
                     result.warn("evidence_file_unavailable", f"Evidence file unavailable: {file_name}")
                     continue
@@ -381,13 +694,22 @@ def verify_manifest(
                     result.error("evidence_hash_mismatch", f"Evidence file changed: {file_name}")
                 else:
                     result.info("evidence_hash_valid", f"Evidence file hash matches: {file_name}")
+                    result.complete("evidence_binding")
 
     sig = data.get("manifest_signature")
     if sig is None:
         result.warn("unsigned", "Manifest is unsigned (no manifest_signature)")
     elif not isinstance(sig, dict):
         result.error("schema_invalid", "manifest_signature must be an object")
-    elif sig.get("signed_content_hash"):
+    elif not sig.get("signed_content_hash"):
+        # A present-but-hollow seal used to be quieter than a deleted one: the
+        # old elif chain simply ran out, so a forger's best move was to keep the
+        # key and empty it.
+        result.error(
+            "signature_incomplete",
+            "manifest_signature carries no signed_content_hash, so nothing binds it to this manifest",
+        )
+    else:
         manifest_copy = {k: v for k, v in data.items() if k != "manifest_signature"}
         signed_bytes = json.dumps(
             manifest_copy, sort_keys=True, separators=(",", ":")
@@ -397,12 +719,27 @@ def verify_manifest(
             result.error("tampered", "Manifest content hash mismatch (manifest may have been tampered with)")
         else:
             result.info("signed_content_hash_valid", "Manifest content matches its signed-content hash")
-        if sig.get("trust_scope") == "local_software_integrity":
-            local_key = signing_key_path.expanduser() if signing_key_path is not None else None
-            if local_key is None or not local_key.is_file():
+        # IMPORTANT: keyed off the signature algorithm, never off trust_scope.
+        # trust_scope is an unconstrained string inside the sealed document, so
+        # a forger who edits it picks whether their own seal gets checked.
+        if str(sig.get("algorithm")) != _LOCAL_SEAL_ALGORITHM:
+            result.error(
+                "signature_algorithm_unrecognised",
+                f"manifest_signature declares algorithm {sig.get('algorithm')!r}, which this "
+                "verifier cannot check; an unverifiable seal is not an accepted one",
+            )
+        elif signing_key_path is None:
+            result.warn(
+                "local_signing_key_not_supplied",
+                "The local HMAC key was deliberately not supplied (--public-only), so the seal "
+                "bytes were not verified; the portable Ed25519 signature still covers this manifest",
+            )
+        else:
+            local_key = signing_key_path.expanduser()
+            if not local_key.is_file():
                 result.warn(
                     "local_signing_key_unavailable",
-                    "Local HMAC key is unavailable; signature bytes were not verified",
+                    f"Local HMAC key is unavailable at {local_key}; signature bytes were not verified",
                 )
             elif not sig.get("signature_hex"):
                 result.error("signature_missing", "Local integrity seal has no signature bytes")
@@ -420,21 +757,26 @@ def verify_manifest(
                         result.error("signature_invalid", "Local HMAC integrity seal is invalid")
                     else:
                         result.info("local_signature_valid", "Local HMAC integrity seal verified")
-            result.warn(
-                "local_integrity_only",
-                "Local HMAC integrity is not hardware attestation or external identity",
-            )
-        else:
-            result.warn(
-                "signature_not_independently_verified",
-                "Signature bytes were not independently verified by this local verifier",
-            )
+        result.warn(
+            "local_integrity_only",
+            "Local HMAC integrity is not hardware attestation or external identity",
+        )
 
     portable = data.get("portable_signature")
     if not isinstance(portable, dict):
         result.warn(
             "portable_signature_missing",
             "No portable Ed25519 signature is present; public-key integrity is untrusted",
+        )
+    elif pinned_public_key(public_key_path)[0] is None:
+        # IMPORTANT: unverifiable is not tampered. portable_signature_invalid is a
+        # "changed" code, so treating a missing pin as a failure accused a
+        # recipient's untouched manifest of having moved.
+        result.warn(
+            "portable_key_unavailable",
+            f"No pinned Ed25519 public key at {pinned_public_key(public_key_path)[1]}, so the "
+            "portable signature was not verified. Pass --public-key <the producer's public key "
+            "file> to check it.",
         )
     else:
         unsigned = {
@@ -448,6 +790,7 @@ def verify_manifest(
             result.error("portable_signature_invalid", f"Ed25519 verification failed: {exc}")
         else:
             if valid:
+                result.complete("portable_signature")
                 result.info("portable_signature_valid", message)
                 result.warn(
                     "signer_identity_unverified",
@@ -455,6 +798,14 @@ def verify_manifest(
                 )
             else:
                 result.error("portable_signature_invalid", message)
+
+    _check_c2pa_claim(
+        data,
+        manifest_path,
+        result,
+        _load_trust_anchors(trust_anchor_path),
+        c2pa_asset_override,
+    )
 
     facts = data.get("session_facts")
     if isinstance(facts, dict):
@@ -552,6 +903,21 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Verify the manifest export hash against this file instead of its recorded path.",
     )
+    parser.add_argument(
+        "--trust-anchor",
+        type=Path,
+        default=DEFAULT_TRUST_ANCHOR,
+        help=(
+            "PEM trust anchor this machine holds. The C2PA claim is evaluated against it, "
+            "never against the anchor recorded inside the manifest."
+        ),
+    )
+    parser.add_argument(
+        "--c2pa-asset",
+        type=Path,
+        default=None,
+        help="Re-read the C2PA claim from this file instead of the recorded signed asset.",
+    )
     args = parser.parse_args(argv)
 
     path = args.target
@@ -569,13 +935,15 @@ def main(argv: list[str] | None = None) -> int:
                 None if args.public_only else args.signing_key,
                 args.public_key,
                 args.export,
+                args.trust_anchor,
+                args.c2pa_asset,
             )
         elif path.suffix == ".jsonl":
             log.info("Verifying hash chain: %s", path)
             result = verify_hash_chain(path)
         else:
             log.info("Attempting both manifest and hash chain verification")
-            result = verify_manifest(path, args.signing_key)
+            result = verify_manifest(path, args.signing_key, trust_anchor_path=args.trust_anchor)
             chain_result = verify_hash_chain(path)
             result.findings.extend(chain_result.findings)
     except Exception:
@@ -594,6 +962,9 @@ def main(argv: list[str] | None = None) -> int:
         else:
             log.info("OK:   [%s] %s", f.code, f.message)
 
+    for name in result.unchecked:
+        log.warning("NOT CHECKED: [%s] %s", name, _CHECK_DESCRIPTIONS[name])
+
     log.info(
         "OUTCOME: %s (local POC verifier; not a registry or identity result)",
         result.outcome,
@@ -602,14 +973,21 @@ def main(argv: list[str] | None = None) -> int:
     if result.outcome == "verified":
         log.info("PASS: %d checks, %d warnings", len(result.findings), len(result.warnings))
         return 0
-    else:
+    if result.outcome == "incomplete":
         log.error(
-            "FAIL: outcome=%s, %d errors, %d warnings",
-            result.outcome,
-            len(result.errors),
-            len(result.warnings),
+            "INCOMPLETE: nothing contradicts this manifest, but %d of %d load-bearing checks "
+            "could not run, so it is not verified",
+            len(result.unchecked),
+            len(_REQUIRED_CHECKS),
         )
         return 1
+    log.error(
+        "FAIL: outcome=%s, %d errors, %d warnings",
+        result.outcome,
+        len(result.errors),
+        len(result.warnings),
+    )
+    return 1
 
 
 if __name__ == "__main__":

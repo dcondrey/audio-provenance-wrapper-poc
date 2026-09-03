@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AcknowledgementLogic.h"
+
 #include <juce_core/juce_core.h>
 #include <atomic>
 #include <cstdint>
@@ -37,6 +39,10 @@ public:
     std::uint64_t getSendAttempts() const noexcept { return sendAttempts.load (std::memory_order_relaxed); }
     std::uint64_t getSendFailures() const noexcept { return sendFailures.load (std::memory_order_relaxed); }
     std::uint64_t getSendAccepted() const noexcept { return sendAccepted.load (std::memory_order_relaxed); }
+    std::uint64_t getMalformedAcknowledgements() const noexcept
+    {
+        return malformedAcknowledgements.load (std::memory_order_relaxed);
+    }
 
 private:
     void run() override;
@@ -57,14 +63,15 @@ private:
     std::atomic<std::uint64_t> streamRejections { 0 };
     std::atomic<std::uint64_t> streamChainBreaks { 0 };
     std::atomic<std::uint64_t> sessionMismatchesIgnored { 0 };
+    std::atomic<std::uint64_t> malformedAcknowledgements { 0 };
     std::atomic<std::uint64_t> daemonRestartsObserved { 0 };
     std::atomic<std::uint64_t> lastAcknowledgementMilliseconds { 0 };
-    std::atomic<std::int64_t> daemonInstanceHash { 0 };
+    ack::State acknowledgementState;
     std::atomic<bool> lastReceiptAccepted { false };
     std::atomic<bool> lastReceiptRejected { false };
 
     static constexpr std::uint64_t acknowledgementStaleMilliseconds = 3000;
-
+    static constexpr int maxEventBytes = 8192;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventEmitter)
 };
 

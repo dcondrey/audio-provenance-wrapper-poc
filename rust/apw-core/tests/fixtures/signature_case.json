@@ -1,0 +1,132 @@
+{
+  "seed_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "unsigned_manifest": {
+    "apw_version": "0.9.0",
+    "schema": "audio-provenance-manifest-v0",
+    "session_id": "sess-café-01",
+    "capture_session": {
+      "id": "sess-café-01",
+      "scope": "local_daemon_runtime",
+      "apw:proof_level": "directly_observed"
+    },
+    "created_at": "2025-08-31T00:26:40.500000Z",
+    "core_principle": "Never claim full DAW provenance.",
+    "daemon_receipt_acknowledgement": {
+      "protocol": "apw-local-udp-ack-v1",
+      "status": "unknown",
+      "streams": [],
+      "counters": {
+        "attempted": 0,
+        "sent": 0,
+        "failed": 0
+      },
+      "scope": "No daemon acknowledgement evidence was supplied to the builder.",
+      "apw:proof_level": "unknown_unobserved"
+    },
+    "observed_stems": [],
+    "apw:unobserved": [
+      "hidden_plugin_state",
+      "internal_preset_logic",
+      "bypassed_routing",
+      "daw_internal_processing",
+      "unverifiable_upstream_provenance"
+    ],
+    "observation_coverage": {
+      "status": "unknown_coverage",
+      "basis": "No complete observation counters were available.",
+      "counters": {},
+      "apw:proof_level": "unknown_unobserved"
+    },
+    "stem_export_association": {
+      "status": "not_established",
+      "capture_session_id": "sess-café-01",
+      "stem_ids": [],
+      "export_file_name": null,
+      "basis": "No routed-feature/export comparison was supplied. Session co-occurrence alone does not establish an audio association.",
+      "reason": "routed-feature comparison unavailable",
+      "apw:proof_level": "unknown_unobserved"
+    },
+    "claim_summary": [
+      {
+        "claim": "observation_coverage",
+        "value": "unknown_coverage",
+        "evidence": "Complete counters were not available",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      {
+        "claim": "routed_audio_observed",
+        "value": false,
+        "evidence": "No buffer_hash events were received",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      {
+        "claim": "export_file_hashed",
+        "value": false,
+        "evidence": "No export detected",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      {
+        "claim": "observed_stem_linked_to_export",
+        "value": false,
+        "evidence": "association unavailable",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      {
+        "claim": "source_category",
+        "value": "unknown",
+        "evidence": "no observed stem",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      {
+        "claim": "full_ableton_provenance",
+        "value": false,
+        "evidence": "Only audio routed through the capture plugin was observed",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      {
+        "claim": "embedded_c2pa_claim",
+        "value": "unavailable",
+        "evidence": "No C2PA claim was produced",
+        "apw:proof_level": "unknown_unobserved"
+      }
+    ],
+    "c2pa_mapping": {
+      "status": "descriptive_projection_see_c2pa_claim_for_the_signed_claim",
+      "claim_generator": "AudioProvenanceCapture/0.9.0",
+      "assertions": [
+        {
+          "label": "apw.unobserved",
+          "data": {
+            "items": [
+              "hidden_plugin_state",
+              "internal_preset_logic",
+              "bypassed_routing",
+              "daw_internal_processing",
+              "unverifiable_upstream_provenance"
+            ]
+          }
+        }
+      ]
+    },
+    "c2pa_claim": {
+      "status": "unavailable",
+      "reason": "No C2PA claim was supplied to the builder.",
+      "scope": "A real C2PA claim signed with a locally issued X.509 chain and bound to the asset by a SHA-256 hard binding. The signing act and the binding are directly observed. The signer identity is self-asserted: a 'verified' validation state means the claim chains to this machine's own root certificate, not to any external trust list, registry, or verified creator identity.",
+      "apw:proof_level": "unknown_unobserved"
+    }
+  },
+  "signature": {
+    "algorithm": "Ed25519",
+    "canonicalization": "apw-json-sort-v1",
+    "public_key_hex": "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
+    "public_key_file": "/var/folders/f6/9fydz_3n0p13t2scsr8ppdlm0000gn/T/tmp000a4wg6/demo_ed25519_public.key",
+    "signer_id": "56475aa75463474c",
+    "signature_hex": "8f9e66f3df971f20511df3e277ff475fcd00d24432b6069c0960b73799f700c73fa610aa43ec0e0db30f541963ae725e85282725e6897b113e9acafc6481740d",
+    "signed_content_hash": "0f5b909f1398e27ba3efcbe11e2a9e68c33b356ab4bd50602ebcaae0aeacc731",
+    "trust_scope": "self_generated_demo_key_integrity",
+    "signer_identity": "not_established",
+    "signer_identity_proof_level": "unknown_unobserved",
+    "apw:proof_level": "directly_observed",
+    "notes": "The public key independently verifies canonical manifest integrity. A valid self-generated signature proves key possession, not creator identity, authorship, or external trust."
+  }
+}

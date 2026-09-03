@@ -183,7 +183,55 @@
       ]
     },
     "downstream_registration_handoff": { "type": "object" },
-    "c2pa_mapping": { "type": "object" }
+    "c2pa_mapping": { "type": "object" },
+    "c2pa_claim": {
+      "description": "The signed C2PA claim. status 'unavailable' records why none was produced. Not in required: manifests written before this section existed remain valid.",
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": ["status"],
+          "properties": {
+            "status": { "enum": ["embedded", "sidecar", "unavailable"] },
+            "validation": {
+              "type": "object",
+              "required": ["state", "trust_anchor_scope"],
+              "properties": {
+                "state": {
+                  "enum": [
+                    "verified",
+                    "registered_but_changed",
+                    "mark_found_claim_not_trusted",
+                    "nothing_found"
+                  ]
+                },
+                "trust_anchor_scope": { "const": "self_issued_local_root_only" }
+              }
+            },
+            "signer": {
+              "allOf": [
+                { "$ref": "#/$defs/proofObject" },
+                {
+                  "required": ["signer_identity"],
+                  "properties": {
+                    "signer_identity": { "const": "not_established" },
+                    "apw:proof_level": { "not": { "const": "externally_verified" } }
+                  }
+                }
+              ]
+            },
+            "ingredients": {
+              "type": "array",
+              "items": {
+                "allOf": [
+                  { "$ref": "#/$defs/proofObject" },
+                  { "required": ["title", "relationship", "sha256"] }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
   },
   "additionalProperties": true
 }

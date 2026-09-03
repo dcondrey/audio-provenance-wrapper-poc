@@ -1,0 +1,31 @@
+[package]
+name = "genomark"
+description = "GenoMark-Q (genomark-lepqim-v1): dither-modulated QIM over trimmed-mean adjacent-cell log-spectral-energy differences. Blind detection, CRC-gated acceptance, exact gain invariance."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+default = ["bench"]
+bench = ["dep:audio-provenance-bench"]
+
+[dependencies]
+chacha20 = "0.10.2"
+audio-provenance-audio = { workspace = true }
+audio-provenance-bench = { workspace = true, optional = true }
+audio-provenance-core = { workspace = true }
+hkdf = { version = "0.13.0", features = ["kdf"] }
+rustfft.workspace = true
+sha2 = { workspace = true }
+thiserror = { workspace = true, features = ["std"] }
+
+[[bin]]
+name = "genomark-bench"
+path = "src/bin/genomark-bench.rs"
+required-features = ["bench"]

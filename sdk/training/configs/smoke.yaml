@@ -1,0 +1,56 @@
+# Smoke configuration: a handful of steps on synthesized audio, CPU, a couple of minutes.
+# It is NOT a training configuration. Its job is to prove every stage of the harness executes:
+# the perceptual budget, the full Phase C distortion layer including a real ffmpeg codec round
+# trip, the losses, checkpointing, ONNX export and the model card.
+run:
+  seed: 20260831
+  device: cpu
+  out_dir: runs/smoke
+  log_every: 1
+  checkpoint_every: 0
+  deterministic: true
+
+data:
+  synthetic_items: 24
+  source_clip_seconds: 6.0
+  analysis_seconds: [3.0, 3.5]
+  num_workers: 0
+
+optim:
+  batch_size: 2
+  lr: 3.0e-4
+  warmup_steps: 2
+  total_steps: 12
+  ema_decay: 0.99
+  unmarked_fraction: 0.5
+
+curriculum:
+  phase_a_end: 3
+  phase_b_end: 7
+  phase_c_end: 12
+
+rir:
+  max_order: 6
+  max_ir_seconds: 0.6
+  pool_size: 2
+  rt60_s: [0.20, 0.45]
+  source_distance_m: [0.5, 1.5]
+
+distortion:
+  capture_codec_p: 0.5
+  source_codec_p: 0.0
+
+detector:
+  window_seconds: 3.0
+  window_hop_seconds: 1.5
+  presence_window_seconds: 1.5
+  min_presence_span_seconds: 1.0
+  min_locator_seconds: 1.0
+  max_windows: 8
+
+evaluation:
+  channels: ["identity", "mp3_128", "acoustic_1m_room"]
+  corpus_items: 6
+  clip_seconds: 4.0
+  false_positive_trials: 24
+  target_false_positive_rate: 1.0e-3

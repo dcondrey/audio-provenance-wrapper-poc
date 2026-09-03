@@ -198,7 +198,9 @@ class DeterministicBundleTests(unittest.TestCase):
                     bundle_path=bundle,
                     signer=signer,
                 )
-                self.assertEqual(verify_evidence_bundle(index, bundle), [])
+                self.assertEqual(
+                    verify_evidence_bundle(index, bundle, root / "public.key"), []
+                )
                 outputs.append((index, bundle))
 
             self.assertEqual(outputs[0][0].read_bytes(), outputs[1][0].read_bytes())

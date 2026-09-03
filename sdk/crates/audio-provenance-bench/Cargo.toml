@@ -1,0 +1,29 @@
+[package]
+name = "audio-provenance-bench"
+description = "Robustness and perceptual bench for audio watermarking: channel simulators, a measurement runner, and PASS/FAIL reporting."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+default = ["native"]
+native = []
+
+[dependencies]
+audio-provenance-audio = { workspace = true }
+audio-provenance-core = { workspace = true }
+rustfft = { workspace = true }
+serde = { workspace = true, features = ["std"] }
+serde_json = { workspace = true, features = ["std"] }
+thiserror = { workspace = true, features = ["std"] }
+
+[[bin]]
+name = "audio-provenance-bench"
+path = "src/bin/audio-provenance-bench.rs"
+required-features = ["native"]

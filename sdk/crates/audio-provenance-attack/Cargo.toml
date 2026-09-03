@@ -1,0 +1,23 @@
+[package]
+name = "audio-provenance-attack"
+description = "Adversarial campaign against genomark-lepqim-v1: estimation, desynchronisation, collusion, overwriting and forgery, each with its measured perceptual cost."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+genomark = { workspace = true, features = ["bench"] }
+audio-provenance-audio = { workspace = true }
+audio-provenance-bench = { workspace = true }
+audio-provenance-core = { workspace = true }
+serde_json = { workspace = true, features = ["std"] }
+
+[[bin]]
+name = "audio-provenance-attack"
+path = "src/bin/audio-provenance-attack.rs"

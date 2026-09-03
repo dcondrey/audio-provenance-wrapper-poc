@@ -4,28 +4,56 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 import subprocess
 import sys
 import zipfile
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
-def find_manifest(session_dir: Path) -> Path:
-    manifests = sorted(
+def session_manifests(session_dir: Path) -> list[Path]:
+    return sorted(
         p
         for p in (session_dir / "manifests").glob("*_manifest.json")
         if "altered" not in p.name
     )
-    if len(manifests) != 1:
-        raise SystemExit(
-            f"expected exactly one manifest in {session_dir / 'manifests'}, found {len(manifests)}"
+
+
+def find_manifest(session_dir: Path, selected: Path | None = None) -> Path:
+    manifests = session_manifests(session_dir)
+    if not manifests:
+        raise SystemExit(f"no manifest in {session_dir / 'manifests'}")
+    if selected is not None:
+        chosen = selected if selected.is_absolute() else session_dir / "manifests" / selected.name
+        chosen = chosen.resolve()
+        if chosen not in {m.resolve() for m in manifests}:
+            listing = "\n".join(f"  {m.name}" for m in manifests)
+            raise SystemExit(
+                f"{chosen} is not one of the manifests in {session_dir / 'manifests'}:\n{listing}"
+            )
+        return chosen
+    if len(manifests) > 1:
+        newest = max(manifests, key=lambda m: m.stat().st_mtime)
+        print(
+            f"{len(manifests)} manifests in {session_dir / 'manifests'}; packaging the most "
+            f"recent one: {newest.name}. Pass --manifest to choose another.",
+            file=sys.stderr,
         )
+        return newest
     return manifests[0]
+
+
+def optional_number(value: object, spec: str) -> str:
+    """Render a manifest field that is null whenever its status is unavailable."""
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return format(value, spec)
+    return "n/a"
 
 
 def run_verifier(manifest: Path, *extra: str) -> tuple[int, str]:
@@ -59,6 +87,100 @@ def copy_manifest_tree(manifest: Path, dest: Path) -> None:
         shutil.copytree(artifacts, dest / "artifacts", dirs_exist_ok=True)
 
 
+@dataclass(frozen=True)
+class PackagedPrimaries:
+    manifest_rel: str
+    export_rel: str | None
+    evidence_rel: tuple[str, ...]
+    chain_rel: tuple[str, ...]
+    derived_audio: tuple[tuple[str, str], ...]
+
+
+def sha256_file(path: Path, byte_length: int | None = None) -> str:
+    digest = hashlib.sha256()
+    remaining = byte_length
+    with path.open("rb") as handle:
+        while remaining is None or remaining > 0:
+            chunk = handle.read(1 << 20 if remaining is None else min(1 << 20, remaining))
+            if not chunk:
+                break
+            digest.update(chunk)
+            if remaining is not None:
+                remaining -= len(chunk)
+    if remaining is not None and remaining > 0:
+        raise SystemExit(f"{path} is shorter than the {byte_length} bytes the manifest binds")
+    return digest.hexdigest()
+
+
+def copy_primaries(manifest_data: dict, manifest_rel: str, dest: Path) -> PackagedPrimaries:
+    """Copy the primary artefacts the manifest binds into the package.
+
+    IMPORTANT: the manifest is signed, so its absolute session paths are never
+    rewritten. The package carries the bytes and the README supplies the
+    overrides that let a verifier reach them.
+    """
+    export = manifest_data["export"]
+    export_rel: str | None = None
+    source = Path(str(export.get("file_path", "")))
+    if source.is_file():
+        target = dest / "export" / export["file_name"]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+        actual = sha256_file(target)
+        if actual != export["sha256"]:
+            raise SystemExit(
+                f"{source} hashes to {actual}, but the manifest binds {export['sha256']}. "
+                "Refusing to ship an export that does not match its own manifest."
+            )
+        export_rel = f"export/{export['file_name']}"
+
+    binding = manifest_data.get("evidence_binding") or {}
+    evidence_dir = Path(str(binding.get("evidence_directory", "")))
+    bindings = binding.get("evidence_files") or {
+        name: {"sha256": digest} for name, digest in (binding.get("evidence_file_hashes") or {}).items()
+    }
+    evidence_rel: list[str] = []
+    chain_rel: list[str] = []
+    for name, record in sorted(bindings.items()):
+        source = evidence_dir / str(name)
+        if not source.is_file():
+            continue
+        target = dest / "evidence" / str(name)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+        byte_length = record.get("byte_length") if isinstance(record, dict) else None
+        actual = sha256_file(target, byte_length if isinstance(byte_length, int) else None)
+        expected = record.get("sha256") if isinstance(record, dict) else None
+        if expected and actual != expected:
+            raise SystemExit(
+                f"{source} does not match the bound evidence hash for {name} "
+                f"({actual} != {expected}). Refusing to ship inconsistent evidence."
+            )
+        evidence_rel.append(f"evidence/{name}")
+        # Session-lifecycle logs are bound too, but carry no buffer_hash chain,
+        # so the chain verifier would honestly fail on them.
+        if b'"buffer_hash"' in target.read_bytes():
+            chain_rel.append(f"evidence/{name}")
+
+    derived: list[tuple[str, str]] = []
+    presentation = manifest_data.get("presentation") or {}
+    for key in ("c2pa_signed_asset", "c2pa_sidecar_manifest"):
+        rel = presentation.get(key)
+        if not rel:
+            continue
+        packaged = dest / str(rel)
+        if packaged.is_file():
+            derived.append((str(rel), sha256_file(packaged)))
+
+    return PackagedPrimaries(
+        manifest_rel=manifest_rel,
+        export_rel=export_rel,
+        evidence_rel=tuple(evidence_rel),
+        chain_rel=tuple(chain_rel),
+        derived_audio=tuple(derived),
+    )
+
+
 def proof_label(level: str) -> str:
     return level.replace("_", " ")
 
@@ -80,6 +202,7 @@ def build_readme(
     tamper_summary: list[str],
     null_manifest: dict | None,
     contents: list[str],
+    packaged: "PackagedPrimaries",
 ) -> str:
     export = manifest_data["export"]
     coverage = manifest_data["observation_coverage"]
@@ -126,11 +249,12 @@ def build_readme(
         f"| export hashed | `sha256:{export['sha256'][:16]}…` | "
         f"{proof_label(export['apw:proof_level'])} |"
     )
+    offset = optional_number(association.get("best_offset_seconds"), ".3f")
     lines.append(
         f"| stem–export association | {association['status']} "
-        f"(confidence {association['confidence']:.2f}, "
-        f"coverage {association['matched_coverage']:.2f}, "
-        f"offset {association['best_offset_seconds']:.3f}s) | "
+        f"(confidence {optional_number(association.get('confidence'), '.2f')}, "
+        f"coverage {optional_number(association.get('matched_coverage'), '.2f')}, "
+        f"offset {offset if offset == 'n/a' else offset + 's'}) | "
         f"{proof_label(association['apw:proof_level'])} |"
     )
     lines.append("")
@@ -142,6 +266,24 @@ def build_readme(
         f"- Export: `{export['file_name']}`, {export['file_size_bytes']:,} bytes, "
         f"`sha256:{export['sha256']}`"
     )
+    if packaged.export_rel:
+        lines.append(
+            f"  Shipped verbatim at `{packaged.export_rel}`; `shasum -a 256` on it "
+            "reproduces the digest above."
+        )
+    else:
+        lines.append(
+            "  The exported audio was NOT reachable at packaging time, so it is not in "
+            "this package and the digest above cannot be reproduced from these files alone."
+        )
+    for rel, digest in packaged.derived_audio:
+        lines.append(
+            f"- Derived signed asset: `{rel}`, `sha256:{digest}` — a **different** digest "
+            "on purpose. C2PA embedding appends a manifest chunk after the last original "
+            "audio byte, so the signed copy cannot hash the same as the export. The "
+            "manifest binds the export digest; the appended region is excluded from the "
+            "C2PA hard binding. Neither digest disagreeing with the other is tampering."
+        )
     lines.append(
         f"- Coverage: `{coverage['status']}` — {coverage['basis']}"
     )
@@ -189,12 +331,34 @@ def build_readme(
     lines.append("## Independent verification")
     lines.append("")
     lines.append(
-        "From a checkout of the repository (Python ≥ 3.11 with `cryptography` installed):"
+        "From a checkout of the repository (Python ≥ 3.11 with `cryptography` installed). "
+        "`PKG` is the directory holding this README; every path below resolves inside it, "
+        "so the commands work wherever the package is unpacked:"
     )
     lines.append("")
     lines.append("```sh")
-    lines.append("./scripts/verify_demo.sh <path-to>/" + export["file_name"].rsplit(".", 1)[0] + "_manifest.json --public-only")
+    lines.append("PKG=<path-to-this-directory>")
+    manifest_cmd = f'./scripts/verify_demo.sh "$PKG/{packaged.manifest_rel}" --public-only'
+    if packaged.export_rel:
+        manifest_cmd += f' \\\n    --export "$PKG/{packaged.export_rel}"'
+    lines.append(manifest_cmd)
+    for rel in packaged.chain_rel:
+        lines.append(f'./scripts/verify_demo.sh "$PKG/{rel}"')
     lines.append("```")
+    lines.append("")
+    lines.append(
+        "The first command re-hashes the manifest, its Ed25519 portable signature and the "
+        "exported audio shipped here. Each further command replays the hash chain in one "
+        "evidence file end to end."
+    )
+    lines.append("")
+    lines.append(
+        "The manifest records the author's absolute session paths, which do not exist on "
+        "your machine. `--export` overrides the export path; the evidence files are "
+        "verified directly by the commands above instead. Without those overrides the "
+        "verifier reports `export_file_unavailable` / `evidence_file_unavailable` "
+        "warnings — an absence of input, never a tamper finding."
+    )
     lines.append("")
     lines.append(
         "The evidence bundle ZIP is deterministic; `artifacts/*_bundle_index.json` is the "
@@ -204,6 +368,27 @@ def build_readme(
     )
     lines.append("")
     return "\n".join(lines)
+
+
+def verify_packaged_copy(package_dir: Path, packaged: PackagedPrimaries) -> tuple[int, str]:
+    """Run the exact commands the README prints, against the package's own files."""
+    parts: list[str] = []
+    worst = 0
+    extra: list[str] = ["--public-only"]
+    if packaged.export_rel:
+        extra += ["--export", str(package_dir / packaged.export_rel)]
+    rc, transcript = run_verifier(package_dir / packaged.manifest_rel, *extra)
+    worst = max(worst, rc)
+    parts.append(f"$ daemon.verify {packaged.manifest_rel} {' '.join(extra)}\n{transcript}")
+    for rel in packaged.chain_rel:
+        _, transcript = run_verifier(package_dir / rel)
+        # A chain file carries no manifest, so the verifier's manifest-level checks are
+        # reported unrun and it exits non-zero. The claim under test here is narrower:
+        # the hash chain in this file replays end to end.
+        if "chain_intact" not in transcript:
+            worst = max(worst, 1)
+        parts.append(f"$ daemon.verify {rel}\n{transcript}")
+    return worst, "\n".join(parts)
 
 
 def deterministic_zip(src_dir: Path, zip_path: Path) -> None:
@@ -223,13 +408,24 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("session_dir", type=Path)
     parser.add_argument("--output", type=Path, default=Path("demo-output/founder-package"))
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=None,
+        help="Manifest to package when the session holds more than one. Defaults to the newest.",
+    )
     args = parser.parse_args()
 
     session_dir = args.session_dir.resolve()
-    manifest_path = find_manifest(session_dir)
+    manifest_path = find_manifest(session_dir, args.manifest)
     manifest_data = json.loads(manifest_path.read_text())
     stem = manifest_path.name.removesuffix("_manifest.json")
     verification_path = manifest_path.parent / "artifacts" / f"{stem}_verification.json"
+    if not verification_path.is_file():
+        raise SystemExit(
+            f"{manifest_path.name} has no verifier result at {verification_path}. "
+            "The session was not sealed completely; re-export or pass --manifest."
+        )
     verification = json.loads(verification_path.read_text())
     session_kind = (
         "synthetic" if manifest_data["session_id"].startswith("synthetic-") else "capture"
@@ -240,6 +436,7 @@ def main() -> int:
     if package_dir.exists():
         raise SystemExit(f"refusing to overwrite {package_dir}")
     copy_manifest_tree(manifest_path, package_dir)
+    packaged = copy_primaries(manifest_data, manifest_path.name, package_dir)
 
     rc, transcript = run_verifier(manifest_path)
     if rc != 0:
@@ -281,17 +478,30 @@ def main() -> int:
                 null_manifest_path = find_manifest(null_sessions[-1])
                 null_manifest = json.loads(null_manifest_path.read_text())
                 copy_manifest_tree(null_manifest_path, package_dir / "honest-null")
+                copy_primaries(
+                    null_manifest, null_manifest_path.name, package_dir / "honest-null"
+                )
 
     contents = sorted(
-        str(p.relative_to(package_dir))
-        for p in package_dir.rglob("*")
-        if p.is_file()
+        [
+            str(p.relative_to(package_dir))
+            for p in package_dir.rglob("*")
+            if p.is_file()
+        ]
+        + ["README.md", "portable-verification-transcript.txt"]
     )
-    contents.insert(0, "README.md")
     readme = build_readme(
-        manifest_data, verification, session_kind, tamper_summary, null_manifest, contents
+        manifest_data, verification, session_kind, tamper_summary, null_manifest,
+        contents, packaged,
     )
     (package_dir / "README.md").write_text(readme)
+
+    portable_rc, portable_transcript = verify_packaged_copy(package_dir, packaged)
+    (package_dir / "portable-verification-transcript.txt").write_text(portable_transcript)
+    if portable_rc != 0:
+        raise SystemExit(
+            "the package does not verify from its own files:\n" + portable_transcript
+        )
 
     zip_path = package_dir.with_suffix(".zip")
     deterministic_zip(package_dir, zip_path)
@@ -301,6 +511,9 @@ def main() -> int:
         "package_zip": str(zip_path),
         "session_kind": session_kind,
         "verifier_outcome": verification["outcome"],
+        "packaged_export": packaged.export_rel,
+        "packaged_evidence": list(packaged.evidence_rel),
+        "packaged_hash_chains": list(packaged.chain_rel),
         "files": len(contents),
     }, indent=2))
     return 0

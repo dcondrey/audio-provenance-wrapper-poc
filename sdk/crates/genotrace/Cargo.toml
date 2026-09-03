@@ -1,0 +1,35 @@
+[package]
+name = "genotrace"
+description = "The recovery ladder: a bare audio file in, an admitted signed manifest and one of four provenance statuses out."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+genomark = { workspace = true }
+# IMPORTANT: the workspace entry is default-features = false, so `codecs` must be asked for by
+# name here. genotrace::ingest is the only caller of decode_bytes; without this the shipped CLI
+# decodes wav alone while capabilities() advertises mp3, flac, ogg and mp4.
+audio-provenance-audio = { workspace = true, features = ["codecs"] }
+audio-provenance-core = { workspace = true, features = ["std"] }
+audio-provenance-manifest = { workspace = true, features = ["std"] }
+audio-provenance-registry = { workspace = true }
+hex = { workspace = true, features = ["std"] }
+serde = { workspace = true, features = ["std"] }
+serde_json = { workspace = true, features = ["std"] }
+sha2 = { workspace = true }
+thiserror = { workspace = true, features = ["std"] }
+
+# IMPORTANT: std::time::Instant traps on wasm32-unknown-unknown, which would abort every
+# verification inside the ladder timer. web-time reads performance.now() there instead.
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+web-time = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
