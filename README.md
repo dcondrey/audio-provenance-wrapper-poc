@@ -1,4 +1,14 @@
-# Audio Provenance
+<!-- repo-header:start -->
+<img src="https://github.com/dcondrey.png?size=160" alt="Audio Provenance Capture logo" width="120" align="left">
+
+<h1>Audio Provenance Capture</h1>
+
+<p><strong>Proof of concept for audio provenance capture in Ableton Live using a wrapper/capture plugin, local daemon, audio hashing, and JSON manifests for stem-to-export traceability.</strong></p>
+
+<br clear="left">
+
+[![Best Practices Evidence](https://img.shields.io/badge/best%20practices-evidence%20reviewed-6a4c93?style=flat-square&labelColor=20232a)](.bestpractices.json)
+<!-- repo-header:end -->
 
 One monorepo for creation-stage capture, signed provenance records, resilient audio recovery, and
 verification.
@@ -40,11 +50,6 @@ sdk/scripts/watermark-adversarial-fast.sh
 ```
 
 ## Capture application
-
-A macOS + Ableton Live proof of concept for opt-in, routed-audio provenance.
-The system observes audio that passes through a JUCE VST3, streams evidence to
-a local daemon, hashes a detected WAV/AIFF export, and produces both a JSON
-manifest and a human-readable HTML fight card.
 
 ## Current State: v0.9 Demo Candidate, v1.0 Gate Closed
 
