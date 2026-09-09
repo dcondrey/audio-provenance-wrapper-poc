@@ -86,6 +86,15 @@ gate requires zero steady-state live-allocation growth, zero real-time allocatio
 transparency violations, and the exact `min(ready_windows, 4)` shutdown-flush bound. This automated
 gate permanently replaces the former eight-hour manual Ableton playback/offline soak requirement.
 
+Steady state is established before the measured window opens rather than assumed. The soak renders
+one-second segments and quiesces the observer thread after each until two consecutive segments
+retain nothing, then measures across the soak proper and compares both directions. The absorb phase
+exists because several allocations on the audio path are one-time lazy initialisation -- the
+observer's hash chain is empty until its first window, and JUCE interns an event's JSON property
+names the first time that variant is emitted -- and the quiesce exists because a returned audio
+callback does not mean the observer thread has finished accounting for its window. `lazy_init_bytes`
+in the run's JSON reports what the absorb phase retained; it is diagnostic, not gated.
+
 ## Ableton-specific integration checks
 
 Track duplication, bypass/re-enable specifically through Ableton's UI, freeze, flatten, export

@@ -6,6 +6,7 @@
 #include <atomic>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -337,6 +338,38 @@ void renderBlocks (HeadlessAudioDevice& device, std::uint64_t& sequence, int cou
         device.render (size, sequence++);
 }
 
+std::uint64_t renderSoakSegment (HeadlessAudioDevice& device, std::uint64_t& sequence,
+                                 std::uint64_t& callbacks, std::chrono::seconds duration)
+{
+    const auto deadline = Clock::now() + duration;
+    std::uint64_t rendered = 0;
+    while (Clock::now() < deadline)
+    {
+        const int sizes[] { 64, 127, 512, 4096, 511, 7 };
+        const auto size = sizes[callbacks % (sizeof (sizes) / sizeof (sizes[0]))];
+        device.render (size, sequence++);
+        ++callbacks;
+        ++rendered;
+    }
+    return rendered;
+}
+
+// IMPORTANT: a returned audio callback does not mean its window has been
+// accounted for; the observer hashes on its own thread. Sampling live
+// allocation while that thread is mid-window measures a transient, and a
+// difference of two such samples is not a steady-state claim.
+void quiesceObserver (const apw::AudioObserver& observer)
+{
+    auto previous = observer.getTotalWindowsHashed();
+    for (int stableChecks = 0; stableChecks < 5;)
+    {
+        std::this_thread::sleep_for (std::chrono::milliseconds (20));
+        const auto current = observer.getTotalWindowsHashed();
+        stableChecks = current == previous ? stableChecks + 1 : 0;
+        previous = current;
+    }
+}
+
 void testLifecycleMatrix()
 {
     HeadlessAudioDevice device;
@@ -465,17 +498,55 @@ void runSoak (const Options& options)
     player.setProcessor (processor.get());
 
     std::uint64_t sequence = options.seed;
-    renderBlocks (device, sequence, 64, 512); // Warm every lazy host/processor path.
-    const auto baselineBytes = liveAllocatedBytes.load (std::memory_order_relaxed);
-    const auto deadline = Clock::now() + std::chrono::seconds (options.soakSeconds);
     std::uint64_t callbacks = 0;
-    while (Clock::now() < deadline)
+
+    // Some allocations reachable from the audio path are one-time lazy
+    // initialisation rather than steady state: the observer's hash chain holds
+    // nothing until its first window, and JUCE interns an event's JSON property
+    // names in a global string pool the first time that variant is emitted, so
+    // a rare variant pays for its names whenever it first fires. Measuring
+    // across them reports initialisation as growth. A fixed warm-up is not
+    // enough to clear them -- how long it takes depends on when the content
+    // first crosses each event threshold -- so steady state is observed rather
+    // than assumed: absorb whole segments until two consecutive ones retain
+    // nothing, and only then open the measured window.
+    auto settledBytes = liveAllocatedBytes.load (std::memory_order_relaxed);
+    std::int64_t lazyInitBytes = 0;
+    int absorbSegments = 0;
+    for (int settledSegments = 0;
+         settledSegments < 2 && absorbSegments < 30;
+         ++absorbSegments)
     {
-        const int sizes[] { 64, 127, 512, 4096, 511, 7 };
-        const auto size = sizes[callbacks % (sizeof (sizes) / sizeof (sizes[0]))];
-        device.render (size, sequence++);
-        ++callbacks;
+        renderSoakSegment (device, sequence, callbacks, std::chrono::seconds (1));
+        quiesceObserver (processor->getAudioObserver());
+        const auto current = liveAllocatedBytes.load (std::memory_order_relaxed);
+        const auto delta = static_cast<std::int64_t> (current)
+            - static_cast<std::int64_t> (settledBytes);
+        lazyInitBytes += delta;
+        settledSegments = delta == 0 ? settledSegments + 1 : 0;
+        settledBytes = current;
     }
+    check (absorbSegments < 30,
+           "live allocation never settled across 30 absorb segments, retaining "
+               + std::to_string (lazyInitBytes) + " bytes");
+
+    const auto measuredCallbacks = renderSoakSegment (
+        device, sequence, callbacks, std::chrono::seconds (options.soakSeconds));
+    quiesceObserver (processor->getAudioObserver());
+    const auto measuredBytes = liveAllocatedBytes.load (std::memory_order_relaxed);
+
+    // Two-sided. The former one-sided clamp reported zero growth whenever the
+    // baseline was the larger sample, so a baseline taken with transients in
+    // flight -- which is what an unquiesced one is -- hid real movement.
+    const auto growthBytes = static_cast<std::int64_t> (measuredBytes)
+        - static_cast<std::int64_t> (settledBytes);
+    check (growthBytes == 0, "steady-state live allocation moved by "
+                                + std::to_string (growthBytes) + " bytes");
+
+    // Quiescing for the measurement drains the FIFO, so refill it faster than
+    // the observer can hash: the shutdown bound below is only worth asserting
+    // when there is more ready evidence than the flush is allowed to keep.
+    renderBlocks (device, sequence, 64, 4096);
 
     // Stopping the observer accounts every queued or partial sample and exposes the exact bounded
     // shutdown decision while the object is still inspectable.
@@ -494,10 +565,6 @@ void runSoak (const Options& options)
     check (submitted == represented,
            "FIFO conservation failed: submitted samples were neither hashed nor counted dropped");
 
-    const auto finalBytes = liveAllocatedBytes.load (std::memory_order_relaxed);
-    const auto growthBytes = finalBytes > baselineBytes ? finalBytes - baselineBytes : 0;
-    check (growthBytes == 0, "steady-state live allocation grew by "
-                                + std::to_string (growthBytes) + " bytes");
     check (device.allocationViolationCount() == 0,
            "soak observed real-time allocation(s): "
                + std::to_string (device.allocationViolationCount()));
@@ -506,7 +573,9 @@ void runSoak (const Options& options)
 
     std::cout << "{\"schema\":\"apw-headless-soak-v1\",\"seed\":" << options.seed
               << ",\"wall_seconds\":" << options.soakSeconds
-              << ",\"callbacks\":" << callbacks
+              << ",\"absorb_segments\":" << absorbSegments
+              << ",\"callbacks\":" << measuredCallbacks
+              << ",\"lazy_init_bytes\":" << lazyInitBytes
               << ",\"memory_growth_bytes\":" << growthBytes
               << ",\"realtime_allocation_violations\":"
               << device.allocationViolationCount()
