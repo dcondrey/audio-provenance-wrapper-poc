@@ -635,7 +635,7 @@ fn main() -> std::process::ExitCode {
         generated_at: options.timestamp,
         production_implementation: IMPLEMENTATION,
         experimental_implementations_included: Vec::new(),
-        feature_isolation: "classical-apw_watermark default feature; apw-watermark-neural absent from dependency graph",
+        feature_isolation: "classical-apw-watermark default feature; apw-watermark-neural absent from dependency graph",
         seed: options.seed,
         qualification_complete,
         meets_predeclared_targets,

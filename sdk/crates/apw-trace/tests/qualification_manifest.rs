@@ -96,6 +96,6 @@ fn the_production_qualification_runner_cannot_link_the_experimental_implementati
         .unwrap()
         .join("audio-provenance-nulltest/Cargo.toml");
     let text = std::fs::read_to_string(manifest).unwrap();
-    assert!(text.contains("classical-apw_watermark"));
+    assert!(text.contains("classical-apw-watermark"));
     assert!(!text.contains("apw-watermark-neural"));
 }

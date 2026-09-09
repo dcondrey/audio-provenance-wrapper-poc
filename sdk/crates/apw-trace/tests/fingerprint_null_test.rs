@@ -7,7 +7,7 @@
 //! Run it:
 //!
 //! ```text
-//! cargo test -p apw_trace --test fingerprint_null_test -- --ignored --nocapture
+//! cargo test -p apw-trace --test fingerprint_null_test -- --ignored --nocapture
 //! ```
 //!
 //! It is `#[ignore]`d because it shells out to ffmpeg and takes minutes, not because it is

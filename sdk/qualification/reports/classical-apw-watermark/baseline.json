@@ -3,7 +3,7 @@
   "generated_at": "2026-09-01T00:00:00Z",
   "production_implementation": "apw-watermark-lepqim-v1",
   "experimental_implementations_included": [],
-  "feature_isolation": "classical-apw_watermark default feature; apw-watermark-neural absent from dependency graph",
+  "feature_isolation": "classical-apw-watermark default feature; apw-watermark-neural absent from dependency graph",
   "seed": 4706347393385544497,
   "qualification_complete": true,
   "meets_predeclared_targets": false,
@@ -55,11 +55,11 @@
       "sha256": "f2e1b321c1f3da74c1b084fce9122039e140d1250a59cb0a815968f177e8a777"
     },
     {
-      "path": "qualification/reports/classical-apw_watermark/association.json",
+      "path": "qualification/reports/classical-apw-watermark/association.json",
       "sha256": "276f251b521b98a4bdf89c643aea4e2aa748678e92c69575446ab20ae4079efa"
     },
     {
-      "path": "qualification/reports/classical-apw_watermark/attacks.json",
+      "path": "qualification/reports/classical-apw-watermark/attacks.json",
       "sha256": "f673d3f84d40084d945740d4d55d46d438986b72e7031c641c8c5867af5c978b"
     },
     {

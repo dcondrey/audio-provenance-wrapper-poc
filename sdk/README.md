@@ -132,8 +132,8 @@ cargo run --release -p audio-provenance-nulltest --bin audio-provenance-qualify 
   --corpus-manifest qualification/watermark-adversarial-v1.json
 ```
 
-The checked-in baseline is `qualification/reports/classical-apw_watermark/baseline.md`. Its production
-runner has the default `classical-apw_watermark` feature and no `apw-watermark-neural` dependency; a permanent
+The checked-in baseline is `qualification/reports/classical-apw-watermark/baseline.md`. Its production
+runner has the default `classical-apw-watermark` feature and no `apw-watermark-neural` dependency; a permanent
 test rejects any accidental link to the experimental crate.
 
 ## Remote key custody and registry publication

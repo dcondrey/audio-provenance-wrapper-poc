@@ -234,11 +234,11 @@ VerifyResult { status: Verified, reason: "soft_binding_accepted",
 That is an anchored studio's name printed as `verified` over audio carrying a mark that names a
 different record. `ladder.rs` was restored byte-identically from a backup afterwards and re-verified.
 
-**Verified.** `cargo test -p apw_trace` → **31 passed, 0 failed, 1 ignored**.
-`cargo clippy -p apw_trace --all-targets --all-features -- -D warnings` clean.
-`cargo fmt --check -p apw_trace` clean. The wide run
-`cargo test -p audio-provenance-core -p audio-provenance-audio -p audio-provenance-registry -p audio-provenance-bench -p apw_watermark
--p audio-provenance-manifest -p apw_trace -p audio-provenance-cli -p audio-provenance-trust -p audio-provenance-c2pa` exits 0 with
+**Verified.** `cargo test -p apw-trace` → **31 passed, 0 failed, 1 ignored**.
+`cargo clippy -p apw-trace --all-targets --all-features -- -D warnings` clean.
+`cargo fmt --check -p apw-trace` clean. The wide run
+`cargo test -p audio-provenance-core -p audio-provenance-audio -p audio-provenance-registry -p audio-provenance-bench -p apw-watermark
+-p audio-provenance-manifest -p apw-trace -p audio-provenance-cli -p audio-provenance-trust -p audio-provenance-c2pa` exits 0 with
 **183 passed, 0 failed, 6 ignored**. **No existing test was changed**; one new file was added.
 
 `-p audio-provenance-sdk` is absent from that list, and the reason is not this audit's change. At 17:17 the

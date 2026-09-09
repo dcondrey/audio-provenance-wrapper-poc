@@ -16,7 +16,7 @@ located record with rejected association produces `changed`.
 
 Qualification update 2026-09-01: the full 1,000-item null artifact, all 13 characterization items,
 585 recording-association trials, and a fresh 591-row/all-13-item adversarial campaign are
-aggregated in `qualification/reports/classical-apw_watermark/baseline.json`. **OBSERVED:** 0/37,000 null
+aggregated in `qualification/reports/classical-apw-watermark/baseline.json`. **OBSERVED:** 0/37,000 null
 false accepts (rule-of-three 95% upper bound 0.003003), 512/740 exact locator recoveries, 268/273
 expected associations, and 298/312 material alterations rejected. The run is complete and the
 declared targets fail. `apw-watermark-neural` is absent from the production runner's dependency graph.

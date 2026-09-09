@@ -827,7 +827,7 @@ Three arms, none runnable today (section 2.7). What to build:
   (a) Q matrix twice. `crates/apw-watermark/src/bin/apw-watermark-bench.rs` runs it once over cover audio.
       Add an N-embed pre-pass, or write a wrapper that N-marks the corpus to WAV first and passes it
       via `--real-wav`:
-          CARGO_TARGET_DIR=/Volumes/C/rust-target cargo run --release -p apw_watermark \
+          CARGO_TARGET_DIR=/Volumes/C/rust-target cargo run --release -p apw-watermark \
             --bin apw-watermark-bench -- --out-dir bench-out/k3-without-n --duration 30
           # then the same with an N-marked corpus, and diff the four named rows
   (b) The 0.04 nepers bound. `training//apw-watermark-neural/qmark.py` has the statistic and the hinge but
