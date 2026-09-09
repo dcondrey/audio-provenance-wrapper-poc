@@ -1,11 +1,7 @@
 <!-- repo-header:start -->
-<img src="https://github.com/dcondrey.png?size=160" alt="Audio Provenance Capture logo" width="120" align="left">
-
 <h1>Audio Provenance Capture</h1>
 
 <p><strong>Proof of concept for audio provenance capture in Ableton Live using a wrapper/capture plugin, local daemon, audio hashing, and JSON manifests for stem-to-export traceability.</strong></p>
-
-<br clear="left">
 
 [![Best Practices Evidence](https://img.shields.io/badge/best%20practices-evidence%20reviewed-6a4c93?style=flat-square&labelColor=20232a)](.bestpractices.json)
 <!-- repo-header:end -->
