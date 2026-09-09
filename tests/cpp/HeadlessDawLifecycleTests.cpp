@@ -589,7 +589,7 @@ void runSoak (const Options& options)
     std::cout << "{\"schema\":\"apw-headless-soak-v1\",\"seed\":" << options.seed
               << ",\"wall_seconds\":" << options.soakSeconds
               << ",\"absorb_segments\":" << absorbSegments
-              << ",\"callbacks\":" << measuredCallbacks
+              << ",\"measured_callbacks\":" << measuredCallbacks
               << ",\"lazy_init_bytes\":" << lazyInitBytes
               << ",\"memory_growth_bytes\":" << growthBytes
               << ",\"realtime_allocation_violations\":"
