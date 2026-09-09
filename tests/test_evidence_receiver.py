@@ -139,6 +139,51 @@ class TaxonomyTests(unittest.TestCase):
         valid, error = validate_network_event(event)
         self.assertTrue(valid, error)
 
+    def _host_event(self, **overrides):
+        event = {
+            "event_type": "host_environment",
+            "proof_level": "directly_observed",
+            "host_recognised": True,
+            "host_name": "Ableton Live",
+            "host_executable_name": "Live",
+            "wrapper_format": "VST3",
+        }
+        event.update(overrides)
+        return event
+
+    def test_network_accepts_host_environment(self):
+        valid, error = validate_network_event(self._host_event())
+        self.assertTrue(valid, error)
+
+    def test_host_name_may_be_null_when_the_host_is_unrecognised(self):
+        valid, error = validate_network_event(
+            self._host_event(host_recognised=False, host_name=None)
+        )
+        self.assertTrue(valid, error)
+
+    def test_required_host_text_field_may_not_be_null(self):
+        valid, error = validate_network_event(self._host_event(wrapper_format=None))
+        self.assertFalse(valid)
+        self.assertIn("wrapper_format", error)
+
+    def test_host_text_field_length_boundary(self):
+        for length, expected in ((127, True), (128, True), (129, False)):
+            with self.subTest(length=length):
+                valid, _ = validate_network_event(self._host_event(host_name="a" * length))
+                self.assertIs(valid, expected)
+
+    def test_host_recognised_must_be_a_boolean(self):
+        for value in ("true", 1, None):
+            with self.subTest(value=value):
+                valid, error = validate_network_event(self._host_event(host_recognised=value))
+                self.assertFalse(valid)
+                self.assertIn("host_recognised", error)
+
+    def test_host_name_must_be_a_string(self):
+        valid, error = validate_network_event(self._host_event(host_name=42))
+        self.assertFalse(valid)
+        self.assertIn("host_name", error)
+
 
 class ReceiverTests(unittest.TestCase):
     def test_process_valid_packet(self):

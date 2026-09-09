@@ -15,6 +15,7 @@ namespace EventTypes
     inline constexpr const char* transportChange = "transport_change";
     inline constexpr const char* midiEvent       = "midi_event";
     inline constexpr const char* sessionConfig   = "session_config_change";
+    inline constexpr const char* hostEnvironment = "host_environment";
 }
 
 namespace ProofLevels

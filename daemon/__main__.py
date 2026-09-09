@@ -43,6 +43,7 @@ _LAYER_MAP: dict[str, str] = {
     "midi_event": "midi",
     "parameter_change": "midi",
     "session_config_change": "session",
+    "host_environment": "session",
 }
 
 

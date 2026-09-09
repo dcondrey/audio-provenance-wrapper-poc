@@ -228,6 +228,10 @@ public:
 
     int port() const noexcept { return portNumber; }
     std::uint64_t receipts() const noexcept { return receiptCount.load (std::memory_order_relaxed); }
+    std::uint64_t hostEnvironments() const noexcept
+    {
+        return hostEnvironmentEvents.load (std::memory_order_relaxed);
+    }
 
 private:
     void run()
@@ -248,6 +252,8 @@ private:
             const auto* object = event.getDynamicObject();
             if (object == nullptr)
                 continue;
+            if (object->getProperty ("event_type").toString() == "host_environment")
+                hostEnvironmentEvents.fetch_add (1, std::memory_order_relaxed);
             const auto sequence = static_cast<juce::int64> (
                 object->getProperty ("event_sequence"));
             auto* acknowledgement = new juce::DynamicObject();
@@ -277,6 +283,7 @@ private:
     std::thread worker;
     std::atomic<bool> stop { false };
     std::atomic<std::uint64_t> receiptCount { 0 };
+    std::atomic<std::uint64_t> hostEnvironmentEvents { 0 };
 };
 
 int reserveLoopbackPort()
@@ -395,6 +402,14 @@ void testLifecycleMatrix()
                + std::to_string (processor->getEventEmitter().getSendAttempts())
                + ", accepted " + std::to_string (processor->getEventEmitter().getSendAccepted())
                + ", daemon receipts " + std::to_string (daemonBefore.receipts()) + ")");
+
+    // Which DAW loaded this instance is observable only through this event, so
+    // the construction and prepareToPlay announcements are both load-bearing.
+    const auto announcedHost = waitUntil ([&] {
+        return daemonBefore.hostEnvironments() >= 2;
+    }, 2000);
+    check (announcedHost, "plug-in did not announce its host environment twice (observed "
+               + std::to_string (daemonBefore.hostEnvironments()) + ")");
 
     // Project save, plug-in deletion, and reload through the host state chunk.
     processor->setSigningArmed (true);

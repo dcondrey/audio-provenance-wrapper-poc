@@ -1,4 +1,5 @@
 #include "PluginProcessor.h"
+#include "ObservationEvent.h"
 #include "PluginEditor.h"
 #include "SafeJson.h"
 
@@ -31,6 +32,7 @@ AudioProvenanceCaptureAudioProcessor::AudioProvenanceCaptureAudioProcessor (int 
     : AudioProcessor (BusesProperties()
                           .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                           .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
+      observedHost (observeHost (wrapperType)),
       pluginInstanceId ("plugin-" + juce::Uuid().toString().substring (0, 12)),
       pluginCaptureSessionId ("plugin-session-" + juce::Uuid().toString().substring (0, 12)),
       eventEmitter (pluginInstanceId, pluginCaptureSessionId, "127.0.0.1", daemonPort),
@@ -38,51 +40,89 @@ AudioProvenanceCaptureAudioProcessor::AudioProvenanceCaptureAudioProcessor (int 
 {
     audioObserver.start ([this] (const juce::String& jsonEvent)
     {
-        auto parsed = apw::safejson::parseBounded (jsonEvent);
-        if (auto* object = parsed.getDynamicObject())
-        {
-            const auto sequence = eventSequence.fetch_add (1, std::memory_order_relaxed) + 1;
-            object->setProperty ("plugin_instance_id", pluginInstanceId);
-            object->setProperty ("plugin_capture_session_id", pluginCaptureSessionId);
-            object->setProperty ("event_sequence", static_cast<juce::int64> (sequence));
-
-            auto* telemetry = new juce::DynamicObject();
-            telemetry->setProperty ("buffers_submitted", static_cast<juce::int64> (audioObserver.getBuffersSubmitted()));
-            telemetry->setProperty ("samples_submitted", static_cast<juce::int64> (audioObserver.getSamplesSubmitted()));
-            telemetry->setProperty ("windows_hashed", static_cast<juce::int64> (
-                audioObserver.getTotalWindowsHashed()));
-            telemetry->setProperty ("fifo_samples_dropped", static_cast<juce::int64> (audioObserver.getFifoSamplesDropped()));
-            telemetry->setProperty ("fifo_windows_dropped", static_cast<juce::int64> (audioObserver.getFifoWindowsDropped()));
-            telemetry->setProperty ("midi_events_dropped", static_cast<juce::int64> (audioObserver.getMidiEventsDropped()));
-            telemetry->setProperty ("midi_unsupported_dropped", static_cast<juce::int64> (audioObserver.getUnsupportedMidiEventsDropped()));
-            telemetry->setProperty ("midi_cc_subthreshold_discarded", static_cast<juce::int64> (
-                audioObserver.getSubThresholdCcChangesDiscarded()));
-            telemetry->setProperty ("bypassed_buffers", static_cast<juce::int64> (
-                audioObserver.getBypassedBuffers()));
-            telemetry->setProperty ("bypassed_samples", static_cast<juce::int64> (
-                audioObserver.getBypassedSamples()));
-            telemetry->setProperty ("observation_discontinuities", static_cast<juce::int64> (
-                audioObserver.getObservationDiscontinuities()));
-            telemetry->setProperty ("events_prepared", static_cast<juce::int64> (sequence));
-            telemetry->setProperty ("udp_sends_attempted", static_cast<juce::int64> (eventEmitter.getSendAttempts() + 1));
-            telemetry->setProperty ("udp_sends_failed", static_cast<juce::int64> (eventEmitter.getSendFailures()));
-            const auto acknowledgement = eventEmitter.getAcknowledgementSnapshot();
-            telemetry->setProperty ("daemon_acknowledgements_processed", static_cast<juce::int64> (
-                acknowledgement.acknowledgementsProcessed));
-            telemetry->setProperty ("daemon_highest_accepted_sequence", static_cast<juce::int64> (
-                acknowledgement.highestAcceptedSequence));
-            telemetry->setProperty ("daemon_highest_contiguous_sequence", static_cast<juce::int64> (
-                acknowledgement.highestContiguousSequence));
-            telemetry->setProperty ("daemon_ack_session_mismatches_ignored", static_cast<juce::int64> (
-                acknowledgement.sessionMismatchesIgnored));
-            telemetry->setProperty ("daemon_malformed_acknowledgements", static_cast<juce::int64> (
-                eventEmitter.getMalformedAcknowledgements()));
-            telemetry->setProperty ("daemon_restarts_observed", static_cast<juce::int64> (
-                acknowledgement.daemonRestartsObserved));
-            object->setProperty ("telemetry", juce::var (telemetry));
-            eventEmitter.sendEvent (juce::JSON::toString (parsed, true));
-        }
+        emitEnrichedEvent (jsonEvent);
     });
+
+    emitHostEnvironment();
+}
+
+void AudioProvenanceCaptureAudioProcessor::emitEnrichedEvent (const juce::String& jsonEvent)
+{
+    auto parsed = apw::safejson::parseBounded (jsonEvent);
+    if (auto* object = parsed.getDynamicObject())
+    {
+        const auto sequence = eventSequence.fetch_add (1, std::memory_order_relaxed) + 1;
+        object->setProperty ("plugin_instance_id", pluginInstanceId);
+        object->setProperty ("plugin_capture_session_id", pluginCaptureSessionId);
+        object->setProperty ("event_sequence", static_cast<juce::int64> (sequence));
+
+        auto* telemetry = new juce::DynamicObject();
+        telemetry->setProperty ("buffers_submitted", static_cast<juce::int64> (audioObserver.getBuffersSubmitted()));
+        telemetry->setProperty ("samples_submitted", static_cast<juce::int64> (audioObserver.getSamplesSubmitted()));
+        telemetry->setProperty ("windows_hashed", static_cast<juce::int64> (
+            audioObserver.getTotalWindowsHashed()));
+        telemetry->setProperty ("fifo_samples_dropped", static_cast<juce::int64> (audioObserver.getFifoSamplesDropped()));
+        telemetry->setProperty ("fifo_windows_dropped", static_cast<juce::int64> (audioObserver.getFifoWindowsDropped()));
+        telemetry->setProperty ("midi_events_dropped", static_cast<juce::int64> (audioObserver.getMidiEventsDropped()));
+        telemetry->setProperty ("midi_unsupported_dropped", static_cast<juce::int64> (audioObserver.getUnsupportedMidiEventsDropped()));
+        telemetry->setProperty ("midi_cc_subthreshold_discarded", static_cast<juce::int64> (
+            audioObserver.getSubThresholdCcChangesDiscarded()));
+        telemetry->setProperty ("bypassed_buffers", static_cast<juce::int64> (
+            audioObserver.getBypassedBuffers()));
+        telemetry->setProperty ("bypassed_samples", static_cast<juce::int64> (
+            audioObserver.getBypassedSamples()));
+        telemetry->setProperty ("observation_discontinuities", static_cast<juce::int64> (
+            audioObserver.getObservationDiscontinuities()));
+        telemetry->setProperty ("events_prepared", static_cast<juce::int64> (sequence));
+        telemetry->setProperty ("udp_sends_attempted", static_cast<juce::int64> (eventEmitter.getSendAttempts() + 1));
+        telemetry->setProperty ("udp_sends_failed", static_cast<juce::int64> (eventEmitter.getSendFailures()));
+        const auto acknowledgement = eventEmitter.getAcknowledgementSnapshot();
+        telemetry->setProperty ("daemon_acknowledgements_processed", static_cast<juce::int64> (
+            acknowledgement.acknowledgementsProcessed));
+        telemetry->setProperty ("daemon_highest_accepted_sequence", static_cast<juce::int64> (
+            acknowledgement.highestAcceptedSequence));
+        telemetry->setProperty ("daemon_highest_contiguous_sequence", static_cast<juce::int64> (
+            acknowledgement.highestContiguousSequence));
+        telemetry->setProperty ("daemon_ack_session_mismatches_ignored", static_cast<juce::int64> (
+            acknowledgement.sessionMismatchesIgnored));
+        telemetry->setProperty ("daemon_malformed_acknowledgements", static_cast<juce::int64> (
+            eventEmitter.getMalformedAcknowledgements()));
+        telemetry->setProperty ("daemon_restarts_observed", static_cast<juce::int64> (
+            acknowledgement.daemonRestartsObserved));
+        object->setProperty ("telemetry", juce::var (telemetry));
+        eventEmitter.sendEvent (juce::JSON::toString (parsed, true));
+    }
+}
+
+AudioProvenanceCaptureAudioProcessor::HostObservation
+AudioProvenanceCaptureAudioProcessor::observeHost (WrapperType wrapper)
+{
+    const juce::PluginHostType host;
+    HostObservation observation;
+
+    // IMPORTANT: getHostDescription() returns the literal "Unknown" for any host
+    // outside JUCE's table, so emitting it as a name would dress an absence as an
+    // observation. Recognition is a separate field and the name is empty without it.
+    observation.recognised = host.type != juce::PluginHostType::UnknownHost;
+    if (observation.recognised)
+        observation.name = juce::String (host.getHostDescription());
+
+    observation.executableName =
+        juce::File::getSpecialLocation (juce::File::hostApplicationPath).getFileName();
+    observation.wrapperFormat = juce::String (getWrapperTypeDescription (wrapper));
+    return observation;
+}
+
+void AudioProvenanceCaptureAudioProcessor::emitHostEnvironment()
+{
+    emitEnrichedEvent (apw::buildJsonEvent (
+        apw::EventTypes::hostEnvironment, getMonotonicMilliseconds(), 0,
+        {
+            { "host_recognised", observedHost.recognised },
+            { "host_name", observedHost.recognised ? juce::var (observedHost.name) : juce::var() },
+            { "host_executable_name", observedHost.executableName },
+            { "wrapper_format", observedHost.wrapperFormat }
+        }));
 }
 
 AudioProvenanceCaptureAudioProcessor::~AudioProvenanceCaptureAudioProcessor()
@@ -105,6 +145,10 @@ void AudioProvenanceCaptureAudioProcessor::prepareToPlay (double sampleRate, int
                                         samplesPerBlock);
 
     doubleConversionBuffer.setSize (getTotalNumInputChannels(), samplesPerBlock);
+
+    // Re-announced per session start so a daemon that was not listening when
+    // this instance was constructed still learns which host produced the stream.
+    emitHostEnvironment();
 }
 
 void AudioProvenanceCaptureAudioProcessor::releaseResources()

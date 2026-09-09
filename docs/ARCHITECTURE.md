@@ -192,6 +192,7 @@ Unknown coverage remains `unknown_unobserved`.
 | `transport_change`      | directly_observed  | plugin    |
 | `midi_event`            | directly_observed  | plugin    |
 | `session_config_change` | directly_observed  | plugin    |
+| `host_environment`      | directly_observed  | plugin    |
 | `sample_file_observed`  | directly_observed  | daemon    |
 | `ingredient_correlation`| inferred           | daemon    |
 

@@ -46,7 +46,11 @@ bool EventEmitter::sendEvent (const juce::String& jsonEvent)
         sendFailures.fetch_add (1, std::memory_order_relaxed);
         return false;
     }
-    const auto written = socket.write (targetHost, targetPort, jsonEvent.toRawUTF8(), expected);
+    const auto written = [this, &jsonEvent, expected]
+    {
+        const juce::ScopedLock lock (sendLock);
+        return socket.write (targetHost, targetPort, jsonEvent.toRawUTF8(), expected);
+    }();
     if (written == expected)
     {
         sendAccepted.fetch_add (1, std::memory_order_relaxed);

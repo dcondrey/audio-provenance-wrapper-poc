@@ -95,6 +95,22 @@ private:
 
     static bool hasSafeStateEnvelope (const void* data, int sizeInBytes) noexcept;
 
+    struct HostObservation
+    {
+        bool recognised = false;
+        juce::String name;
+        juce::String executableName;
+        juce::String wrapperFormat;
+    };
+
+    static HostObservation observeHost (WrapperType wrapper);
+
+    // IMPORTANT: every event reaching the daemon must pass through here. The
+    // daemon tracks stream continuity by event_sequence, so an event emitted
+    // around this method opens a permanent gap in the chain.
+    void emitEnrichedEvent (const juce::String& jsonEvent);
+    void emitHostEnvironment();
+
     std::atomic<int> observedChannelCount { 0 };
     std::atomic<int> observedSampleRateHz { 0 };
     std::atomic<int> observedBufferSizeSamples { 0 };
@@ -102,6 +118,11 @@ private:
     std::atomic<std::uint64_t> lastNonSilentBufferSeenMilliseconds { 0 };
     std::atomic<bool> lastBufferHadAudio { false };
     std::atomic<bool> lastCallbackWasBypassed { false };
+
+    // The host process cannot change for the life of this instance, so it is
+    // observed once. Re-querying it per prepareToPlay retains allocations that
+    // the headless soak gate counts as steady-state growth.
+    const HostObservation observedHost;
 
     // Granular observation pipeline (identifiers and emitter must outlive observer).
     const juce::String pluginInstanceId;

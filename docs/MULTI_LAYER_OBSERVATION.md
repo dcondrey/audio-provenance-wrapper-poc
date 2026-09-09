@@ -80,6 +80,7 @@ computes per-window (4096 sample) features.
 | `transport_change` | The DAW started/stopped playback, changed BPM, entered record mode |
 | `midi_event` | A MIDI note or controller message passed through the plugin |
 | `session_config_change` | Sample rate, channel count, or buffer size changed |
+| `host_environment` | Which host application loaded the plugin, and in which plugin format |
 
 **Proof level:** `directly_observed`
 
@@ -767,6 +768,7 @@ support VST3 (or AU/CLAP/AAX with corresponding plugin builds).
 | `transport_change` | `transport_state` |
 | `midi_event` | `midi_event_type`, `midi_channel` |
 | `session_config_change` | `sample_rate_hz`, `channel_count` |
+| `host_environment` | `host_recognised`, `wrapper_format` |
 
 ### Layer 2: Input Capture (directly_observed / inferred)
 

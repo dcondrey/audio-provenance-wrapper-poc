@@ -49,6 +49,11 @@ private:
     void processAcknowledgement (const juce::String& jsonAcknowledgement);
 
     juce::DatagramSocket socket;
+    // IMPORTANT: DatagramSocket::write caches the resolved address in members it
+    // rewrites and frees without a lock, so concurrent senders can double-free or
+    // leak that addrinfo. Events now originate on the observer thread and on the
+    // message thread, so sends are serialised here.
+    juce::CriticalSection sendLock;
     const juce::String expectedPluginInstanceId;
     const juce::String expectedPluginCaptureSessionId;
     juce::String targetHost;

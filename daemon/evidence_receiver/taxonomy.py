@@ -23,6 +23,7 @@ class EventType(str, Enum):
     PROJECT_DIFF = "project_diff"
     PROJECT_SAVE_DETECTED = "project_save_detected"
     LAYER_UNAVAILABLE = "layer_unavailable"
+    HOST_ENVIRONMENT = "host_environment"
 
 
 class ProofLevel(str, Enum):
@@ -63,6 +64,7 @@ REQUIRED_FIELDS: dict[str, list[str]] = {
     EventType.PROJECT_DIFF: ["clips_added", "clips_removed"],
     EventType.PROJECT_SAVE_DETECTED: ["file_hash"],
     EventType.LAYER_UNAVAILABLE: ["layer", "reason"],
+    EventType.HOST_ENVIRONMENT: ["host_recognised", "wrapper_format"],
 }
 
 _VALID_EVENT_TYPES = frozenset(e.value for e in EventType)
@@ -91,6 +93,7 @@ NETWORK_PROOF_LEVEL_CAP: dict[str, str] = {
     EventType.SESSION_CONFIG: ProofLevel.DIRECTLY_OBSERVED,
     EventType.SPECTRAL_PROFILE_CHANGE: ProofLevel.DIRECTLY_OBSERVED,
     EventType.PARAMETER_CHANGE: ProofLevel.DIRECTLY_OBSERVED,
+    EventType.HOST_ENVIRONMENT: ProofLevel.DIRECTLY_OBSERVED,
 }
 
 # IMPORTANT: downstream consumers (status readiness, audio association, sample
@@ -112,6 +115,18 @@ NETWORK_NUMERIC_FIELDS: dict[str, tuple[str, ...]] = {
         "cc_number", "change_count", "midi_channel", "start_value", "end_value",
     ),
     EventType.MIDI_EVENT: ("midi_channel",),
+}
+
+# IMPORTANT: honesty constraint 1 for free text. These fields name the host
+# application observed around the plug-in and are rendered into the signed
+# manifest, so an unauthenticated socket must not be able to write an unbounded
+# or non-string value into a signed claim.
+MAX_TEXT_FIELD_CHARS = 128
+NETWORK_TEXT_FIELDS: dict[str, tuple[str, ...]] = {
+    EventType.HOST_ENVIRONMENT: ("host_name", "host_executable_name", "wrapper_format"),
+}
+NETWORK_BOOLEAN_FIELDS: dict[str, tuple[str, ...]] = {
+    EventType.HOST_ENVIRONMENT: ("host_recognised",),
 }
 
 
@@ -228,6 +243,23 @@ def validate_network_event(event: Mapping[str, object]) -> tuple[bool, str]:
         value = event.get(field)
         if value is not None and not _is_finite_number(value):
             return False, f"Field '{field}' must be a finite number for {event_type}"
+    required = REQUIRED_FIELDS.get(event_type, [])
+    for field in NETWORK_TEXT_FIELDS.get(event_type, ()):
+        value = event.get(field)
+        # A null is honest for an optional field (an unrecognised host has no
+        # name) but never for one the event type declares as required.
+        if value is None and field not in required:
+            continue
+        if not isinstance(value, str) or len(value) > MAX_TEXT_FIELD_CHARS:
+            return False, (
+                f"Field '{field}' must be a string of at most "
+                f"{MAX_TEXT_FIELD_CHARS} characters for {event_type}"
+            )
+
+    for field in NETWORK_BOOLEAN_FIELDS.get(event_type, ()):
+        if not isinstance(event.get(field), bool):
+            return False, f"Field '{field}' must be a boolean for {event_type}"
+
     if event_type == EventType.BUFFER_HASH:
         envelope = event.get("energy_envelope")
         if envelope is not None and (
