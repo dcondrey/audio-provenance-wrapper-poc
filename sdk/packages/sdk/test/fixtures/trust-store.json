@@ -2,7 +2,7 @@
   "format": "audio-provenance-trust-store-v0",
   "anchors": [
     {
-      "signer_id": "604ca4627a21158b",
+      "signer_id": "1a47831d461f7581",
       "identity": "Signal Room Studios",
       "authority": "studio-ca"
     }
