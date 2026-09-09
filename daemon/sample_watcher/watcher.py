@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 import argparse
+import array
 import json
 import logging
 import math
 import re
-import struct
 import subprocess
+import sys
 import time
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable, Iterator
 
 from daemon.common import append_jsonl, sha256_file_with_size, utc_timestamp
 
@@ -25,6 +26,15 @@ DEFAULT_NOTES = [
     "No claim is made that this file was placed on a specific Ableton track.",
 ]
 
+_FINGERPRINT_FRAME_CAP = 44_100
+_AFINFO_TIMEOUT_SECONDS = 5
+
+_AFINFO_DURATION = re.compile(r"estimated duration:\s*([0-9.]+)\s*sec")
+_AFINFO_CHANNELS = re.compile(r"Data format:\s*(\d+)\s+ch")
+_AFINFO_RATE = re.compile(r"Data format:\s*\d+\s+ch,\s*([0-9.]+)\s+Hz")
+
+MetadataDict = dict[str, "float | int | None"]
+
 
 @dataclass(frozen=True)
 class FileSignature:
@@ -37,143 +47,163 @@ def is_audio_file(path: Path) -> bool:
 
 
 def iter_audio_files(watch_dir: Path, recursive: bool) -> Iterable[Path]:
-    pattern = "**/*" if recursive else "*"
-    for path in sorted(watch_dir.glob(pattern)):
-        if is_audio_file(path):
-            yield path
+    matches = watch_dir.glob("**/*" if recursive else "*")
+    return (candidate for candidate in sorted(matches) if is_audio_file(candidate))
 
 
 def file_signature(path: Path) -> FileSignature:
-    stat_result = path.stat()
-    return FileSignature(size_bytes=stat_result.st_size, modified_ns=stat_result.st_mtime_ns)
+    info = path.stat()
+    return FileSignature(size_bytes=info.st_size, modified_ns=info.st_mtime_ns)
 
 
-def empty_audio_metadata() -> dict[str, float | int | None]:
+def empty_audio_metadata() -> MetadataDict:
+    return {"duration_seconds": None, "sample_rate": None, "channels": None}
+
+
+def _metadata_from_rate_and_frames(rate: int, frames: int, channels: int) -> MetadataDict:
     return {
-        "duration_seconds": None,
-        "sample_rate": None,
-        "channels": None,
+        "duration_seconds": frames / rate if rate else None,
+        "sample_rate": rate or None,
+        "channels": channels,
     }
 
 
-def extract_audio_metadata(path: Path) -> dict[str, float | int | None]:
-    suffix = path.suffix.lower()
-    if suffix == ".wav":
-        return _extract_wave_metadata(path)
-    if suffix in {".aif", ".aiff"}:
-        return _extract_aiff_metadata(path)
-    return _extract_afinfo_metadata(path)
-
-
-def _extract_wave_metadata(path: Path) -> dict[str, float | int | None]:
+def _read_wave(path: Path) -> MetadataDict:
     import wave
 
-    metadata = empty_audio_metadata()
     try:
-        with wave.open(str(path), "rb") as audio_file:
-            sample_rate = audio_file.getframerate()
-            frames = audio_file.getnframes()
-            metadata["sample_rate"] = sample_rate or None
-            metadata["channels"] = audio_file.getnchannels()
-            metadata["duration_seconds"] = frames / sample_rate if sample_rate else None
+        with wave.open(str(path), "rb") as handle:
+            return _metadata_from_rate_and_frames(
+                handle.getframerate(), handle.getnframes(), handle.getnchannels()
+            )
     except (EOFError, OSError, wave.Error):
-        return _extract_afinfo_metadata(path)
-    return metadata
+        return _read_afinfo(path)
 
 
-def _extract_aiff_metadata(path: Path) -> dict[str, float | int | None]:
+def _read_aiff(path: Path) -> MetadataDict:
     try:
         with warnings.catch_warnings():
+            # aifc is deprecated and removed in newer CPython; fall through to
+            # afinfo rather than letting the import warning surface to callers.
             warnings.simplefilter("ignore", DeprecationWarning)
             import aifc
     except ModuleNotFoundError:
-        return _extract_afinfo_metadata(path)
+        return _read_afinfo(path)
 
-    metadata = empty_audio_metadata()
     try:
-        with aifc.open(str(path), "rb") as audio_file:
-            sample_rate = audio_file.getframerate()
-            frames = audio_file.getnframes()
-            metadata["sample_rate"] = sample_rate or None
-            metadata["channels"] = audio_file.getnchannels()
-            metadata["duration_seconds"] = frames / sample_rate if sample_rate else None
+        with aifc.open(str(path), "rb") as handle:
+            return _metadata_from_rate_and_frames(
+                handle.getframerate(), handle.getnframes(), handle.getnchannels()
+            )
     except (EOFError, OSError, aifc.Error):
-        return _extract_afinfo_metadata(path)
-    return metadata
+        return _read_afinfo(path)
 
 
-def _extract_afinfo_metadata(path: Path) -> dict[str, float | int | None]:
+def _read_afinfo(path: Path) -> MetadataDict:
+    """Last resort: shell out to macOS `afinfo` for anything the stdlib cannot open."""
     metadata = empty_audio_metadata()
     try:
-        result = subprocess.run(
+        completed = subprocess.run(
             ["afinfo", str(path)],
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=_AFINFO_TIMEOUT_SECONDS,
         )
     except (FileNotFoundError, OSError, subprocess.TimeoutExpired):
         return metadata
 
-    if result.returncode != 0:
+    if completed.returncode != 0:
         return metadata
 
-    duration_match = re.search(r"estimated duration:\s*([0-9.]+)\s*sec", result.stdout)
-    channels_match = re.search(r"Data format:\s*(\d+)\s+ch", result.stdout)
-    sample_rate_match = re.search(r"Data format:\s*\d+\s+ch,\s*([0-9.]+)\s+Hz", result.stdout)
+    report = completed.stdout
+    duration = _AFINFO_DURATION.search(report)
+    if duration:
+        metadata["duration_seconds"] = float(duration.group(1))
 
-    if duration_match:
-        metadata["duration_seconds"] = float(duration_match.group(1))
-    if sample_rate_match:
-        sample_rate = float(sample_rate_match.group(1))
-        metadata["sample_rate"] = int(sample_rate) if sample_rate.is_integer() else sample_rate
-    if channels_match:
-        metadata["channels"] = int(channels_match.group(1))
+    rate = _AFINFO_RATE.search(report)
+    if rate:
+        as_float = float(rate.group(1))
+        metadata["sample_rate"] = int(as_float) if as_float.is_integer() else as_float
+
+    channels = _AFINFO_CHANNELS.search(report)
+    if channels:
+        metadata["channels"] = int(channels.group(1))
 
     return metadata
 
 
+_METADATA_READERS: dict[str, Callable[[Path], MetadataDict]] = {
+    ".wav": _read_wave,
+    ".aif": _read_aiff,
+    ".aiff": _read_aiff,
+}
+
+
+def extract_audio_metadata(path: Path) -> MetadataDict:
+    return _METADATA_READERS.get(path.suffix.lower(), _read_afinfo)(path)
+
+
+def _no_fingerprint() -> dict[str, float | None]:
+    return {"rms": None, "zero_crossing_rate": None}
+
+
+def _mono_samples(raw: bytes, channels: int) -> Iterator[float]:
+    """Interleaved signed 16-bit LE frames to a normalised mono stream."""
+    pcm = array.array("h")
+    pcm.frombytes(raw)
+    if sys.byteorder == "big":
+        pcm.byteswap()
+
+    if channels <= 1:
+        return (sample / 32768.0 for sample in pcm)
+    return (
+        sum(pcm[offset : offset + channels]) / (channels * 32768.0)
+        for offset in range(0, len(pcm) - channels + 1, channels)
+    )
+
+
 def compute_audio_fingerprint(path: Path) -> dict[str, float | None]:
+    """Cheap perceptual summary. WAV/PCM16 only; anything else reports nothing.
+
+    Deliberately not a provenance binding. It exists so the correlation engine
+    can tell two unrelated imports apart, not so anything can be identified.
+    """
     if path.suffix.lower() != ".wav":
-        return {"rms": None, "zero_crossing_rate": None}
+        return _no_fingerprint()
 
     try:
         import wave
 
-        with wave.open(str(path), "rb") as wf:
-            nframes = wf.getnframes()
-            nchannels = wf.getnchannels()
-            sampwidth = wf.getsampwidth()
-            if sampwidth != 2 or nframes == 0:
-                return {"rms": None, "zero_crossing_rate": None}
+        with wave.open(str(path), "rb") as handle:
+            if handle.getsampwidth() != 2 or handle.getnframes() == 0:
+                return _no_fingerprint()
+            channels = handle.getnchannels()
+            raw = handle.readframes(min(handle.getnframes(), _FINGERPRINT_FRAME_CAP))
 
-            max_frames = min(nframes, 44100)
-            raw = wf.readframes(max_frames)
-            total_samples = len(raw) // 2
-            samples = struct.unpack(f"<{total_samples}h", raw)
+        count = 0
+        energy = 0.0
+        crossings = 0
+        previous_sign = None
+        for sample in _mono_samples(raw, channels):
+            count += 1
+            energy += sample * sample
+            sign = sample >= 0
+            if previous_sign is not None and sign != previous_sign:
+                crossings += 1
+            previous_sign = sign
 
-            if nchannels > 1:
-                mono = [
-                    sum(samples[i : i + nchannels]) / nchannels
-                    for i in range(0, len(samples), nchannels)
-                ]
-            else:
-                mono = list(samples)
+        if count == 0:
+            return _no_fingerprint()
 
-            if not mono:
-                return {"rms": None, "zero_crossing_rate": None}
-
-            norm = [s / 32768.0 for s in mono]
-            rms = math.sqrt(sum(s * s for s in norm) / len(norm))
-            crossings = sum(
-                1 for i in range(1, len(norm)) if (norm[i] >= 0) != (norm[i - 1] >= 0)
-            )
-            zcr = crossings / (len(norm) - 1) if len(norm) > 1 else 0.0
-
-            return {"rms": round(rms, 6), "zero_crossing_rate": round(zcr, 6)}
+        rate = crossings / (count - 1) if count > 1 else 0.0
+        return {
+            "rms": round(math.sqrt(energy / count), 6),
+            "zero_crossing_rate": round(rate, 6),
+        }
     except Exception:
         log.debug("Audio fingerprint extraction failed for %s", path, exc_info=True)
-        return {"rms": None, "zero_crossing_rate": None}
+        return _no_fingerprint()
 
 
 def build_sample_file_event(
@@ -181,40 +211,47 @@ def build_sample_file_event(
     observed_at: str | None = None,
     expected_signature: FileSignature | None = None,
 ) -> dict[str, object]:
-    resolved_path = path.expanduser().resolve()
-    stat_result = resolved_path.stat()
-    created_timestamp = getattr(stat_result, "st_birthtime", stat_result.st_ctime)
+    """Build one `sample_file_observed` record, or refuse.
+
+    IMPORTANT: `directly_observed` is a claim about a file that held still. The
+    stat taken here brackets every read below, and the closing stat must agree
+    with it. A write landing anywhere inside that window means the hash, the
+    metadata and the fingerprint may describe different bytes, so the record is
+    refused rather than emitted with a proof level it has not earned.
+    """
+    target = path.expanduser().resolve()
+    opening = target.stat()
+
     if expected_signature is not None and (
-        stat_result.st_size != expected_signature.size_bytes
-        or stat_result.st_mtime_ns != expected_signature.modified_ns
+        opening.st_size != expected_signature.size_bytes
+        or opening.st_mtime_ns != expected_signature.modified_ns
     ):
-        raise OSError(f"{resolved_path} changed after its stability check; evidence not recorded")
+        raise OSError(f"{target} changed after its stability check; evidence not recorded")
 
-    # IMPORTANT: a directly_observed record must be internally consistent.
-    # Every read of the file (hash, metadata, fingerprint) happens before the
-    # validating re-stat; a write landing anywhere in between voids the record.
-    sha256, hashed_bytes = sha256_file_with_size(resolved_path)
-    audio_metadata = extract_audio_metadata(resolved_path)
-    audio_fingerprint = compute_audio_fingerprint(resolved_path)
-    post_stat = resolved_path.stat()
+    digest, hashed_bytes = sha256_file_with_size(target)
+    audio_metadata = extract_audio_metadata(target)
+    audio_fingerprint = compute_audio_fingerprint(target)
+
+    closing = target.stat()
     if (
-        hashed_bytes != stat_result.st_size
-        or post_stat.st_size != stat_result.st_size
-        or post_stat.st_mtime_ns != stat_result.st_mtime_ns
+        hashed_bytes != opening.st_size
+        or closing.st_size != opening.st_size
+        or closing.st_mtime_ns != opening.st_mtime_ns
     ):
-        raise OSError(f"{resolved_path} changed while being read; evidence not recorded")
+        raise OSError(f"{target} changed while being read; evidence not recorded")
 
+    suffix = target.suffix.lower()
     return {
         "event_type": "sample_file_observed",
         "proof_level": "directly_observed",
-        "file_name": resolved_path.name,
-        "file_path": str(resolved_path),
-        "sha256": sha256,
-        "format": resolved_path.suffix.lower().lstrip("."),
-        "file_extension": resolved_path.suffix.lower(),
+        "file_name": target.name,
+        "file_path": str(target),
+        "sha256": digest,
+        "format": suffix.lstrip("."),
+        "file_extension": suffix,
         "file_size_bytes": hashed_bytes,
-        "created_at": utc_timestamp(created_timestamp),
-        "modified_at": utc_timestamp(stat_result.st_mtime),
+        "created_at": utc_timestamp(getattr(opening, "st_birthtime", opening.st_ctime)),
+        "modified_at": utc_timestamp(opening.st_mtime),
         "observed_at": observed_at or utc_timestamp(),
         "audio_metadata": audio_metadata,
         "audio_fingerprint": audio_fingerprint,
@@ -227,6 +264,12 @@ def append_event(event: dict[str, object], evidence_path: Path) -> None:
 
 
 class SampleWatcher:
+    """Polls a folder and emits one evidence record per settled audio file.
+
+    A file is recorded only after its signature repeats for `stable_polls`
+    consecutive scans, so a sample still being written is not hashed mid-flight.
+    """
+
     def __init__(
         self,
         watch_dir: Path,
@@ -240,65 +283,80 @@ class SampleWatcher:
         self.poll_interval_seconds = poll_interval_seconds
         self.stable_polls = max(1, stable_polls)
         self.recursive = recursive
+        # Keyed by resolved path. Every one of these is pruned against the live
+        # listing on each scan; a bounce/delete/re-bounce loop would otherwise
+        # grow them without bound for the lifetime of the daemon.
         self._seen: dict[str, FileSignature] = {}
         self._pending: dict[str, tuple[FileSignature, int]] = {}
         self._read_failed: set[str] = set()
 
-    def mark_existing_seen(self) -> None:
+    def _ensure_watch_dir(self) -> None:
         self.watch_dir.mkdir(parents=True, exist_ok=True)
+
+    def mark_existing_seen(self) -> None:
+        self._ensure_watch_dir()
         for path in iter_audio_files(self.watch_dir, self.recursive):
             self._seen[str(path.resolve())] = file_signature(path)
 
+    def _forget_vanished(self, live_keys: set[str]) -> None:
+        for key in list(self._seen):
+            if key not in live_keys:
+                del self._seen[key]
+        for key in list(self._pending):
+            if key not in live_keys:
+                del self._pending[key]
+        self._read_failed &= live_keys
+
+    def _settled(self, key: str, signature: FileSignature) -> bool:
+        """Advance the stability counter, reporting whether the file has settled."""
+        previous, count = self._pending.get(key, (signature, 0))
+        count = count + 1 if previous == signature else 1
+        self._pending[key] = (signature, count)
+        return count >= self.stable_polls
+
     def scan_once(self) -> list[dict[str, object]]:
-        self.watch_dir.mkdir(parents=True, exist_ok=True)
-        observed_events: list[dict[str, object]] = []
+        self._ensure_watch_dir()
+        emitted: list[dict[str, object]] = []
 
-        current_paths = list(iter_audio_files(self.watch_dir, self.recursive))
-        current_keys = {str(path.resolve()) for path in current_paths}
-        for vanished_key in self._seen.keys() - current_keys:
-            del self._seen[vanished_key]
-        for vanished_key in self._pending.keys() - current_keys:
-            del self._pending[vanished_key]
-        self._read_failed &= current_keys
+        live = list(iter_audio_files(self.watch_dir, self.recursive))
+        by_key = {str(path.resolve()): path for path in live}
+        self._forget_vanished(set(by_key))
 
-        for path in current_paths:
-            resolved_key = str(path.resolve())
+        for key, path in by_key.items():
             try:
                 signature = file_signature(path)
             except OSError:
                 continue
 
-            if self._seen.get(resolved_key) == signature:
+            if self._seen.get(key) == signature:
                 continue
-
-            previous_signature, stable_count = self._pending.get(resolved_key, (signature, 0))
-            stable_count = stable_count + 1 if previous_signature == signature else 1
-            self._pending[resolved_key] = (signature, stable_count)
-
-            if stable_count < self.stable_polls:
+            if not self._settled(key, signature):
                 continue
 
             try:
                 event = build_sample_file_event(path, expected_signature=signature)
             except OSError as exc:
-                # The unchanged signature re-satisfies the stable check every
-                # poll, so this retries forever; say so once per episode instead
-                # of dropping the file's evidence in silence.
-                if resolved_key not in self._read_failed:
+                # A file whose stat is stable but whose bytes will not read
+                # re-qualifies on every poll, so this path retries forever. Warn
+                # once per episode rather than either spamming the log or
+                # dropping the evidence silently.
+                if key not in self._read_failed:
                     log.warning(
                         "Sample file stat is stable but its content is unreadable; "
-                        "evidence not emitted, will keep retrying: %s (%s)", path, exc,
+                        "evidence not emitted, will keep retrying: %s (%s)",
+                        path,
+                        exc,
                     )
-                    self._read_failed.add(resolved_key)
+                    self._read_failed.add(key)
                 continue
 
-            self._read_failed.discard(resolved_key)
+            self._read_failed.discard(key)
             append_event(event, self.evidence_path)
-            observed_events.append(event)
-            self._seen[resolved_key] = signature
-            self._pending.pop(resolved_key, None)
+            emitted.append(event)
+            self._seen[key] = signature
+            self._pending.pop(key, None)
 
-        return observed_events
+        return emitted
 
     def run_forever(self, scan_existing: bool = False) -> None:
         if scan_existing:
@@ -313,12 +371,14 @@ class SampleWatcher:
             time.sleep(self.poll_interval_seconds)
 
 
-def observe_existing_files(watch_dir: Path, evidence_path: Path, recursive: bool = False) -> list[dict[str, object]]:
+def observe_existing_files(
+    watch_dir: Path, evidence_path: Path, recursive: bool = False
+) -> list[dict[str, object]]:
     watch_dir = watch_dir.expanduser()
     evidence_path = evidence_path.expanduser()
     watch_dir.mkdir(parents=True, exist_ok=True)
-    observed_events: list[dict[str, object]] = []
 
+    emitted: list[dict[str, object]] = []
     for path in iter_audio_files(watch_dir, recursive):
         try:
             event = build_sample_file_event(path)
@@ -326,52 +386,58 @@ def observe_existing_files(watch_dir: Path, evidence_path: Path, recursive: bool
             log.warning("Skipping unstable file: %s", exc)
             continue
         append_event(event, evidence_path)
-        observed_events.append(event)
+        emitted.append(event)
 
-    return observed_events
+    return emitted
+
+
+_CLI_FLAGS: tuple[tuple[str, dict[str, object]], ...] = (
+    (
+        "--watch-dir",
+        {
+            "type": Path,
+            "default": DEFAULT_WATCH_DIR,
+            "help": "Folder to watch for sample files. Defaults to ~/Music/ProvenanceSamples.",
+        },
+    ),
+    (
+        "--evidence-file",
+        {
+            "type": Path,
+            "default": DEFAULT_EVIDENCE_PATH,
+            "help": "JSONL output path. Defaults to evidence/sample_import_events.jsonl.",
+        },
+    ),
+    ("--poll-interval", {"type": float, "default": 2.0, "help": "Seconds between directory scans."}),
+    (
+        "--stable-polls",
+        {
+            "type": int,
+            "default": 2,
+            "help": "Number of unchanged scans required before hashing a detected file.",
+        },
+    ),
+    (
+        "--scan-existing",
+        {
+            "action": "store_true",
+            "help": "Record audio files that already exist in the watch folder at startup.",
+        },
+    ),
+    ("--once", {"action": "store_true", "help": "Record current audio files once and exit."}),
+    (
+        "--recursive",
+        {"action": "store_true", "help": "Scan subdirectories under the configured sample folder."},
+    ),
+)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Watch a local sample folder and write provenance evidence JSONL.")
-    parser.add_argument(
-        "--watch-dir",
-        type=Path,
-        default=DEFAULT_WATCH_DIR,
-        help="Folder to watch for sample files. Defaults to ~/Music/ProvenanceSamples.",
+    parser = argparse.ArgumentParser(
+        description="Watch a local sample folder and write provenance evidence JSONL."
     )
-    parser.add_argument(
-        "--evidence-file",
-        type=Path,
-        default=DEFAULT_EVIDENCE_PATH,
-        help="JSONL output path. Defaults to evidence/sample_import_events.jsonl.",
-    )
-    parser.add_argument(
-        "--poll-interval",
-        type=float,
-        default=2.0,
-        help="Seconds between directory scans.",
-    )
-    parser.add_argument(
-        "--stable-polls",
-        type=int,
-        default=2,
-        help="Number of unchanged scans required before hashing a detected file.",
-    )
-    parser.add_argument(
-        "--scan-existing",
-        action="store_true",
-        help="Record audio files that already exist in the watch folder at startup.",
-    )
-    parser.add_argument(
-        "--once",
-        action="store_true",
-        help="Record current audio files once and exit.",
-    )
-    parser.add_argument(
-        "--recursive",
-        action="store_true",
-        help="Scan subdirectories under the configured sample folder.",
-    )
+    for flag, options in _CLI_FLAGS:
+        parser.add_argument(flag, **options)  # type: ignore[arg-type]
     return parser.parse_args(argv)
 
 
