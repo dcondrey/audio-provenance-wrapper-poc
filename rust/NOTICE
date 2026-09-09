@@ -1,0 +1,40 @@
+Audio Provenance — APW workspace
+Copyright 2026 David Condrey
+
+This product includes software developed for the Audio Provenance project.
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+--------------------------------------------------------------------------------
+THIRD-PARTY DEPENDENCIES
+--------------------------------------------------------------------------------
+
+Nothing third-party is vendored into this tree. Everything below is a Cargo
+dependency named in Cargo.lock, not copied source.
+
+Every external crate in Cargo.lock was checked against its own `license` field.
+No GPL, LGPL, AGPL, MPL, SSPL or BUSL dependency is present in this workspace.
+The crates carrying an attribution obligation:
+
+  Unicode License v3 (Unicode-3.0)
+    yoke, yoke-derive, zerofrom, zerofrom-derive, and the ICU4X support crates.
+    Permissive; attribution only.
+
+  Apache-2.0 AND ISC
+    ring. Both notices apply.
+
+  BSD-3-Clause AND MIT
+    brotli. Both notices apply.
+
+  (MIT OR Apache-2.0) AND Unicode-3.0
+    unicode-ident.
+
+Everything else resolves to MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC,
+Zlib or Unlicense.
+
+--------------------------------------------------------------------------------
+NOT COVERED BY THIS FILE
+--------------------------------------------------------------------------------
+
+This NOTICE and the accompanying LICENSE cover the rust/ workspace only. The
+VST3/AU capture plugin at ../src/ and the Python daemon at ../daemon/ are NOT
+licensed under Apache-2.0 and are not covered here. See ../LICENSING.md.

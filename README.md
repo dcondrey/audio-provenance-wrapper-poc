@@ -9,6 +9,10 @@
 One monorepo for creation-stage capture, signed provenance records, resilient audio recovery, and
 verification.
 
+## Licensing
+
+This repository is not under a single licence. `rust/` and `sdk/` are Apache-2.0; the capture plugin, daemon, requirements and docs are jointly authored and not licensed, and the plugin additionally links JUCE (AGPLv3-or-commercial). See [LICENSING.md](LICENSING.md) before copying or distributing anything here.
+
 ## Repository layout
 
 | Path | Role |

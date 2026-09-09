@@ -1,0 +1,59 @@
+Audio Provenance SDK
+Copyright 2026 David Condrey
+
+This product includes software developed for the Audio Provenance project.
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+--------------------------------------------------------------------------------
+THIRD-PARTY DEPENDENCIES
+--------------------------------------------------------------------------------
+
+Nothing third-party is vendored into this tree. Everything below is a Cargo
+dependency resolved from crates.io and named in Cargo.lock, not copied source.
+The per-directory NOTICE files under crates/apw-watermark-neural/, training/ and
+tools/capture-rig/ cover a different question — whether third-party *source or
+model weights* were copied in — and all three answer no. This file covers the
+licence obligations that arrive with the dependency graph.
+
+All 456 external crates in Cargo.lock were checked against their own `license`
+field in the crates.io source cache. No GPL, LGPL, AGPL, SSPL or BUSL dependency
+is present in either workspace. The non-permissive licences that are present:
+
+  Mozilla Public License 2.0 (MPL-2.0)
+  -----------------------------------
+  symphonia 0.6.1 and its component crates: symphonia-common, symphonia-core,
+  symphonia-metadata, symphonia-bundle-flac, symphonia-bundle-mp3,
+  symphonia-codec-aac, symphonia-codec-adpcm, symphonia-codec-alac,
+  symphonia-codec-pcm, symphonia-codec-vorbis, symphonia-format-isomp4,
+  symphonia-format-ogg, symphonia-format-riff.
+
+  Source: https://github.com/pdeljanov/Symphonia
+  Used by: crates/audio-provenance-audio, via its `codecs` feature. That feature is ON BY
+  DEFAULT (`default = ["fs", "codecs"]`), and both apw-trace and apw-watermark depend on it,
+  so symphonia is in the default build graph of the sdk/ workspace rather than opt-in.
+  Not present in the rust/ workspace.
+
+  MPL-2.0 is file-level copyleft and is compatible with the Apache License 2.0 in
+  a combined work. It imposes no licence obligation on the files in this
+  repository. It does require that the MPL-licensed files themselves stay under
+  MPL-2.0 and that recipients of a distributed binary be told where to obtain
+  their source; the upstream URL above satisfies that.
+
+  Unicode License v3 (Unicode-3.0)
+  --------------------------------
+  yoke, yoke-derive, zerofrom, zerofrom-derive (ICU4X support crates).
+  Permissive. Attribution only.
+
+  Community Data License Agreement, Permissive 2.0 (CDLA-Permissive-2.0)
+  ---------------------------------------------------------------------
+  webpki-roots. Permissive. This crate is a data set of root certificates, not
+  code. Attribution only.
+
+--------------------------------------------------------------------------------
+NOT COVERED BY THIS FILE
+--------------------------------------------------------------------------------
+
+JUCE. The VST3/AU capture plugin at ../src/ links JUCE, which is licensed
+AGPLv3-or-commercial and is NOT permissively licensed. The plugin is a separate
+component under separate terms and is not covered by this LICENSE or NOTICE.
+Nothing in this SDK tree links JUCE. See ../LICENSING.md.
