@@ -1,6 +1,6 @@
 [package]
 name = "audio-provenance-registry"
-description = "Queryable repository of signed Audio Provenance manifests, indexed by GenoMark id and content hash."
+description = "Queryable repository of signed Audio Provenance manifests, indexed by Watermark id and content hash."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

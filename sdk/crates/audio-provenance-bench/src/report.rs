@@ -11,7 +11,7 @@ pub const ACOUSTIC_DISCLAIMER: &str = crate::channel::acoustic::SIMULATION_DISCL
 
 pub const FIXTURE_DISCLAIMER: &str = "The codec measured in this run is a BENCH FIXTURE: a \
 deliberately simple stand-in that exists to validate the bench. Its numbers describe the fixture and \
-say nothing about GenoMark or any product watermark.";
+say nothing about Watermark or any product watermark.";
 
 pub const METRIC_DEFINITIONS: &[(&str, &str)] = &[
     (

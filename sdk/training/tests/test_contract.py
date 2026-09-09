@@ -2,9 +2,9 @@
 
 import pytest
 
-from genomark_n.config import StftConfig, load_config
-from genomark_n.model import GenoMarkN
-from genomark_n.qmark import QGrid
+from apw_watermark_neural.config import StftConfig, load_config
+from apw_watermark_neural.model import NeuralWatermark
+from apw_watermark_neural.qmark import QGrid
 
 
 def test_band_arithmetic():
@@ -24,7 +24,7 @@ def test_four_frequency_halvings_land_on_twenty_rows():
 
 def test_decoder_preserves_time_resolution():
     config = load_config()
-    model = GenoMarkN(config.encoder, config.decoder, config.payload, config.stft)
+    model = NeuralWatermark(config.encoder, config.decoder, config.payload, config.stft)
     import torch
 
     frames = 97
@@ -34,7 +34,7 @@ def test_decoder_preserves_time_resolution():
     assert trace.shape == (1, config.payload.message_bits, frames)
 
 
-def test_q_grid_matches_genomark_geometry():
+def test_q_grid_matches_apw_watermark_geometry():
     grid = QGrid(load_config().q, 48_000)
     assert len(grid.active_pairs) == 14
     assert grid.edges_hz[0] == pytest.approx(861.3, abs=0.1)

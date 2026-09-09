@@ -5,7 +5,7 @@ use audio_provenance_registry::{
     RegistryRecord,
 };
 use clap::{Args, Subcommand};
-use genotrace::admission::Admission;
+use apw_trace::admission::Admission;
 
 use crate::context::Context;
 use crate::error::CliError;
@@ -75,7 +75,7 @@ fn add(context: &Context, manifest_path: &Path) -> Result<u8, CliError> {
 
     // The signature is checked by admitting the manifest before it is stored. A registry of records
     // that never verified is a registry of assertions.
-    let manifest = match genotrace::admission::admit(&bytes) {
+    let manifest = match apw_trace::admission::admit(&bytes) {
         Admission::Admitted { manifest } => manifest,
         Admission::Rejected { code, detail, .. } | Admission::Unparseable { code, detail } => {
             return Err(CliError::usage(format!("{code}: {detail}")));

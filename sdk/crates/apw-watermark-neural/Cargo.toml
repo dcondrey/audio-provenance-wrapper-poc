@@ -1,0 +1,31 @@
+[package]
+name = "apw-watermark-neural"
+description = "Watermark-N (apw-watermark-neural-v1) inference: ONNX runtime host for the learned acoustic mark. Rust-side STFT, shift-equivariant pooled detection, model-card-frozen thresholds."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+default = ["bench", "download-binaries"]
+bench = ["dep:audio-provenance-bench"]
+# Fetches a prebuilt ONNX Runtime at build time. Convenient for development; WATERMARK_N_SPEC.md
+# section 7.1 rules it out for a shipped SDK, so a release build selects `load-dynamic` instead.
+download-binaries = ["ort/download-binaries", "ort/tls-rustls"]
+load-dynamic = ["ort/load-dynamic"]
+
+[dependencies]
+audio-provenance-audio = { workspace = true }
+audio-provenance-bench = { workspace = true, optional = true }
+audio-provenance-core = { workspace = true }
+hex = { workspace = true, features = ["std"] }
+ort = { version = "2.0.0-rc.13", default-features = false, features = ["ndarray", "std"] }
+serde = { workspace = true, features = ["std"] }
+serde_json = { workspace = true, features = ["std"] }
+sha2 = { workspace = true }
+thiserror = { workspace = true, features = ["std"] }

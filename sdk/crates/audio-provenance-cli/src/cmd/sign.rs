@@ -8,8 +8,8 @@ use audio_provenance_registry::{
     ContentHash, LocalRegistryBackend, Lookup, MarkId, RegistryBackend, RegistryRecord,
 };
 use clap::Args;
-use genomark::{GenoMark, Payload};
-use genotrace::{IngestLimits, Ingested};
+use apw_watermark::{Watermark, Payload};
+use apw_trace::{IngestLimits, Ingested};
 
 /// 24-bit is the default the marked copy is written at. 16-bit requantisation is a channel the
 /// mark survives, but re-encoding a master downward is a loss the signer did not ask for; anything
@@ -43,13 +43,13 @@ pub struct SignArgs {
     /// Signing date, YYYY-MM-DD. Defaults to today in UTC.
     #[arg(long)]
     pub signed_at: Option<String>,
-    /// Embed a GenoMark before hashing. Needs --out, and refuses an already-signed input.
+    /// Embed a Watermark before hashing. Needs --out, and refuses an already-signed input.
     #[arg(long)]
     pub mark: bool,
 }
 
 pub fn run(context: &Context, args: &SignArgs) -> Result<u8, CliError> {
-    let source = genotrace::ingest_path(&args.file, genotrace::IngestLimits::default())?;
+    let source = apw_trace::ingest_path(&args.file, apw_trace::IngestLimits::default())?;
     let key = load_signing_key(&args.key)?;
 
     // IMPORTANT: resolved BEFORE the audio is rewritten. The locator is checked against this
@@ -77,7 +77,7 @@ pub fn run(context: &Context, args: &SignArgs) -> Result<u8, CliError> {
     // that will be written, never from the in-memory buffer, because the WAV encoder quantises and
     // a verifier decodes what is on disk.
     let ingested = match &plan.marked {
-        Some(marked) => genotrace::ingest_bytes(marked.bytes.clone(), IngestLimits::default())?,
+        Some(marked) => apw_trace::ingest_bytes(marked.bytes.clone(), IngestLimits::default())?,
         None => source,
     };
 
@@ -98,7 +98,7 @@ pub fn run(context: &Context, args: &SignArgs) -> Result<u8, CliError> {
     }
     // IMPORTANT: from `ingested`, the marked buffer the digests above were taken from, never from
     // `source`. A reference extracted before marking describes audio that is on disk nowhere.
-    let reference = genotrace::reference_fingerprint(ingested.audio())?;
+    let reference = apw_trace::reference_fingerprint(ingested.audio())?;
     if let Some(fingerprint) = &reference {
         draft = draft.with_fingerprint(fingerprint.clone());
     }
@@ -209,14 +209,14 @@ fn plan_mark(
     }
     // The spec's own guard. Marking rewrites the audio a hard binding covers, so a file that
     // already carries a manifest cannot be marked without invalidating it.
-    if genotrace::container::find_embedded(source.bytes(), source.container())
-        != genotrace::container::EmbeddedOutcome::Absent
+    if apw_trace::container::find_embedded(source.bytes(), source.container())
+        != apw_trace::container::EmbeddedOutcome::Absent
     {
         return Err(CliError::usage(
             "mark_after_sign: this file already carries an embedded manifest, and marking changes the audio that manifest's hard binding covers",
         ));
     }
-    if genotrace::sidecar_paths(&args.file)
+    if apw_trace::sidecar_paths(&args.file)
         .iter()
         .any(|path| path.is_file())
     {
@@ -240,7 +240,7 @@ fn plan_mark(
     for _ in 0..LOCATOR_ATTEMPTS {
         let salt = fresh_salt()?;
         let payload = Payload::with_locator_bytes(
-            genomark::payload::VERSION,
+            apw_watermark::payload::VERSION,
             0,
             &derive_locator(&key.public_key_bytes(), &salt),
         )?;
@@ -264,7 +264,7 @@ fn plan_mark(
                 Lookup::NotFound => {}
             }
         }
-        let marked = GenoMark::public().embed(source.audio(), payload)?;
+        let marked = Watermark::public().embed(source.audio(), payload)?;
         return Ok(MarkPlan {
             salt,
             marked: Some(Marked {
@@ -288,7 +288,7 @@ fn sidecar_target(args: &SignArgs, audio_out: &Path) -> Option<PathBuf> {
     if args.embed {
         return None;
     }
-    genotrace::sidecar_paths(audio_out).into_iter().next()
+    apw_trace::sidecar_paths(audio_out).into_iter().next()
 }
 
 struct Signed<'a> {
@@ -324,11 +324,11 @@ fn report(context: &Context, signed: &Signed<'_>) -> Result<(), CliError> {
             "registry": signed.registry,
             "locator_salt": signed.locator_salt.to_hex(),
             "reference_fingerprint": signed.reference_hex_len.map(|length| serde_json::json!({
-                "algorithm": genotrace::fingerprint::ALGORITHM_ID,
+                "algorithm": apw_trace::fingerprint::ALGORITHM_ID,
                 "digest_hex_len": length,
             })),
             "mark": signed.mark.map(|payload| serde_json::json!({
-                "algorithm": genomark::ALGORITHM_ID,
+                "algorithm": apw_watermark::ALGORITHM_ID,
                 "version": payload.version(),
                 "namespace": payload.namespace(),
                 "locator": hex::encode(&payload.to_bytes()[1..]),
@@ -361,7 +361,7 @@ fn report(context: &Context, signed: &Signed<'_>) -> Result<(), CliError> {
     match signed.reference_hex_len {
         Some(length) => println!(
             "  reference  {}  {} hex, corroborates a lossy path",
-            genotrace::fingerprint::ALGORITHM_ID,
+            apw_trace::fingerprint::ALGORITHM_ID,
             length
         ),
         None => {
@@ -389,7 +389,7 @@ fn report(context: &Context, signed: &Signed<'_>) -> Result<(), CliError> {
         println!(
             "  mark       {}  {}, namespace {}",
             hex::encode(&payload.to_bytes()[1..]),
-            genomark::ALGORITHM_ID,
+            apw_watermark::ALGORITHM_ID,
             payload.namespace()
         );
         match (signed.record_id, signed.registry) {

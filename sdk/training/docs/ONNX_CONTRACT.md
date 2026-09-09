@@ -1,18 +1,18 @@
-# GenoMark-N ONNX contract (`genomark-n-onnx-contract/1`)
+# Watermark-N ONNX contract (`apw-watermark-neural-onnx-contract/1`)
 
-**Read this before writing `crates/genomark-n`.** At the time this was written that crate did not
+**Read this before writing `crates/apw-watermark-neural`.** At the time this was written that crate did not
 exist, so the contract below is defined here and is the one the Rust side must match. The machine
 -readable form is emitted by `export_onnx.py` next to the weights as `onnx_contract.json`; this
 document is the prose. If the two ever disagree, the JSON produced by the export that shipped the
 weights wins, because it carries the digests.
 
-Everything here follows `docs/GENOMARK_N_SPEC.md` section 7.2.
+Everything here follows `docs/WATERMARK_N_SPEC.md` section 7.2.
 
 ## The split
 
 The exported graphs are **pure convolution over log-magnitudes**. The Rust side owns:
 
-- windowing, FFT and inverse FFT (`realfft` 3.5.0, the square-root Hann WOLA path GenoMark-Q uses),
+- windowing, FFT and inverse FFT (`realfft` 3.5.0, the square-root Hann WOLA path Watermark-Q uses),
 - the residual-only resample (`rubato` 5.0.0) of spec 2.2,
 - band slicing and the log,
 - the **perceptual budget** `B[t,f]`,
@@ -39,7 +39,7 @@ nothing that can differ between runtimes except arithmetic.
 
 Frame `t` reads `padded[t*512 .. t*512 + 2048]`, i.e. host samples `[t*512 - 2048, t*512)`, so its
 centre sits at `t*512 - 1024` and the first four frames lie mostly in the lead pad. This is
-`crates/genomark-n`'s framing, and it is NOT `torch.stft(center=True)`, which pads 1024 and would
+`crates/apw-watermark-neural`'s framing, and it is NOT `torch.stft(center=True)`, which pads 1024 and would
 put every frame index four hops out of step while the model card claimed otherwise. The Rust
 `ModelCard::validate` refuses a card whose `lead_pad_samples` is not 2048.
 
@@ -99,7 +99,7 @@ and a fidelity bound buried in opaque weights cannot be audited.
 `band_of_bin` (320 entries), `band_centres_bark`, `spreading_matrix_linear`
 (`10^(spreading_db(z_b - z_j)/10)`), `masking_offset_linear`, `kappa`, `b_max_nepers`. The model is
 the same Schroeder / half-Bark / `alpha = 0.5` model `crates/audio-provenance-bench/src/perceptual.rs`
-implements, ported in `src/genomark_n/perceptual.py`. Spec 9.4 requires the training objective and
+implements, ported in `/apw-watermark-neural/perceptual.py`. Spec 9.4 requires the training objective and
 the bench measurement to be the same function.
 
 ## Detector schedule
@@ -117,8 +117,8 @@ false accepts per file. Widening the search without widening the CRC is how a fa
 | bits | field |
 |---|---|
 | 0..2 | version (currently 1) |
-| 3..6 | namespace (identical semantics to GenoMark-Q) |
-| 7..31 | locator prefix: the leading 25 bits of the same SHA-256 GenoMark-Q's 48-bit locator prefixes |
+| 3..6 | namespace (identical semantics to Watermark-Q) |
+| 7..31 | locator prefix: the leading 25 bits of the same SHA-256 Watermark-Q's 48-bit locator prefixes |
 | 32..55 | CRC-24/OPENPGP, poly `0x864CFB`, init `0xB704CE`, over bits 0..31 |
 
 Check value: `crc24(b"123456789") == 0x21CF02`.
@@ -139,7 +139,7 @@ shipped runtime is `candle` reading the safetensors file, which carries no opset
 2. **Port parity (bench row N-B12).** For 200 corpus items through 6 channels, the Rust decoder's 56
    bit logits and per-frame presence logits must agree with the PyTorch reference to max absolute
    error < 1e-3 in fp32, and the accept/reject decision must agree on 100% of trials. The reference
-   side of that comparison is `src/genomark_n/pipeline.py::Detector`; the harness does not yet ship
+   side of that comparison is `/apw-watermark-neural/pipeline.py::Detector`; the harness does not yet ship
    a dump command for it, which is the open item named in this directory's README.
 3. **Band arithmetic.** 320 bins, 23.4375 Hz, 210.9375..7687.5 Hz. `tests/test_contract.py` pins it
    on this side.

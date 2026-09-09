@@ -16,7 +16,7 @@ manual Ableton soak. Ableton-only compatibility checks are listed in `PLUGIN_REA
 The watermark fast gate covers the local-region/interior-gap predicate, signed duration and block
 distribution, discontinuity detection, actual-audio interior substitution, crop recovery, and the
 permanent adversarial-plan schema. The parallel full-corpus runner and its measured classical
-GenoMark baseline live under `sdk/qualification/reports/classical-genomark/`. The 2026-09-01
+Watermark baseline live under `sdk/qualification/reports/classical-apw_watermark/`. The 2026-09-01
 baseline is complete but does not meet every declared quality target; the report preserves those
 failures rather than promoting the implementation.
 

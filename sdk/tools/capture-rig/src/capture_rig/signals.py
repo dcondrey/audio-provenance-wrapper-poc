@@ -1,6 +1,6 @@
 """Exponential sine sweep generation and its Farina inverse filter.
 
-The sweep is the measurement stimulus for section 10.2(a) of docs/GENOMARK_N_SPEC.md. Its inverse
+The sweep is the measurement stimulus for section 10.2(a) of docs/WATERMARK_N_SPEC.md. Its inverse
 filter is built here rather than at deconvolution time so that the normalisation constant, which is
 what makes a deconvolved impulse response absolutely scaled rather than arbitrarily scaled, is
 computed once from the sweep pair itself.

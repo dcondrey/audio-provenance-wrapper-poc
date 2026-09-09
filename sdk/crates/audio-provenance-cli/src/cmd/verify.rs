@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use clap::Args;
-use genomark::GenoMark;
-use genotrace::{
+use apw_watermark::Watermark;
+use apw_trace::{
     FileFingerprintIndex, InferredAssociationPolicy, NoTrustAnchors, NullTestTable, SidecarPolicy,
     TrustStore, VerifyOptions,
 };
@@ -41,11 +41,11 @@ pub fn run(context: &Context, args: &VerifyArgs) -> Result<u8, CliError> {
         Some(path) => Some(FileFingerprintIndex::open(path)?),
         None => None,
     };
-    let genomark = GenoMark::public();
+    let apw_watermark = Watermark::public();
     let no_anchors = NoTrustAnchors;
 
     let mut options = VerifyOptions::new()
-        .with_genomark(&genomark)
+        .with_apw_watermark(&apw_watermark)
         .offline(context.offline)
         .with_sidecar(match (&args.sidecar, args.no_sidecar) {
             (_, true) => SidecarPolicy::Disabled,
@@ -77,7 +77,7 @@ pub fn run(context: &Context, args: &VerifyArgs) -> Result<u8, CliError> {
         options = options.with_fingerprint_index(index);
     }
 
-    let result = genotrace::verify(&args.file, &options)?;
+    let result = apw_trace::verify(&args.file, &options)?;
     let name = args.file.display().to_string();
 
     if context.json {

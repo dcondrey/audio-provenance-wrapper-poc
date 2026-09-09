@@ -17,7 +17,7 @@ pub use error::{
 };
 pub use hashing::{GENESIS, sha256, sha256_hex, window_hash};
 pub use locator::{
-    GENOMARK_PAYLOAD_VERSION, LOCATOR_BYTES, LOCATOR_DOMAIN, LOCATOR_SALT_BYTES,
+    WATERMARK_PAYLOAD_VERSION, LOCATOR_BYTES, LOCATOR_DOMAIN, LOCATOR_SALT_BYTES,
     LOCATOR_SALT_HEX_LEN, LocatorSalt, derive_locator, locator_from_signed_manifest,
 };
 pub use signing::{

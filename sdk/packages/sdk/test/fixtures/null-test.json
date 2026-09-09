@@ -4,8 +4,8 @@
   "seed": 7450482583528238693,
   "payload_hex": "",
   "codec": {
-    "name": "genomark-lepqim-v1",
-    "description": "GenoMark-Q (genomark-lepqim-v1). Dither-modulated QIM over the trimmed mean of adjacent-cell log-spectral-energy differences in 861-4307 Hz, 1024-sample frames at 50% overlap, two frames per slot, K=9 rate-1/3 convolutional code interleaved over a 416-slot block, CRC-32C gating acceptance. Detection is blind: audio and the profile key, no original and no expected payload. Gain invariance is exact. Acoustic re-recording is unsupported.",
+    "name": "apw-watermark-lepqim-v1",
+    "description": "Watermark-Q (apw-watermark-lepqim-v1). Dither-modulated QIM over the trimmed mean of adjacent-cell log-spectral-energy differences in 861-4307 Hz, 1024-sample frames at 50% overlap, two frames per slot, K=9 rate-1/3 convolutional code interleaved over a 416-slot block, CRC-32C gating acceptance. Detection is blind: audio and the profile key, no original and no expected payload. Gain invariance is exact. Acoustic re-recording is unsupported.",
     "is_bench_fixture": false,
     "payload_len": 7
   },

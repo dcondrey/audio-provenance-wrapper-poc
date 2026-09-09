@@ -1,4 +1,4 @@
-# Bill of materials — GenoMark-N Stage 0
+# Bill of materials — Watermark-N Stage 0
 
 Everything needed to run the campaign in `RUNBOOK.md`. Prices are indicative mid-2026 street prices in
 GBP including VAT; substitute freely, but keep the *spread* — the point of three speakers and three

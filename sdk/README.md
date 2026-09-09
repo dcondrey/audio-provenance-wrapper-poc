@@ -27,11 +27,11 @@ Stable 1.96.0, pinned in `rust-toolchain.toml`. Edition 2024, resolver 3.
 cargo build --workspace --all-targets
 cargo test --workspace
 cargo fmt --all -- --check
-cargo clippy --workspace --all-targets --all-features --exclude genomark-n -- -D warnings
-cargo clippy -p genomark-n --all-targets -- -D warnings
+cargo clippy --workspace --all-targets --all-features --exclude apw-watermark-neural -- -D warnings
+cargo clippy -p apw-watermark-neural --all-targets -- -D warnings
 ```
 
-`genomark-n` is excluded from the `--all-features` line deliberately, not to hide a warning. Its
+`apw-watermark-neural` is excluded from the `--all-features` line deliberately, not to hide a warning. Its
 `download-binaries` and `load-dynamic` features are two mutually exclusive ways to obtain the ONNX
 Runtime and the crate raises a `compile_error!` when both are on, so `--all-features` is not a valid
 configuration for it. Clippy it on its own line with its own default features.
@@ -111,8 +111,8 @@ cargo run --release -p audio-provenance-nulltest --bin audio-provenance-corpus-b
 
 # Was the real-vs-synthetic difference real, or did the harness move underneath?
 uv run --no-project python corpus/analyse-real-vs-synthetic.py \
-  bench-out/real-corpus/genomark-lepqim-v1-real-corpus.json \
-  --baseline bench-out/final2/genomark-lepqim-v1.json
+  bench-out/real-corpus/apw-watermark-lepqim-v1-real-corpus.json \
+  --baseline bench-out/final2/apw-watermark-lepqim-v1.json
 
 # The null test: how often does the detector accept a payload out of never-marked audio
 cargo run --release -p audio-provenance-nulltest --bin audio-provenance-null-test -- \
@@ -132,8 +132,8 @@ cargo run --release -p audio-provenance-nulltest --bin audio-provenance-qualify 
   --corpus-manifest qualification/watermark-adversarial-v1.json
 ```
 
-The checked-in baseline is `qualification/reports/classical-genomark/baseline.md`. Its production
-runner has the default `classical-genomark` feature and no `genomark-n` dependency; a permanent
+The checked-in baseline is `qualification/reports/classical-apw_watermark/baseline.md`. Its production
+runner has the default `classical-apw_watermark` feature and no `apw-watermark-neural` dependency; a permanent
 test rejects any accidental link to the experimental crate.
 
 ## Remote key custody and registry publication
@@ -160,9 +160,9 @@ or the inference does not get to be a verdict.
 | `audio-provenance-audio` | Decode, WAV encode, FFT/STFT/MDCT, resampling, filters, metrics |
 | `audio-provenance-registry` | Signed-manifest registry: a trait, a local backend and an HTTP one |
 | `audio-provenance-bench` | Channel simulators, the measurement runner, the null-test statistics |
-| `genomark` | GenoMark-Q (`genomark-lepqim-v1`): 56-bit payload, blind CRC-gated detection |
+| `apw_watermark` | Watermark-Q (`apw-watermark-lepqim-v1`): 56-bit payload, blind CRC-gated detection |
 | `audio-provenance-manifest` | The signed record, and the POC `audio-provenance-manifest-v0` interop path |
-| `genotrace` | The recovery ladder, the soft binding, and the status mapping |
+| `apw_trace` | The recovery ladder, the soft binding, and the status mapping |
 | `audio-provenance-trust` | Anchors, signer records, revocation, chain evaluation: key possession into a name |
 | `audio-provenance-c2pa` | C2PA claim-structure reading, checked against `c2patool` rather than our own writer |
 | `audio-provenance-sdk` | The public facade: verify, inspect, sign, embed, publish, `capabilities()` |
@@ -170,7 +170,7 @@ or the inference does not get to be a verdict.
 | `audio-provenance-wasm` | The wasm-bindgen surface, published as `@writerslogic/audio-provenance-sdk` |
 | `audio-provenance-nulltest` | The null-test and real-corpus bench runners |
 | `audio-provenance-attack` | The adversarial campaign against the watermark |
-| `genomark-n` | GenoMark-N, the v2 learned acoustic mark. Research, not shipped |
+| `apw-watermark-neural` | Watermark-N, the v2 learned acoustic mark. Research, not shipped |
 
 `members` is `["crates/*"]` rather than a list of names, because cargo refuses to load the entire
 workspace when a named member's directory is missing.
@@ -204,7 +204,7 @@ network, a process, or the clock; timestamps are parameters, never `SystemTime::
 - **Acoustic re-recording is unsupported in v1.** `capabilities()` returns the literal
   `"unsupported"`. The bench's acoustic rows are a *simulated* path and are labelled as such.
 - **The watermark is a locator, not an authenticator.** Against an attacker who has read
-  `docs/GENOMARK_SPEC.md` it has no removal and no forgery resistance; `docs/WATERMARK_ATTACKS.md`
+  `docs/WATERMARK_SPEC.md` it has no removal and no forgery resistance; `docs/WATERMARK_ATTACKS.md`
   measures exactly how much. Verdicts rest on the signature over the hash chain, never on the mark.
 - **Perceptual figures are segmental SNR and a noise-to-mask ratio.** Neither is PEAQ and neither is
   a listening test.

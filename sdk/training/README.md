@@ -1,7 +1,7 @@
-# GenoMark-N training harness
+# Watermark-N training harness
 
-PyTorch harness for `genomark-neural-v1`, the **learned acoustic mark** of
-`docs/GENOMARK_N_SPEC.md`. It is additive: a second mark alongside GenoMark-Q, never a replacement.
+PyTorch harness for `apw-watermark-neural-v1`, the **learned acoustic mark** of
+`docs/WATERMARK_N_SPEC.md`. It is additive: a second mark alongside Watermark-Q, never a replacement.
 
 **Nothing here is a result.** The spec is a gated feasibility program, not a committed feature.
 `capabilities().acousticRerecording` stays the literal `"unsupported"` until spec section 12's Stage
@@ -17,7 +17,7 @@ uv run pytest -q
 ./scripts/smoke.sh           # train, calibrate, evaluate, export ONNX, parity fixtures, model card
 
 # the 300-step spec 9.6 smoke, then PyTorch -> ONNX -> Rust:
-uv run python -m genomark_n.train --config configs/smoke_300.yaml
+uv run python -m apw_watermark_neural.train --config configs/smoke_300.yaml
 uv run python scripts/curve.py runs/smoke300/train_log.jsonl
 ./scripts/loop_closure.sh configs/smoke_300.yaml runs/smoke300 300
 ```
@@ -76,27 +76,27 @@ closed:
 ## Layout
 
 ```
-src/genomark_n/
+/apw-watermark-neural/
   config.py          every spec hyperparameter, typed, with the hard bounds enforced
   seeding.py         seeding + an honest statement of what determinism MPS cannot give
   stft.py            the STFT that lives OUTSIDE the exported graph (spec 7.2)
   perceptual.py      torch port of crates/audio-provenance-bench/src/perceptual.rs + the budget B[t,f]
   payload.py         56-bit message, CRC-24/OPENPGP, the fixed 11-trial flip search
   model.py           encoder U-Net (frequency-only downsampling) and the two-head decoder
-  qmark.py           GenoMark-Q's statistic: distortion stage D0 and the L_q hinge
+  qmark.py           Watermark-Q's statistic: distortion stage D0 and the L_q hinge
   pipeline.py        Marker, the loss set, FrozenThresholds, and the blind Detector
   channels.py        eval channels named and parameterised to mirror audio-provenance-bench
   rir/               image-source synthesizer (Eyring, windowed-sinc) + licence-gated corpora
   data/              licence gating, manifests, synthetic corpus, the training dataset
   distortion/        spec 6's D0-D11, differentiable, with a real ffmpeg codec round trip
                      (`noise.py` synthesises D7's tilted room floor when MUSAN is not configured)
-  rust_card.py       the `genomark-n-model-card/1` record crates/genomark-n loads
+  rust_card.py       the `apw-watermark-neural-model-card/1` record crates/apw-watermark-neural loads
   train.py calibrate.py evaluate.py export_onnx.py parity.py model_card.py
-docs/ONNX_CONTRACT.md   >>> the contract crates/genomark-n must match <<<
+docs/ONNX_CONTRACT.md   >>> the contract crates/apw-watermark-neural must match <<<
 NOTICE                  what was and was not vendored, and the licence read for each
 ```
 
-## For the author of `crates/genomark-n`
+## For the author of `crates/apw-watermark-neural`
 
 `docs/ONNX_CONTRACT.md` is the contract, and `export_onnx.py` emits its machine-readable twin as
 `onnx_contract.json` beside the weights. Short form:
@@ -117,7 +117,7 @@ NOTICE                  what was and was not vendored, and the licence read for 
 | parameter count | ~5.5 M, ~22 MB fp32 (2.8) | **8.23 M, 32.9 MB fp32** | the channel widths of 2.5/2.6 taken literally give this. Under K7's 40 MB ceiling, above the spec's estimate. Either accept it or narrow `encoder.stage_channels`; the number is measured and printed by the model card, not asserted |
 | RIR decay rate | image-source with Eyring absorption | image-source **plus a measured-decay correction** | a rectangular image-source field does not decay at the Eyring rate: reflection count per metre varies with direction, so by Jensen the direction-averaged decay is slower. Uncorrected, a room asked for 0.40 s measures 0.55 s. The geometry sets the reflection pattern; the correction sets the rate; the achieved T30 is measured back and carried on the result |
 | analysis length | sampled per example, `U(3 s, 5 s)` (4.4c) | sampled **per batch** | a per-item length cannot be stacked without padding, and padding hands the decoder a silent boundary that is a synchronisation cue no real capture provides |
-| STFT framing | `center=True` is never named; spec 7.2 leaves the transform to Rust | **lead pad = 2048, the window length**, frame count `ceil((2048+samples)/512)` | `crates/genomark-n` pads by the window length and `ModelCard::validate` refuses a card claiming otherwise. `torch.stft(center=True)` pads 1024 and would put every frame four hops out of step. The model is shift-equivariant so the choice costs training nothing and costs the contract everything |
+| STFT framing | `center=True` is never named; spec 7.2 leaves the transform to Rust | **lead pad = 2048, the window length**, frame count `ceil((2048+samples)/512)` | `crates/apw-watermark-neural` pads by the window length and `ModelCard::validate` refuses a card claiming otherwise. `torch.stft(center=True)` pads 1024 and would put every frame four hops out of step. The model is shift-equivariant so the choice costs training nothing and costs the contract everything |
 | EMA scope | "EMA of the **encoder** weights" (9.5) | EMA over the whole model, decoder included | the decoder is what the frozen threshold is calibrated against, so an EMA encoder paired with a raw decoder would calibrate one model and ship another. Narrow it in `runlog.Ema` if the spec's scope is meant literally |
 
 ## Compute, honestly
@@ -151,8 +151,8 @@ with the full chain is worse. Kill criterion K8 fires at 14 days. Rent the GPU.
 
 ## Known gaps
 
-- **The parity fixtures exist but nothing consumes them yet.** `genomark_n.parity` writes bench row
-  N-B12's reference side as raw little-endian f32 blobs plus `parity_manifest.json`. `crates/genomark-n`
+- **The parity fixtures exist but nothing consumes them yet.** `apw_watermark_neural.parity` writes bench row
+  N-B12's reference side as raw little-endian f32 blobs plus `parity_manifest.json`. `crates/apw-watermark-neural`
   now exists and loads an exported card, but nothing reads the fixtures back, so N-B12 is prepared
   and not run.
 - **GroupNorm is not strictly shift-equivariant.** Its statistics are global over `(C, H, W)` per

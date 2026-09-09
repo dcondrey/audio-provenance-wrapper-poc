@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from genomark_n.rir.image_source import (
+from apw_watermark_neural.rir.image_source import (
     ImageSourceRoom,
     eyring_absorption,
     measure_rt60,

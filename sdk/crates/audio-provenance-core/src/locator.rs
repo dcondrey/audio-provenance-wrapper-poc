@@ -14,10 +14,10 @@ pub const LOCATOR_DOMAIN: &[u8] = b"audio-provenance-locator-v1";
 pub const LOCATOR_SALT_BYTES: usize = 16;
 pub const LOCATOR_BYTES: usize = 6;
 
-/// `GENOMARK_SPEC` section 5's payload version. It lives here rather than in `genomark` because
+/// `WATERMARK_SPEC` section 5's payload version. It lives here rather than in `apw_watermark` because
 /// `audio-provenance-registry` needs it to default a record's mark fields and must not depend on the
 /// detector, which pulls an FFT.
-pub const GENOMARK_PAYLOAD_VERSION: u8 = 1;
+pub const WATERMARK_PAYLOAD_VERSION: u8 = 1;
 
 pub const LOCATOR_SALT_HEX_LEN: usize = LOCATOR_SALT_BYTES * 2;
 
@@ -87,7 +87,7 @@ impl<'de> Deserialize<'de> for LocatorSalt {
     }
 }
 
-/// The 48-bit GenoMark locator: `sha256(domain || 0x00 || signer public key || salt)[..6]`.
+/// The 48-bit Watermark locator: `sha256(domain || 0x00 || signer public key || salt)[..6]`.
 ///
 /// IMPORTANT: nothing in the preimage is derived from the audio, the manifest or the signature.
 /// That is the whole point. The locator has to be allocated before the mark is embedded, and the
@@ -112,7 +112,7 @@ pub fn derive_locator(public_key: &[u8; 32], salt: &LocatorSalt) -> [u8; LOCATOR
 
 /// The locator a signed manifest declares, derived from the document's OWN public key and salt.
 ///
-/// The one implementation, shared by the registry and by GenoTrace's mark rung, so the write path
+/// The one implementation, shared by the registry and by Trace's mark rung, so the write path
 /// and the re-derivation that polices it cannot drift apart. It is deliberately schema-agnostic:
 /// any document carrying `portable_signature.public_key_hex` and a root `locator_salt` derives,
 /// including the POC's `audio-provenance-manifest-v0`.

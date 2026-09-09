@@ -6,8 +6,8 @@ use std::sync::Arc;
 use audio_provenance_core::VerificationStatus;
 use audio_provenance_registry::config::ProcessEnv;
 use audio_provenance_registry::{RegistryBackend, RegistryResolver};
-use genomark::GenoMark;
-use genotrace::{
+use apw_watermark::Watermark;
+use apw_trace::{
     DEFAULT_SOFT_BINDING_THRESHOLD, FileFingerprintIndex, FileTrustStore, FingerprintIndex,
     InferredAssociationPolicy, IngestLimits, InspectReport, NullTestTable, RecoveryMethod,
     SidecarPolicy, StepOutcome, TrustStore, VerifyResult,
@@ -17,16 +17,16 @@ use crate::error::SdkError;
 
 /// Everything a verification may be pointed at, owned.
 ///
-/// GenoTrace's own options borrow, which is right for a hot loop and wrong for a caller that just
+/// Trace's own options borrow, which is right for a hot loop and wrong for a caller that just
 /// resolved a registry name and a trust-store path. This owns those resources and lends them to
-/// GenoTrace for the length of one call.
+/// Trace for the length of one call.
 #[derive(Debug)]
 pub struct VerifyOptions {
     registry: Option<Arc<dyn RegistryBackend>>,
     trust_store: Option<Box<dyn TrustStore>>,
     fingerprint_index: Option<Box<dyn FingerprintIndex>>,
     null_test: NullTestTable,
-    genomark: GenoMark,
+    apw_watermark: Watermark,
     sidecar: SidecarPolicy,
     offline: bool,
     soft_binding_threshold: f64,
@@ -41,7 +41,7 @@ impl Default for VerifyOptions {
             trust_store: None,
             fingerprint_index: None,
             null_test: NullTestTable::empty(),
-            genomark: GenoMark::public(),
+            apw_watermark: Watermark::public(),
             sidecar: SidecarPolicy::Conventional,
             offline: false,
             soft_binding_threshold: DEFAULT_SOFT_BINDING_THRESHOLD,
@@ -111,11 +111,11 @@ impl VerifyOptions {
         self
     }
 
-    /// Selects a keyed GenoMark profile. The default is namespace 0, whose profile key is published
+    /// Selects a keyed Watermark profile. The default is namespace 0, whose profile key is published
     /// and whose mark is therefore recovery, not tamper resistance.
     #[must_use]
-    pub fn with_genomark(mut self, genomark: GenoMark) -> Self {
-        self.genomark = genomark;
+    pub fn with_apw_watermark(mut self, apw_watermark: Watermark) -> Self {
+        self.apw_watermark = apw_watermark;
         self
     }
 
@@ -165,9 +165,9 @@ impl VerifyOptions {
         self.registry.as_deref()
     }
 
-    fn borrowed(&self) -> Result<genotrace::VerifyOptions<'_>, SdkError> {
-        let mut options = genotrace::VerifyOptions::new()
-            .with_genomark(&self.genomark)
+    fn borrowed(&self) -> Result<apw_trace::VerifyOptions<'_>, SdkError> {
+        let mut options = apw_trace::VerifyOptions::new()
+            .with_apw_watermark(&self.apw_watermark)
             .with_null_test(&self.null_test)
             .with_sidecar(self.sidecar.clone())
             .offline(self.offline)
@@ -204,21 +204,21 @@ impl VerifyOptions {
 /// Returns `Err` only for a caller error or for a search that could not finish. Every provenance
 /// condition is one of the four statuses on the `Ok` side.
 pub fn verify(path: &Path, options: &VerifyOptions) -> Result<VerifyResult, SdkError> {
-    settled(genotrace::verify(path, &options.borrowed()?)?)
+    settled(apw_trace::verify(path, &options.borrowed()?)?)
 }
 
 /// Verifies bytes already in hand. Sidecar rungs cannot run: there is no real directory to resolve
 /// them against, and no path from inside a manifest is ever followed.
 pub fn verify_bytes(bytes: Vec<u8>, options: &VerifyOptions) -> Result<VerifyResult, SdkError> {
-    settled(genotrace::verify_bytes(bytes, &options.borrowed()?)?)
+    settled(apw_trace::verify_bytes(bytes, &options.borrowed()?)?)
 }
 
-/// Reports what GenoTrace found, with no verdict and no trust evaluation.
+/// Reports what Trace found, with no verdict and no trust evaluation.
 ///
 /// An incomplete search is reported here rather than raised: there is no verdict for an outage to
 /// contaminate.
 pub fn inspect(path: &Path, options: &VerifyOptions) -> Result<InspectReport, SdkError> {
-    Ok(genotrace::inspect(path, &options.borrowed()?)?)
+    Ok(apw_trace::inspect(path, &options.borrowed()?)?)
 }
 
 /// Rungs whose only `unavailable` outcome is a registry that could not answer.
@@ -227,7 +227,7 @@ const fn registry_backed(method: RecoveryMethod) -> bool {
         method,
         RecoveryMethod::ContentHashLookup
             | RecoveryMethod::DecodedAudioHashLookup
-            | RecoveryMethod::GenomarkRecovery
+            | RecoveryMethod::WatermarkRecovery
     )
 }
 
@@ -256,7 +256,7 @@ fn settled(result: VerifyResult) -> Result<VerifyResult, SdkError> {
             detail: step.detail.clone(),
         }),
         // `incomplete` without an unavailable step is the ladder itself failing to run, which
-        // GenoTrace records as a `recovery_rung_failed` diagnostic.
+        // Trace records as a `recovery_rung_failed` diagnostic.
         None => Err(SdkError::RecoveryIncomplete {
             method: "recovery_ladder",
             detail: result

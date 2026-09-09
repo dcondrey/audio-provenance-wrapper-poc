@@ -16,14 +16,14 @@ default = ["http"]
 http = ["audio-provenance-registry/http", "dep:async-trait", "dep:reqwest", "dep:tokio"]
 
 [dependencies]
-genomark = { workspace = true }
+apw-watermark = { workspace = true }
 audio-provenance-audio = { workspace = true }
 audio-provenance-core = { workspace = true, features = ["std"] }
 audio-provenance-manifest = { workspace = true, features = ["std"] }
 audio-provenance-registry = { workspace = true }
 async-trait = { workspace = true, optional = true }
 ed25519-dalek = { workspace = true }
-genotrace = { workspace = true }
+apw-trace = { workspace = true }
 getrandom = { workspace = true }
 hex = { workspace = true, features = ["std"] }
 reqwest = { workspace = true, optional = true }

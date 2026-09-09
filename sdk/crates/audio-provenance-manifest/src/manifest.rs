@@ -44,7 +44,7 @@ impl ManifestSchema {
     }
 }
 
-/// The GenoMark fields a document CAN carry.
+/// The Watermark fields a document CAN carry.
 ///
 /// IMPORTANT: the locator is deliberately absent, and storing one here would be a second spelling
 /// of the same fact. It is derived from the signer's public key and the record's `locator_salt`,
@@ -213,7 +213,7 @@ impl Manifest {
         self.mark.as_ref()
     }
 
-    /// The 16 signed bytes the GenoMark locator is derived from. Required on a Audio Provenance record;
+    /// The 16 signed bytes the Watermark locator is derived from. Required on a Audio Provenance record;
     /// absent on a POC record that predates the field.
     pub const fn locator_salt(&self) -> Option<LocatorSalt> {
         self.locator_salt
@@ -250,7 +250,7 @@ impl Manifest {
         Ok(sha256(&canonical_json(&self.value)?))
     }
 
-    /// The GenoMark locator this record answers to: `sha256(domain || 0x00 || public key || salt)`
+    /// The Watermark locator this record answers to: `sha256(domain || 0x00 || public key || salt)`
     /// truncated to 48 bits, over the document's OWN declared key and salt. Re-deriving it is what
     /// detects a registry serving a manifest that does not claim the mark's locator. `None` when
     /// the document carries no usable salt, which is a mismatch rather than a pass.

@@ -2,7 +2,7 @@ use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 
 use audio_provenance_core::{
-    GENOMARK_PAYLOAD_VERSION, KeyPossessionProof, PortableSignature, SignatureError,
+    WATERMARK_PAYLOAD_VERSION, KeyPossessionProof, PortableSignature, SignatureError,
     canonical_json, locator_from_signed_manifest, unsigned_manifest_view,
     verify_manifest_signature,
 };
@@ -50,7 +50,7 @@ impl RegistryRecord {
     ///
     /// IMPORTANT: the mark version and namespace are NOT parameters. Passing them in was the one
     /// way a caller could store a record whose namespace contradicts the manifest it points at,
-    /// which GenoTrace's soft-binding check would then silently discard at verify time.
+    /// which Trace's soft-binding check would then silently discard at verify time.
     pub fn from_signed_manifest(
         manifest: Value,
         content_hash: ContentHash,
@@ -79,7 +79,7 @@ impl RegistryRecord {
             locator_from_signed_manifest(&manifest).ok_or(RegistryError::MissingLocatorSalt)?;
         let record_id = RecordId::from_manifest_bytes(&manifest_bytes);
         let mark_id = MarkId::new(
-            mark_field(&manifest, "version", GENOMARK_PAYLOAD_VERSION)?,
+            mark_field(&manifest, "version", WATERMARK_PAYLOAD_VERSION)?,
             mark_field(&manifest, "namespace", 0)?,
             locator,
         )?;

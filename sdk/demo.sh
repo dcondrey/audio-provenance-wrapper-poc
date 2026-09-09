@@ -19,8 +19,8 @@ FFMPEG="${FFMPEG:-/opt/homebrew/bin/ffmpeg}"
 # rate behind a soft binding is measured; --null-test names which measurement.
 NULL_TEST="${NULL_TEST:-}"
 if [ -z "$NULL_TEST" ]; then
-  for candidate in "$REPO/bench-out/null-v1/genomark-lepqim-v1-null-test.json" \
-                   "$REPO/bench-out/null-pilot/genomark-lepqim-v1-null-test.json"; do
+  for candidate in "$REPO/bench-out/null-v1/apw-watermark-lepqim-v1-null-test.json" \
+                   "$REPO/bench-out/null-pilot/apw-watermark-lepqim-v1-null-test.json"; do
     [ -f "$candidate" ] && { NULL_TEST="$candidate"; break; }
   done
 fi
@@ -65,7 +65,7 @@ fi
 "$G" trust export-anchor --anchor anchor.json --out store.json >/dev/null
 "$G" trust add --store store.json --document record.json >/dev/null
 
-say "Sign the master, embed a GenoMark, publish the record"
+say "Sign the master, embed a Watermark, publish the record"
 run "\"$G\" sign master.wav --key signer.key --mark --out signed.wav --registry local --no-color | tee sign.out"
 LOCATOR="$(awk '$1 == "mark" { print $2; exit }' sign.out)"
 
@@ -107,7 +107,7 @@ say "7. A file that was never registered  ->  expect: not_found, stated neutrall
 run "\"$G\" verify master.wav --registry local --trust-store store.json --null-test \"$NULL_TEST\" || true"
 
 say "8. The same transcode on a SPARSE master  ->  expect: changed, and it says why"
-# This is not a bug being hidden. GenoMark needs in-band energy to carry a block,
+# This is not a bug being hidden. Watermark needs in-band energy to carry a block,
 # and quiet, peaky material through a lossy codec loses enough whole blocks to fall
 # under the 0.72 coverage guard. The guard is what stops a spliced insert verifying,
 # so it is not being loosened to make this row pass. Measured: 7 of the 13

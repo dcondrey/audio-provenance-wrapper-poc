@@ -24,7 +24,7 @@ pub enum RegistryError {
     ManifestNotObject,
     #[error("manifest carries no portable_signature block")]
     MissingSignatureBlock,
-    #[error("manifest declares no usable locator_salt, so no GenoMark payload can ever resolve it")]
+    #[error("manifest declares no usable locator_salt, so no Watermark payload can ever resolve it")]
     MissingLocatorSalt,
     #[error("locator {mark_id} is already held by record {existing}")]
     LocatorConflict { mark_id: String, existing: String },

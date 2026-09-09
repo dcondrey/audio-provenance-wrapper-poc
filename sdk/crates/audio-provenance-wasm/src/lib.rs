@@ -11,14 +11,14 @@
 //! | Decode wav / aiff / mp3 / flac / ogg / mp4 from bytes | yes |
 //! | Rung 1, embedded manifest | yes |
 //! | Rung 2, sidecar manifest | no, there is no directory to resolve one against |
-//! | Rungs 3-6 (content hash, decoded-audio hash, GenoMark, fingerprint search) | only over the records the caller supplies |
+//! | Rungs 3-6 (content hash, decoded-audio hash, Watermark, fingerprint search) | only over the records the caller supplies |
 //! | `local` filesystem registry | no |
 //! | `http` registry | no; a browser cannot open a raw socket, and the JS side fetches instead |
 //! | Trust store, null-test report | yes, passed in as JSON rather than read from a path |
 //! | Signing, marking, publishing | no; the producer surface is native-only |
 //!
 //! Nothing about the verdict changes. The status mapping, the soft-binding gates, the null-test
-//! requirement and the identity rule are `genotrace`'s, compiled unmodified.
+//! requirement and the identity rule are `apw_trace`'s, compiled unmodified.
 //!
 //! # Two calls, not a fake synchronous fetch
 //!
@@ -28,8 +28,8 @@
 //! embedded manifest needs no registry at all and verifies in one call.
 
 use audio_provenance_core::VerificationStatus;
-use genomark::GenoMark;
-use genotrace::{IngestLimits, ingest_bytes};
+use apw_watermark::Watermark;
+use apw_trace::{IngestLimits, ingest_bytes};
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
@@ -78,7 +78,7 @@ pub fn inspect_bytes(audio: Vec<u8>, options_json: Option<String>) -> Result<Str
     let channels = buffer.channels();
     let duration_seconds = buffer.duration_seconds();
     // PERF: decodes twice, once here for the container facts and once inside the ladder. `inspect`
-    // is a diagnostic call and the alternative is a second entry point into GenoTrace that borrows
+    // is a diagnostic call and the alternative is a second entry point into Trace that borrows
     // an already-ingested buffer, which is a wider change than this report is worth.
     let bytes = ingested.bytes().to_vec();
     drop(ingested);
@@ -96,7 +96,7 @@ pub fn inspect_bytes(audio: Vec<u8>, options_json: Option<String>) -> Result<Str
             .manifest
             .as_ref()
             .map(|manifest| manifest.schema().id()),
-        method: result.method.map(genotrace::RecoveryMethod::as_str),
+        method: result.method.map(apw_trace::RecoveryMethod::as_str),
         signer_id: result
             .signature
             .as_ref()
@@ -135,7 +135,7 @@ pub fn capabilities() -> Result<String, JsValue> {
         .map_err(|error| json::throw("serialization_failed", &error.to_string()))
 }
 
-/// The GenoMark locators recoverable from this audio, for a caller that must fetch records before
+/// The Watermark locators recoverable from this audio, for a caller that must fetch records before
 /// it can supply them.
 ///
 /// At most one: blind detection reports the single payload the CRC accepted, and `locators` is
@@ -144,7 +144,7 @@ pub fn capabilities() -> Result<String, JsValue> {
 #[wasm_bindgen(js_name = locators)]
 pub fn locators(audio: Vec<u8>) -> Result<String, JsValue> {
     let ingested = ingest_bytes(audio, IngestLimits::default()).map_err(coded)?;
-    let outcome = GenoMark::public().detect(ingested.audio()).map_err(coded)?;
+    let outcome = Watermark::public().detect(ingested.audio()).map_err(coded)?;
     let found = outcome.payload().map(|payload| LocatorReport {
         version: payload.version(),
         namespace: payload.namespace(),
@@ -213,8 +213,8 @@ struct InspectBytesReport {
     manifest_schema: Option<&'static str>,
     method: Option<&'static str>,
     signer_id: Option<String>,
-    trace: Vec<genotrace::RecoveryStep>,
-    recovery: genotrace::RecoveryReport,
+    trace: Vec<apw_trace::RecoveryStep>,
+    recovery: apw_trace::RecoveryReport,
     incomplete: bool,
 }
 

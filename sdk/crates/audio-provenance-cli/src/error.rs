@@ -7,7 +7,7 @@ use audio_provenance_core::{CodedError, KeyError, SignatureError};
 use audio_provenance_manifest::ManifestError;
 use audio_provenance_registry::{ConfigError, RegistryError, ResolveError};
 use audio_provenance_trust::TrustError;
-use genotrace::GenoTraceError;
+use apw_trace::TraceError;
 
 use crate::exit;
 
@@ -37,7 +37,7 @@ pub enum CliError {
     #[error(transparent)]
     Trust(#[from] TrustError),
     #[error(transparent)]
-    Trace(#[from] GenoTraceError),
+    Trace(#[from] TraceError),
     #[error(transparent)]
     Registry(#[from] RegistryError),
     #[error(transparent)]
@@ -51,7 +51,7 @@ pub enum CliError {
     #[error(transparent)]
     Signature(#[from] SignatureError),
     #[error(transparent)]
-    Mark(#[from] genomark::GenoMarkError),
+    Mark(#[from] apw_watermark::WatermarkError),
     #[error(transparent)]
     Audio(#[from] AudioError),
     #[error(transparent)]
@@ -125,16 +125,16 @@ impl CliError {
             // blind, and the operational code says the search could not finish.
             Self::LocatorCheckUnavailable { .. } => exit::INCOMPLETE,
             Self::Trace(inner) => match inner {
-                GenoTraceError::Unreadable { .. }
-                | GenoTraceError::InputTooLarge { .. }
-                | GenoTraceError::DurationTooLong { .. }
-                | GenoTraceError::UnrecognisedContainer
-                | GenoTraceError::Undecodable { .. } => exit::INPUT,
-                GenoTraceError::InvalidOption { .. }
-                | GenoTraceError::NullTestMalformed { .. }
-                | GenoTraceError::NullTestFixtureCodec
-                | GenoTraceError::NullTestNotRun
-                | GenoTraceError::FingerprintIndexMalformed { .. } => exit::USAGE,
+                TraceError::Unreadable { .. }
+                | TraceError::InputTooLarge { .. }
+                | TraceError::DurationTooLong { .. }
+                | TraceError::UnrecognisedContainer
+                | TraceError::Undecodable { .. } => exit::INPUT,
+                TraceError::InvalidOption { .. }
+                | TraceError::NullTestMalformed { .. }
+                | TraceError::NullTestFixtureCodec
+                | TraceError::NullTestNotRun
+                | TraceError::FingerprintIndexMalformed { .. } => exit::USAGE,
             },
             Self::Entropy { .. } | Self::LocatorAllocation { .. } | Self::Serialise { .. } => {
                 exit::INTERNAL

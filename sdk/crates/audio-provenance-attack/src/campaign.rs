@@ -17,20 +17,20 @@ use audio_provenance_bench::attacks::statistic::{
 use audio_provenance_bench::corpus::CorpusItem;
 use audio_provenance_bench::perceptual::{self, PERCEPTUAL_LIMITS};
 use audio_provenance_bench::ports::CommandRunner;
-use genomark::payload::Payload;
-use genomark::{DetectionOutcome, GenoMark};
+use apw_watermark::payload::Payload;
+use apw_watermark::{DetectionOutcome, Watermark};
 use serde_json::Value;
 use std::collections::BTreeMap;
 
 /// Slot statistic residual the attacks converge to, one twentieth of the lattice period. It is the
 /// embedder's own closure budget, so an attack that reaches it has moved the statistic as precisely
 /// as the embedder placed it.
-const CONVERGENCE_NEPERS: f64 = genomark::params::DELTA / 20.0;
+const CONVERGENCE_NEPERS: f64 = apw_watermark::params::DELTA / 20.0;
 
 #[derive(Debug)]
 pub struct Options<'a> {
-    pub victim: &'a GenoMark,
-    pub attacker: &'a GenoMark,
+    pub victim: &'a Watermark,
+    pub attacker: &'a Watermark,
     pub geometry: PairBandGeometry,
     pub puncture: PunctureRule,
     pub runner: &'a dyn CommandRunner,
@@ -131,7 +131,7 @@ fn finish(
 
 fn payload_for(index: usize) -> Result<Payload, String> {
     Payload::new(
-        genomark::payload::VERSION,
+        apw_watermark::payload::VERSION,
         1,
         0x0000_A100_0000 + index as u64,
     )
@@ -212,7 +212,7 @@ pub fn run(items: &[CorpusItem], options: &Options<'_>) -> Result<AttackReport, 
                 attack: "embed_reference".to_owned(),
                 family: AttackFamily::Control,
                 knowledge: AttackerKnowledge::ProfileKey,
-                params: params(&[("lattice_step_nepers", genomark::params::DELTA.into())]),
+                params: params(&[("lattice_step_nepers", apw_watermark::params::DELTA.into())]),
                 expected: &expected,
                 baseline: &baseline,
                 note: Some(
@@ -254,7 +254,7 @@ pub fn run(items: &[CorpusItem], options: &Options<'_>) -> Result<AttackReport, 
             );
             parameters.insert(
                 "lattice_step_nepers".to_owned(),
-                genomark::params::DELTA.into(),
+                apw_watermark::params::DELTA.into(),
             );
             rows.push(finish(
                 Case {
@@ -599,7 +599,7 @@ pub fn run(items: &[CorpusItem], options: &Options<'_>) -> Result<AttackReport, 
 
         let one_block: Vec<Option<f64>> = marked_statistics
             .iter()
-            .take(genomark::params::BLOCK_SLOTS)
+            .take(apw_watermark::params::BLOCK_SLOTS)
             .copied()
             .collect();
         let single = estimate_residues(&one_block, &options.geometry);
@@ -631,7 +631,7 @@ pub fn run(items: &[CorpusItem], options: &Options<'_>) -> Result<AttackReport, 
                     ("donor_blocks", 1.into()),
                     (
                         "donor_seconds",
-                        (genomark::params::BLOCK_FRAMES as f64
+                        (apw_watermark::params::BLOCK_FRAMES as f64
                             * f64::from(options.geometry.hop() as u32)
                             / f64::from(options.geometry.sample_rate()))
                         .into(),
@@ -799,9 +799,9 @@ pub fn run(items: &[CorpusItem], options: &Options<'_>) -> Result<AttackReport, 
     }
 
     Ok(AttackReport {
-        algorithm: genomark::ALGORITHM_ID.to_owned(),
+        algorithm: apw_watermark::ALGORITHM_ID.to_owned(),
         band_hz: options.geometry.band_hz(),
-        lattice_step_nepers: genomark::params::DELTA,
+        lattice_step_nepers: apw_watermark::params::DELTA,
         items: items.iter().map(|item| item.meta.id.clone()).collect(),
         rows,
         perceptual_limits: PERCEPTUAL_LIMITS,
@@ -841,7 +841,7 @@ pub fn forgery_null(
                 state = state
                     .wrapping_mul(6_364_136_223_846_793_005)
                     .wrapping_add(1_442_695_040_888_963_407);
-                Some(genomark::params::DELTA * ((state >> 11) as f64) / (1u64 << 53) as f64)
+                Some(apw_watermark::params::DELTA * ((state >> 11) as f64) / (1u64 << 53) as f64)
             })
             .collect();
         let transplant = CosetTransplant::new("random_coset", residues);

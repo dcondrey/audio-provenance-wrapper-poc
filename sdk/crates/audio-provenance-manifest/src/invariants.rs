@@ -751,7 +751,7 @@ fn validate_claims(claims: Option<&Value>, findings: &mut Vec<Finding>) {
     }
 }
 
-/// IMPORTANT: `GENOMARK_SPEC` §5 gives version and namespace four bits each. A wider value would
+/// IMPORTANT: `WATERMARK_SPEC` §5 gives version and namespace four bits each. A wider value would
 /// silently overflow into its neighbour when the payload is packed.
 fn validate_mark(mark: Option<&Value>, findings: &mut Vec<Finding>) {
     let Some(mark) = mark.and_then(Value::as_object) else {

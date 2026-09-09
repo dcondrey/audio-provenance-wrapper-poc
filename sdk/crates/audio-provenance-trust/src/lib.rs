@@ -11,7 +11,7 @@
 //! unknown_unobserved`, and that guard is not weakened here. What this crate adds is the only
 //! legitimate way past it: a chain from the signing key to an anchor the verifier configured. A
 //! chain that reaches a trusted anchor is `externally_verified`. Everything else is
-//! `unknown_unobserved`. There is no middle level and no caller-settable one: `genotrace` derives
+//! `unknown_unobserved`. There is no middle level and no caller-settable one: `apw_trace` derives
 //! the level from its own status mapping, and [`AnchoredTrustStore`] can only report reached or
 //! not reached.
 //!

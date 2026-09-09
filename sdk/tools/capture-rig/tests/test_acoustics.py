@@ -27,7 +27,7 @@ from scipy.signal import fftconvolve
 from .synthetic import decaying_ir
 
 SAMPLE_RATE = 48000
-TRAINING_IMAGE_SOURCE = Path("/Volumes/A/audio-provenance/sdk/training/src/genomark_n/rir/image_source.py")
+TRAINING_IMAGE_SOURCE = Path("/Volumes/A/audio-provenance/sdk/training//apw-watermark-neural/rir/image_source.py")
 
 # IEC 61672-1 A-weighting, dB relative to 1 kHz.
 IEC_61672_A_WEIGHTING_DB = {31.5: -39.4, 100.0: -19.1, 1000.0: 0.0, 10000.0: -2.5, 20000.0: -9.3}
@@ -36,13 +36,13 @@ IEC_61672_A_WEIGHTING_DB = {31.5: -39.4, 100.0: -19.1, 1000.0: 0.0, 10000.0: -2.
 def _load_training_image_source():
     """Load the training tree's image-source module by path.
 
-    By path rather than by import because `genomark_n.rir.__init__` pulls in the dataset module,
+    By path rather than by import because `apw_watermark_neural.rir.__init__` pulls in the dataset module,
     which needs torch, and this tool must not carry a torch dependency to cross-check twenty lines of
     Schroeder integration.
     """
     if not TRAINING_IMAGE_SOURCE.exists():
         return None
-    spec = importlib.util.spec_from_file_location("genomark_n_image_source", TRAINING_IMAGE_SOURCE)
+    spec = importlib.util.spec_from_file_location("apw_watermark_neural_image_source", TRAINING_IMAGE_SOURCE)
     if spec is None or spec.loader is None:
         return None
     module = importlib.util.module_from_spec(spec)

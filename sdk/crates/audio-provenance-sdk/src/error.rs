@@ -4,18 +4,18 @@ use audio_provenance_audio::AudioError;
 use audio_provenance_core::{CodedError, KeyError, SignatureError};
 use audio_provenance_manifest::ManifestError;
 use audio_provenance_registry::{ConfigError, RegistryError, ResolveError};
-use genotrace::GenoTraceError;
+use apw_trace::TraceError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum SdkError {
     #[error(transparent)]
-    Recovery(#[from] GenoTraceError),
+    Recovery(#[from] TraceError),
 
     /// A registry rung was meant to run and could not.
     ///
     /// IMPORTANT: this is why `verify` returns a `Result` at all beyond caller errors. An outage
     /// collapsed into `not_found` would publish "this work is unregistered" on the strength of a
-    /// dropped connection. GenoTrace keeps the distinction as `incomplete`; the facade refuses to
+    /// dropped connection. Trace keeps the distinction as `incomplete`; the facade refuses to
     /// hand a caller a `not_found` that rests on it.
     #[error("registry rung {method} could not run: {detail}")]
     RegistryUnavailable {
@@ -37,7 +37,7 @@ pub enum SdkError {
     },
 
     /// Marking changes the audio a hard binding covers, so a mark applied after signing invalidates
-    /// the record that was just written. GENOMARK_SPEC section 3.6 fixes the order: embed, then
+    /// the record that was just written. WATERMARK_SPEC section 3.6 fixes the order: embed, then
     /// hash, then sign.
     #[error(
         "{path} already carries a Audio Provenance manifest; marking it would invalidate that record"
@@ -96,7 +96,7 @@ pub enum SdkError {
     #[error(transparent)]
     Key(#[from] KeyError),
     #[error(transparent)]
-    Mark(#[from] genomark::GenoMarkError),
+    Mark(#[from] apw_watermark::WatermarkError),
     #[error(transparent)]
     Audio(#[from] AudioError),
     #[error(transparent)]

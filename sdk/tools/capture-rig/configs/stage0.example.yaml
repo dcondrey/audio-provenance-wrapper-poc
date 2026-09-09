@@ -1,4 +1,4 @@
-# GenoMark-N Stage 0 physical capture campaign.
+# Watermark-N Stage 0 physical capture campaign.
 #
 # The grid of spec section 10.1 is 3 rooms x 3 speakers x 3 microphones x 5 distances x 2 SPL
 # levels = 270 cells. Running 200 clips through all of them is roughly 450 hours of playback, which

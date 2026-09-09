@@ -1,4 +1,4 @@
-# Runbook — GenoMark-N Stage 0 physical capture campaign
+# Runbook — Watermark-N Stage 0 physical capture campaign
 
 Two weeks, three rooms, three speakers, three microphones. This is the campaign spec section 10
 orders before any training step, and its outputs are inputs to everything after it.

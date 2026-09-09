@@ -1,8 +1,8 @@
-//! Parallel classical-GenoMark qualification orchestrator and static baseline writer.
+//! Parallel classical-Watermark qualification orchestrator and static baseline writer.
 //!
 //! The four measurement arms run as independent release binaries so null detection, watermark
 //! recovery, adversarial attacks, and recording association can use separate worker pools. The
-//! orchestrator never loads `genomark-n`; its report records an empty experimental implementation
+//! orchestrator never loads `apw-watermark-neural`; its report records an empty experimental implementation
 //! list and hashes every raw artifact it summarizes.
 
 use std::fs::File;
@@ -15,7 +15,7 @@ use serde::Serialize;
 use serde_json::Value;
 
 const SCHEMA: &str = "audio-provenance-classical-qualification-v1";
-const IMPLEMENTATION: &str = "genomark-lepqim-v1";
+const IMPLEMENTATION: &str = "apw-watermark-lepqim-v1";
 const DEFAULT_SEED: u64 = 0x6765_6E6F_746F_6E65;
 
 const USAGE: &str = "audio-provenance-qualify --null-dir DIR --corpus-dir DIR --out-dir DIR
@@ -284,7 +284,7 @@ fn artifact(path: &Path, hash: String) -> Artifact {
 fn markdown(report: &BaselineReport) -> String {
     let rate = |value: Option<f64>| value.map_or_else(|| "n/a".to_owned(), |v| format!("{v:.8}"));
     format!(
-        "# Classical GenoMark qualification baseline\n\n\
+        "# Classical Watermark qualification baseline\n\n\
          - Production implementation: `{}`\n\
          - Experimental implementations included: none\n\
          - Qualification complete: `{}`\n\
@@ -295,7 +295,7 @@ fn markdown(report: &BaselineReport) -> String {
          - Material-alteration rejection: {}\n\
          - Association predicates: {:.2} s local regions, {:.2} s maximum unexplained gap, {:.2} minimum coverage\n\
          - Dataset coverage: {} null; {} recovery real; {} association; {} adversarial items\n\n\
-         `genomark-n` is not linked into the qualification runner. Mark recovery is a locator \
+         `apw-watermark-neural` is not linked into the qualification runner. Mark recovery is a locator \
          measurement, not authentication; signed-record association and signature verification \
          remain separate gates.\n",
         report.production_implementation,
@@ -529,7 +529,7 @@ fn main() -> std::process::ExitCode {
             != Some(IMPLEMENTATION)
     {
         return fail(
-            "an artifact does not describe classical GenoMark".to_owned(),
+            "an artifact does not describe classical Watermark".to_owned(),
             4,
         );
     }
@@ -635,7 +635,7 @@ fn main() -> std::process::ExitCode {
         generated_at: options.timestamp,
         production_implementation: IMPLEMENTATION,
         experimental_implementations_included: Vec::new(),
-        feature_isolation: "classical-genomark default feature; genomark-n absent from dependency graph",
+        feature_isolation: "classical-apw_watermark default feature; apw-watermark-neural absent from dependency graph",
         seed: options.seed,
         qualification_complete,
         meets_predeclared_targets,

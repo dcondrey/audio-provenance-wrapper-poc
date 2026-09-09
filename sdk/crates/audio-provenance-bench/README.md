@@ -4,7 +4,7 @@ The bench comes before the watermark it measures.
 
 A mark that round-trips clean audio and dies on every real distribution path is indistinguishable
 from a working one until something measures it. This crate is that something, and it was written and
-validated against known-bad detectors before GenoMark existed.
+validated against known-bad detectors before Watermark existed.
 
 ## Running it
 
@@ -83,7 +83,7 @@ every report.
 
 ## The fixtures, and why they exist
 
-Three deliberately simple codecs, named `fixture_*` so no reader can mistake one for GenoMark:
+Three deliberately simple codecs, named `fixture_*` so no reader can mistake one for Watermark:
 
 - `fixture_lsb16` — payload plus a sync word and CRC-16 in the least significant bit of the 16-bit
   quantisation, repeated to fill the file. Bit-exact through a transparent path, gone the moment

@@ -65,7 +65,7 @@ impl RegistrySource {
 
 /// A queryable repository of signed manifests.
 ///
-/// Synchronous by choice: every consumer (the CLI, and GenoTrace's recovery ladder) issues
+/// Synchronous by choice: every consumer (the CLI, and Trace's recovery ladder) issues
 /// strictly sequential lookups, and a sync trait is dyn-compatible without boxing every call.
 pub trait RegistryBackend: fmt::Debug + Send + Sync {
     fn source(&self) -> &RegistrySource;

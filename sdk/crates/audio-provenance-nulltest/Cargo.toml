@@ -1,6 +1,6 @@
 [package]
 name = "audio-provenance-nulltest"
-description = "Runs the GenoMark null test: detection over a large corpus of never-marked audio across the whole channel matrix, and emits the bench report the verifier's --null-test gate consumes."
+description = "Runs the Watermark null test: detection over a large corpus of never-marked audio across the whole channel matrix, and emits the bench report the verifier's --null-test gate consumes."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -12,12 +12,12 @@ authors.workspace = true
 workspace = true
 
 [features]
-default = ["classical-genomark"]
-classical-genomark = []
+default = ["classical-apw-watermark"]
+classical-apw-watermark = []
 
 [dependencies]
-genomark = { workspace = true, features = ["bench"] }
-genotrace = { workspace = true }
+apw-watermark = { workspace = true, features = ["bench"] }
+apw-trace = { workspace = true }
 audio-provenance-audio = { workspace = true, features = ["fs"] }
 audio-provenance-bench = { workspace = true }
 audio-provenance-core = { workspace = true }

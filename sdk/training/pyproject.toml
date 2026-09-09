@@ -1,7 +1,7 @@
 [project]
-name = "genomark-n-training"
+name = "apw-watermark-neural-training"
 version = "0.1.0"
-description = "PyTorch training harness for GenoMark-N (genomark-neural-v1), the learned acoustic mark specified in docs/GENOMARK_N_SPEC.md."
+description = "PyTorch training harness for Watermark-N (apw-watermark-neural-v1), the learned acoustic mark specified in docs/WATERMARK_N_SPEC.md."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -17,12 +17,12 @@ dependencies = [
 ]
 
 [project.scripts]
-genomark-n-train = "genomark_n.train:main"
-genomark-n-calibrate = "genomark_n.calibrate:main"
-genomark-n-evaluate = "genomark_n.evaluate:main"
-genomark-n-export = "genomark_n.export_onnx:main"
-genomark-n-modelcard = "genomark_n.model_card:main"
-genomark-n-parity = "genomark_n.parity:main"
+apw-watermark-neural-train = "apw_watermark_neural.train:main"
+apw-watermark-neural-calibrate = "apw_watermark_neural.calibrate:main"
+apw-watermark-neural-evaluate = "apw_watermark_neural.evaluate:main"
+apw-watermark-neural-export = "apw_watermark_neural.export_onnx:main"
+apw-watermark-neural-modelcard = "apw_watermark_neural.model_card:main"
+apw-watermark-neural-parity = "apw_watermark_neural.parity:main"
 
 [dependency-groups]
 dev = [
@@ -35,7 +35,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/genomark_n"]
+packages = ["src/apw_watermark_neural"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

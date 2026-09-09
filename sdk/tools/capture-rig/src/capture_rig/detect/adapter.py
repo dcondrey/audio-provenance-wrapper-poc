@@ -1,7 +1,7 @@
 """Detector adapters. A detector is anything with `detect(audio, thresholds) -> Detection`.
 
-That is the signature `training/src/genomark_n/pipeline.py::Detector.detect` already uses, so a
-PyTorch GenoMark-N detector, an AudioSeal baseline or a Rust binary all plug in the same way and
+That is the signature `training//apw-watermark-neural/pipeline.py::Detector.detect` already uses, so a
+PyTorch Watermark-N detector, an AudioSeal baseline or a Rust binary all plug in the same way and
 none of them can be handed anything a deployed detector would not have.
 """
 

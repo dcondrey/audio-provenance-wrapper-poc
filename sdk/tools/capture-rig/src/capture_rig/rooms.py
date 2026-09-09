@@ -29,7 +29,7 @@ K0_MIN_DRR_DB = 0.0
 K0_DISTANCE_M = 1.0
 K0_DISTANCE_TOLERANCE_M = 0.05
 
-# Only the fields `training/src/genomark_n/data/manifest.py::CorpusEntry` accepts. It constructs the
+# Only the fields `training//apw-watermark-neural/data/manifest.py::CorpusEntry` accepts. It constructs the
 # dataclass with **record, so an extra key is a TypeError at load time, not an ignored field.
 MANIFEST_FIELDS = ("path", "licence", "source", "attribution", "url", "sample_rate", "seconds")
 

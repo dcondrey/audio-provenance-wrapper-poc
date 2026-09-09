@@ -1,12 +1,12 @@
-//! The bridge into `genotrace`'s verification pipeline.
+//! The bridge into `apw_trace`'s verification pipeline.
 //!
-//! The proof level is not passed across this boundary and cannot be. `genotrace` derives
+//! The proof level is not passed across this boundary and cannot be. `apw_trace` derives
 //! `externally_verified` from a `TrustOutcome::Anchored` in its own status mapping, so the only
 //! thing this adapter can do is report whether a chain reached a trusted anchor. There is no
 //! setter, here or anywhere, that raises a signer's proof level.
 
 use audio_provenance_core::KeyPossessionProof;
-use genotrace::{TrustAnchor, TrustResolution};
+use apw_trace::{TrustAnchor, TrustResolution};
 
 use crate::chain::TrustEvaluation;
 use crate::store::TrustStore;
@@ -36,7 +36,7 @@ impl AnchoredTrustStore {
     }
 }
 
-impl genotrace::TrustStore for AnchoredTrustStore {
+impl apw_trace::TrustStore for AnchoredTrustStore {
     fn resolve(&self, proof: &KeyPossessionProof) -> TrustResolution {
         match self.store.evaluate(proof.public_key_bytes(), &self.at) {
             TrustEvaluation::Vouched(identity) => TrustResolution::Anchored(TrustAnchor {

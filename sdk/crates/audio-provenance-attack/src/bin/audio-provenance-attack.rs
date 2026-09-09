@@ -1,12 +1,12 @@
-//! Runs the adversarial campaign against `genomark-lepqim-v1` and writes the report it measured.
+//! Runs the adversarial campaign against `apw-watermark-lepqim-v1` and writes the report it measured.
 
 use audio_provenance_attack::{campaign, spec};
 use audio_provenance_bench::attacks::report::RemovalVerdict;
 use audio_provenance_bench::corpus::{CorpusItem, CorpusSpec, load_wav_directory, load_wav_files};
 use audio_provenance_bench::ports::FileStore;
 use audio_provenance_bench::ports::native::{DiskFileStore, ProcessRunner};
-use genomark::GenoMark;
-use genomark::payload::Payload;
+use apw_watermark::Watermark;
+use apw_watermark::payload::Payload;
 use std::process::ExitCode;
 use std::time::Instant;
 
@@ -128,10 +128,10 @@ fn load(options: &Options) -> Result<Vec<CorpusItem>, String> {
     Ok(items)
 }
 
-fn keys() -> Result<(GenoMark, GenoMark), String> {
-    let victim = GenoMark::keyed(b"victim/secret/profile/key/never-published".to_vec(), 1)
+fn keys() -> Result<(Watermark, Watermark), String> {
+    let victim = Watermark::keyed(b"victim/secret/profile/key/never-published".to_vec(), 1)
         .map_err(|error| error.to_string())?;
-    let attacker = GenoMark::keyed(b"attacker/own/profile/key".to_vec(), 2)
+    let attacker = Watermark::keyed(b"attacker/own/profile/key".to_vec(), 2)
         .map_err(|error| error.to_string())?;
     Ok((victim, attacker))
 }
@@ -154,7 +154,7 @@ fn probe(options: &Options) -> Result<(), String> {
             geometry.slots_per_block()
         );
 
-        let payload = Payload::new(genomark::payload::VERSION, 1, 0x0000_A100_0000)
+        let payload = Payload::new(apw_watermark::payload::VERSION, 1, 0x0000_A100_0000)
             .map_err(|error| error.to_string())?;
         let started = Instant::now();
         let marked = victim

@@ -47,7 +47,7 @@ impl ManifestDraft {
         self
     }
 
-    /// The salt the GenoMark locator was allocated from. REQUIRED: a Audio Provenance record that does not
+    /// The salt the Watermark locator was allocated from. REQUIRED: a Audio Provenance record that does not
     /// carry one names no locator, so no mark can ever resolve it.
     #[must_use]
     pub const fn with_locator_salt(mut self, salt: LocatorSalt) -> Self {

@@ -10,7 +10,7 @@ Specifically NOT present, and not to be added:
                            licence-clean pipeline in the field. Nothing from it is copied here.
                            What was taken is a DESIGN IDEA that is published in the paper: a
                            per-sample detection head, moved to the frame grid as the presence head
-                           of GENOMARK_N_SPEC.md section 2.6(a). Ideas are not copyrightable; the
+                           of WATERMARK_N_SPEC.md section 2.6(a). Ideas are not copyrightable; the
                            code was not read into this tree.
                            Licence read at https://github.com/facebookresearch/audioseal/blob/main/LICENSE
 
@@ -20,7 +20,7 @@ Specifically NOT present, and not to be added:
                            HuggingFace mirror has cardData: null. NO WEIGHTS VENDORED. What was
                            taken is published design: the fidelity-floor controller idea (here a
                            per-bin masking budget, spec 2.7) and the pseudo-differentiable codec
-                           layer (here src/genomark_n/distortion/codec.py, written from the
+                           layer (here /apw-watermark-neural/distortion/codec.py, written from the
                            published description: real encoder forward, identity gradient backward).
                            Licence read at https://github.com/sony/silentcipher (README + release assets)
 
@@ -33,29 +33,29 @@ Specifically NOT present, and not to be added:
                            published distortion-layer recipe as a FACT IN A PAPER:
                            DAR(.) = GaussianNoise(BandPass(RIRConvolution)) and its ablation
                            ordering, reimplemented clean-room in
-                           src/genomark_n/distortion/chain.py.
+                           /apw-watermark-neural/distortion/chain.py.
 
   AWARE                    No weights exist in the repository. What was taken is the published
                            position-agnostic bitwise readout idea (paired filter banks producing
                            per-bit temporal activation traces, globally averaged), reimplemented in
-                           src/genomark_n/model.py::Decoder.
+                           /apw-watermark-neural/model.py::Decoder.
 
   Timbre Watermarking      GPL-3.0. Hard block. Not read, not used.
 
 Reimplemented from published descriptions, with no third-party code consulted line by line:
 
   - the image-source method (Allen & Berkley 1979) and Eyring's reverberation formula, in
-    src/genomark_n/rir/image_source.py;
+    /apw-watermark-neural/rir/image_source.py;
   - the Schroeder spreading function / half-Bark masking model, ported from this repository's own
     crates/audio-provenance-bench/src/perceptual.rs (Apache-2.0, same project) into
-    src/genomark_n/perceptual.py;
-  - RBJ audio-EQ-cookbook biquad coefficients, in src/genomark_n/distortion/dsp.py;
-  - CRC-24/OPENPGP, in src/genomark_n/payload.py, verified against the standard check value
+    /apw-watermark-neural/perceptual.py;
+  - RBJ audio-EQ-cookbook biquad coefficients, in /apw-watermark-neural/distortion/dsp.py;
+  - CRC-24/OPENPGP, in /apw-watermark-neural/payload.py, verified against the standard check value
     crc24(b"123456789") == 0x21CF02.
 
 DATA. No corpus is bundled. Loaders refuse any manifest entry whose declared licence is outside
 {CC0-1.0, CC-BY-*, CC-BY-SA-*, audio-provenance-owned, audio-provenance-licensed, public-domain} and refuse the
-following sources by name, with the reason, in src/genomark_n/data/licences.py:
+following sources by name, with the reason, in /apw-watermark-neural/data/licences.py:
 
   unfiltered FMA           metadata is CC BY-NC-SA 4.0; audio licences are heterogeneous per track
                            and a substantial fraction are NonCommercial (spec 9.1)

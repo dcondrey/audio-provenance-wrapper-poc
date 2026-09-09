@@ -3,7 +3,7 @@
 use std::sync::Arc;
 
 use audio_provenance_sdk::VerifyOptions;
-use genotrace::{FileTrustStore, NullTestTable};
+use apw_trace::{FileTrustStore, NullTestTable};
 use serde::Deserialize;
 use wasm_bindgen::JsValue;
 

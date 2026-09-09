@@ -62,6 +62,53 @@ dependencies = [
 ]
 
 [[package]]
+name = "apw-trace"
+version = "0.1.0"
+dependencies = [
+ "apw-watermark",
+ "audio-provenance-audio",
+ "audio-provenance-core",
+ "audio-provenance-manifest",
+ "audio-provenance-registry",
+ "hex",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "thiserror",
+ "web-time",
+]
+
+[[package]]
+name = "apw-watermark"
+version = "0.1.0"
+dependencies = [
+ "audio-provenance-audio",
+ "audio-provenance-bench",
+ "audio-provenance-core",
+ "chacha20",
+ "hkdf",
+ "rustfft",
+ "sha2",
+ "thiserror",
+]
+
+[[package]]
+name = "apw-watermark-neural"
+version = "0.1.0"
+dependencies = [
+ "audio-provenance-audio",
+ "audio-provenance-bench",
+ "audio-provenance-core",
+ "hex",
+ "ort",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror",
+]
+
+[[package]]
 name = "assert-json-diff"
 version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -98,10 +145,10 @@ checksum = "1254ebf6529f3763c491acfb5ab6e960809e3c75a38584cc664f8c5667fb7107"
 name = "audio-provenance-attack"
 version = "0.1.0"
 dependencies = [
+ "apw-watermark",
  "audio-provenance-audio",
  "audio-provenance-bench",
  "audio-provenance-core",
- "genomark",
  "serde_json",
 ]
 
@@ -134,10 +181,10 @@ dependencies = [
 name = "audio-provenance-c2pa"
 version = "0.1.0"
 dependencies = [
+ "apw-trace",
  "audio-provenance-core",
  "audio-provenance-manifest",
  "ciborium",
- "genotrace",
  "hex",
  "serde_json",
  "thiserror",
@@ -147,6 +194,8 @@ dependencies = [
 name = "audio-provenance-cli"
 version = "0.1.0"
 dependencies = [
+ "apw-trace",
+ "apw-watermark",
  "audio-provenance-audio",
  "audio-provenance-core",
  "audio-provenance-manifest",
@@ -154,8 +203,6 @@ dependencies = [
  "audio-provenance-sdk",
  "audio-provenance-trust",
  "clap",
- "genomark",
- "genotrace",
  "getrandom 0.4.3",
  "hex",
  "serde_json",
@@ -193,11 +240,11 @@ dependencies = [
 name = "audio-provenance-nulltest"
 version = "0.1.0"
 dependencies = [
+ "apw-trace",
+ "apw-watermark",
  "audio-provenance-audio",
  "audio-provenance-bench",
  "audio-provenance-core",
- "genomark",
- "genotrace",
  "serde",
  "serde_json",
 ]
@@ -219,14 +266,14 @@ dependencies = [
 name = "audio-provenance-sdk"
 version = "0.1.0"
 dependencies = [
+ "apw-trace",
+ "apw-watermark",
  "async-trait",
  "audio-provenance-audio",
  "audio-provenance-core",
  "audio-provenance-manifest",
  "audio-provenance-registry",
  "ed25519-dalek",
- "genomark",
- "genotrace",
  "getrandom 0.4.3",
  "hex",
  "reqwest",
@@ -243,8 +290,8 @@ dependencies = [
 name = "audio-provenance-trust"
 version = "0.1.0"
 dependencies = [
+ "apw-trace",
  "audio-provenance-core",
- "genotrace",
  "hex",
  "serde",
  "serde_json",
@@ -256,13 +303,13 @@ dependencies = [
 name = "audio-provenance-wasm"
 version = "0.1.0"
 dependencies = [
+ "apw-trace",
+ "apw-watermark",
  "audio-provenance-audio",
  "audio-provenance-core",
  "audio-provenance-registry",
  "audio-provenance-sdk",
  "console_error_panic_hook",
- "genomark",
- "genotrace",
  "getrandom 0.4.3",
  "hex",
  "js-sys",
@@ -777,53 +824,6 @@ dependencies = [
  "memchr",
  "pin-project-lite",
  "slab",
-]
-
-[[package]]
-name = "genomark"
-version = "0.1.0"
-dependencies = [
- "audio-provenance-audio",
- "audio-provenance-bench",
- "audio-provenance-core",
- "chacha20",
- "hkdf",
- "rustfft",
- "sha2",
- "thiserror",
-]
-
-[[package]]
-name = "genomark-n"
-version = "0.1.0"
-dependencies = [
- "audio-provenance-audio",
- "audio-provenance-bench",
- "audio-provenance-core",
- "hex",
- "ort",
- "serde",
- "serde_json",
- "sha2",
- "thiserror",
-]
-
-[[package]]
-name = "genotrace"
-version = "0.1.0"
-dependencies = [
- "audio-provenance-audio",
- "audio-provenance-core",
- "audio-provenance-manifest",
- "audio-provenance-registry",
- "genomark",
- "hex",
- "serde",
- "serde_json",
- "sha2",
- "tempfile",
- "thiserror",
- "web-time",
 ]
 
 [[package]]

@@ -4,13 +4,13 @@ import json
 
 import pytest
 
-from genomark_n.data.licences import (
+from apw_watermark_neural.data.licences import (
     LicenceError,
     normalise_licence,
     require_allowed_licence,
     require_allowed_source,
 )
-from genomark_n.data.manifest import load_manifest
+from apw_watermark_neural.data.manifest import load_manifest
 
 
 @pytest.mark.parametrize("licence", ["CC BY-NC 4.0", "CC BY-ND 4.0", "GPL-3.0", "unknown", ""])

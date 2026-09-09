@@ -6,7 +6,7 @@ use serde::Serialize;
 ///
 /// `null` reads as "not yet measured" and invites hope. No published method demonstrates blind,
 /// CRC-gated, ground-truth-free recovery over a speaker-to-microphone path at any distance.
-pub const ACOUSTIC_RERECORDING: &str = genomark::ACOUSTIC_RERECORDING;
+pub const ACOUSTIC_RERECORDING: &str = apw_watermark::ACOUSTIC_RERECORDING;
 
 /// The rate every figure in [`capabilities`] is quoted at.
 pub const REFERENCE_SAMPLE_RATE: u32 = 44_100;
@@ -75,7 +75,7 @@ pub struct FingerprintCapabilities {
     pub default_policy_emits_candidate: bool,
     /// A Audio Provenance record commits to the constellation of the audio it was signed over, so a
     /// transcode whose hard binding fails can still reach `verified` at proof level `inferred` when
-    /// a CRC-valid GenoMark payload for that record also decodes out of the audio.
+    /// a CRC-valid Watermark payload for that record also decodes out of the audio.
     pub signed_reference_corroborates_lossy_path: bool,
     /// The alignment-coverage floor that corroboration must clear, on top of every rung-5 alignment
     /// gate and the block-coverage guard.
@@ -89,7 +89,7 @@ pub fn capabilities() -> Capabilities {
 
 impl Capabilities {
     pub fn at(sample_rate: u32) -> Self {
-        let mark = genomark::Capabilities::at(sample_rate);
+        let mark = apw_watermark::Capabilities::at(sample_rate);
         Self {
             sdk: env!("CARGO_PKG_NAME"),
             version: env!("CARGO_PKG_VERSION"),
@@ -101,12 +101,12 @@ impl Capabilities {
             ],
             signature_algorithms: ["ed25519", "ed25519-sha256-remote-custody"],
             recovery_methods: [
-                genotrace::RecoveryMethod::EmbeddedManifest.as_str(),
-                genotrace::RecoveryMethod::SidecarManifest.as_str(),
-                genotrace::RecoveryMethod::ContentHashLookup.as_str(),
-                genotrace::RecoveryMethod::DecodedAudioHashLookup.as_str(),
-                genotrace::RecoveryMethod::GenomarkRecovery.as_str(),
-                genotrace::RecoveryMethod::FingerprintSearch.as_str(),
+                apw_trace::RecoveryMethod::EmbeddedManifest.as_str(),
+                apw_trace::RecoveryMethod::SidecarManifest.as_str(),
+                apw_trace::RecoveryMethod::ContentHashLookup.as_str(),
+                apw_trace::RecoveryMethod::DecodedAudioHashLookup.as_str(),
+                apw_trace::RecoveryMethod::WatermarkRecovery.as_str(),
+                apw_trace::RecoveryMethod::FingerprintSearch.as_str(),
             ],
             registry_backends: ["local", "http"],
             // IMPORTANT: `ogg_vorbis`, not `ogg`. symphonia 0.6 ships no Opus decoder and
@@ -131,15 +131,15 @@ impl Capabilities {
                 public_namespace_is_removable: true,
             },
             fingerprint: FingerprintCapabilities {
-                algorithm: genotrace::fingerprint::ALGORITHM_ID,
-                min_query_seconds: genotrace::fingerprint::MIN_QUERY_SECONDS,
+                algorithm: apw_trace::fingerprint::ALGORITHM_ID,
+                min_query_seconds: apw_trace::fingerprint::MIN_QUERY_SECONDS,
                 can_reach_verified: false,
                 default_policy_emits_candidate: false,
                 signed_reference_corroborates_lossy_path: true,
-                reference_affirmation_coverage: genotrace::AFFIRMATION_COVERAGE,
+                reference_affirmation_coverage: apw_trace::AFFIRMATION_COVERAGE,
             },
             acoustic_rerecording: ACOUSTIC_RERECORDING,
-            default_soft_binding_threshold: genotrace::DEFAULT_SOFT_BINDING_THRESHOLD,
+            default_soft_binding_threshold: apw_trace::DEFAULT_SOFT_BINDING_THRESHOLD,
             soft_binding_verified_requires_null_test: true,
         }
     }

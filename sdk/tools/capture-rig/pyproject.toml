@@ -1,7 +1,7 @@
 [project]
 name = "audio-provenance-capture-rig"
 version = "0.1.0"
-description = "Stage 0 physical capture campaign harness for GenoMark-N: playback/capture, room measurement, campaign matrix, and blind detection reporting. See docs/GENOMARK_N_SPEC.md section 10."
+description = "Stage 0 physical capture campaign harness for Watermark-N: playback/capture, room measurement, campaign matrix, and blind detection reporting. See docs/WATERMARK_N_SPEC.md section 10."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

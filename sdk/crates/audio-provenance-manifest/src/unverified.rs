@@ -65,7 +65,7 @@ impl UnverifiedManifest {
         self.value.get("schema").and_then(Value::as_str)
     }
 
-    /// The signature envelope, unchecked. Exposed because GenoTrace records it on a candidate it
+    /// The signature envelope, unchecked. Exposed because Trace records it on a candidate it
     /// could not admit; it carries no bound data.
     pub fn signature_block(&self) -> Option<&Value> {
         self.value.get("portable_signature")
@@ -73,7 +73,7 @@ impl UnverifiedManifest {
 
     /// The one exit from the unverified type.
     ///
-    /// Order matters and follows GENOTRACE stage 2: canonicality (where it applies), then the
+    /// Order matters and follows TRACE stage 2: canonicality (where it applies), then the
     /// signature, and only then the schema invariants. Nothing bound is read before the signature
     /// check, because everything that reads bound data lives on [`Manifest`].
     pub fn admit(self, schema: ManifestSchema) -> Result<Manifest, AdmissionFailure> {

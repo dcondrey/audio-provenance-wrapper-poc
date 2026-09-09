@@ -23,7 +23,7 @@ fn key() -> SigningKey {
     SigningKey::from_raw_bytes(&SEED).unwrap()
 }
 
-/// Two seconds of a decaying tone: long enough to decode, short enough that the GenoMark rung's
+/// Two seconds of a decaying tone: long enough to decode, short enough that the Watermark rung's
 /// detector cannot dominate the test run.
 fn write_wav(path: &Path) {
     write_tone(path, 2.0);
@@ -44,7 +44,7 @@ fn write_tone(path: &Path, seconds: f32) {
     std::fs::write(path, wav::encode(&buffer, BitDepth::Int16).unwrap()).unwrap();
 }
 
-/// Long enough for the GenoMark embedder, whose block is 9.66 s at 44.1 kHz.
+/// Long enough for the Watermark embedder, whose block is 9.66 s at 44.1 kHz.
 fn write_long_wav(path: &Path) {
     write_tone(path, 20.0);
 }
@@ -347,7 +347,7 @@ fn a_published_record_is_recovered_from_the_registry_alone() {
 
 /// The two-phase publish, end to end on real audio: allocate a locator, embed it, then sign the
 /// MARKED file with the salt that locator came from. What the file carries and what the record
-/// answers to have to be one value, and it is checked the way GenoTrace checks it: blindly.
+/// answers to have to be one value, and it is checked the way Trace checks it: blindly.
 #[test]
 fn an_embedded_mark_resolves_the_record_signed_over_it() {
     let dir = tempfile::tempdir().unwrap();
@@ -382,7 +382,7 @@ fn an_embedded_mark_resolves_the_record_signed_over_it() {
     assert_eq!(receipt.locator, plan.locator_hex());
 
     let written = wav::decode(&std::fs::read(&marked).unwrap(), &DecodeLimits::default()).unwrap();
-    let detection = audio_provenance_sdk::GenoMark::public()
+    let detection = audio_provenance_sdk::Watermark::public()
         .detect(&written)
         .unwrap();
     let payload = detection

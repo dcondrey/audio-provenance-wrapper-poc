@@ -41,10 +41,10 @@
 //! `audio-provenance-bench` null-test report supplies the false-positive rate the result must publish; see
 //! [`VerifyOptions::with_null_test_report`].
 //!
-//! # The four statuses come from GenoTrace
+//! # The four statuses come from Trace
 //!
 //! This crate defines no status of its own. [`audio_provenance_core::VerificationStatus`] is the vocabulary,
-//! the mapping lives in `genotrace::status`, and [`VerifyResult`] serialises as the CLI's `--json`
+//! the mapping lives in `apw_trace::status`, and [`VerifyResult`] serialises as the CLI's `--json`
 //! output verbatim rather than through a second hand-built shape.
 
 #![cfg_attr(test, allow(clippy::unwrap_used))]
@@ -88,9 +88,9 @@ pub use audio_provenance_registry::{
     HttpRegistryAuth, HttpRegistryBackend, HttpRegistryOptions, LocalRegistryBackend, Lookup,
     RegistryBackend, RegistryKind, RegistryRecord, RegistrySource, WritableRegistryBackend,
 };
-pub use genomark::{GenoMark, Payload};
-pub use genotrace::result::FindingReport;
-pub use genotrace::{
+pub use apw_watermark::{Watermark, Payload};
+pub use apw_trace::result::FindingReport;
+pub use apw_trace::{
     BindingKind, BindingReport, DEFAULT_SOFT_BINDING_THRESHOLD, FileTrustStore, InspectReport,
     MatchBasis, NoTrustAnchors, NullTestTable, RecoveryMethod, RecoveryReport, RecoveryStep,
     SidecarPolicy, SignatureReport, StepOutcome, TrustAnchor, TrustResolution, TrustStore,

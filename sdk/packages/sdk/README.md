@@ -60,7 +60,7 @@ is reading a different verdict from the one they think they asked for.
 
 ## The result
 
-`VerifyResult` mirrors the Rust `genotrace::result::VerifyResult` field for field, with keys
+`VerifyResult` mirrors the Rust `apw_trace::result::VerifyResult` field for field, with keys
 camelCased. The parts worth reading before you write a UI:
 
 | Field | Type | Meaning |
@@ -71,7 +71,7 @@ camelCased. The parts worth reading before you write a UI:
 | `identityProofLevel` | `ProofLevel` | `externally_verified` exactly when `identity` is non-null |
 | `signedAt` | `string \| null` | `YYYY-MM-DD` |
 | `match` | `number \| null` | `null` when no binding was evaluated |
-| `matchBasis` | `"hard_exact" \| "genomark" \| "fingerprint" \| "mark_and_fingerprint" \| "none"` | which binding carried the verdict |
+| `matchBasis` | `"hard_exact" \| "apw_watermark" \| "fingerprint" \| "mark_and_fingerprint" \| "none"` | which binding carried the verdict |
 | `binding` | `BindingReport` | the numbers behind `match`, including the false-positive rate |
 | `method` | `RecoveryMethod \| null` | which rung recovered the record |
 | `trace` | `RecoveryStep[]` | all six rungs, with outcomes and timings |
@@ -99,7 +99,7 @@ add one.
 ### `mark_and_fingerprint` is how a transcode still verifies
 
 A lossy transcode destroys the hard binding. It can still reach `verified` at proof level
-`inferred` when BOTH a CRC-valid GenoMark payload naming the record decodes out of the audio AND
+`inferred` when BOTH a CRC-valid Watermark payload naming the record decodes out of the audio AND
 the record's own signed reference constellation affirms it. A fingerprint alone never verifies, and
 a payload that decodes while the constellation disagrees is the watermark-copy attack and stays
 `changed`.

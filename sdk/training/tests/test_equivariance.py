@@ -26,13 +26,13 @@ import numpy as np
 import pytest
 import torch
 
-from genomark_n.config import load_config
-from genomark_n.data.synthetic import SyntheticCorpus
-from genomark_n.model import GenoMarkN
-from genomark_n.payload import MessageCodec
-from genomark_n.perceptual import PerceptualModel
-from genomark_n.pipeline import Marker
-from genomark_n.stft import SpectralFront
+from apw_watermark_neural.config import load_config
+from apw_watermark_neural.data.synthetic import SyntheticCorpus
+from apw_watermark_neural.model import NeuralWatermark
+from apw_watermark_neural.payload import MessageCodec
+from apw_watermark_neural.perceptual import PerceptualModel
+from apw_watermark_neural.pipeline import Marker
+from apw_watermark_neural.stft import SpectralFront
 
 SUB_FRAME_SHIFT = 137
 WHOLE_HOP_SHIFT = 5 * 512
@@ -46,7 +46,7 @@ def harness():
     torch.manual_seed(7)
     config = load_config()
     front = SpectralFront(config.stft)
-    model = GenoMarkN(config.encoder, config.decoder, config.payload, config.stft).eval()
+    model = NeuralWatermark(config.encoder, config.decoder, config.payload, config.stft).eval()
     marker = Marker(model, front, PerceptualModel(config.perceptual, config.stft.sample_rate),
                     config.budget)
     codec = MessageCodec(config.payload)

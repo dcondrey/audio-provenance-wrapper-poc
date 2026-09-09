@@ -1,6 +1,6 @@
 //! The marked bench over real recorded music, run beside the synthetic corpus in one report.
 //!
-//! `genomark-bench` takes real files through `--real-wav`, but `CorpusSpec::max_real_items` caps
+//! `apw-watermark-bench` takes real files through `--real-wav`, but `CorpusSpec::max_real_items` caps
 //! that at four and the loader takes rather than rejects, so a larger real corpus disappears
 //! without an error. This binary exists to run the same measurement over a whole directory with the
 //! cap set from the directory itself, and to keep the synthetic items in the same report so the
@@ -16,8 +16,8 @@ use audio_provenance_bench::ports::native::{DiskFileStore, ProcessRunner};
 use audio_provenance_bench::report::{RowVerdict, Thresholds};
 use audio_provenance_bench::runner::{BenchConfig, run};
 use audio_provenance_bench::watermark::WatermarkCodec;
-use genomark::bench::GenoMarkCodec;
-use genomark::payload::Payload;
+use apw_watermark::bench::LepQimCodec;
+use apw_watermark::payload::Payload;
 
 const USAGE: &str = "audio-provenance-corpus-bench --real-dir DIR [--out-dir DIR] [--ffmpeg PATH]
                      [--seed N] [--duration SECONDS] [--min-recovery RATE]
@@ -161,7 +161,7 @@ fn main() -> std::process::ExitCode {
         generated_at: std::env::var("AUDIO_PROVENANCE_BENCH_TIMESTAMP").ok(),
     };
 
-    let codec = GenoMarkCodec::public();
+    let codec = LepQimCodec::public();
     let matrix = default_matrix(&options.ffmpeg);
     eprintln!(
         "corpus bench: {} items x {} channels",

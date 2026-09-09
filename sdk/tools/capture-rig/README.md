@@ -1,7 +1,7 @@
 # audio-provenance-capture-rig
 
-Stage 0 of the GenoMark-N programme: the physical speaker-to-microphone capture campaign specified in
-`docs/GENOMARK_N_SPEC.md` section 10, built before any serious training investment because it is what
+Stage 0 of the Watermark-N programme: the physical speaker-to-microphone capture campaign specified in
+`docs/WATERMARK_N_SPEC.md` section 10, built before any serious training investment because it is what
 decides whether the programme continues.
 
 **The number this exists to produce does not exist anywhere.** Every physical acoustic watermark
@@ -76,7 +76,7 @@ stops the programme, so it is never reachable from a dataset too thin to support
 ## Detectors
 
 A detector is anything with `detect(audio, thresholds) -> Detection` — the same signature
-`training/src/genomark_n/pipeline.py` already uses.
+`training//apw-watermark-neural/pipeline.py` already uses.
 
 ```
 --detector null                             declines everything; the pipeline's own control
@@ -110,7 +110,7 @@ Each is recorded in every measurement JSON.
   designed for 0.30 s, where a 10 s 20 Hz–20 kHz sweep reads 0.30 s. Use a 10 s sweep.
 - **DRR** — the ACE Challenge convention: a ±2.5 ms window around the direct peak against everything
   after it, on the same 100 Hz – 8 kHz band. **This is not the split the training tree uses.**
-  `RirPair.measured_drr_db()` in `training/src/genomark_n/rir/image_source.py` separates image-source
+  `RirPair.measured_drr_db()` in `training//apw-watermark-neural/rir/image_source.py` separates image-source
   order 0 from orders ≥ 1, which is unobservable on a measured response. On that synthesiser's own
   output the ACE figure reads about **+2.4 dB above** the order-split target and tracks it one for
   one, so a DRR-parameterised training distribution maps monotonically onto measured DRR with a stated
@@ -144,7 +144,7 @@ This directory is owned by the capture-rig workstream. It creates no paths outsi
 crate, and does not edit the workspace manifest.
 
 It duplicates about twenty lines of Schroeder integration that also exist in
-`training/src/genomark_n/rir/image_source.py`. That is deliberate: a path dependency on a
+`training//apw-watermark-neural/rir/image_source.py`. That is deliberate: a path dependency on a
 concurrently-edited package would break K0's evaluator whenever that package is refactored. The two
 implementations are cross-checked in `tests/test_acoustics.py`, which agrees with the training tree's
 `measure_rt60` to within 2% on the same convention and skips when that tree is absent.

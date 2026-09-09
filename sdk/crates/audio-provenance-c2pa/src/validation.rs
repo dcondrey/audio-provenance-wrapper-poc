@@ -9,7 +9,7 @@
 //! `claimSignature.validated`, `assertion.hashedURI.match`, `assertion.dataHash.match` and
 //! `signingCredential.untrusted` as separate rows, and it is the combination that picks the state.
 //!
-//! # Precedence, matching `genotrace::derive_status`
+//! # Precedence, matching `apw_trace::derive_status`
 //!
 //! Recovery, then store integrity, then signature, then binding, then trust. Store integrity sits
 //! above the binding on purpose: an assertion store that does not recompute against the claim's
@@ -18,7 +18,7 @@
 //! `CandidateRejected(NoncanonicalManifest)` above binding evaluation in the ladder, and it lands
 //! on the same status: `untrusted`, never `changed`.
 //!
-//! Every row of [`classify`] has a counterpart in `genotrace::derive_status`, reached with the
+//! Every row of [`classify`] has a counterpart in `apw_trace::derive_status`, reached with the
 //! `StatusInputs` on the right:
 //!
 //! | C2PA evidence                                   | state                          | `StatusInputs`                                              | status      |

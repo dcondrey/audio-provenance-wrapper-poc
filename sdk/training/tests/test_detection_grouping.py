@@ -17,11 +17,11 @@ import pytest
 import torch
 from torch import nn
 
-from genomark_n.config import load_config
-from genomark_n.model import GenoMarkN
-from genomark_n.payload import Message, MessageCodec
-from genomark_n.pipeline import Detector, FrozenThresholds
-from genomark_n.stft import SpectralFront
+from apw_watermark_neural.config import load_config
+from apw_watermark_neural.model import NeuralWatermark
+from apw_watermark_neural.payload import Message, MessageCodec
+from apw_watermark_neural.pipeline import Detector, FrozenThresholds
+from apw_watermark_neural.stft import SpectralFront
 
 CLIP_SECONDS = 6.0
 LOGIT = 6.0
@@ -102,7 +102,7 @@ def _detector(cells, present, threshold: float = 0.5, window_seconds: float = 1.
     audio = torch.zeros(1, int(CLIP_SECONDS * config.stft.sample_rate))
     # The detector reads only `model.decoder`; the stub supplies exactly that surface and the
     # cast is what makes the substitution explicit rather than widening the real signature.
-    detect = Detector(cast(GenoMarkN, _Model(decoder)), front, detector_config, codec)
+    detect = Detector(cast(NeuralWatermark, _Model(decoder)), front, detector_config, codec)
     return detect.detect(audio, _thresholds(threshold)), codec
 
 

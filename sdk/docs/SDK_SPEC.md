@@ -1,7 +1,7 @@
 // =====================================================================
 // PACKAGE NAMES. Published as @writerslogic/audio-provenance-sdk per the target
 // repo's committed SCOPE.md (@audio-provenance is unregistered and Audio Provenance/
-// GenoMark/GenoTrace are third-party marks). The brief's
+// Watermark/Trace are third-party marks). The brief's
 // `import { verify } from "@audio-provenance/sdk"` is preserved as a workspace
 // alias package that re-exports this one, and as the rename target.
 // Nothing but package.json name fields encodes the scope.
@@ -97,9 +97,9 @@ export declare function admitManifest(
 export declare function validateManifest(value: unknown): Finding[];
 
 // ---------------------------------------------------------------------
-// @writerslogic/audio-provenance-genomark
+// @writerslogic/audio-provenance-apw_watermark
 // ---------------------------------------------------------------------
-export const ALGORITHM_ID: "genomark-lepqim-v1";
+export const ALGORITHM_ID: "apw-watermark-lepqim-v1";
 /** 56. The width the CALLER controls. Not 88 (with CRC), not 96 (trellis
  *  steps), not 288 (coded bits) — those are internal and never surface. */
 export const MARK_PAYLOAD_BITS: 56;
@@ -143,9 +143,9 @@ export type VerifyStatus = "verified" | "changed" | "untrusted" | "not_found";
 export type AudioInput = string | URL | Uint8Array | ArrayBuffer | Blob;
 export type MatchBasis =
   | "hard_exact"
-  | "genomark"
+  | "apw_watermark"
   | "fingerprint"
-  /** GENOTRACE_SPEC route 3(c): a CRC-valid GenoMark payload naming this record,
+  /** TRACE_SPEC route 3(c): a CRC-valid Watermark payload naming this record,
    *  corroborated by the record's own signed reference constellation, over a
    *  file whose hard binding no longer recomputes. ALWAYS proofLevel
    *  "inferred", never match 1.0. A fingerprint alone is still "fingerprint"
@@ -194,13 +194,13 @@ export interface VerifyResult {
 export interface BindingReport {
   readonly kind:
     | "hard_hash"
-    | "soft_genomark"
+    | "soft_apw_watermark"
     | "soft_fingerprint"
     | "soft_mark_and_fingerprint"
     | "none";
   readonly match: number;
-  /** hard_hash -> directly_observed; a `strong` genomark -> directly_observed;
-   *  a `single` genomark, any fingerprint, and soft_mark_and_fingerprint ->
+  /** hard_hash -> directly_observed; a `strong` apw_watermark -> directly_observed;
+   *  a `single` apw_watermark, any fingerprint, and soft_mark_and_fingerprint ->
    *  inferred, never higher. */
   readonly proofLevel: ProofLevel;
   /** The threshold the reported `match` was actually gated against, which is
@@ -246,7 +246,7 @@ export interface RecordingAssociationReport {
 
 export type RecoveryMethod =
   | "embedded_manifest" | "sidecar_manifest" | "content_hash_lookup"
-  | "decoded_audio_hash_lookup" | "genomark_recovery" | "fingerprint_search";
+  | "decoded_audio_hash_lookup" | "apw_watermark_recovery" | "fingerprint_search";
 export interface RecoveryStep {
   readonly method: RecoveryMethod;
   readonly outcome: "hit" | "miss" | "skipped" | "degraded" | "unavailable";
@@ -274,7 +274,7 @@ export interface VerifyOptions {
 export declare function verify(input: AudioInput, options?: VerifyOptions): Promise<VerifyResult>;
 export declare function sign(input: AudioInput, options: SignOptions): Promise<SignResult>;
 export declare function embed(input: AudioInput, options: EmbedOptions): Promise<EmbedResult>;
-/** Reports what GenoTrace found, with no verdict and no trust evaluation. */
+/** Reports what Trace found, with no verdict and no trust evaluation. */
 export declare function inspect(input: AudioInput, options?: InspectOptions): Promise<InspectReport>;
 
 export interface SignOptions {

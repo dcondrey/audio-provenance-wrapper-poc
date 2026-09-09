@@ -12,19 +12,19 @@ Every finding and every inventory row carries a reachability tag:
 - **DORMANT** — no caller at all.
 
 `file:line` references are to files opened during the audit. Line numbers for
-`crates/genotrace/src/ladder.rs` are as of the fix in F-1 below.
+`crates/apw-trace/src/ladder.rs` are as of the fix in F-1 below.
 
 ## Scope
 
-Read and audited: `audio-provenance-core`, `audio-provenance-manifest`, `audio-provenance-registry`, `genotrace`,
+Read and audited: `audio-provenance-core`, `audio-provenance-manifest`, `audio-provenance-registry`, `apw_trace`,
 `audio-provenance-trust`, `audio-provenance-sdk`, `audio-provenance-cli`, `audio-provenance-wasm` (options only), `audio-provenance-c2pa`,
-`genomark` (payload, CRC, keystream, params), `audio-provenance-audio` (wav, iff, buffer, decode limits).
+`apw_watermark` (payload, CRC, keystream, params), `audio-provenance-audio` (wav, iff, buffer, decode limits).
 
-**Not read, and therefore not reported on:** `crates/genomark-n`, `training/`, `tools/capture-rig`
+**Not read, and therefore not reported on:** `crates/apw-watermark-neural`, `training/`, `tools/capture-rig`
 (owned by the concurrent v2 effort). The assignment's ONNX-model and ZIP-bundle parser surfaces live
 there. No ONNX or ZIP parsing exists in any crate this audit read; the only archive-shaped input in
 scope is the JUMBF box tree, covered under section 3. `audio-provenance-bench` DSP internals and
-`genotrace/src/fingerprint/{landmark,score,reference}.rs` were read only where the verification path
+`apw-trace/src/fingerprint/{landmark,score,reference}.rs` were read only where the verification path
 enters them.
 
 ---
@@ -33,17 +33,17 @@ enters them.
 
 | Primitive | Crate + version | Where | Reachability |
 |---|---|---|---|
-| Ed25519 (`verify_strict`) manifest signature | `ed25519-dalek` 3.0.0 (`curve25519-dalek` 5.0.0) | `audio-provenance-core/src/signing.rs:265-301` | **PRODUCTION** — `audio-provenance-manifest/src/unverified.rs:124`, reached from `genotrace/src/admission.rs:57` on every rung |
+| Ed25519 (`verify_strict`) manifest signature | `ed25519-dalek` 3.0.0 (`curve25519-dalek` 5.0.0) | `audio-provenance-core/src/signing.rs:265-301` | **PRODUCTION** — `audio-provenance-manifest/src/unverified.rs:124`, reached from `apw-trace/src/admission.rs:57` on every rung |
 | Ed25519 domain-separated signature | `ed25519-dalek` 3.0.0 | `audio-provenance-core/src/signing.rs:94-98, 305-318` | **PRODUCTION** — trust anchors/records/revocations, `audio-provenance-trust/src/document.rs:200,354,514` |
 | SHA-256 | `sha2` 0.11.0 | `audio-provenance-core/src/hashing.rs:31-37` | **PRODUCTION** — content hash, decoded-audio hash, record id, signer id, locator |
 | SHA-256 hash chain (`window_hash`) | `sha2` 0.11.0 | `audio-provenance-core/src/hashing.rs:12-29` | **TEST-ONLY in this workspace.** `grep -rn window_hash crates/*/src crates/*/tests` returns only the definition, the `audio-provenance-core/src/lib.rs:18` re-export and `audio-provenance-core/tests/poc_interop.rs:139-158`. It is exported for POC observer interop; no verification path calls it. Note that `window_hash("", s)` and `window_hash("genesis", s)` are equal by design (`hashing.rs:14-18`), so a chain whose previous hash is the literal string `genesis` is indistinguishable from a genesis window. Not exploitable here because nothing in this workspace consumes it |
-| HKDF-SHA256 (GenoMark schedule) | `hkdf` 0.13.0 + `hmac` 0.13.0 | `genomark/src/keystream.rs:38-40` | **PRODUCTION** — `GenoMark::public()` at `genotrace/src/lib.rs:234,276` |
-| ChaCha20 keystream (dither/preamble/pilot) | `chacha20` 0.10.2 | `genomark/src/keystream.rs:47` | **PRODUCTION**, same path |
-| CRC-32C (Castagnoli, reflected 0x82F63B78) | hand-rolled, `genomark/src/crc32c.rs` | payload acceptance gate, `genomark/src/payload.rs:139-152` | **PRODUCTION** |
+| HKDF-SHA256 (Watermark schedule) | `hkdf` 0.13.0 + `hmac` 0.13.0 | `apw-watermark/src/keystream.rs:38-40` | **PRODUCTION** — `Watermark::public()` at `apw-trace/src/lib.rs:234,276` |
+| ChaCha20 keystream (dither/preamble/pilot) | `chacha20` 0.10.2 | `apw-watermark/src/keystream.rs:47` | **PRODUCTION**, same path |
+| CRC-32C (Castagnoli, reflected 0x82F63B78) | hand-rolled, `apw-watermark/src/crc32c.rs` | payload acceptance gate, `apw-watermark/src/payload.rs:139-152` | **PRODUCTION** |
 | CSPRNG | `getrandom` 0.4.3 | `audio-provenance-cli/src/cmd/keygen.rs:29`, `cmd/sign.rs:189`, `cmd/embed.rs:187`, `audio-provenance-sdk/src/producer.rs:334` | **PRODUCTION** — all key and salt material |
 | PCG-XSH-RR 64/32 | hand-rolled, `audio-provenance-bench/src/dsp/rng.rs` | bench reproducibility only | **PRODUCTION in the bench binary, never for key material** |
 | TLS | `rustls` 0.23.43 via `ureq` 3.4.0 | `audio-provenance-registry/src/http.rs:163-171` | **PRODUCTION** when an HTTP registry is configured; `http` is no longer a default feature |
-| COSE / ES256 / PS256 (C2PA) | — | not implemented anywhere | **DORMANT** — `genotrace/src/ladder.rs:404-407` emits `c2pa_cose_verification_unsupported` |
+| COSE / ES256 / PS256 (C2PA) | — | not implemented anywhere | **DORMANT** — `apw-trace/src/ladder.rs:404-407` emits `c2pa_cose_verification_unsupported` |
 | Post-quantum | — | none | absent, correctly |
 
 There is **one** signature algorithm. `SignatureAlgorithm` is a single-variant enum
@@ -64,7 +64,7 @@ There is **one** signature algorithm. `SignatureAlgorithm` is a single-variant e
 | Locator | `derive_locator(pubkey, salt)`, `locator.rs:99` | `locator_from_signed_manifest`, `locator.rs:119` — one implementation shared by writer and re-deriver | Yes |
 | Record `mark_id` | `RegistryRecord::from_signed_manifest`, `record.rs:78-85` — derived from the manifest's own key and salt | `LocalRegistryBackend::read_entry` `local/mod.rs:150`, `HttpRegistryBackend::lookup_by_mark` `http.rs:400` | Yes — a backend cannot assert a mark id |
 | Record `content_sha256` | envelope field, caller-supplied (`record.rs:54-59`) | not cross-checked against `hard_binding.content_sha256` | **No** — see F-7 |
-| GenoMark payload → record | `audio-provenance sign` allocates the locator, then `audio-provenance embed` writes it | rung 5 re-derives (`ladder.rs:733-771`); route 3(c) re-derives (`ladder.rs:1207`); the no-hard-binding soft arm did **not** | **No, until F-1's fix** |
+| Watermark payload → record | `audio-provenance sign` allocates the locator, then `audio-provenance embed` writes it | rung 5 re-derives (`ladder.rs:733-771`); route 3(c) re-derives (`ladder.rs:1207`); the no-hard-binding soft arm did **not** | **No, until F-1's fix** |
 
 There is no hardware-backed signer, no Secure Enclave, TPM, HSM or KMS path, and no `cfg!(test)` or
 emulator guard anywhere on the signing path. `SigningKey` has exactly one constructor from bytes
@@ -87,9 +87,9 @@ operator entropy  ── getrandom::fill (32 B) ──▶ Ed25519 seed  [keygen.
                                           getrandom::fill (16 B) ────┘  locator_salt, signed into the manifest
 
 
-GenoMark profile key  (namespace 0: the literal b"audio-provenance/genomark/public/v1", params.rs:122)
+Watermark profile key  (namespace 0: the literal b"audio-provenance/apw-watermark/public/v1", params.rs:122)
         │
-        └─ HKDF-SHA256, salt = NONE, info = "genomark-lepqim-v1" || namespace(1 B) || epoch(8 B, BE)
+        └─ HKDF-SHA256, salt = NONE, info = "apw-watermark-lepqim-v1" || namespace(1 B) || epoch(8 B, BE)
                  │                                                        [keystream.rs:32-40]
                  └─▶ 44 bytes ─┬─ 32 B ChaCha20 key
                                └─ 12 B ChaCha20 nonce
@@ -145,7 +145,7 @@ constant time and do not need to be.
 
 ### F-1 — Mark transplant verifies against a record that declares no hard binding — HIGH — PRODUCTION — **FIXED IN THIS AUDIT**
 
-**What.** `evaluate_binding` fell through to the GenoMark soft-binding arm whenever
+**What.** `evaluate_binding` fell through to the Watermark soft-binding arm whenever
 `manifest.hard_binding()` was `None`, and that arm accepted **any** CRC-valid payload recovered from
 the audio without ever checking that the payload's locator names the record being evaluated.
 `corroborate`, the route-3(c) sibling twenty lines below, does make exactly that check
@@ -154,10 +154,10 @@ the audio without ever checking that the payload's locator names the record bein
 **Reachability.** PRODUCTION.
 
 - The class is constructed at exactly one non-test site. `grep -rn "SoftMark" crates/*/src` returns
-  `crates/genotrace/src/ladder.rs:1098` and `:1105` as the only constructors of
+  `crates/apw-trace/src/ladder.rs:1098` and `:1105` as the only constructors of
   `BindingEvaluation::SoftMark` / `SoftMarkUnpriced`; every other hit is the enum definition, the
   class projection in `result.rs`, or the status mapping.
-- `evaluate_binding` is called from `genotrace/src/lib.rs:411`, inside `run`, which is the body of
+- `evaluate_binding` is called from `apw-trace/src/lib.rs:411`, inside `run`, which is the body of
   both `verify` (`lib.rs:199`) and `verify_bytes` (`lib.rs:207`) — the CLI's `verify` command, the
   SDK facade and the wasm surface all land there.
 - The fall-through requires `hard_binding()` to be `None`. `HardBinding::evaluate_content` compares
@@ -180,9 +180,9 @@ conditionally — `daemon/manifest_builder/builder.py:204`, `if self.export is n
 that produced no rendered file therefore signs exactly the shape this finding needs. The comment
 should be corrected; it is in a crate the concurrent run owns, so it is reported rather than edited.
 
-**The attack.** Namespace 0's GenoMark profile key is the published literal
-`b"audio-provenance/genomark/public/v1"` (`genomark/src/params.rs:122`), and `GenoMark::public()` is what
-`genotrace` uses when the caller supplies none (`genotrace/src/lib.rs:234,276`). Anyone can therefore
+**The attack.** Namespace 0's Watermark profile key is the published literal
+`b"audio-provenance/apw-watermark/public/v1"` (`apw-watermark/src/params.rs:122`), and `Watermark::public()` is what
+`apw_trace` uses when the caller supplies none (`apw-trace/src/lib.rs:234,276`). Anyone can therefore
 mint a strong, CRC-valid mark carrying **any** 48-bit locator; locators are not secret, they are URL
 path segments (`http.rs:367`). An attacker takes a published `audio-provenance-manifest-v0` document
 signed by an anchored studio that carries no `export.sha256`, drops it beside arbitrary audio they
@@ -193,7 +193,7 @@ report supplied, the class is `SoftMarkStrongAtOrAboveThreshold` and the mapping
 Without a null-test report it is `SoftMarkFalsePositiveRateUnknown` → `untrusted`, so `--null-test`
 is what turns the hole from loud to silent.
 
-**Fix applied** at `crates/genotrace/src/ladder.rs:1081-1118`: the soft arm now requires
+**Fix applied** at `crates/apw-trace/src/ladder.rs:1081-1118`: the soft arm now requires
 `manifest.mark_locator() == Some(payload.locator_bytes())`, the same term `corroborate` applies. A
 mark that names another record raises a `recovered_mark_names_another_record` warning and the
 evaluation falls through to the fingerprint arm or to `NoEvidence`, i.e. `changed`. `mark_locator()`
@@ -206,13 +206,13 @@ re-derives from the manifest's own signed `portable_signature.public_key_hex` an
 arm. An ApwV0 record with no `locator_salt` now cannot be soft-mark-verified at all, which is the
 correct statement: such a record commits to no locator, so no mark in any audio is evidence about it.
 
-**Demonstrated, not derived.** `crates/genotrace/tests/soft_mark_locator.rs` is a new file that
-drives both halves end to end through `verify` over a real 29 s WAV, a real GenoMark embed and a real
+**Demonstrated, not derived.** `crates/apw-trace/tests/soft_mark_locator.rs` is a new file that
+drives both halves end to end through `verify` over a real 29 s WAV, a real Watermark embed and a real
 `audio-provenance-manifest-v0` fixture with `export` removed, `locator_salt` added and the document
 re-signed:
 
 - `a_mark_that_names_this_record_substitutes_for_the_hard_binding_it_never_declared` — the arm is
-  live and reaches `Verified / soft_binding_accepted / SoftGenomark / match 0.99`. This is what
+  live and reaches `Verified / soft_binding_accepted / SoftWatermark / match 0.99`. This is what
   proves the surface was real rather than theoretical.
 - `a_mark_that_names_another_record_is_not_evidence_about_this_one` — with the fix, `Changed /
   no_binding_evidence / match 0.0` plus the `recovered_mark_names_another_record` finding.
@@ -224,33 +224,33 @@ re-signed:
 test a_mark_that_names_another_record_is_not_evidence_about_this_one ... FAILED
 VerifyResult { status: Verified, reason: "soft_binding_accepted",
   identity: Some("Signal Room Studios"), identity_proof_level: ExternallyVerified,
-  identity_authority: Some("studio-ca"), match: 0.99, match_basis: Genomark,
-  binding: BindingReport { kind: SoftGenomark, match: 0.99, proof_level: DirectlyObserved,
+  identity_authority: Some("studio-ca"), match: 0.99, match_basis: Watermark,
+  binding: BindingReport { kind: SoftWatermark, match: 0.99, proof_level: DirectlyObserved,
     threshold: 0.72, false_positive_rate_at_match: Some(0.008108108108108109),
-    detail: "GenoMark, 3/3 blocks" },
+    detail: "Watermark, 3/3 blocks" },
   signature: Some(SignatureReport { ..., valid: true }) }
 ```
 
 That is an anchored studio's name printed as `verified` over audio carrying a mark that names a
 different record. `ladder.rs` was restored byte-identically from a backup afterwards and re-verified.
 
-**Verified.** `cargo test -p genotrace` → **31 passed, 0 failed, 1 ignored**.
-`cargo clippy -p genotrace --all-targets --all-features -- -D warnings` clean.
-`cargo fmt --check -p genotrace` clean. The wide run
-`cargo test -p audio-provenance-core -p audio-provenance-audio -p audio-provenance-registry -p audio-provenance-bench -p genomark
--p audio-provenance-manifest -p genotrace -p audio-provenance-cli -p audio-provenance-trust -p audio-provenance-c2pa` exits 0 with
+**Verified.** `cargo test -p apw_trace` → **31 passed, 0 failed, 1 ignored**.
+`cargo clippy -p apw_trace --all-targets --all-features -- -D warnings` clean.
+`cargo fmt --check -p apw_trace` clean. The wide run
+`cargo test -p audio-provenance-core -p audio-provenance-audio -p audio-provenance-registry -p audio-provenance-bench -p apw_watermark
+-p audio-provenance-manifest -p apw_trace -p audio-provenance-cli -p audio-provenance-trust -p audio-provenance-c2pa` exits 0 with
 **183 passed, 0 failed, 6 ignored**. **No existing test was changed**; one new file was added.
 
 `-p audio-provenance-sdk` is absent from that list, and the reason is not this audit's change. At 17:17 the
 concurrent v1-completion run added `crates/audio-provenance-sdk/tests/facade.rs:453`, which reads
 `result.record_id`, a field `VerifyResult` does not yet have
-(`crates/genotrace/src/result.rs`, unmodified since 11:55): `error[E0609]: no field record_id on type
+(`crates/apw-trace/src/result.rs`, unmodified since 11:55): `error[E0609]: no field record_id on type
 VerifyResult`. That test target has not compiled since. An earlier run of the same list *including*
 `-p audio-provenance-sdk`, taken before that edit, exited 0 with the fix in place.
 
 ### F-2 — The v0 trust store binds a name to a 64-bit truncated key digest — HIGH — PRODUCTION — NOT FIXED
 
-**What.** `genotrace::FileTrustStore` keys its anchors and its revocation list on `signer_id`, which is
+**What.** `apw_trace::FileTrustStore` keys its anchors and its revocation list on `signer_id`, which is
 `sha256(public_key)` truncated to 16 hex characters — 64 bits (`signing.rs:46-50`,
 `FileTrustStore::resolve` at `trust.rs:148-161`, `AnchorEntry` at `trust.rs:76-81`).
 
@@ -288,14 +288,14 @@ security claim to a 64-bit one, on the one value that decides whether a name is 
 weakens revocation identically (`trust.rs:152`).
 
 **Remedy, precisely.** Add a required `public_key_hex` (32 bytes, lowercase hex) to
-`genotrace::trust::AnchorEntry`; key `FileTrustStore.anchors` and `.revoked` on `[u8; 32]`; have
+`apw_trace::trust::AnchorEntry`; key `FileTrustStore.anchors` and `.revoked` on `[u8; 32]`; have
 `resolve` compare `proof.public_key_bytes()` (`signing.rs:242-244`) and treat a declared `signer_id`
 that does not derive from the key as a load error. That is a deliberate break of the v0 format, whose
 migration message is "re-issue as `audio-provenance-trust-store-v1`", which `audio-provenance trust` already writes
 exclusively (`context.rs:87-88`).
 
 **Not fixed here** because it changes an on-disk format and requires editing three test helpers
-inside `crates/genotrace/tests/recovery.rs:60-64`, `crates/genotrace/tests/fingerprint.rs:340-344`
+inside `crates/apw-trace/tests/recovery.rs:60-64`, `crates/apw-trace/tests/fingerprint.rs:340-344`
 and `crates/audio-provenance-sdk/tests/facade.rs:52-65`, all of which construct the store from a bare
 `signer_id` string and some of which do not have the public key in scope. Those crates are owned by
 the concurrent v1-completion run.
@@ -312,7 +312,7 @@ authority are printed (`result.rs:547-553`, `render.rs:157-163`). The design int
 (`ladder.rs:410-421`, `sidecar_paths` at `lib.rs:490-500`), and the sidecar travels with the audio,
 so whoever distributes the file chooses it. The manifest need only be genuinely signed; published
 records are exactly that. The behaviour is pinned by an existing test:
-`crates/genotrace/tests/recovery.rs:294-315`, `audio_that_moved_under_a_valid_signature_is_changed`,
+`crates/apw-trace/tests/recovery.rs:294-315`, `audio_that_moved_under_a_valid_signature_is_changed`,
 asserts `result.identity.as_deref() == Some("Signal Room Studios")` on a `changed` verdict.
 
 **Why it matters.** The row assumes the manifest arrived with the audio legitimately. An attacker
@@ -349,11 +349,11 @@ downgrade must never yield a *stronger* claim, and it does not: every rung feeds
 and reputation: an attacker can turn a genuinely `verified` file into `untrusted` by appending a chunk.
 Worth stating in the product's honest-limits section; not a soundness bug.
 
-### F-5 — GenoMark namespace 0 is a published key; the mark is recovery, not tamper resistance — INFO — PRODUCTION — correct as designed
+### F-5 — Watermark namespace 0 is a published key; the mark is recovery, not tamper resistance — INFO — PRODUCTION — correct as designed
 
-`PUBLIC_PROFILE_KEY` is `b"audio-provenance/genomark/public/v1"` (`params.rs:122`) and `GenoMark::public()` is
-the default in `genotrace` (`lib.rs:234,276`), in the SDK (`audio-provenance-sdk/src/verify.rs:44`) and
-therefore in the wasm build. `genomark/src/lib.rs:71-74` already says so plainly: "an informed
+`PUBLIC_PROFILE_KEY` is `b"audio-provenance/apw-watermark/public/v1"` (`params.rs:122`) and `Watermark::public()` is
+the default in `apw_trace` (`lib.rs:234,276`), in the SDK (`audio-provenance-sdk/src/verify.rs:44`) and
+therefore in the wasm build. `apw-watermark/src/lib.rs:71-74` already says so plainly: "an informed
 adversary can estimate and subtract it. It is not tamper resistance and must not be described as
 such."
 
@@ -367,7 +367,7 @@ Consequence: the mark is an **index**, never an authenticator. Everything downst
 way — the locator is re-derived from the record's own signed key and salt at `ladder.rs:746-750`, at
 `:1207` and now at `:1089`. F-1 was the one place that assumption had been dropped.
 
-One loose end, not exploitable: `DetectionOutcome::namespace_mismatch` (`genomark/src/detect.rs:775`,
+One loose end, not exploitable: `DetectionOutcome::namespace_mismatch` (`apw-watermark/src/detect.rs:775`,
 `:842`) is raised as a *warning only* at `ladder.rs:679-689` when the accepted payload's 4-bit
 namespace field differs from the namespace the detector is keyed for. The declared field then becomes
 part of the registry `MarkId` (`ladder.rs:694-698`), so the mismatch only redirects the lookup; the
@@ -402,7 +402,7 @@ to a content hash the registry could be checked against, and the hard binding is
 
 `grep -rn "evaluate_hard_binding" crates/*/src crates/*/tests` returns the definition
 (`audio-provenance-manifest/src/manifest.rs:266`) and three assertions in
-`audio-provenance-manifest/tests/interop.rs:49,53,188`. Nothing in `genotrace`, `audio-provenance-sdk`,
+`audio-provenance-manifest/tests/interop.rs:49,53,188`. Nothing in `apw_trace`, `audio-provenance-sdk`,
 `audio-provenance-cli` or `audio-provenance-wasm` calls it; the ladder reads `hard_binding()` directly
 (`ladder.rs:1055`).
 
@@ -548,7 +548,7 @@ correctly marked as the fallback it is.
 - **A `changed` verdict names an anchored signer on a file they never touched** if the attacker
   supplies the sidecar (F-3). That is the system's loudest false statement and it is reachable by
   anyone holding a published record.
-- **The GenoMark mark is not an authenticator** (F-5). Every claim that rests on the mark rests on
+- **The Watermark mark is not an authenticator** (F-5). Every claim that rests on the mark rests on
   the re-derivation of the locator from a signed key and salt; F-1 was the one place that had been
   dropped, and it is now closed.
 - **C2PA claims are never cryptographically verified** (F-6). They are diagnostics.
@@ -557,7 +557,7 @@ correctly marked as the fallback it is.
   `audio-provenance-manifest/src/invariants.rs:37-40`: it says the POC JSON Schema "additionally demands
   `export`", and the schema does not. Correcting it is a one-line change in a crate the concurrent run
   owns.
-- **Unread**: `crates/genomark-n`, `training/`, `tools/capture-rig`. Any ONNX model loading, ZIP
+- **Unread**: `crates/apw-watermark-neural`, `training/`, `tools/capture-rig`. Any ONNX model loading, ZIP
   bundle handling or capture-rig input parsing in those trees is unaudited. No such parser exists in
   the crates read here.
 
@@ -571,11 +571,11 @@ touched exactly three files and nothing owned by the concurrent runs:
 
 | File | Change |
 |---|---|
-| `crates/genotrace/src/ladder.rs` | F-1's fix, `evaluate_binding` only, lines 1081-1118. Nothing else in the file moved; verified byte-identical against a pre-experiment backup after the negative control |
-| `crates/genotrace/tests/soft_mark_locator.rs` | New. Two tests demonstrating F-1's surface and its closure |
+| `crates/apw-trace/src/ladder.rs` | F-1's fix, `evaluate_binding` only, lines 1081-1118. Nothing else in the file moved; verified byte-identical against a pre-experiment backup after the negative control |
+| `crates/apw-trace/tests/soft_mark_locator.rs` | New. Two tests demonstrating F-1's surface and its closure |
 | `docs/THREAT_MODEL.md` | This document |
 
-Nothing under `crates/genomark-n`, `training/`, `tools/capture-rig`, `crates/genomark`,
+Nothing under `crates/apw-watermark-neural`, `training/`, `tools/capture-rig`, `crates/apw-watermark`,
 `crates/audio-provenance-sdk`, `crates/audio-provenance-cli`, `crates/audio-provenance-manifest`, `crates/audio-provenance-wasm`,
 `packages/sdk` or `crates/audio-provenance-trust` was modified. Nothing under
 `/Volumes/A/audio-provenance` was modified; it was read only.

@@ -1,12 +1,12 @@
 """Room acoustics measured from an impulse response: RT60, DRR, and A-weighted level.
 
-Kill criterion K0 in docs/GENOMARK_N_SPEC.md section 12.3 is defined on MEASURED RT60 and MEASURED
+Kill criterion K0 in docs/WATERMARK_N_SPEC.md section 12.3 is defined on MEASURED RT60 and MEASURED
 direct-to-reverberant ratio, so the conventions below are the ones K0 is evaluated under and they are
 named rather than implied.
 
 RT60: Schroeder backward integration, T30 fitted between -5 dB and -35 dB and extrapolated to 60 dB,
 with a Lundeby-style noise truncation before integration. Matches the T30 convention of
-`training/src/genomark_n/rir/image_source.py::measure_rt60`, with the truncation added because a
+`training//apw-watermark-neural/rir/image_source.py::measure_rt60`, with the truncation added because a
 measured response has a noise floor that a synthesised one does not.
 
 DRR: the ACE Challenge convention, a +/- 2.5 ms window around the direct peak against everything

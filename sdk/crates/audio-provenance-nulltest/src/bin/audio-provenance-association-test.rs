@@ -1,9 +1,9 @@
-//! Full-corpus recording-association qualification for classical GenoMark.
+//! Full-corpus recording-association qualification for classical Watermark.
 //!
-//! This is deliberately separate from locator recovery. It embeds the production GenoMark-Q mark,
-//! constructs the exact signed reference constellation used by `genotrace`, and measures the
+//! This is deliberately separate from locator recovery. It embeds the production Watermark-Q mark,
+//! constructs the exact signed reference constellation used by `apw_trace`, and measures the
 //! candidate with `fingerprint::compare`, including 0.5 s local regions and the 0.75 s maximum
-//! unexplained-gap predicate. No `genomark-n` dependency or feature exists in this crate.
+//! unexplained-gap predicate. No `apw-watermark-neural` dependency or feature exists in this crate.
 
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -19,17 +19,17 @@ use audio_provenance_bench::ports::FileStore;
 use audio_provenance_bench::ports::native::{DiskFileStore, ProcessRunner};
 use audio_provenance_bench::report::cell_seed;
 use audio_provenance_bench::watermark::WatermarkCodec;
-use genomark::bench::GenoMarkCodec;
-use genomark::payload::Payload;
-use genotrace::fingerprint::reference::{AFFIRMATION_REGION_SECONDS, MAX_UNEXPLAINED_GAP_SECONDS};
-use genotrace::fingerprint::score::ScoreLimits;
-use genotrace::fingerprint::{
+use apw_watermark::bench::LepQimCodec;
+use apw_watermark::payload::Payload;
+use apw_trace::fingerprint::reference::{AFFIRMATION_REGION_SECONDS, MAX_UNEXPLAINED_GAP_SECONDS};
+use apw_trace::fingerprint::score::ScoreLimits;
+use apw_trace::fingerprint::{
     AFFIRMATION_COVERAGE, FingerprintQuery, ReferenceFingerprint, compare,
 };
 use serde::Serialize;
 
 const SCHEMA: &str = "audio-provenance-association-qualification-v1";
-const IMPLEMENTATION: &str = "genomark-lepqim-v1";
+const IMPLEMENTATION: &str = "apw-watermark-lepqim-v1";
 const DEFAULT_SEED: u64 = 0x4153_534f_4349_4154;
 const LONG_SECONDS: f64 = 120.0;
 
@@ -384,7 +384,7 @@ fn evaluate_item(
     options: &Options,
 ) -> Vec<CaseResult> {
     let item = &corpus[index];
-    let codec = GenoMarkCodec::public();
+    let codec = LepQimCodec::public();
     let payload = match Payload::new(1, 0, 0x9AC3_5E00_11A7) {
         Ok(payload) => payload.to_bytes(),
         Err(error) => {

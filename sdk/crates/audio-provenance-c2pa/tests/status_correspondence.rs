@@ -12,7 +12,7 @@ use audio_provenance_c2pa::{
     HardBindingEvidence, classify,
 };
 use audio_provenance_core::VerificationStatus;
-use genotrace::{
+use apw_trace::{
     BindingClass, Exhaustion, RejectionReason, SignatureOutcome, StatusInputs, TrustOutcome,
     derive_status,
 };

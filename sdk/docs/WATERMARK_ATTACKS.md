@@ -1,11 +1,11 @@
-# Attacks on GenoMark-Q
+# Attacks on Watermark-Q
 
 A motivated adversary, not a codec. Everything below is measured, on the corpus and with the
 commands named at the end. Nothing in it is a prediction.
 
 ## The result in one paragraph
 
-Against an attacker who has read `GENOMARK_SPEC.md`, `genomark-lepqim-v1` provides **no removal
+Against an attacker who has read `WATERMARK_SPEC.md`, `apw-watermark-lepqim-v1` provides **no removal
 resistance and no forgery resistance**. The mark can be erased with a residual the same size as the
 mark itself, by three independent methods, none of which needs the profile key or any analysis the
 specification does not publish. It can be transplanted onto unrelated audio from a single 8.9 s
@@ -323,7 +323,7 @@ assumption. A CRC stops a guess. It does not stop a copy.
 ## What this does not measure
 
 Nothing in this document exercises the layers above the watermark, and those layers are where a
-verdict actually comes from. Read from `STATUS.md` and `docs/GENOTRACE_SPEC.md` 3.2a, and stated
+verdict actually comes from. Read from `STATUS.md` and `docs/TRACE_SPEC.md` 3.2a, and stated
 here as read-from-spec rather than as a measurement made in this campaign: a transplanted or forged
 file has no matching hash-chain hard binding and no matching signed reference constellation, so
 route 3(c) cannot reach `verified` for it; a payload that decodes while the constellation disagrees
@@ -368,12 +368,12 @@ The campaign wrote 276 rows in 264 s and the null arm ran 300 trials in 258 s, o
 before any attack. The victim key is generated inside the process and never leaves it; every row
 marked `spec only` or `one marked file` runs without it.
 
-Code: `crates/audio-provenance-bench/src/attacks` (the attacks, which know nothing about GenoMark) and
-`crates/audio-provenance-attack` (the wiring, which reads only published items out of `genomark`). The
+Code: `crates/audio-provenance-bench/src/attacks` (the attacks, which know nothing about Watermark) and
+`crates/audio-provenance-attack` (the wiring, which reads only published items out of `apw_watermark`). The
 invariant that every closed-loop attack reaches the shift it asked for is pinned by
 `crates/audio-provenance-bench/tests/attack_invariants.rs`.
 
-Measured 2026-08-31 against `crates/genomark` at source digest
+Measured 2026-08-31 against `crates/apw-watermark` at source digest
 `906e7803d539641d47d310dbefcd7fe6d2958106e057479e3d38cc2fba9df152`
-(`find crates/genomark/src -name '*.rs' | sort | xargs shasum -a 256 | shasum -a 256`), which did not
+(`find crates/apw-watermark/src -name '*.rs' | sort | xargs shasum -a 256 | shasum -a 256`), which did not
 change during the run.

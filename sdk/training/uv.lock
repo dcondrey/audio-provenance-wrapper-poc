@@ -206,7 +206,7 @@ wheels = [
 ]
 
 [[package]]
-name = "genomark-n-training"
+name = "apw-watermark-neural-training"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

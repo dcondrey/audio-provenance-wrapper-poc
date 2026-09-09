@@ -28,9 +28,9 @@ TRAINING_ROOT = Path("/Volumes/A/audio-provenance/sdk/training")
 
 PROBE = """
 import json, sys
-from genomark_n.config import RirConfig
-from genomark_n.data.manifest import load_manifest
-from genomark_n.rir.corpus import RirCorpus
+from apw_watermark_neural.config import RirConfig
+from apw_watermark_neural.data.manifest import load_manifest
+from apw_watermark_neural.rir.corpus import RirCorpus
 
 root = sys.argv[1]
 entries = load_manifest(root + "/manifest.jsonl")

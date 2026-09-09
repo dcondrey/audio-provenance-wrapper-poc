@@ -17,7 +17,7 @@ authors = ["Audio Provenance contributors"]
 async-trait = { version = "0.1.89" }
 ciborium = { version = "0.2.2", default-features = false }
 ed25519-dalek = { version = "3.0.0", default-features = false, features = ["alloc", "fast", "zeroize"] }
-genomark = { path = "crates/genomark", version = "0.1.0", default-features = false }
+apw-watermark = { path = "crates/apw-watermark", version = "0.1.0", default-features = false }
 audio-provenance-audio = { path = "crates/audio-provenance-audio", version = "0.1.0", default-features = false }
 audio-provenance-bench = { path = "crates/audio-provenance-bench", version = "0.1.0" }
 audio-provenance-core = { path = "crates/audio-provenance-core", version = "0.1.0", default-features = false }
@@ -25,7 +25,7 @@ audio-provenance-manifest = { path = "crates/audio-provenance-manifest", version
 audio-provenance-registry = { path = "crates/audio-provenance-registry", version = "0.1.0", default-features = false, features = ["std", "local"] }
 audio-provenance-sdk = { path = "crates/audio-provenance-sdk", version = "0.1.0", default-features = false }
 audio-provenance-trust = { path = "crates/audio-provenance-trust", version = "0.1.0" }
-genotrace = { path = "crates/genotrace", version = "0.1.0" }
+apw-trace = { path = "crates/apw-trace", version = "0.1.0" }
 getrandom = { version = "0.4.3" }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 hound = { version = "3.5.1" }

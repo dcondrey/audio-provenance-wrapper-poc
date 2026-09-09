@@ -16,13 +16,13 @@ located record with rejected association produces `changed`.
 
 Qualification update 2026-09-01: the full 1,000-item null artifact, all 13 characterization items,
 585 recording-association trials, and a fresh 591-row/all-13-item adversarial campaign are
-aggregated in `qualification/reports/classical-genomark/baseline.json`. **OBSERVED:** 0/37,000 null
+aggregated in `qualification/reports/classical-apw_watermark/baseline.json`. **OBSERVED:** 0/37,000 null
 false accepts (rule-of-three 95% upper bound 0.003003), 512/740 exact locator recoveries, 268/273
 expected associations, and 298/312 material alterations rejected. The run is complete and the
-declared targets fail. `genomark-n` is absent from the production runner's dependency graph.
+declared targets fail. `apw-watermark-neural` is absent from the production runner's dependency graph.
 
-The tree was being edited by another effort while this gate ran: `crates/genotrace/src/ladder.rs`
-and `crates/genotrace/tests/soft_mark_locator.rs` changed at 17:10 and 17:13 local, mid-run. Every
+The tree was being edited by another effort while this gate ran: `crates/apw-trace/src/ladder.rs`
+and `crates/apw-trace/tests/soft_mark_locator.rs` changed at 17:10 and 17:13 local, mid-run. Every
 result below comes from the tree as it stood after those edits.
 
 ## The gate
@@ -32,8 +32,8 @@ result below comes from the tree as it stood after those edits.
 | `cargo build --workspace --all-targets` | **OBSERVED** clean |
 | `cargo test --workspace` | **OBSERVED** 217 passed, 0 failed, 6 ignored, over 59 test targets |
 | `cargo clippy --workspace --all-targets -- -D warnings` | **OBSERVED** clean |
-| `cargo clippy --workspace --exclude genomark-n --all-targets --all-features -- -D warnings` | **OBSERVED** clean |
-| `cargo clippy --workspace --all-targets --all-features -- -D warnings` | **OBSERVED FAILING**, in `genomark-n` only. See Open. |
+| `cargo clippy --workspace --exclude apw-watermark-neural --all-targets --all-features -- -D warnings` | **OBSERVED** clean |
+| `cargo clippy --workspace --all-targets --all-features -- -D warnings` | **OBSERVED FAILING**, in `apw-watermark-neural` only. See Open. |
 | `cargo fmt --all --check` | **OBSERVED** clean |
 | `pnpm --filter @writerslogic/audio-provenance-sdk run build:wasm && build && test` | **OBSERVED** 12 Node tests pass against wasm rebuilt from this tree |
 
@@ -51,17 +51,17 @@ false-positive harness; it was **NOT** run here, so its 812-pair result is REPOR
 | `audio-provenance-audio` | symphonia decode, WAV encode, FFT/STFT/MDCT, rubato resampling, biquads |
 | `audio-provenance-registry` | `RegistryBackend`, local + HTTP backends, the name resolver |
 | `audio-provenance-bench` | 37 channels, `WatermarkCodec`, the BER / exact-recovery / false-positive runner |
-| `genomark` | `genomark-lepqim-v1`, 56-bit payload, blind CRC-gated detection |
+| `apw_watermark` | `apw-watermark-lepqim-v1`, 56-bit payload, blind CRC-gated detection |
 | `audio-provenance-manifest` | The signed record model and the POC `audio-provenance-manifest-v0` interop path |
 | `audio-provenance-c2pa` | C2PA claim reading and assertion-store integrity, checked against `c2patool` |
-| `genotrace` | The recovery ladder, the container reader **and writer**, the status mapping |
+| `apw_trace` | The recovery ladder, the container reader **and writer**, the status mapping |
 | `audio-provenance-trust` | Anchors, signed signer records, revocation, chain evaluation |
 | `audio-provenance-sdk` | `verify` / `sign` / `embed` / `inspect`, `capabilities()` |
 | `audio-provenance-cli` | The `audio-provenance` binary |
 | `audio-provenance-wasm` | The wasm-bindgen surface, and the caller-supplied registry backend |
-| `audio-provenance-attack` | The adversarial campaign against `genomark-lepqim-v1` |
-| `audio-provenance-nulltest` | The GenoMark null-test and corpus-bench runners |
-| `genomark-n` | Experimental inference path; not a production alternative until it beats classical GenoMark on the same blind corpus, latency, memory, false-positive, and perceptual gates |
+| `audio-provenance-attack` | The adversarial campaign against `apw-watermark-lepqim-v1` |
+| `audio-provenance-nulltest` | The Watermark null-test and corpus-bench runners |
+| `apw-watermark-neural` | Experimental inference path; not a production alternative until it beats classical Watermark on the same blind corpus, latency, memory, false-positive, and perceptual gates |
 
 `members` is `["crates/*"]` rather than a name list, because cargo refuses to load the whole
 workspace when a named member's directory is missing.
@@ -70,12 +70,12 @@ workspace when a named member's directory is missing.
 `audio-provenance-trust` did not compile. It compiles: `cargo build --workspace --all-targets` built all
 fifteen crates. `--workspace` is now correct everywhere except the `--all-features` clippy line.
 
-## GenoMark, re-measured this session
+## Watermark, re-measured this session
 
 Re-run at the baseline's own invocation — same default seed `7450482583528238693`, same payload
 `109ac35e0011a7`, same 10-item 30 s corpus, same three real WAVs — in `--release`, and diffed
-row by row against `bench-out/final2/genomark-lepqim-v1.txt`. Report:
-`bench-out/regate/genomark-lepqim-v1.txt`.
+row by row against `bench-out/final2/apw-watermark-lepqim-v1.txt`. Report:
+`bench-out/regate/apw-watermark-lepqim-v1.txt`.
 
 **OBSERVED. The critical arm is unchanged: 0 accepts in 370 unmarked trials, and the per-channel
 `fpr` column is 0.000 on all 37 rows.** No false-positive regression.
@@ -119,7 +119,7 @@ filesystem registry. Full transcript in the report accompanying this run.
 | sign `--mark`, publish | a record | signed, marked `fa2426c0c3d9`, record published, exit 0 |
 | verify the signed WAV | verified, hard, 1.0 | `verified`, `match 1.00 (hard binding, exact)`, identity resolved, exit 0 |
 | the same with `--no-sidecar` | the registry answers | `verified`, recovered via `content_hash_lookup`, exit 0 |
-| **mp3 128, verify** | **verified via the soft binding** | **`verified (inferred)`, `match 0.99`, GenoMark 27/27 blocks + signed constellation, recovered via `genomark_recovery`, exit 0** |
+| **mp3 128, verify** | **verified via the soft binding** | **`verified (inferred)`, `match 0.99`, Watermark 27/27 blocks + signed constellation, recovered via `apw_watermark_recovery`, exit 0** |
 | mp3 128 without `--null-test` | the gate refuses | `untrusted`, exit 2, "a soft binding cannot verify without one" |
 | aac 128, verify | verified | `verified (inferred)`, `match 0.99`, 23/27 blocks, exit 0 |
 | opus 128, verify | verified | **FAILS**: `input_undecodable`, exit 65. See Open. |
@@ -134,11 +134,11 @@ filesystem registry. Full transcript in the report accompanying this run.
 
 - **The RIFF provenance writer existed twice and the two copies had opposite semantics.**
   `audio-provenance-cli` replaced an existing `aprv` chunk; `audio-provenance-sdk` appended one. The reader,
-  `genotrace::container::riff_chunk`, returns the FIRST match. So `audio_provenance_sdk::sign` with
+  `apw_trace::container::riff_chunk`, returns the FIRST match. So `audio_provenance_sdk::sign` with
   `embed_manifest` over an already-signed asset published a file that verified against the manifest
   it was meant to supersede. **OBSERVED** as a failing test before the fix (recovered `2026-03-14`
   where `2027-05-02` was signed) and passing after. There is now one writer,
-  `genotrace::container::write_riff_chunk`, beside the reader; both crates are adapters over it.
+  `apw_trace::container::write_riff_chunk`, beside the reader; both crates are adapters over it.
   The consolidation also gave the CLI path the manifest-size bound it lacked, which it could
   previously exceed and write a chunk its own reader would refuse.
 - **`capabilities().decodes` advertised `ogg`.** symphonia 0.6.1 ships no Opus decoder and
@@ -163,20 +163,20 @@ filesystem registry. Full transcript in the report accompanying this run.
   production quality gaps, not missing measurements and not reasons to widen the fixed predicates.
 
 - **`cargo clippy --workspace --all-targets --all-features` cannot pass.** `--all-features` enables
-  `genomark-n`'s `download-binaries` and `load-dynamic` together, and that crate raises a
+  `apw-watermark-neural`'s `download-binaries` and `load-dynamic` together, and that crate raises a
   deliberate `compile_error!` because they are mutually exclusive ONNX Runtime linkage strategies.
-  GenoMark-N remains experimental and is not a second production path. Everything else is clean
+  Watermark-N remains experimental and is not a second production path. Everything else is clean
   under `--all-features`; the two clippy lines in the gate table above are the usable form.
 
 - **Opus does not decode.** `.opus` returns `input_undecodable`, exit 65. symphonia 0.6.1 has no
   Opus codec and no feature flag adds one, so this cannot be fixed in a manifest; it needs another
-  decoder or an ffmpeg-backed path. The GenoMark mark itself survives an opus-128 codec pass
+  decoder or an ffmpeg-backed path. The Watermark mark itself survives an opus-128 codec pass
   intact — **OBSERVED** `verified (inferred)`, 27/27 blocks, after decoding the same `.opus` back to
   WAV with ffmpeg — so this is a container/codec support gap, not a robustness one.
 
 - **A trust store the CLI produced cannot be read by the shipped JS SDK.** The CLI has two store
   readers: `audio_provenance_trust::TrustStore` for the chained Ed25519-signed `audio-provenance-trust-store-v1`
-  (a file, or a directory with an `anchors/` subdirectory) and `genotrace::FileTrustStore` for the
+  (a file, or a directory with an `anchors/` subdirectory) and `apw_trace::FileTrustStore` for the
   flat asserted `audio-provenance-trust-store-v0`. It has one writer: `audio-provenance trust export-anchor` emits
   v1, and no v0 writer exists anywhere in the workspace outside test fixtures. `audio-provenance-wasm` has
   one reader, `FileTrustStore`, so it accepts v0 only. **OBSERVED**: handing the CLI's own
@@ -184,7 +184,7 @@ filesystem registry. Full transcript in the report accompanying this run.
   field 'signer_id'`. The Node test suite passes because its fixture is a hand-written v0 file, and
   the step-(i) verdicts above were produced with a v0 store built from the run's signer id.
 
-- **`--null-test` gates soft bindings from reaching `verified`.** The full GenoMark null artifact
+- **`--null-test` gates soft bindings from reaching `verified`.** The full Watermark null artifact
   now covers 1,000 unmarked tracks across all 37 channels: **OBSERVED from the versioned artifact,**
   0/37,000 accepts and rule-of-three 95% upper bound 0.003003. Any demo still carrying the older
   370-trial pilot report must be repointed explicitly; this baseline does not silently rewrite a
@@ -192,7 +192,7 @@ filesystem registry. Full transcript in the report accompanying this run.
 
 - **The reference-constellation false-positive measurement was not re-run here, and it does not
   cover the case above.** REPORTED: 812 ordered pairs, 0 affirmations, 95% upper bound 0.0037, from
-  `crates/genotrace/tests/fingerprint_null_test.rs`, which is `#[ignore]`d as expensive and was left
+  `crates/apw-trace/tests/fingerprint_null_test.rs`, which is `#[ignore]`d as expensive and was left
   ignored. Those pairs are two *different recordings*. The interior-substitution case is a signed
   work with material swapped into it, which that harness never presented, and the span-based
   coverage it priced is the same term that is structurally blind to it. So 0.0037 is not a bound on
@@ -216,7 +216,7 @@ filesystem registry. Full transcript in the report accompanying this run.
 - **The reference constellation is linear in duration**, about 62 bytes per second, capped at
   262144 peaks (roughly two hours). Fine for masters and stems.
 
-- **`genomark_candidate_cap_reached` fires on a 4-minute input.** **OBSERVED** in the Node result
+- **`apw_watermark_candidate_cap_reached` fires on a 4-minute input.** **OBSERVED** in the Node result
   for the 240 s master: "peaks above the sync threshold were dropped unexamined; the recovery figure
   for this input is a cap artifact". The candidate cap is tuned for shorter items; on a full-length
   track the reported recovery figure is a floor, not the detector's real reach.

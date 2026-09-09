@@ -1,4 +1,4 @@
-//! The GenoMark null test.
+//! The Watermark null test.
 //!
 //! Never embeds anything. It loads a corpus of never-marked works, pushes every one of them through
 //! every channel in the matrix, and counts how often the detector returned a payload. The report it
@@ -13,7 +13,7 @@ use audio_provenance_bench::ports::FileStore;
 use audio_provenance_bench::ports::native::{DiskFileStore, ProcessRunner};
 use audio_provenance_bench::report::RowVerdict;
 use audio_provenance_bench::watermark::WatermarkCodec;
-use genomark::bench::GenoMarkCodec;
+use apw_watermark::bench::LepQimCodec;
 
 const USAGE: &str = "audio-provenance-null-test --corpus-dir DIR [--out-dir DIR] [--ffmpeg PATH]
                    [--seed N] [--workers N] [--duration SECONDS] [--limit N]
@@ -159,7 +159,7 @@ fn main() -> std::process::ExitCode {
         progress: options.progress,
     };
 
-    let codec = GenoMarkCodec::public();
+    let codec = LepQimCodec::public();
     let matrix = default_matrix(&options.ffmpeg);
     eprintln!(
         "null test: {} works x {} channels = {} trials, {} workers",

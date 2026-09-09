@@ -7,7 +7,7 @@ use audio_provenance_trust::{
     Anchor, Capability, Instant, Refusal, RevocationEntry, RevocationList, RevocationReason,
     SignedAnchor, SignedRecord, SignerRecord, TrustEvaluation, TrustStore, Window,
 };
-use genotrace::{TrustResolution, TrustStore as _};
+use apw_trace::{TrustResolution, TrustStore as _};
 use serde_json::Value;
 
 fn key(seed: u8) -> SigningKey {
@@ -436,7 +436,7 @@ fn a_document_outside_the_signed_grammar_is_refused() {
         );
     }
 }
-/// The adapter is the only thing `genotrace` sees, and `Anchored` is the only input from which its
+/// The adapter is the only thing `apw_trace` sees, and `Anchored` is the only input from which its
 /// status mapping produces `externally_verified`. Nothing else it can return may be `Anchored`.
 #[test]
 fn the_adapter_reports_anchored_only_for_a_completed_chain() {

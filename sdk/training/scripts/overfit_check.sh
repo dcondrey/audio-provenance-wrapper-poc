@@ -4,6 +4,6 @@
 # not a statement about whether the mark survives a room. Passing does not mean the design works.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-uv run python -m genomark_n.overfit_check \
+uv run python -m apw_watermark_neural.overfit_check \
   --config configs/smoke.yaml --steps "${1:-400}" --lr 1e-3 --seconds 2.0 \
   --out runs/overfit_check.json

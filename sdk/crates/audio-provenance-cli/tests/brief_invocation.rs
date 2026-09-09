@@ -170,13 +170,13 @@ fn the_briefs_invocation_verifies_and_exits_zero() {
 fn a_marked_signature_binds_the_marked_audio_and_the_mark_survives_into_the_file() {
     let temp = tempfile::tempdir().unwrap();
     let root = temp.path();
-    // A GenoMark block is 9.66 s at 44.1 kHz and an arbitrary crop needs two of them, so 21 s is the
+    // A Watermark block is 9.66 s at 44.1 kHz and an arbitrary crop needs two of them, so 21 s is the
     // shortest input that puts recovery inside the guaranteed window rather than at its edge.
     write_noise(&root.join("master.wav"), 21.0);
 
     let (_, err, code) = audio_provenance(root, &["keygen", "--out", "studio.key"]);
     assert_eq!(code, 0, "keygen: {err}");
-    // The GenoMark rung reports `skipped` with no registry to resolve a mark against, so one has to
+    // The Watermark rung reports `skipped` with no registry to resolve a mark against, so one has to
     // exist for the recovered mark id to reach the trace at all.
     let (_, err, code) =
         audio_provenance(root, &["registry", "init", "registry", "--name", "public"]);
@@ -208,7 +208,7 @@ fn a_marked_signature_binds_the_marked_audio_and_the_mark_survives_into_the_file
     );
     assert_eq!(code, 0, "sign --mark: {err}");
     assert!(out.contains("resolves   record "), "{out}");
-    assert!(out.contains("reference  genotrace-landmark-v1"), "{out}");
+    assert!(out.contains("reference  apw-trace-landmark-v1"), "{out}");
     let signer_id = out
         .lines()
         .find_map(|line| line.trim().strip_prefix("signer_id  "))
@@ -254,16 +254,16 @@ fn a_marked_signature_binds_the_marked_audio_and_the_mark_survives_into_the_file
     );
     assert_eq!(code, 2, "{err}{out}");
     assert!(out.starts_with("untrusted  "), "{out}");
-    assert!(out.contains("recovered via genomark_recovery"), "{out}");
+    assert!(out.contains("recovered via apw_watermark_recovery"), "{out}");
     assert!(
         out.contains("the signed reference constellation agree"),
         "{out}"
     );
-    let genomark = out
+    let apw_watermark = out
         .lines()
-        .find(|line| line.contains("genomark_recovery") && !line.contains("recovered via"))
+        .find(|line| line.contains("apw_watermark_recovery") && !line.contains("recovered via"))
         .unwrap();
-    assert!(genomark.contains("hit"), "{genomark}");
+    assert!(apw_watermark.contains("hit"), "{apw_watermark}");
 
     // Priced and anchored: all four predicates hold by route 3(c). The status is `verified`, and
     // every honesty guard fires with it — the qualifier on the header, a match strictly under 1.00,
@@ -285,7 +285,7 @@ fn a_marked_signature_binds_the_marked_audio_and_the_mark_survives_into_the_file
         .parent()
         .and_then(Path::parent)
         .unwrap()
-        .join("bench-out/final2/genomark-lepqim-v1.json");
+        .join("bench-out/final2/apw-watermark-lepqim-v1.json");
     let (out, err, code) = audio_provenance(
         root,
         &[

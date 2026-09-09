@@ -1,6 +1,6 @@
 //! `audio-provenance`: the command line over the Audio Provenance SDK.
 //!
-//! Every verdict printed here was decided by `genotrace`. This binary chooses a renderer and maps a
+//! Every verdict printed here was decided by `apw_trace`. This binary chooses a renderer and maps a
 //! status onto an exit code; it holds no provenance logic of its own, and there is no path by which
 //! a rendering decision can change an answer.
 
@@ -67,7 +67,7 @@ enum Command {
     Verify(cmd::verify::VerifyArgs),
     /// Hash and sign a file, optionally publishing the record.
     Sign(cmd::sign::SignArgs),
-    /// Write a GenoMark-marked copy.
+    /// Write a Watermark-marked copy.
     Embed(cmd::embed::EmbedArgs),
     /// Convert one admitted capture handoff into a development SDK record and verify it.
     CaptureAdapt(cmd::capture_adapt::CaptureAdaptArgs),

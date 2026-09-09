@@ -1,4 +1,4 @@
-//! The producer surface: sign a record, embed a GenoMark-Q mark, publish to a registry.
+//! The producer surface: sign a record, embed a Watermark-Q mark, publish to a registry.
 //!
 //! # The order is fixed, and it is not a convenience
 //!
@@ -15,7 +15,7 @@
 //! the REQUIRED signed `locator_salt` field of the record it seals over the MARKED audio, and
 //! [`publish`] stores the record under the locator derived from the manifest's own key and salt.
 //!
-//! GenoTrace re-derives the same value from the bytes a registry returns and refuses a mismatch as
+//! Trace re-derives the same value from the bytes a registry returns and refuses a mismatch as
 //! `untrusted / locator_mismatch`, terminal, no descent. Binding the signer's public key into the
 //! preimage is what makes squatting somebody else's locator a 2^48 search rather than a copy of
 //! their published salt.
@@ -36,9 +36,9 @@ use audio_provenance_registry::{
     ContentHash, LocalRegistryBackend, RecordId, RegistryKind, RegistryRecord, RegistryResolver,
     SignedAt, WritableRegistryBackend,
 };
-use genomark::{GenoMark, Payload};
-use genotrace::container::{EmbeddedOutcome, find_embedded};
-use genotrace::{IngestLimits, Ingested, ingest_path};
+use apw_watermark::{Watermark, Payload};
+use apw_trace::container::{EmbeddedOutcome, find_embedded};
+use apw_trace::{IngestLimits, Ingested, ingest_path};
 use serde::Serialize;
 
 use crate::error::SdkError;
@@ -47,7 +47,7 @@ use crate::riff;
 /// Where the signed record is written alongside the asset.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum SidecarOutput {
-    /// `<asset>.audio-provenance.json`, the first path GenoTrace's sidecar rung reads.
+    /// `<asset>.audio-provenance.json`, the first path Trace's sidecar rung reads.
     #[default]
     Conventional,
     Explicit(PathBuf),
@@ -181,7 +181,7 @@ pub struct SignResult {
     /// SHA-256 over [`Self::manifest_bytes`]: the registry `RecordId`.
     pub record_id: String,
     /// The 48-bit registry key this record answers to, derived from the signer's public key and
-    /// [`Self::locator_salt`]. A GenoMark payload carrying it resolves this record.
+    /// [`Self::locator_salt`]. A Watermark payload carrying it resolves this record.
     pub locator: String,
     /// The 16 CSPRNG bytes the locator was derived from, as they appear in the signed manifest.
     pub locator_salt: String,
@@ -206,7 +206,7 @@ pub struct SignResult {
     ///
     /// `content_sha256` is a straight hash over the file bytes, and the manifest carrying that
     /// digest is inside the bytes being hashed, so it cannot recompute over an asset with an
-    /// embedded record. `decoded_audio_sha256` still recomputes exactly; GenoTrace reports
+    /// embedded record. `decoded_audio_sha256` still recomputes exactly; Trace reports
     /// `hard_exact_decoded_audio_only` plus a `container_bytes_changed` finding. Only the sidecar
     /// path leaves `content_sha256` exact.
     pub asset_binds_content_sha256: bool,
@@ -246,7 +246,7 @@ pub fn sign(path: &Path, options: &SignOptions) -> Result<SignResult, SdkError> 
     }
     // IMPORTANT: from `ingested`, the same buffer the digests above came from. Taken from the
     // pre-mark source instead, the reference would describe audio that exists nowhere on disk.
-    let reference = genotrace::reference_fingerprint(ingested.audio())?;
+    let reference = apw_trace::reference_fingerprint(ingested.audio())?;
     if let Some(fingerprint) = &reference {
         draft = draft.with_fingerprint(fingerprint.clone());
     }
@@ -278,7 +278,7 @@ pub fn sign(path: &Path, options: &SignOptions) -> Result<SignResult, SdkError> 
             Some(target.display().to_string())
         }
         SidecarOutput::Conventional => {
-            let target = genotrace::sidecar_paths(asset)
+            let target = apw_trace::sidecar_paths(asset)
                 .into_iter()
                 .next()
                 .ok_or_else(|| SdkError::InvalidOption {
@@ -344,7 +344,7 @@ impl MarkPlan {
         let locator = derive_locator(&signer.public_key_bytes(), &salt);
         Ok(Self {
             salt,
-            payload: Payload::with_locator_bytes(genomark::payload::VERSION, namespace, &locator)?,
+            payload: Payload::with_locator_bytes(apw_watermark::payload::VERSION, namespace, &locator)?,
         })
     }
 
@@ -371,7 +371,7 @@ fn fresh_salt() -> Result<LocatorSalt, SdkError> {
 
 #[derive(Debug)]
 pub struct EmbedOptions {
-    genomark: GenoMark,
+    apw_watermark: Watermark,
     payload: Payload,
     out: PathBuf,
     depth: BitDepth,
@@ -383,7 +383,7 @@ impl EmbedOptions {
     /// provenance RECOVERY for cooperative and accidental cases, not tamper resistance.
     pub fn new(out: impl Into<PathBuf>, payload: Payload) -> Self {
         Self {
-            genomark: GenoMark::public(),
+            apw_watermark: Watermark::public(),
             payload,
             out: out.into(),
             depth: BitDepth::Int24,
@@ -392,8 +392,8 @@ impl EmbedOptions {
     }
 
     #[must_use]
-    pub fn with_genomark(mut self, genomark: GenoMark) -> Self {
-        self.genomark = genomark;
+    pub fn with_apw_watermark(mut self, apw_watermark: Watermark) -> Self {
+        self.apw_watermark = apw_watermark;
         self
     }
 
@@ -447,7 +447,7 @@ pub fn embed(path: &Path, options: &EmbedOptions) -> Result<EmbedResult, SdkErro
     }
 
     let payload = options.payload;
-    if payload.namespace() != options.genomark.namespace() {
+    if payload.namespace() != options.apw_watermark.namespace() {
         return Err(SdkError::InvalidOption {
             option: "payload",
             reason: format!(
@@ -457,18 +457,18 @@ pub fn embed(path: &Path, options: &EmbedOptions) -> Result<EmbedResult, SdkErro
         });
     }
 
-    let (marked, report) = options.genomark.embed_measured(ingested.audio(), payload)?;
+    let (marked, report) = options.apw_watermark.embed_measured(ingested.audio(), payload)?;
     let encoded = audio_provenance_audio::wav::encode(&marked, options.depth)?;
     write_file(&options.out, &encoded)?;
 
     Ok(EmbedResult {
-        algorithm: genomark::ALGORITHM_ID,
+        algorithm: apw_watermark::ALGORITHM_ID,
         out: options.out.display().to_string(),
         payload_hex: hex::encode(payload.to_bytes()),
         locator_hex: hex::encode(payload.locator_bytes()),
         version: payload.version(),
         namespace: payload.namespace(),
-        payload_bits: genomark::PAYLOAD_BITS,
+        payload_bits: apw_watermark::PAYLOAD_BITS,
         slots: report.slots,
         blocks: report.blocks,
         punctured_slots: report.punctured_slots,
@@ -565,7 +565,7 @@ pub fn open_local_registry(
 /// would destroy a binding they could still repair.
 ///
 /// A container this build does not scan (Ogg, MP4) does NOT count, and the gate is therefore not
-/// total for those two. That is the same blind spot GenoTrace's rung 1 reports as `unsearched`, so
+/// total for those two. That is the same blind spot Trace's rung 1 reports as `unsearched`, so
 /// a record hidden there is one no verifier in this build could recover either; the conventional
 /// sidecar is the only check that still applies. A total gate would have to refuse every Ogg and
 /// MP4 input outright, which would block marking unsigned audio on the strength of a scan that was
@@ -575,7 +575,7 @@ fn carries_record(ingested: &Ingested, path: &Path) -> bool {
         EmbeddedOutcome::Found(_) | EmbeddedOutcome::Unparseable(_) => return true,
         EmbeddedOutcome::Absent | EmbeddedOutcome::Unsearched(_) => {}
     }
-    genotrace::sidecar_paths(path)
+    apw_trace::sidecar_paths(path)
         .iter()
         .any(|candidate| candidate.is_file())
 }
@@ -585,7 +585,7 @@ fn write_asset_with_record(
     asset: &Path,
     manifest_bytes: &[u8],
 ) -> Result<(), SdkError> {
-    if ingested.container() != genotrace::ingest::Container::Wav {
+    if ingested.container() != apw_trace::ingest::Container::Wav {
         return Err(SdkError::ContainerNotWritable {
             container: ingested.container().as_str(),
         });

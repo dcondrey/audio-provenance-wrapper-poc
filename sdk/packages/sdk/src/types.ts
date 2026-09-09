@@ -1,5 +1,5 @@
 /**
- * The result shape, mirrored from the Rust `genotrace::result::VerifyResult`.
+ * The result shape, mirrored from the Rust `apw_trace::result::VerifyResult`.
  *
  * Every union below is the exact set of strings the Rust enum serialises. Widening one of these to
  * `string` would let a caller branch on a status that cannot occur and, worse, would stop the
@@ -21,20 +21,20 @@ export type ProofLevel =
  * What produced the match.
  *
  * `mark_and_fingerprint` is route 3(c): the signed hard binding did not recompute, and BOTH a
- * CRC-valid GenoMark payload naming this record and the record's own signed reference constellation
+ * CRC-valid Watermark payload naming this record and the record's own signed reference constellation
  * say this is the same work over a lossy path. It is deliberately distinct from `fingerprint`,
  * because a fingerprint alone never verifies.
  */
 export type MatchBasis =
   | "hard_exact"
-  | "genomark"
+  | "apw_watermark"
   | "fingerprint"
   | "mark_and_fingerprint"
   | "none";
 
 export type BindingKind =
   | "hard_hash"
-  | "soft_genomark"
+  | "soft_apw_watermark"
   | "soft_fingerprint"
   | "soft_mark_and_fingerprint"
   | "none";
@@ -44,7 +44,7 @@ export type RecoveryMethod =
   | "sidecar_manifest"
   | "content_hash_lookup"
   | "decoded_audio_hash_lookup"
-  | "genomark_recovery"
+  | "apw_watermark_recovery"
   | "fingerprint_search";
 
 export type StepOutcome = "hit" | "miss" | "skipped" | "degraded" | "unavailable";

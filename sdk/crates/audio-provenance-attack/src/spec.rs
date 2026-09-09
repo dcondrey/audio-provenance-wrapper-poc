@@ -1,14 +1,14 @@
 use audio_provenance_bench::attacks::erase::residue;
 use audio_provenance_bench::attacks::geometry::{PairBandGeometry, PunctureRule};
-use genomark::block::{SlotRole, slot_role};
-use genomark::convolutional::encode;
-use genomark::geometry::{Band, CELL_EDGES, cell_edge_hz};
-use genomark::params::{BLOCK_SLOTS, DELTA, FRAMES_PER_SLOT, TRIM_EACH_TAIL};
-use genomark::payload::Payload;
+use apw_watermark::block::{SlotRole, slot_role};
+use apw_watermark::convolutional::encode;
+use apw_watermark::geometry::{Band, CELL_EDGES, cell_edge_hz};
+use apw_watermark::params::{BLOCK_SLOTS, DELTA, FRAMES_PER_SLOT, TRIM_EACH_TAIL};
+use apw_watermark::payload::Payload;
 
 /// Everything a spec reader needs to compute the statistic the mark is quantised in.
 ///
-/// Every value here is published in GENOMARK_SPEC.md section 1 and section 4. None of it depends on
+/// Every value here is published in WATERMARK_SPEC.md section 1 and section 4. None of it depends on
 /// the profile key.
 pub fn geometry(sample_rate: u32) -> Result<PairBandGeometry, String> {
     let band = Band::new(sample_rate).map_err(|error| error.to_string())?;
@@ -29,16 +29,16 @@ pub fn geometry(sample_rate: u32) -> Result<PairBandGeometry, String> {
 /// The puncture rule the detector applies, copied out of the same published section.
 pub fn puncture() -> PunctureRule {
     PunctureRule::new(
-        genomark::params::PUNCTURE_BAND_POWER,
-        genomark::params::PUNCTURE_CELL_POWER,
-        genomark::params::PUNCTURE_MIN_PAIRS,
+        apw_watermark::params::PUNCTURE_BAND_POWER,
+        apw_watermark::params::PUNCTURE_CELL_POWER,
+        apw_watermark::params::PUNCTURE_MIN_PAIRS,
     )
 }
 
 /// The coded bit each slot of a block carries for a given payload, for the slots whose bit is
 /// payload-derived. Preamble and pilot slots return `None`: their polarity comes from the key.
 pub fn payload_slot_bits(payload: Payload) -> Vec<Option<u8>> {
-    let interleaved = genomark::interleaver::interleave(&encode(&payload.to_message()));
+    let interleaved = apw_watermark::interleaver::interleave(&encode(&payload.to_message()));
     (0..BLOCK_SLOTS)
         .map(|slot| match slot_role(slot) {
             SlotRole::Data(index) => interleaved.get(index).copied(),

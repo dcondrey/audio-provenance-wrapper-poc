@@ -39,13 +39,13 @@ fn parse_lower_hex<const N: usize>(
     Ok(out)
 }
 
-/// The 56-bit GenoMark payload that keys a registry record.
+/// The 56-bit Watermark payload that keys a registry record.
 ///
 /// The locator half is derived by the record's own signer from its public key and the record's
 /// `locator_salt` ([`audio_provenance_core::derive_locator`]), never from the record's contents. A holder
 /// of the index cannot mint one for a key it does not have.
 ///
-/// IMPORTANT: `GENOMARK_SPEC` §5 fixes the bit fields (version 0..3, namespace 4..7,
+/// IMPORTANT: `WATERMARK_SPEC` §5 fixes the bit fields (version 0..3, namespace 4..7,
 /// locator 8..55) but not their byte packing. This crate packs them into 7 bytes as
 /// `[version | namespace << 4, locator[0..6]]` and renders that big-endian as 14 lowercase
 /// hex characters. Every on-disk key and every URL path segment uses that spelling.

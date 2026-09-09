@@ -424,7 +424,7 @@ def load_campaign(path: str | Path) -> Campaign:
     sample_rate = int(raw.get("sample_rate", 48000))
     if sample_rate < 32000:
         raise ConfigError(
-            f"{source}: sample_rate {sample_rate} is below 32 kHz; GenoMark-N runs at 48 kHz and spec "
+            f"{source}: sample_rate {sample_rate} is below 32 kHz; Watermark-N runs at 48 kHz and spec "
             "2.2 refuses a host below 32 kHz outright"
         )
     channels = int(raw.get("capture_channels", 1))

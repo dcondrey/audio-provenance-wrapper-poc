@@ -57,7 +57,7 @@ export function inspectBytes(audio, options_json) {
 }
 
 /**
- * The GenoMark locators recoverable from this audio, for a caller that must fetch records before
+ * The Watermark locators recoverable from this audio, for a caller that must fetch records before
  * it can supply them.
  *
  * At most one: blind detection reports the single payload the CRC accepted, and `locators` is

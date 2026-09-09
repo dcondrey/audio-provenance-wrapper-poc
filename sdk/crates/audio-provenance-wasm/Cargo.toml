@@ -15,7 +15,7 @@ crate-type = ["cdylib", "rlib"]
 workspace = true
 
 [dependencies]
-genomark = { workspace = true }
+apw-watermark = { workspace = true }
 audio-provenance-audio = { workspace = true, features = ["codecs"] }
 audio-provenance-core = { workspace = true, features = ["std"] }
 audio-provenance-registry = { workspace = true }
@@ -24,7 +24,7 @@ audio-provenance-registry = { workspace = true }
 # Nothing here loses a capability by it: a browser cannot open a raw socket anyway, and the JS side
 # supplies the records instead.
 audio-provenance-sdk = { workspace = true }
-genotrace = { workspace = true }
+apw-trace = { workspace = true }
 hex = { workspace = true, features = ["std"] }
 js-sys = "0.3.104"
 serde = { workspace = true, features = ["std"] }

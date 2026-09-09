@@ -1,8 +1,8 @@
 //! Rendering only. Every fact printed here was decided by the SDK.
 
 use audio_provenance_core::{ProofLevel, VerificationStatus};
-use genotrace::MatchBasis;
-use genotrace::{InspectReport, RecoveryStep, StepOutcome, VerifyResult};
+use apw_trace::MatchBasis;
+use apw_trace::{InspectReport, RecoveryStep, StepOutcome, VerifyResult};
 
 use crate::style::{Style, Tone};
 
@@ -160,7 +160,7 @@ fn status_tone(status: VerificationStatus) -> Tone {
     }
 }
 
-/// The finding `genotrace` emits when a configured trust store actively refused a signer, as
+/// The finding `apw_trace` emits when a configured trust store actively refused a signer, as
 /// opposed to simply not covering it.
 pub const TRUST_REFUSAL_CODE: &str = "trust_anchor_rejected";
 
@@ -240,7 +240,7 @@ fn match_note(result: &VerifyResult) -> String {
             }
             _ => "hard binding, exact".to_string(),
         },
-        MatchBasis::Genomark | MatchBasis::Fingerprint | MatchBasis::MarkAndFingerprint => format!(
+        MatchBasis::Watermark | MatchBasis::Fingerprint | MatchBasis::MarkAndFingerprint => format!(
             "{}, {}",
             result.binding.detail,
             result.binding.proof_level.as_str()
@@ -263,12 +263,12 @@ fn notes(result: &VerifyResult) -> Vec<String> {
     }
     if verified_by_inference(result) {
         notes.push(
-            "verified (inferred, soft binding: the exact bytes changed, the recording is the same). The signed hard binding does not recompute over these bytes, so this is NOT an exact-bytes verification; a GenoMark payload naming this record decoded out of the audio and the record's own signed reference constellation matched it. That is the honest reading of a lossy path, not evidence the file is byte-identical to what was signed.".to_string(),
+            "verified (inferred, soft binding: the exact bytes changed, the recording is the same). The signed hard binding does not recompute over these bytes, so this is NOT an exact-bytes verification; a Watermark payload naming this record decoded out of the audio and the record's own signed reference constellation matched it. That is the honest reading of a lossy path, not evidence the file is byte-identical to what was signed.".to_string(),
         );
     }
     if matches!(
         result.match_basis,
-        MatchBasis::Genomark | MatchBasis::Fingerprint | MatchBasis::MarkAndFingerprint
+        MatchBasis::Watermark | MatchBasis::Fingerprint | MatchBasis::MarkAndFingerprint
     ) {
         let side = if result.r#match >= result.binding.threshold {
             "above"
@@ -400,8 +400,8 @@ fn emit_note_line(line: &str, first: bool, style: Style) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use genotrace::result::{FindingReport, MarkRecoveryReport, RecordingAssociationReport};
-    use genotrace::{BindingKind, BindingReport, RecordingAssociationStatus, RecoveryReport};
+    use apw_trace::result::{FindingReport, MarkRecoveryReport, RecordingAssociationReport};
+    use apw_trace::{BindingKind, BindingReport, RecordingAssociationStatus, RecoveryReport};
 
     fn result(status: VerificationStatus, reason: &'static str) -> VerifyResult {
         VerifyResult {

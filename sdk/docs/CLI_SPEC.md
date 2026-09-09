@@ -49,7 +49,7 @@ A transcode-recovered result shows the soft basis without hiding it in a footnot
   verified   ripped.mp3
     identity   Signal Room Studios        (externally_verified via studio-ca)
     signed     2026-03-13
-    match      0.94                       (GenoMark, 17/18 blocks, inferred)
+    match      0.94                       (Watermark, 17/18 blocks, inferred)
     note       hard binding unavailable (audio re-encoded); soft binding above
                threshold 0.72. False-positive rate at this match: 1.4e-07.
 
@@ -60,7 +60,7 @@ A transcode-recovered result shows the soft basis without hiding it in a footnot
          sidecar_manifest        miss  0.2ms   no sidecar at ripped.mp3.audio-provenance.json
          content_hash_lookup     miss  8.1ms   sha256 e3b0c442... not in registry
          decoded_audio_hash      miss  7.9ms   decoded audio digest not in registry
-         genomark_recovery       hit   4.8s    strong, 17/18 blocks, rho 1.0000
+         apw_watermark_recovery       hit   4.8s    strong, 17/18 blocks, rho 1.0000
          fingerprint_search      skip  -       requires --accept-inferred
 
 --json emits the VerifyResult verbatim, one object, no wrapper. This is the
@@ -80,7 +80,7 @@ Writes a marked copy and prints the payload plus the honest capability block:
 
   $ audio-provenance embed master.wav --out=master.marked.wav
   embedded   master.marked.wav
-    algorithm  genomark-lepqim-v1         payload 56 bits
+    algorithm  apw-watermark-lepqim-v1         payload 56 bits
     locator    a41f9c2e5b07               namespace 0 (public)
     resolves   nothing: a standalone embed publishes no record. `audio-provenance sign --mark
                --registry=<name>` allocates a locator and registers the record it names.
@@ -94,7 +94,7 @@ The FAILS block is not a --verbose extra. It prints on every embed, because a
 user who does not see it will assume the mark survives a microphone.
 
 --- audio-provenance inspect <file> [--json]
-Reports what GenoTrace found with NO verdict and NO trust evaluation. Exit 0
+Reports what Trace found with NO verdict and NO trust evaluation. Exit 0
 whenever the file was readable, regardless of provenance.
 
 --- audio-provenance registry <init|add|list|get> ...

@@ -42,7 +42,7 @@ FORBIDDEN: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("JSON", re.compile(r"\b(JSON::|DynamicObject|buildJsonEvent|parseBounded)")),
     ("network", re.compile(r"\b(DatagramSocket|StreamingSocket|socket|sendto|recvfrom)\b")),
     ("logging", re.compile(r"\b(Logger|DBG|std::cout|std::cerr|printf|fprintf|syslog)\b")),
-    ("SDK", re.compile(r"\b(c2pa|audio_provenance_sdk|genotrace|RegistryBackend)\b", re.IGNORECASE)),
+    ("SDK", re.compile(r"\b(c2pa|audio_provenance_sdk|apw_trace|RegistryBackend)\b", re.IGNORECASE)),
     ("known allocating JUCE call", re.compile(r"\.(setSize|add|insert|append|toString|getMessage)\s*\(")),
 )
 

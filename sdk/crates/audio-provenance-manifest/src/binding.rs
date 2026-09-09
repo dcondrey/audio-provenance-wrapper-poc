@@ -7,7 +7,7 @@ use crate::error::ManifestError;
 /// The result of recomputing a binding over the audio actually presented.
 ///
 /// `Uncoverable` is not a soft "maybe": it means the manifest declares no binding of that kind, so
-/// nothing was recomputed. GENOTRACE's predicate 3 treats it differently from `Mismatch` on
+/// nothing was recomputed. TRACE's predicate 3 treats it differently from `Mismatch` on
 /// purpose, because the soft binding may substitute for an ABSENT hard binding and may never
 /// override one that FAILED.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -103,7 +103,7 @@ pub struct AudioFingerprint {
     digest_hex: String,
 }
 
-/// A fingerprint is a bounded descriptor, not a payload channel. The descriptor GenoTrace writes is
+/// A fingerprint is a bounded descriptor, not a payload channel. The descriptor Trace writes is
 /// a landmark constellation, whose size is linear in the duration of the work: 1 MiB of hex is
 /// about two hours of audio at the scheme's peak density.
 pub const MAX_FINGERPRINT_HEX_LEN: usize = 1_048_576;

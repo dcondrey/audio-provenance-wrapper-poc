@@ -1,4 +1,4 @@
-//! The Audio Provenance registry: signed manifests, queryable by GenoMark id, by exact content hash and
+//! The Audio Provenance registry: signed manifests, queryable by Watermark id, by exact content hash and
 //! by perceptual fingerprint.
 //!
 //! # A miss and an outage are different answers

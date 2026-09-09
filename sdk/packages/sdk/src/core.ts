@@ -126,7 +126,7 @@ export function createClient(runtime: Runtime) {
     },
 
     /**
-     * The GenoMark locators recoverable from this audio.
+     * The Watermark locators recoverable from this audio.
      *
      * `RegistryBackend` is synchronous and `fetch` is not, so a caller backed by a remote registry
      * runs this first, fetches the records for the locators it returns, and passes them to

@@ -20,7 +20,7 @@ use sha2::{Digest, Sha256};
 use crate::error::SdkError;
 use crate::producer::{PublishReceipt, SidecarOutput, SignOptions, SignResult, publish, sign};
 use crate::verify::{VerifyOptions, verify};
-use genotrace::{SidecarPolicy, VerifyResult};
+use apw_trace::{SidecarPolicy, VerifyResult};
 
 const MAX_HANDOFF_BYTES: u64 = 1_048_576;
 const ADAPTER_DOMAIN: &[u8] = b"audio-provenance-capture-adapter-v1\0";

@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use audio_provenance_audio::{BitDepth, wav};
 use clap::Args;
-use genomark::{Capabilities, GenoMark, Payload};
+use apw_watermark::{Capabilities, Watermark, Payload};
 
 use crate::context::Context;
 use crate::error::CliError;
@@ -48,7 +48,7 @@ pub fn run(context: &Context, args: &EmbedArgs) -> Result<u8, CliError> {
             path: args.out.display().to_string(),
         });
     }
-    let ingested = genotrace::ingest_path(&args.file, genotrace::IngestLimits::default())?;
+    let ingested = apw_trace::ingest_path(&args.file, apw_trace::IngestLimits::default())?;
     let audio = ingested.audio();
 
     let locator = match &args.locator {
@@ -58,9 +58,9 @@ pub fn run(context: &Context, args: &EmbedArgs) -> Result<u8, CliError> {
         // second time one master is embedded.
         None => random_locator()?,
     };
-    let payload = Payload::new(genomark::payload::VERSION, args.namespace, locator)?;
+    let payload = Payload::new(apw_watermark::payload::VERSION, args.namespace, locator)?;
     let mark = if args.namespace == 0 {
-        GenoMark::public()
+        Watermark::public()
     } else {
         return Err(CliError::usage(
             "a non-zero namespace needs its profile key, and this build ships no key store; use --namespace=0",

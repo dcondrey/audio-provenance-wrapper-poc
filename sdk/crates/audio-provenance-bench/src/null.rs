@@ -593,7 +593,7 @@ pub fn run_null(
         false_positive_trials: attempted,
         false_positive_accepts: accepts,
         overall_false_positive_rate: pooled_rate,
-        // IMPORTANT: this is the WORST CHANNEL's bound, not 3/pooled. `genotrace`'s NullTestTable
+        // IMPORTANT: this is the WORST CHANNEL's bound, not 3/pooled. `apw_trace`'s NullTestTable
         // reads this field as the rate a soft binding is priced at, and a verifier meets one
         // channel, so pooling here would publish a number an order of magnitude better than any
         // single path was measured to.

@@ -69,7 +69,7 @@ VERDICT: FAIL
   - 32 channel row(s) missed their threshold
   - 1 channel row(s) could not run
 
-* The codec measured in this run is a BENCH FIXTURE: a deliberately simple stand-in that exists to validate the bench. Its numbers describe the fixture and say nothing about GenoMark or any product watermark.
+* The codec measured in this run is a BENCH FIXTURE: a deliberately simple stand-in that exists to validate the bench. Its numbers describe the fixture and say nothing about Watermark or any product watermark.
 
 * SIMULATED acoustic path. The impulse response is synthesised (exponentially decaying noise plus discrete early reflections), the transducer curve is a fixed filter cascade, and the room noise is Gaussian. This row is NOT a speaker-to-microphone measurement and may not be reported as one. A real over-the-air result requires playing the file through a loudspeaker and capturing it with a microphone in a room.
 

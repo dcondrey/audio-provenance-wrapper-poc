@@ -8,7 +8,7 @@ use audio_provenance_registry::{
     RegistryResolver,
 };
 use audio_provenance_trust::{AnchoredTrustStore, Instant};
-use genotrace::{FileTrustStore, NullTestTable};
+use apw_trace::{FileTrustStore, NullTestTable};
 
 use crate::error::CliError;
 use crate::style::Style;
@@ -23,7 +23,7 @@ const TRUST_STORE_ANCHOR_DIR: &str = "anchors";
 
 /// A loaded store and the path it actually came from, so a resolved directory is reported rather
 /// than guessed at.
-type ConfiguredTrustStore = (Box<dyn genotrace::TrustStore>, PathBuf);
+type ConfiguredTrustStore = (Box<dyn apw_trace::TrustStore>, PathBuf);
 
 #[derive(Debug)]
 pub struct Context {
@@ -136,7 +136,7 @@ impl Context {
                     .and_then(serde_json::Value::as_str)
                     .map(str::to_string)
             });
-        if declared.as_deref() == Some(genotrace::trust::TRUST_STORE_FORMAT) {
+        if declared.as_deref() == Some(apw_trace::trust::TRUST_STORE_FORMAT) {
             return Ok(Some((Box::new(FileTrustStore::from_json(&bytes)?), file)));
         }
         let store = audio_provenance_trust::TrustStore::from_json(&bytes)?;

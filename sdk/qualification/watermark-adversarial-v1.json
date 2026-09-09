@@ -1,7 +1,7 @@
 {
   "schema": "audio-provenance-watermark-adversarial-v1",
-  "production_implementation": "genomark-lepqim-v1",
-  "experimental_implementations": ["genomark-n"],
+  "production_implementation": "apw-watermark-lepqim-v1",
+  "experimental_implementations": ["apw-watermark-neural"],
   "measurements": [
     "false_acceptance",
     "locator_recovery",
@@ -19,7 +19,7 @@
       "parameters": {"percent": [1, 2, 5, 10, 25, 50]},
       "measures": ["locator_recovery", "recording_association_rejection"],
       "expected": {"association": "rejected", "status": "changed"},
-      "gate": "genotrace::fingerprint::reference::local_association_tests"
+      "gate": "apw_trace::fingerprint::reference::local_association_tests"
     },
     {
       "id": "head_and_tail_replacement",
@@ -27,7 +27,7 @@
       "parameters": {"percent": [1, 5, 25, 50]},
       "measures": ["locator_recovery", "recording_association_rejection"],
       "expected": {"association": "rejected", "status": "changed"},
-      "gate": "genotrace::fingerprint::reference::local_association_tests"
+      "gate": "apw_trace::fingerprint::reference::local_association_tests"
     },
     {
       "id": "arbitrary_crops",
@@ -35,14 +35,14 @@
       "parameters": {"offset_seconds": [0.137, 3.37, 7.3, 31.113]},
       "measures": ["locator_recovery"],
       "expected": {"association": "associated"},
-      "gate": "genotrace::fingerprint::interior_substitution_cannot_hide_between_aligned_edges"
+      "gate": "apw_trace::fingerprint::interior_substitution_cannot_hide_between_aligned_edges"
     },
     {
       "id": "reordered_and_duplicated_sections",
       "tags": ["reorder", "duplicated_section"],
       "measures": ["locator_recovery", "recording_association_rejection"],
       "expected": {"association": "rejected", "status": "changed"},
-      "gate": "genotrace::fingerprint::score::discontinuity_tests"
+      "gate": "apw_trace::fingerprint::score::discontinuity_tests"
     },
     {
       "id": "mark_lifting_onto_unrelated_audio",
@@ -88,7 +88,7 @@
       "parameters": {"ppm": [-3000, -1000, 1000, 3000]},
       "measures": ["false_acceptance", "locator_recovery"],
       "expected": {"thresholds": "predeclared_channel_rows"},
-      "gate": "genomark::properties::playback_rate_drift_decodes_across_the_searched_range"
+      "gate": "apw_watermark::properties::playback_rate_drift_decodes_across_the_searched_range"
     },
     {
       "id": "material_classes",
@@ -119,14 +119,14 @@
       "parameters": {"seconds": [0.1, 1, 5, 7200, 14400]},
       "measures": ["false_acceptance", "locator_recovery"],
       "expected": {"bounds": "explicit", "oversize_reference": "no_soft_verification"},
-      "gate": "genotrace::reference_bounds_and_short_query"
+      "gate": "apw_trace::reference_bounds_and_short_query"
     },
     {
       "id": "unmarked_and_unrelated_null_corpus",
       "tags": ["unmarked_audio", "unrelated_audio"],
       "measures": ["false_acceptance"],
       "expected": {"false_acceptance": "predeclared_upper_bound"},
-      "gate": "genotrace::fingerprint_null_test + audio-provenance-null-test"
+      "gate": "apw_trace::fingerprint_null_test + audio-provenance-null-test"
     }
   ]
 }

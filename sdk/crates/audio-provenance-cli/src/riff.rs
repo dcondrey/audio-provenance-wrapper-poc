@@ -1,9 +1,9 @@
 //! Writing the `aprv` provenance chunk into a RIFF/WAVE file.
 //!
 //! Container surgery, not provenance logic: what goes IN the chunk is decided entirely by
-//! `audio-provenance-manifest`, and the byte layout is `genotrace::container`'s, which also reads it.
+//! `audio-provenance-manifest`, and the byte layout is `apw_trace::container`'s, which also reads it.
 
-use genotrace::container::write_riff_chunk;
+use apw_trace::container::write_riff_chunk;
 
 use crate::error::CliError;
 
@@ -11,7 +11,7 @@ use crate::error::CliError;
 pub fn set_manifest_chunk(wav: &[u8], payload: &[u8]) -> Result<Vec<u8>, CliError> {
     write_riff_chunk(wav, payload).map_err(|error| {
         CliError::usage(match error {
-            genotrace::container::ChunkWriteError::NotRiffWave => {
+            apw_trace::container::ChunkWriteError::NotRiffWave => {
                 "--embed writes a RIFF/WAVE `aprv` chunk and this file is not RIFF/WAVE; use a sidecar"
             }
             other => other.reason(),
@@ -24,8 +24,8 @@ mod tests {
     #![allow(clippy::unwrap_used)]
 
     use super::*;
-    use genotrace::container::{EmbeddedOutcome, find_embedded};
-    use genotrace::ingest::Container;
+    use apw_trace::container::{EmbeddedOutcome, find_embedded};
+    use apw_trace::ingest::Container;
 
     fn wav_with(data: &[u8]) -> Vec<u8> {
         let mut out = b"RIFF\0\0\0\0WAVE".to_vec();
@@ -40,7 +40,7 @@ mod tests {
         out
     }
 
-    /// The writer and `genotrace::container`'s reader are two halves of one format. An odd-length
+    /// The writer and `apw_trace::container`'s reader are two halves of one format. An odd-length
     /// body is the case where a missing pad byte silently shifts every later chunk, so the
     /// round-trip is pinned there and a second write must replace, never duplicate.
     #[test]

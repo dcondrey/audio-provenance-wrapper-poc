@@ -5,8 +5,8 @@ import inspect
 import numpy as np
 import pytest
 
-from genomark_n.payload import MessageCodec, crc24, false_accept_bound
-from genomark_n.pipeline import Detector
+from apw_watermark_neural.payload import MessageCodec, crc24, false_accept_bound
+from apw_watermark_neural.pipeline import Detector
 
 
 def test_detect_has_no_payload_parameter():

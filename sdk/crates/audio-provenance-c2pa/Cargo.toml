@@ -24,8 +24,8 @@ thiserror = { workspace = true }
 
 [dev-dependencies]
 # IMPORTANT: a TEST dependency only. `validation.rs` claims every row of its mapping has a
-# counterpart in `genotrace::derive_status`; `tests/status_correspondence.rs` calls that function
+# counterpart in `apw_trace::derive_status`; `tests/status_correspondence.rs` calls that function
 # rather than restating the claim in prose. Reading a container must not pull the recovery ladder,
 # the codecs or the watermark into the library itself, so this never moves to [dependencies].
-genotrace = { workspace = true }
+apw-trace = { workspace = true }
 serde_json = { workspace = true, features = ["std"] }

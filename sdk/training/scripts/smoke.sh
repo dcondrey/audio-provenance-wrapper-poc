@@ -19,32 +19,32 @@ print(platform.platform(), platform.machine())
 
 echo
 echo "=== 1/6 train ==="
-uv run python -m genomark_n.train --config "$CONFIG"
+uv run python -m apw_watermark_neural.train --config "$CONFIG"
 
 echo
 echo "=== 2/6 calibrate thresholds on UNMARKED audio only ==="
-uv run python -m genomark_n.calibrate --config "$CONFIG" \
+uv run python -m apw_watermark_neural.calibrate --config "$CONFIG" \
   --checkpoint "$RUN/checkpoints/latest.pt" --out "$RUN/thresholds.json"
 
 echo
 echo "=== 3/6 blind evaluation ==="
-uv run python -m genomark_n.evaluate --config "$CONFIG" \
+uv run python -m apw_watermark_neural.evaluate --config "$CONFIG" \
   --checkpoint "$RUN/checkpoints/latest.pt" --thresholds "$RUN/thresholds.json" \
   --out "$RUN/eval.json"
 
 echo
 echo "=== 4/6 ONNX export and numeric round trip ==="
-uv run python -m genomark_n.export_onnx --config "$CONFIG" \
+uv run python -m apw_watermark_neural.export_onnx --config "$CONFIG" \
   --checkpoint "$RUN/checkpoints/latest.pt" --out "$RUN/export" 2>/dev/null
 
 echo
 echo "=== 5/6 N-B12 cross-language parity fixtures ==="
-uv run python -m genomark_n.parity --config "$CONFIG" \
+uv run python -m apw_watermark_neural.parity --config "$CONFIG" \
   --checkpoint "$RUN/checkpoints/latest.pt" --out "$RUN/parity"
 
 echo
 echo "=== 6/6 model card ==="
-uv run python -m genomark_n.model_card --config "$CONFIG" --run-dir "$RUN" \
+uv run python -m apw_watermark_neural.model_card --config "$CONFIG" --run-dir "$RUN" \
   --contract "$RUN/export/onnx_contract.json" --thresholds "$RUN/thresholds.json" \
   --eval "$RUN/eval.json" --out "$RUN/model_card.json"
 
