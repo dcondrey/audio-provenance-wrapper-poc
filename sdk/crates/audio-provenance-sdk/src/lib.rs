@@ -85,9 +85,11 @@ pub use audio_provenance_manifest::{
     Severity,
 };
 pub use audio_provenance_registry::{
-    HttpRegistryAuth, HttpRegistryBackend, HttpRegistryOptions, LocalRegistryBackend, Lookup,
-    RegistryBackend, RegistryKind, RegistryRecord, RegistrySource, WritableRegistryBackend,
+    LocalRegistryBackend, Lookup, RegistryBackend, RegistryKind, RegistryRecord, RegistrySource,
+    WritableRegistryBackend,
 };
+#[cfg(feature = "http")]
+pub use audio_provenance_registry::{HttpRegistryAuth, HttpRegistryBackend, HttpRegistryOptions};
 pub use apw_watermark::{Watermark, Payload};
 pub use apw_trace::result::FindingReport;
 pub use apw_trace::{

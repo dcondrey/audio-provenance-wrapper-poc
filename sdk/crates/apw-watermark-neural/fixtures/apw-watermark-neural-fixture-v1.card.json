@@ -7,11 +7,11 @@
   "graphs": {
     "decoder": {
       "file": "fixture-decoder-v1.onnx",
-      "sha256": "143b469b33af330cb53d2926210944ba3cdfd9840e96c2e24b8dce8b7c039fac"
+      "sha256": "c628dd79456c427795f6375702d897da43e4a916571e44a46f42693cd1b7c11d"
     },
     "encoder": {
       "file": "fixture-encoder-v1.onnx",
-      "sha256": "75c3cf7c172eac448a996be4bab7e6ec0e5857f941a3a5e4d0eee8c31a9f6c76"
+      "sha256": "b178c450562f5d13fbf678644147bfa56442340cf83b797c52e22c7f3cb5619a"
     }
   },
   "transform": {
