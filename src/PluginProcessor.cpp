@@ -26,6 +26,20 @@ juce::String readLocalSigningIdentity()
         return {};
     return juce::String::toHexString (keyBytes.getData(), 8, 0);
 }
+
+// IMPORTANT: the daemon rejects a text field longer than this, and a rejected
+// event never advances that stream's contiguous-sequence counter, which has no
+// backfill: one over-long name would stall contiguity for the whole session.
+// An observation that cannot be reported in full is reported as absent rather
+// than truncated, for the same reason an unrecognised host has no name.
+// Mirrors MAX_TEXT_FIELD_CHARS in daemon/evidence_receiver/taxonomy.py.
+constexpr int maxTextFieldChars = 128;
+
+juce::var reportableText (const juce::String& text)
+{
+    return text.isNotEmpty() && text.length() <= maxTextFieldChars ? juce::var (text)
+                                                                   : juce::var();
+}
 }
 
 AudioProvenanceCaptureAudioProcessor::AudioProvenanceCaptureAudioProcessor (int daemonPort)
@@ -119,8 +133,9 @@ void AudioProvenanceCaptureAudioProcessor::emitHostEnvironment()
         apw::EventTypes::hostEnvironment, getMonotonicMilliseconds(), 0,
         {
             { "host_recognised", observedHost.recognised },
-            { "host_name", observedHost.recognised ? juce::var (observedHost.name) : juce::var() },
-            { "host_executable_name", observedHost.executableName },
+            { "host_name", observedHost.recognised ? reportableText (observedHost.name)
+                                                   : juce::var() },
+            { "host_executable_name", reportableText (observedHost.executableName) },
             { "wrapper_format", observedHost.wrapperFormat }
         }));
 }
