@@ -112,6 +112,18 @@ def builder_cases() -> list[dict[str, object]]:
         "apw:proof_level": "inferred",
     }
     full.session_diagnostics = {"udp_sends_failed": 0}
+    full.set_host_environment(
+        {
+            "status": "observed",
+            "host_recognised": True,
+            "host_name": "Ableton Live",
+            "host_executable_name": "Live",
+            "wrapper_format": "VST3",
+            "basis": "The plug-in wrapper named the host application that loaded it.",
+            "scope": "host scope",
+            "apw:proof_level": "directly_observed",
+        }
+    )
     full.set_c2pa_claim(
         {
             "status": "embedded",
@@ -219,6 +231,28 @@ def schema_cases() -> list[dict[str, object]]:
     }
     portable_bad["export"] = {"sha256": "abc", "apw:proof_level": "directly_observed"}
 
+    host_bad = json.loads(json.dumps(valid))
+    host_bad["host_environment"] = {
+        "status": "host_unrecognised",
+        "host_recognised": True,
+        "host_name": "Unknown",
+        "apw:proof_level": "directly_observed",
+    }
+
+    host_status_bad = json.loads(json.dumps(valid))
+    host_status_bad["host_environment"] = {
+        "status": "definitely_ableton",
+        "apw:proof_level": "directly_observed",
+    }
+
+    host_unnamed_bad = json.loads(json.dumps(valid))
+    host_unnamed_bad["host_environment"] = {
+        "status": "observed",
+        "host_recognised": True,
+        "host_name": "",
+        "apw:proof_level": "inferred",
+    }
+
     not_an_object = ["nope"]
 
     return [
@@ -233,6 +267,9 @@ def schema_cases() -> list[dict[str, object]]:
             ("c2pa_claim_violations", claim_bad),
             ("c2pa_claim_unavailable_violations", claim_unavailable_bad),
             ("portable_signature_violations", portable_bad),
+            ("host_environment_unidentified_violations", host_bad),
+            ("host_environment_status_invalid", host_status_bad),
+            ("host_environment_unnamed_violations", host_unnamed_bad),
             ("nesting_overflow", deep(70)),
             ("not_an_object", not_an_object),
         )

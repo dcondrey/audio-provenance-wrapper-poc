@@ -29,6 +29,12 @@ const COVERAGE_STATUSES: [&str; 3] = [
     "unknown_coverage",
 ];
 const C2PA_CLAIM_STATUSES: [&str; 3] = ["embedded", "sidecar", "unavailable"];
+const HOST_ENVIRONMENT_STATUSES: [&str; 4] = [
+    "observed",
+    "host_unrecognised",
+    "conflicting_observations",
+    "unobserved",
+];
 const ASSOCIATION_STATUSES: [&str; 3] = ["inferred_match", "not_established", "unavailable"];
 const RECEIPT_STATUSES: [&str; 3] = ["issued", "degraded", "unknown"];
 const REQUIRED_COVERAGE_COUNTERS: [&str; 13] = [
@@ -113,6 +119,10 @@ pub fn validate_manifest_invariants(value: &Value) -> Vec<String> {
         validate_coverage(coverage, &mut errors);
     }
 
+    if let Some(Value::Object(host)) = data.get("host_environment") {
+        validate_host_environment(host, &mut errors);
+    }
+
     if let Some(Value::Object(receipt)) = data.get("daemon_receipt_acknowledgement") {
         require_proof(receipt, "daemon_receipt_acknowledgement", &mut errors);
         if !status_in(receipt, &RECEIPT_STATUSES) {
@@ -174,6 +184,40 @@ fn validate_association(association: &Map<String, Value>, errors: &mut Vec<Strin
             "invalid stem_export_association status: {}",
             python_str(status)
         ));
+    }
+}
+
+fn validate_host_environment(host: &Map<String, Value>, errors: &mut Vec<String>) {
+    require_proof(host, "host_environment", errors);
+    if !status_in(host, &HOST_ENVIRONMENT_STATUSES) {
+        errors.push(format!(
+            "invalid host_environment status: {}",
+            python_str(get(host, "status"))
+        ));
+        return;
+    }
+    if is_string_equal(get(host, "status"), "observed") {
+        if !is_string_equal(get(host, PROOF_LEVEL_KEY), ProofLevel::DirectlyObserved.as_str()) {
+            errors.push("an observed host_environment records a directly observed host".to_owned());
+        }
+        if !is_truthy(get(host, "host_name")) {
+            errors.push("an observed host_environment must name the host".to_owned());
+        }
+        return;
+    }
+    // IMPORTANT: honesty constraint 1. The wrapper reports "Unknown" for any host
+    // outside JUCE's table, so a name surviving here would sign an absence as an
+    // observation.
+    if !is_string_equal(get(host, PROOF_LEVEL_KEY), ProofLevel::UnknownUnobserved.as_str()) {
+        errors.push("an unidentified host_environment must remain unknown_unobserved".to_owned());
+    }
+    if !matches!(get(host, "host_name"), Value::Null) {
+        errors.push("an unidentified host_environment must not name a host".to_owned());
+    }
+    if !matches!(get(host, "host_recognised"), Value::Bool(false)) {
+        errors.push(
+            "an unidentified host_environment must not report the host as recognised".to_owned(),
+        );
     }
 }
 

@@ -78,6 +78,12 @@
         "apw:proof_level": "unknown_unobserved"
       },
       {
+        "claim": "host_application",
+        "value": "unknown",
+        "evidence": "No host environment was supplied to the builder.",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      {
         "claim": "full_ableton_provenance",
         "value": false,
         "evidence": "Only audio routed through the capture plugin was observed",
@@ -119,10 +125,10 @@
     "algorithm": "Ed25519",
     "canonicalization": "apw-json-sort-v1",
     "public_key_hex": "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
-    "public_key_file": "/var/folders/f6/9fydz_3n0p13t2scsr8ppdlm0000gn/T/tmpwv4yqnlo/demo_ed25519_public.key",
+    "public_key_file": "/var/folders/f6/9fydz_3n0p13t2scsr8ppdlm0000gn/T/tmpen_eeyl1/demo_ed25519_public.key",
     "signer_id": "56475aa75463474c",
-    "signature_hex": "17521dd286608dc6efa7e123d579ae499b2206c475f2ae49497ade5a22c4344f2681080b70d34bb6aea2073b517ec5db74828235272be276c344933ef016c709",
-    "signed_content_hash": "b85c9da1febc5890986934b712ac91b4b3fdc3beae9601ad636cfc0bce20a712",
+    "signature_hex": "c6862cf527b753183217270f163534be278bd7b58cf97a290f7f3a425482f4223325d872eede322b29cca6d426610087b57e33950c29f702c1d81d6bd613990c",
+    "signed_content_hash": "5fd5c25df3439560343e6c67695f8226677b38706ed66acc23ef62a12aa2afea",
     "trust_scope": "self_generated_demo_key_integrity",
     "signer_identity": "not_established",
     "signer_identity_proof_level": "unknown_unobserved",

@@ -43,6 +43,16 @@ class DaemonIntegrationTests(unittest.TestCase):
             try:
                 events = [
                     {
+                        "event_type": "host_environment",
+                        "proof_level": "directly_observed",
+                        "timestamp_ms": 900,
+                        "sample_position": 0,
+                        "host_recognised": True,
+                        "host_name": "Ableton Live",
+                        "host_executable_name": "Live",
+                        "wrapper_format": "VST3",
+                    },
+                    {
                         "event_type": "transport_change",
                         "proof_level": "directly_observed",
                         "timestamp_ms": 1000,
@@ -105,11 +115,11 @@ class DaemonIntegrationTests(unittest.TestCase):
             plugin_events_path = evidence_dir / "plugin_events.jsonl"
             _wait_for(
                 lambda: plugin_events_path.exists()
-                and len(plugin_events_path.read_text().splitlines()) >= 4,
-                message="4 plugin events in plugin_events.jsonl",
+                and len(plugin_events_path.read_text().splitlines()) >= 5,
+                message="5 plugin events in plugin_events.jsonl",
             )
             lines = plugin_events_path.read_text().splitlines()
-            self.assertEqual(len(lines), 4)
+            self.assertEqual(len(lines), 5)
 
             export_path = export_dir / "mixdown.wav"
             _write_test_wav(export_path)
@@ -145,6 +155,16 @@ class DaemonIntegrationTests(unittest.TestCase):
             self.assertEqual(stems[0]["sample_rate_hz"], 44100)
             self.assertEqual(stems[0]["source_category"], "imported_sample")
             self.assertEqual(stems[0]["source_category_proof_level"], "user_declared")
+            host = manifest["host_environment"]
+            self.assertEqual(host["status"], "observed")
+            self.assertEqual(host["host_name"], "Ableton Live")
+            self.assertEqual(host["wrapper_format"], "VST3")
+            self.assertEqual(host["apw:proof_level"], "directly_observed")
+            host_claim = next(
+                claim for claim in manifest["claim_summary"]
+                if claim["claim"] == "host_application"
+            )
+            self.assertEqual(host_claim["value"], "Ableton Live")
             self.assertIn("manifest_signature", manifest)
             self.assertEqual(
                 manifest["manifest_signature"]["trust_scope"],
@@ -284,6 +304,127 @@ class DaemonIntegrationTests(unittest.TestCase):
             self.assertNotEqual(daemon._last_cosignature_hash, "genesis")
             daemon.stop()
             thread.join(timeout=15)
+
+
+class HostEnvironmentTests(unittest.TestCase):
+    """The host identity the daemon signs into a manifest."""
+
+    def _daemon(self, tmp: str) -> Daemon:
+        tmp_path = Path(tmp)
+        return Daemon(
+            udp_port=0,
+            evidence_dir=tmp_path / "evidence",
+            sample_dir=tmp_path / "samples",
+            export_dir=tmp_path / "exports",
+            manifest_dir=tmp_path / "manifests",
+            hardware_provider=SoftwareProvider(tmp_path / "signing-key.bin"),
+        )
+
+    @staticmethod
+    def _event(**overrides: object) -> dict[str, object]:
+        event = {
+            "event_type": "host_environment",
+            "proof_level": "directly_observed",
+            "host_recognised": True,
+            "host_name": "Ableton Live",
+            "host_executable_name": "Live",
+            "wrapper_format": "VST3",
+        }
+        event.update(overrides)
+        return event
+
+    def test_recognised_host_is_named(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            daemon = self._daemon(tmp)
+            daemon._record_plugin_event(self._event(), "session")
+
+            host = daemon._derive_host_environment()
+            self.assertEqual(host["status"], "observed")
+            self.assertEqual(host["host_name"], "Ableton Live")
+            self.assertEqual(host["wrapper_format"], "VST3")
+            self.assertEqual(host["apw:proof_level"], "directly_observed")
+
+    def test_repeated_identical_observation_is_not_a_conflict(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            daemon = self._daemon(tmp)
+            for _ in range(3):
+                daemon._record_plugin_event(self._event(), "session")
+
+            host = daemon._derive_host_environment()
+            self.assertEqual(host["status"], "observed")
+            self.assertEqual(host["host_name"], "Ableton Live")
+
+    def test_unrecognised_host_is_not_named(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            daemon = self._daemon(tmp)
+            daemon._record_plugin_event(
+                self._event(host_recognised=False, host_name=None), "session"
+            )
+
+            host = daemon._derive_host_environment()
+            self.assertEqual(host["status"], "host_unrecognised")
+            self.assertIsNone(host["host_name"])
+            self.assertEqual(host["apw:proof_level"], "unknown_unobserved")
+            # Observed regardless of whether the wrapper knew the host.
+            self.assertEqual(host["host_executable_name"], "Live")
+
+    def test_a_disagreeing_report_withdraws_the_host(self):
+        """The UDP socket cannot authenticate its sender: last-wins would let a
+        spoofed datagram rename the host in a signed manifest."""
+        with tempfile.TemporaryDirectory() as tmp:
+            daemon = self._daemon(tmp)
+            daemon._record_plugin_event(self._event(), "session")
+            daemon._record_plugin_event(self._event(host_name="Logic Pro"), "session")
+
+            host = daemon._derive_host_environment()
+            self.assertEqual(host["status"], "conflicting_observations")
+            self.assertIsNone(host["host_name"])
+            self.assertFalse(host["host_recognised"])
+            self.assertEqual(host["apw:proof_level"], "unknown_unobserved")
+
+    def test_one_host_in_two_plugin_formats_is_not_a_conflict(self):
+        """Producers A/B a VST3 against an AU in one session; that is one host."""
+        with tempfile.TemporaryDirectory() as tmp:
+            daemon = self._daemon(tmp)
+            daemon._record_plugin_event(self._event(), "session")
+            daemon._record_plugin_event(
+                self._event(wrapper_format="AudioUnit"), "session"
+            )
+
+            host = daemon._derive_host_environment()
+            self.assertEqual(host["status"], "observed")
+            self.assertEqual(host["host_name"], "Ableton Live")
+            self.assertEqual(host["wrapper_format"], "VST3")
+
+    def test_no_report_reads_as_unobserved(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            host = self._daemon(tmp)._derive_host_environment()
+            self.assertEqual(host["status"], "unobserved")
+            self.assertIsNone(host["host_name"])
+            self.assertEqual(host["apw:proof_level"], "unknown_unobserved")
+
+    def test_the_constructor_report_survives_session_event_eviction(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            daemon = self._daemon(tmp)
+            daemon._max_session_events = 2
+            daemon._record_plugin_event(self._event(), "session")
+            for position in range(4):
+                daemon._record_plugin_event(
+                    {
+                        "event_type": "transport_change",
+                        "proof_level": "directly_observed",
+                        "transport_state": "playing",
+                        "sample_position": position,
+                    },
+                    "transport",
+                )
+
+            with daemon._session_lock:
+                self.assertNotIn(
+                    "host_environment",
+                    {event.get("event_type") for event in daemon._session_events},
+                )
+            self.assertEqual(daemon._derive_host_environment()["host_name"], "Ableton Live")
 
 
 class SoftwareProviderTests(unittest.TestCase):

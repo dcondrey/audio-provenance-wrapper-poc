@@ -122,6 +122,7 @@ class ManifestBuilder:
     c2pa_claim: dict[str, object] | None = None
     audio_association: dict[str, object] | None = None
     session_diagnostics: dict[str, object] | None = None
+    host_environment: dict[str, object] | None = None
     unobserved: list[str] = field(default_factory=lambda: [
         "hidden_plugin_state",
         "internal_preset_logic",
@@ -150,6 +151,9 @@ class ManifestBuilder:
 
     def set_forgery_report(self, report: dict[str, object]) -> None:
         self.forgery_report = report
+
+    def set_host_environment(self, host_environment: dict[str, object]) -> None:
+        self.host_environment = host_environment
 
     def set_c2pa_claim(self, claim: dict[str, object]) -> None:
         self.c2pa_claim = claim
@@ -251,6 +255,9 @@ class ManifestBuilder:
         if self.session_diagnostics is not None:
             manifest["session_diagnostics"] = self.session_diagnostics
 
+        if self.host_environment is not None:
+            manifest["host_environment"] = self.host_environment
+
         default_association = {
             "status": "not_established",
             "capture_session_id": self.session_id,
@@ -283,6 +290,7 @@ class ManifestBuilder:
         has_stem = bool(self.stems)
         has_export = self.export is not None
         association_record = self.audio_association or {}
+        host = self.host_environment or {}
         association = association_record.get("status") == "inferred_match"
         source = self.stems[0] if self.stems else None
         claim_record = self.c2pa_claim or {}
@@ -339,6 +347,14 @@ class ManifestBuilder:
                 "apw:proof_level": (
                     source.source_category_proof_level if source is not None else "unknown_unobserved"
                 ),
+            },
+            {
+                "claim": "host_application",
+                "value": host.get("host_name") or "unknown",
+                "evidence": host.get(
+                    "basis", "No host environment was supplied to the builder."
+                ),
+                "apw:proof_level": host.get("apw:proof_level", "unknown_unobserved"),
             },
             {
                 "claim": "full_ableton_provenance",

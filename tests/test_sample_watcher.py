@@ -31,7 +31,7 @@ class SampleWatcherTests(unittest.TestCase):
             self.assertEqual(event["audio_metadata"]["sample_rate"], 8000)
             self.assertEqual(event["audio_metadata"]["channels"], 1)
             self.assertEqual(event["audio_metadata"]["duration_seconds"], 0.25)
-            self.assertIn("No claim is made that this file was placed on a specific Ableton track.", event["notes"])
+            self.assertIn("No claim is made that this file was placed on a specific track in any host.", event["notes"])
 
     def test_observe_existing_files_writes_jsonl(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

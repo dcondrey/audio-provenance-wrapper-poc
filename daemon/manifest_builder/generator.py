@@ -69,6 +69,72 @@ _UNOBSERVED_SAMPLE_DIGEST_MEANING = (
 )
 
 
+_HOST_ENVIRONMENT_SCOPE = (
+    "The host application that loaded the capture plug-in, as reported by the "
+    "plug-in wrapper. Naming the host does not extend observation to anything "
+    "the host did outside the capture path."
+)
+
+
+def derive_host_environment(daemon: "Daemon") -> dict[str, object]:
+    """Grade the host identity the plug-in reported for this session.
+
+    Recognition and identity are separate: the wrapper reports an unrecognised
+    host for anything outside JUCE's table, and reading that back as a host named
+    "Unknown" would dress an absence as an observation.
+    """
+    with daemon._session_lock:
+        observed = dict(daemon._host_environment or {})
+        conflicts = daemon._host_environment_conflicts
+
+    if not observed:
+        return {
+            "status": "unobserved",
+            "host_recognised": False,
+            "host_name": None,
+            "host_executable_name": None,
+            "wrapper_format": None,
+            "basis": "The plug-in reported no host environment in this session.",
+            "scope": _HOST_ENVIRONMENT_SCOPE,
+            "apw:proof_level": "unknown_unobserved",
+        }
+
+    if conflicts:
+        return {
+            "status": "conflicting_observations",
+            "host_recognised": False,
+            "host_name": None,
+            "host_executable_name": None,
+            "wrapper_format": None,
+            "basis": (
+                f"{conflicts} later host environment report(s) disagreed with the "
+                "first, so no single host is established."
+            ),
+            "scope": _HOST_ENVIRONMENT_SCOPE,
+            "apw:proof_level": "unknown_unobserved",
+        }
+
+    recognised = bool(observed.get("host_recognised"))
+    return {
+        "status": "observed" if recognised else "host_unrecognised",
+        "host_recognised": recognised,
+        "host_name": observed.get("host_name") if recognised else None,
+        "host_executable_name": observed.get("host_executable_name"),
+        "wrapper_format": observed.get("wrapper_format"),
+        "basis": (
+            "The plug-in wrapper named the host application that loaded it."
+            if recognised
+            else (
+                "The plug-in wrapper did not recognise the host application, so the "
+                "host is not identified. Its executable name and the plug-in format "
+                "remain as observed."
+            )
+        ),
+        "scope": _HOST_ENVIRONMENT_SCOPE,
+        "apw:proof_level": "directly_observed" if recognised else "unknown_unobserved",
+    }
+
+
 def derive_coverage(daemon: "Daemon", chain_length: int) -> dict[str, object]:
     receiver = daemon.receiver.diagnostics()
     with daemon._session_lock:
@@ -579,6 +645,7 @@ def generate_manifest(daemon: "Daemon", export_path: Path, export_version: int =
         ))
 
     builder.coverage = daemon._derive_coverage(chain_length)
+    builder.host_environment = daemon._derive_host_environment()
     association = associate_export(export_path, feature_snapshot)
     # IMPORTANT: past tense only when the comparison actually ran. The fight card
     # renders basis and never reason, so the static text left an unavailable

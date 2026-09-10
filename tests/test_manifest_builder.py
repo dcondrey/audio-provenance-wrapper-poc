@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from daemon.schema import validate_manifest_invariants
 from daemon.manifest_builder.builder import (
     ExportEvidence,
     IngredientEvidence,
@@ -117,6 +118,77 @@ class ManifestBuilderTests(unittest.TestCase):
         )
         self.assertFalse(full_provenance["value"])
         self.assertEqual(full_provenance["apw:proof_level"], "unknown_unobserved")
+
+    def test_host_environment_names_the_host_on_the_fight_card(self):
+        builder = ManifestBuilder(session_id="s1")
+        builder.set_host_environment({
+            "status": "observed",
+            "host_recognised": True,
+            "host_name": "Ableton Live",
+            "host_executable_name": "Live",
+            "wrapper_format": "VST3",
+            "basis": "The plug-in wrapper named the host application that loaded it.",
+            "apw:proof_level": "directly_observed",
+        })
+
+        manifest = builder.build()
+
+        self.assertEqual(manifest["host_environment"]["host_name"], "Ableton Live")
+        self.assertFalse(validate_manifest_invariants(manifest))
+        claim = next(
+            c for c in manifest["claim_summary"] if c["claim"] == "host_application"
+        )
+        self.assertEqual(claim["value"], "Ableton Live")
+        self.assertEqual(claim["apw:proof_level"], "directly_observed")
+
+    def test_an_unnamed_host_never_reads_as_an_observation(self):
+        builder = ManifestBuilder(session_id="s1")
+        builder.set_host_environment({
+            "status": "host_unrecognised",
+            "host_recognised": False,
+            "host_name": None,
+            "host_executable_name": "SomeDaw",
+            "wrapper_format": "AudioUnit",
+            "basis": "The plug-in wrapper did not recognise the host application.",
+            "apw:proof_level": "unknown_unobserved",
+        })
+
+        manifest = builder.build()
+
+        self.assertFalse(validate_manifest_invariants(manifest))
+        claim = next(
+            c for c in manifest["claim_summary"] if c["claim"] == "host_application"
+        )
+        self.assertEqual(claim["value"], "unknown")
+        self.assertEqual(claim["apw:proof_level"], "unknown_unobserved")
+
+    def test_schema_rejects_a_host_named_without_recognition(self):
+        manifest = ManifestBuilder(session_id="s1").build()
+        manifest["host_environment"] = {
+            "status": "host_unrecognised",
+            "host_recognised": True,
+            "host_name": "Unknown",
+            "apw:proof_level": "directly_observed",
+        }
+
+        errors = validate_manifest_invariants(manifest)
+
+        self.assertIn("an unidentified host_environment must remain unknown_unobserved", errors)
+        self.assertIn("an unidentified host_environment must not name a host", errors)
+        self.assertIn(
+            "an unidentified host_environment must not report the host as recognised", errors
+        )
+
+    def test_a_manifest_without_a_host_environment_stays_valid(self):
+        manifest = ManifestBuilder(session_id="s1").build()
+
+        self.assertNotIn("host_environment", manifest)
+        self.assertFalse(validate_manifest_invariants(manifest))
+        claim = next(
+            c for c in manifest["claim_summary"] if c["claim"] == "host_application"
+        )
+        self.assertEqual(claim["value"], "unknown")
+        self.assertEqual(claim["apw:proof_level"], "unknown_unobserved")
 
     def test_write_json(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

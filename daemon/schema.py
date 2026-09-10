@@ -15,6 +15,12 @@ COVERAGE_STATUSES = {
     "unknown_coverage",
 }
 C2PA_CLAIM_STATUSES = {"embedded", "sidecar", "unavailable"}
+HOST_ENVIRONMENT_STATUSES = {
+    "observed",
+    "host_unrecognised",
+    "conflicting_observations",
+    "unobserved",
+}
 C2PA_VALIDATION_STATES = {
     "verified",
     "registered_but_changed",
@@ -114,6 +120,28 @@ def validate_manifest_invariants(data: object) -> list[str]:
                 # manifest the daemon's own verifier rejected as schema_invalid.
                 if counters.get("daemon_acknowledgements_sent") != counters.get("packets_received"):
                     errors.append("complete_observed_path requires one daemon ACK dispatch per received packet")
+
+    host = data.get("host_environment")
+    if isinstance(host, dict):
+        _require_proof(host, "host_environment", errors)
+        status = host.get("status")
+        if status not in HOST_ENVIRONMENT_STATUSES:
+            errors.append(f"invalid host_environment status: {status}")
+        elif status == "observed":
+            if host.get("apw:proof_level") != "directly_observed":
+                errors.append("an observed host_environment records a directly observed host")
+            if not host.get("host_name"):
+                errors.append("an observed host_environment must name the host")
+        else:
+            # IMPORTANT: honesty constraint 1. The wrapper reports "Unknown" for any
+            # host outside JUCE's table, so a name surviving here would sign an
+            # absence as an observation.
+            if host.get("apw:proof_level") != "unknown_unobserved":
+                errors.append("an unidentified host_environment must remain unknown_unobserved")
+            if host.get("host_name") is not None:
+                errors.append("an unidentified host_environment must not name a host")
+            if host.get("host_recognised") is not False:
+                errors.append("an unidentified host_environment must not report the host as recognised")
 
     receipt = data.get("daemon_receipt_acknowledgement")
     if isinstance(receipt, dict):

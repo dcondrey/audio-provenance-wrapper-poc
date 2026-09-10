@@ -144,6 +144,16 @@ fn full_builder() -> ManifestBuilder {
         "apw:proof_level": "inferred",
     }));
     builder.set_session_diagnostics(json!({"udp_sends_failed": 0}));
+    builder.set_host_environment(json!({
+        "status": "observed",
+        "host_recognised": true,
+        "host_name": "Ableton Live",
+        "host_executable_name": "Live",
+        "wrapper_format": "VST3",
+        "basis": "The plug-in wrapper named the host application that loaded it.",
+        "scope": "host scope",
+        "apw:proof_level": "directly_observed",
+    }));
     builder.set_c2pa_claim(json!({
         "status": "embedded",
         "validation": {"state": "verified", "trust_anchor_scope": "self_issued_local_root_only"},

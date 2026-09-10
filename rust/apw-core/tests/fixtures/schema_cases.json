@@ -79,6 +79,12 @@
           "apw:proof_level": "unknown_unobserved"
         },
         {
+          "claim": "host_application",
+          "value": "unknown",
+          "evidence": "No host environment was supplied to the builder.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
           "claim": "full_ableton_provenance",
           "value": false,
           "evidence": "Only audio routed through the capture plugin was observed",
@@ -220,6 +226,12 @@
           "apw:proof_level": "unknown_unobserved"
         },
         {
+          "claim": "host_application",
+          "value": "unknown",
+          "evidence": "No host environment was supplied to the builder.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
           "claim": "full_ableton_provenance",
           "value": false,
           "evidence": "Only audio routed through the capture plugin was observed",
@@ -351,6 +363,12 @@
           "claim": "source_category",
           "value": "unknown",
           "evidence": "no observed stem",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "host_application",
+          "value": "unknown",
+          "evidence": "No host environment was supplied to the builder.",
           "apw:proof_level": "unknown_unobserved"
         },
         {
@@ -487,6 +505,12 @@
           "apw:proof_level": "unknown_unobserved"
         },
         {
+          "claim": "host_application",
+          "value": "unknown",
+          "evidence": "No host environment was supplied to the builder.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
           "claim": "full_ableton_provenance",
           "value": false,
           "evidence": "Only audio routed through the capture plugin was observed",
@@ -608,6 +632,12 @@
           "apw:proof_level": "unknown_unobserved"
         },
         {
+          "claim": "host_application",
+          "value": "unknown",
+          "evidence": "No host environment was supplied to the builder.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
           "claim": "full_ableton_provenance",
           "value": false,
           "evidence": "Only audio routed through the capture plugin was observed",
@@ -726,6 +756,12 @@
           "claim": "source_category",
           "value": "unknown",
           "evidence": "no observed stem",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "host_application",
+          "value": "unknown",
+          "evidence": "No host environment was supplied to the builder.",
           "apw:proof_level": "unknown_unobserved"
         },
         {
@@ -870,6 +906,12 @@
           "apw:proof_level": "unknown_unobserved"
         },
         {
+          "claim": "host_application",
+          "value": "unknown",
+          "evidence": "No host environment was supplied to the builder.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
           "claim": "full_ableton_provenance",
           "value": false,
           "evidence": "Only audio routed through the capture plugin was observed",
@@ -991,6 +1033,12 @@
           "apw:proof_level": "unknown_unobserved"
         },
         {
+          "claim": "host_application",
+          "value": "unknown",
+          "evidence": "No host environment was supplied to the builder.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
           "claim": "full_ableton_provenance",
           "value": false,
           "evidence": "Only audio routed through the capture plugin was observed",
@@ -1040,6 +1088,406 @@
       "export.sha256 must be a 64-character SHA-256 hex digest",
       "self-generated portable signer identity must remain unknown_unobserved",
       "portable signature trust scope is invalid"
+    ]
+  },
+  {
+    "name": "host_environment_unidentified_violations",
+    "manifest": {
+      "apw_version": "0.9.0",
+      "schema": "audio-provenance-manifest-v0",
+      "session_id": "s",
+      "capture_session": {
+        "id": "s",
+        "scope": "local_daemon_runtime",
+        "apw:proof_level": "directly_observed"
+      },
+      "created_at": "2025-08-31T00:26:40.500000Z",
+      "core_principle": "Never claim full DAW provenance.",
+      "daemon_receipt_acknowledgement": {
+        "protocol": "apw-local-udp-ack-v1",
+        "status": "unknown",
+        "streams": [],
+        "counters": {
+          "attempted": 0,
+          "sent": 0,
+          "failed": 0
+        },
+        "scope": "No daemon acknowledgement evidence was supplied to the builder.",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "observed_stems": [],
+      "apw:unobserved": [
+        "hidden_plugin_state",
+        "internal_preset_logic",
+        "bypassed_routing",
+        "daw_internal_processing",
+        "unverifiable_upstream_provenance"
+      ],
+      "observation_coverage": {
+        "status": "unknown_coverage",
+        "basis": "No complete observation counters were available.",
+        "counters": {},
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "stem_export_association": {
+        "status": "not_established",
+        "capture_session_id": "s",
+        "stem_ids": [],
+        "export_file_name": null,
+        "basis": "No routed-feature/export comparison was supplied. Session co-occurrence alone does not establish an audio association.",
+        "reason": "routed-feature comparison unavailable",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "claim_summary": [
+        {
+          "claim": "observation_coverage",
+          "value": "unknown_coverage",
+          "evidence": "Complete counters were not available",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "routed_audio_observed",
+          "value": false,
+          "evidence": "No buffer_hash events were received",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "export_file_hashed",
+          "value": false,
+          "evidence": "No export detected",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "observed_stem_linked_to_export",
+          "value": false,
+          "evidence": "No routed-feature comparison was supplied.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "source_category",
+          "value": "unknown",
+          "evidence": "no observed stem",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "host_application",
+          "value": "unknown",
+          "evidence": "No host environment was supplied to the builder.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "full_ableton_provenance",
+          "value": false,
+          "evidence": "Only audio routed through the capture plugin was observed",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "embedded_c2pa_claim",
+          "value": "unavailable",
+          "evidence": "No C2PA claim was produced",
+          "apw:proof_level": "unknown_unobserved"
+        }
+      ],
+      "c2pa_mapping": {
+        "status": "descriptive_projection_see_c2pa_claim_for_the_signed_claim",
+        "claim_generator": "AudioProvenanceCapture/0.9.0",
+        "assertions": [
+          {
+            "label": "apw.unobserved",
+            "data": {
+              "items": [
+                "hidden_plugin_state",
+                "internal_preset_logic",
+                "bypassed_routing",
+                "daw_internal_processing",
+                "unverifiable_upstream_provenance"
+              ]
+            }
+          }
+        ]
+      },
+      "c2pa_claim": {
+        "status": "unavailable",
+        "reason": "No C2PA claim was supplied to the builder.",
+        "scope": "A real C2PA claim signed with a locally issued X.509 chain and bound to the asset by a SHA-256 hard binding. The signing act and the binding are directly observed. The signer identity is self-asserted: a 'verified' validation state means the claim chains to this machine's own root certificate, not to any external trust list, registry, or verified creator identity.",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "host_environment": {
+        "status": "host_unrecognised",
+        "host_recognised": true,
+        "host_name": "Unknown",
+        "apw:proof_level": "directly_observed"
+      }
+    },
+    "errors": [
+      "an unidentified host_environment must remain unknown_unobserved",
+      "an unidentified host_environment must not name a host",
+      "an unidentified host_environment must not report the host as recognised"
+    ]
+  },
+  {
+    "name": "host_environment_status_invalid",
+    "manifest": {
+      "apw_version": "0.9.0",
+      "schema": "audio-provenance-manifest-v0",
+      "session_id": "s",
+      "capture_session": {
+        "id": "s",
+        "scope": "local_daemon_runtime",
+        "apw:proof_level": "directly_observed"
+      },
+      "created_at": "2025-08-31T00:26:40.500000Z",
+      "core_principle": "Never claim full DAW provenance.",
+      "daemon_receipt_acknowledgement": {
+        "protocol": "apw-local-udp-ack-v1",
+        "status": "unknown",
+        "streams": [],
+        "counters": {
+          "attempted": 0,
+          "sent": 0,
+          "failed": 0
+        },
+        "scope": "No daemon acknowledgement evidence was supplied to the builder.",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "observed_stems": [],
+      "apw:unobserved": [
+        "hidden_plugin_state",
+        "internal_preset_logic",
+        "bypassed_routing",
+        "daw_internal_processing",
+        "unverifiable_upstream_provenance"
+      ],
+      "observation_coverage": {
+        "status": "unknown_coverage",
+        "basis": "No complete observation counters were available.",
+        "counters": {},
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "stem_export_association": {
+        "status": "not_established",
+        "capture_session_id": "s",
+        "stem_ids": [],
+        "export_file_name": null,
+        "basis": "No routed-feature/export comparison was supplied. Session co-occurrence alone does not establish an audio association.",
+        "reason": "routed-feature comparison unavailable",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "claim_summary": [
+        {
+          "claim": "observation_coverage",
+          "value": "unknown_coverage",
+          "evidence": "Complete counters were not available",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "routed_audio_observed",
+          "value": false,
+          "evidence": "No buffer_hash events were received",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "export_file_hashed",
+          "value": false,
+          "evidence": "No export detected",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "observed_stem_linked_to_export",
+          "value": false,
+          "evidence": "No routed-feature comparison was supplied.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "source_category",
+          "value": "unknown",
+          "evidence": "no observed stem",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "host_application",
+          "value": "unknown",
+          "evidence": "No host environment was supplied to the builder.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "full_ableton_provenance",
+          "value": false,
+          "evidence": "Only audio routed through the capture plugin was observed",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "embedded_c2pa_claim",
+          "value": "unavailable",
+          "evidence": "No C2PA claim was produced",
+          "apw:proof_level": "unknown_unobserved"
+        }
+      ],
+      "c2pa_mapping": {
+        "status": "descriptive_projection_see_c2pa_claim_for_the_signed_claim",
+        "claim_generator": "AudioProvenanceCapture/0.9.0",
+        "assertions": [
+          {
+            "label": "apw.unobserved",
+            "data": {
+              "items": [
+                "hidden_plugin_state",
+                "internal_preset_logic",
+                "bypassed_routing",
+                "daw_internal_processing",
+                "unverifiable_upstream_provenance"
+              ]
+            }
+          }
+        ]
+      },
+      "c2pa_claim": {
+        "status": "unavailable",
+        "reason": "No C2PA claim was supplied to the builder.",
+        "scope": "A real C2PA claim signed with a locally issued X.509 chain and bound to the asset by a SHA-256 hard binding. The signing act and the binding are directly observed. The signer identity is self-asserted: a 'verified' validation state means the claim chains to this machine's own root certificate, not to any external trust list, registry, or verified creator identity.",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "host_environment": {
+        "status": "definitely_ableton",
+        "apw:proof_level": "directly_observed"
+      }
+    },
+    "errors": [
+      "invalid host_environment status: definitely_ableton"
+    ]
+  },
+  {
+    "name": "host_environment_unnamed_violations",
+    "manifest": {
+      "apw_version": "0.9.0",
+      "schema": "audio-provenance-manifest-v0",
+      "session_id": "s",
+      "capture_session": {
+        "id": "s",
+        "scope": "local_daemon_runtime",
+        "apw:proof_level": "directly_observed"
+      },
+      "created_at": "2025-08-31T00:26:40.500000Z",
+      "core_principle": "Never claim full DAW provenance.",
+      "daemon_receipt_acknowledgement": {
+        "protocol": "apw-local-udp-ack-v1",
+        "status": "unknown",
+        "streams": [],
+        "counters": {
+          "attempted": 0,
+          "sent": 0,
+          "failed": 0
+        },
+        "scope": "No daemon acknowledgement evidence was supplied to the builder.",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "observed_stems": [],
+      "apw:unobserved": [
+        "hidden_plugin_state",
+        "internal_preset_logic",
+        "bypassed_routing",
+        "daw_internal_processing",
+        "unverifiable_upstream_provenance"
+      ],
+      "observation_coverage": {
+        "status": "unknown_coverage",
+        "basis": "No complete observation counters were available.",
+        "counters": {},
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "stem_export_association": {
+        "status": "not_established",
+        "capture_session_id": "s",
+        "stem_ids": [],
+        "export_file_name": null,
+        "basis": "No routed-feature/export comparison was supplied. Session co-occurrence alone does not establish an audio association.",
+        "reason": "routed-feature comparison unavailable",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "claim_summary": [
+        {
+          "claim": "observation_coverage",
+          "value": "unknown_coverage",
+          "evidence": "Complete counters were not available",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "routed_audio_observed",
+          "value": false,
+          "evidence": "No buffer_hash events were received",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "export_file_hashed",
+          "value": false,
+          "evidence": "No export detected",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "observed_stem_linked_to_export",
+          "value": false,
+          "evidence": "No routed-feature comparison was supplied.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "source_category",
+          "value": "unknown",
+          "evidence": "no observed stem",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "host_application",
+          "value": "unknown",
+          "evidence": "No host environment was supplied to the builder.",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "full_ableton_provenance",
+          "value": false,
+          "evidence": "Only audio routed through the capture plugin was observed",
+          "apw:proof_level": "unknown_unobserved"
+        },
+        {
+          "claim": "embedded_c2pa_claim",
+          "value": "unavailable",
+          "evidence": "No C2PA claim was produced",
+          "apw:proof_level": "unknown_unobserved"
+        }
+      ],
+      "c2pa_mapping": {
+        "status": "descriptive_projection_see_c2pa_claim_for_the_signed_claim",
+        "claim_generator": "AudioProvenanceCapture/0.9.0",
+        "assertions": [
+          {
+            "label": "apw.unobserved",
+            "data": {
+              "items": [
+                "hidden_plugin_state",
+                "internal_preset_logic",
+                "bypassed_routing",
+                "daw_internal_processing",
+                "unverifiable_upstream_provenance"
+              ]
+            }
+          }
+        ]
+      },
+      "c2pa_claim": {
+        "status": "unavailable",
+        "reason": "No C2PA claim was supplied to the builder.",
+        "scope": "A real C2PA claim signed with a locally issued X.509 chain and bound to the asset by a SHA-256 hard binding. The signing act and the binding are directly observed. The signer identity is self-asserted: a 'verified' validation state means the claim chains to this machine's own root certificate, not to any external trust list, registry, or verified creator identity.",
+        "apw:proof_level": "unknown_unobserved"
+      },
+      "host_environment": {
+        "status": "observed",
+        "host_recognised": true,
+        "host_name": "",
+        "apw:proof_level": "inferred"
+      }
+    },
+    "errors": [
+      "an observed host_environment records a directly observed host",
+      "an observed host_environment must name the host"
     ]
   },
   {

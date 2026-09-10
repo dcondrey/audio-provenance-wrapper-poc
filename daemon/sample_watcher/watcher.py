@@ -23,7 +23,7 @@ DEFAULT_EVIDENCE_PATH = Path("evidence/sample_import_events.jsonl")
 DEFAULT_WATCH_DIR = Path("~/Music/ProvenanceSamples")
 DEFAULT_NOTES = [
     "Detected by filesystem watcher.",
-    "No claim is made that this file was placed on a specific Ableton track.",
+    "No claim is made that this file was placed on a specific track in any host.",
 ]
 
 _FINGERPRINT_FRAME_CAP = 44_100

@@ -169,6 +169,14 @@ class Daemon:
         self._buffer_hash_count = 0
         self._first_hash_event: dict[str, object] | None = None
         self._last_hash_event: dict[str, object] | None = None
+        # IMPORTANT: first observation wins and a disagreeing IDENTITY collapses
+        # the record to unobserved. The plug-in re-emits this every prepareToPlay
+        # and the UDP socket cannot authenticate its sender, so last-wins would let
+        # a spoofed datagram rename the host in a signed manifest. Held here rather
+        # than read back from _session_events because the constructor's emission is
+        # event #1 and therefore the first thing popleft discards.
+        self._host_environment: dict[str, object] | None = None
+        self._host_environment_conflicts = 0
         # Bounded like receiver._stream_states: both are keyed by wire-controlled
         # values and exported into the signed manifest, so unbounded growth is a
         # local-DoS and manifest-spam vector. OrderedDict keys act as an LRU set.
@@ -287,6 +295,8 @@ class Daemon:
                     self._latest_plugin_telemetry.move_to_end(name)
                 while len(self._latest_plugin_telemetry) > MAX_TRACKED_PLUGIN_KEYS:
                     self._latest_plugin_telemetry.popitem(last=False)
+            if event.get("event_type") == "host_environment":
+                self._record_host_environment(event)
             if event.get("event_type") == "buffer_hash":
                 self._buffer_hash_count += 1
                 if self._first_hash_event is None:
@@ -295,6 +305,34 @@ class Daemon:
                 if len(self._feature_events) == self._feature_events.maxlen:
                     self._feature_window_drops += 1
                 self._feature_events.append(dict(event))
+
+    def _record_host_environment(self, event: dict[str, object]) -> None:
+        """Hold the first host environment and mark any later identity disagreement.
+
+        IMPORTANT: only recognition and name are compared. One host routinely loads
+        the plug-in in two formats at once (VST3 alongside AU while a producer A/Bs
+        them), and treating that as two hosts would withdraw a name that was never
+        in doubt.
+
+        Caller holds _session_lock.
+        """
+        observed = {
+            "host_recognised": bool(event.get("host_recognised")),
+            "host_name": event.get("host_name") or None,
+            "host_executable_name": event.get("host_executable_name") or None,
+            "wrapper_format": event.get("wrapper_format") or None,
+        }
+        if self._host_environment is None:
+            self._host_environment = observed
+            return
+        identity = ("host_recognised", "host_name")
+        if any(observed[key] != self._host_environment[key] for key in identity):
+            self._host_environment_conflicts += 1
+            log.warning(
+                "Host environment reported as %r after %r; the manifest will record "
+                "the host as unobserved",
+                observed, self._host_environment,
+            )
 
     def _correlate(self, layer_event: LayerEvent) -> None:
         try:
@@ -634,6 +672,9 @@ class Daemon:
 
     def _derive_coverage(self, chain_length: int) -> dict[str, object]:
         return _manifest_generator.derive_coverage(self, chain_length)
+
+    def _derive_host_environment(self) -> dict[str, object]:
+        return _manifest_generator.derive_host_environment(self)
 
     def _derive_forgery_analysis(self, events_snapshot: list[dict[str, object]]) -> dict[str, object]:
         return _manifest_generator.derive_forgery_analysis(events_snapshot)

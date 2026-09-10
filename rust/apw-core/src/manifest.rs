@@ -336,6 +336,7 @@ pub struct ManifestBuilder {
     c2pa_claim: Option<Value>,
     audio_association: Option<Value>,
     session_diagnostics: Option<Value>,
+    host_environment: Option<Value>,
     unobserved: Vec<String>,
 }
 
@@ -355,6 +356,7 @@ impl Default for ManifestBuilder {
             c2pa_claim: None,
             audio_association: None,
             session_diagnostics: None,
+            host_environment: None,
             unobserved: DEFAULT_UNOBSERVED.iter().map(|s| (*s).to_owned()).collect(),
         }
     }
@@ -406,6 +408,11 @@ impl ManifestBuilder {
 
     pub fn set_session_diagnostics(&mut self, diagnostics: Value) -> &mut Self {
         self.session_diagnostics = Some(diagnostics);
+        self
+    }
+
+    pub fn set_host_environment(&mut self, host_environment: Value) -> &mut Self {
+        self.host_environment = Some(host_environment);
         self
     }
 
@@ -511,6 +518,10 @@ impl ManifestBuilder {
             manifest.insert("session_diagnostics".to_owned(), diagnostics.clone());
         }
 
+        if let Some(host_environment) = &self.host_environment {
+            manifest.insert("host_environment".to_owned(), host_environment.clone());
+        }
+
         manifest.insert(
             "stem_export_association".to_owned(),
             self.association_or_default(),
@@ -585,6 +596,15 @@ impl ManifestBuilder {
             .unwrap_or(false);
         let coverage_record = self.coverage_or_default_for_summary();
         let coverage_map = coverage_record.as_object();
+        let host_record = match &self.host_environment {
+            Some(host) if is_truthy(host) => host.clone(),
+            _ => empty.clone(),
+        };
+        let host_map = host_record.as_object();
+        let host_name = match host_map.and_then(|map| map.get("host_name")) {
+            Some(name) if is_truthy(name) => name.clone(),
+            _ => json!("unknown"),
+        };
 
         let claim_record = match &self.c2pa_claim {
             Some(claim) if is_truthy(claim) => claim.clone(),
@@ -668,6 +688,20 @@ impl ManifestBuilder {
                     Some(stem) => stem.source_category_proof_level.as_str(),
                     None => ProofLevel::UnknownUnobserved.as_str(),
                 },
+            }),
+            json!({
+                "claim": "host_application",
+                "value": host_name,
+                "evidence": lookup_or(
+                    host_map,
+                    "basis",
+                    json!("No host environment was supplied to the builder."),
+                ),
+                PROOF_LEVEL_KEY: lookup_or(
+                    host_map,
+                    PROOF_LEVEL_KEY,
+                    json!(ProofLevel::UnknownUnobserved.as_str()),
+                ),
             }),
             json!({
                 "claim": "full_ableton_provenance",

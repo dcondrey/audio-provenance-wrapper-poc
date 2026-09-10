@@ -34,6 +34,7 @@ core_principle
 observed_stems[]
 export
 observation_coverage
+host_environment              (optional)
 daemon_receipt_acknowledgement
 ingredients[]                 (optional)
 edit_history[]                (optional)
@@ -118,6 +119,29 @@ failures. The result is
 `inferred` from directly observed counters. Missing routed evidence or missing
 counters produces `unknown_coverage` / `unknown_unobserved`.
 
+## Host environment
+
+`host_environment` records which application loaded the capture plug-in, and in
+which plug-in format. Statuses are:
+
+- `observed` - the plug-in wrapper named the host; `directly_observed`
+- `host_unrecognised` - the wrapper did not recognise the host; `unknown_unobserved`
+- `conflicting_observations` - one session reported disagreeing hosts; `unknown_unobserved`
+- `unobserved` - no host environment was reported; `unknown_unobserved`
+
+Only `observed` may carry a `host_name`. The wrapper reports a literal "Unknown"
+for any host outside its table, so anything else nulls the name rather than
+signing an absence as an observation. `host_executable_name` and
+`wrapper_format` survive a `host_unrecognised` status because they are observed
+either way; a conflict withdraws all three.
+
+The daemon keeps the first host each session reports. A later report that
+disagrees does not replace it: the UDP socket cannot authenticate its sender, so
+last-wins would let a spoofed datagram rename the host in a signed manifest.
+
+Naming the host does not extend observation to anything the host did outside the
+capture path. `claim_summary` carries the same value as `host_application`.
+
 ## Daemon receipt acknowledgement
 
 `daemon_receipt_acknowledgement` records protocol, status, daemon instance and
@@ -135,12 +159,15 @@ remote attestation, or registry confirmation.
 
 `claim_summary` is a human-readable fight card covering:
 
+- observation coverage;
 - routed audio observed;
-- export file hashed;
 - daemon receipt acknowledgement issued/degraded/unknown;
+- export file hashed;
 - observed stem associated with export;
 - source category;
-- full Ableton provenance explicitly not claimed.
+- host application, or `unknown` where the host was not identified;
+- full Ableton provenance explicitly not claimed;
+- embedded C2PA claim.
 
 Each summary entry has `claim`, `value`, `evidence`, and `apw:proof_level`.
 

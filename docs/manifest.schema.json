@@ -93,6 +93,25 @@
         }
       ]
     },
+    "host_environment": {
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": ["status", "host_recognised", "host_name", "basis"],
+          "properties": {
+            "status": {
+              "enum": [
+                "observed", "host_unrecognised", "conflicting_observations", "unobserved"
+              ]
+            },
+            "host_recognised": { "type": "boolean" },
+            "host_name": { "type": ["string", "null"] },
+            "host_executable_name": { "type": ["string", "null"] },
+            "wrapper_format": { "type": ["string", "null"] }
+          }
+        }
+      ]
+    },
     "daemon_receipt_acknowledgement": {
       "allOf": [
         { "$ref": "#/$defs/proofObject" },
