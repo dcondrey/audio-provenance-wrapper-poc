@@ -68,7 +68,7 @@
       {
         "claim": "observed_stem_linked_to_export",
         "value": false,
-        "evidence": "association unavailable",
+        "evidence": "No routed-feature comparison was supplied.",
         "apw:proof_level": "unknown_unobserved"
       },
       {
@@ -119,10 +119,10 @@
     "algorithm": "Ed25519",
     "canonicalization": "apw-json-sort-v1",
     "public_key_hex": "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
-    "public_key_file": "/var/folders/f6/9fydz_3n0p13t2scsr8ppdlm0000gn/T/tmp000a4wg6/demo_ed25519_public.key",
+    "public_key_file": "/var/folders/f6/9fydz_3n0p13t2scsr8ppdlm0000gn/T/tmpwv4yqnlo/demo_ed25519_public.key",
     "signer_id": "56475aa75463474c",
-    "signature_hex": "8f9e66f3df971f20511df3e277ff475fcd00d24432b6069c0960b73799f700c73fa610aa43ec0e0db30f541963ae725e85282725e6897b113e9acafc6481740d",
-    "signed_content_hash": "0f5b909f1398e27ba3efcbe11e2a9e68c33b356ab4bd50602ebcaae0aeacc731",
+    "signature_hex": "17521dd286608dc6efa7e123d579ae499b2206c475f2ae49497ade5a22c4344f2681080b70d34bb6aea2073b517ec5db74828235272be276c344933ef016c709",
+    "signed_content_hash": "b85c9da1febc5890986934b712ac91b4b3fdc3beae9601ad636cfc0bce20a712",
     "trust_scope": "self_generated_demo_key_integrity",
     "signer_identity": "not_established",
     "signer_identity_proof_level": "unknown_unobserved",

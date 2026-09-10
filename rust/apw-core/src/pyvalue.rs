@@ -58,6 +58,10 @@ fn numeric_eq(left: &Value, right: &Value) -> bool {
     }
 }
 
+pub fn is_string_equal(value: &Value, expected: &str) -> bool {
+    matches!(value, Value::String(text) if text == expected)
+}
+
 /// Python `str()` of a decoded JSON value. Used by the claim-summary f-strings
 /// and by the `len(str(export["sha256"]))` schema check, both of which are
 /// byte-visible in the manifest.

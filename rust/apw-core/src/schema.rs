@@ -2,7 +2,7 @@ use serde_json::{Map, Value};
 
 use crate::canonical::MAX_PROOF_VALUE_DEPTH;
 use crate::proof::{ProofLevel, PROOF_LEVEL_KEY};
-use crate::pyvalue::{get, is_truthy, python_eq, python_str};
+use crate::pyvalue::{get, is_string_equal, is_truthy, python_eq, python_str};
 
 /// The keys `validate_manifest_invariants` requires. IMPORTANT: `c2pa_claim` is
 /// deliberately absent. `daemon/schema.py::_validate_c2pa_claim` treats absence
@@ -31,7 +31,7 @@ const COVERAGE_STATUSES: [&str; 3] = [
 const C2PA_CLAIM_STATUSES: [&str; 3] = ["embedded", "sidecar", "unavailable"];
 const ASSOCIATION_STATUSES: [&str; 3] = ["inferred_match", "not_established", "unavailable"];
 const RECEIPT_STATUSES: [&str; 3] = ["issued", "degraded", "unknown"];
-const REQUIRED_COVERAGE_COUNTERS: [&str; 11] = [
+const REQUIRED_COVERAGE_COUNTERS: [&str; 13] = [
     "windows_hashed",
     "buffer_hash_events_received",
     "fifo_samples_dropped",
@@ -41,18 +41,22 @@ const REQUIRED_COVERAGE_COUNTERS: [&str; 11] = [
     "hash_chain_breaks",
     "events_prepared",
     "events_received",
+    "packets_received",
     "daemon_acknowledgements_sent",
     "daemon_acknowledgements_failed",
+    "bypassed_buffers",
 ];
-const ZERO_COVERAGE_COUNTERS: [&str; 8] = [
+const ZERO_COVERAGE_COUNTERS: [&str; 10] = [
     "fifo_samples_dropped",
     "fifo_windows_dropped",
     "midi_events_dropped",
+    "bypassed_buffers",
     "udp_sends_failed",
     "sequence_gaps",
     "hash_chain_breaks",
     "stream_evictions",
     "daemon_acknowledgements_failed",
+    "plugin_telemetry_regressions",
 ];
 
 /// Returns the enforced-invariant violations in the same order and wording the
@@ -219,12 +223,17 @@ fn validate_coverage(coverage: &Map<String, Value>, errors: &mut Vec<String>) {
             errors.push(format!("complete_observed_path requires {key}=0"));
         }
     }
+    // IMPORTANT: per received PACKET, not per accepted event. The daemon
+    // acknowledges every datagram including rejections, so requiring parity with
+    // events_received made one stray packet produce a manifest the daemon's own
+    // verifier rejected as schema_invalid.
     if !python_eq(
         get(counters, "daemon_acknowledgements_sent"),
-        get(counters, "events_received"),
+        get(counters, "packets_received"),
     ) {
         errors.push(
-            "complete_observed_path requires one daemon ACK dispatch per received event".to_owned(),
+            "complete_observed_path requires one daemon ACK dispatch per received packet"
+                .to_owned(),
         );
     }
 }
@@ -378,8 +387,4 @@ fn status_in(map: &Map<String, Value>, allowed: &[&str]) -> bool {
     allowed
         .iter()
         .any(|candidate| is_string_equal(status, candidate))
-}
-
-fn is_string_equal(value: &Value, expected: &str) -> bool {
-    matches!(value, Value::String(text) if text == expected)
 }

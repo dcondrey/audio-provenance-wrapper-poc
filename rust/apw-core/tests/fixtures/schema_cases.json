@@ -69,7 +69,7 @@
         {
           "claim": "observed_stem_linked_to_export",
           "value": false,
-          "evidence": "association unavailable",
+          "evidence": "No routed-feature comparison was supplied.",
           "apw:proof_level": "unknown_unobserved"
         },
         {
@@ -210,7 +210,7 @@
         {
           "claim": "observed_stem_linked_to_export",
           "value": false,
-          "evidence": "association unavailable",
+          "evidence": "No routed-feature comparison was supplied.",
           "apw:proof_level": "unknown_unobserved"
         },
         {
@@ -344,7 +344,7 @@
         {
           "claim": "observed_stem_linked_to_export",
           "value": false,
-          "evidence": "association unavailable",
+          "evidence": "No routed-feature comparison was supplied.",
           "apw:proof_level": "unknown_unobserved"
         },
         {
@@ -391,7 +391,11 @@
         "apw:proof_level": "unknown_unobserved"
       }
     },
-    "errors": []
+    "errors": [
+      "complete_observed_path missing counter: packets_received",
+      "complete_observed_path missing counter: bypassed_buffers",
+      "complete_observed_path requires one daemon ACK dispatch per received packet"
+    ]
   },
   {
     "name": "counters_violations",
@@ -473,7 +477,7 @@
         {
           "claim": "observed_stem_linked_to_export",
           "value": false,
-          "evidence": "association unavailable",
+          "evidence": "No routed-feature comparison was supplied.",
           "apw:proof_level": "unknown_unobserved"
         },
         {
@@ -522,8 +526,11 @@
     },
     "errors": [
       "complete_observed_path missing counter: hash_chain_breaks",
+      "complete_observed_path missing counter: packets_received",
+      "complete_observed_path missing counter: bypassed_buffers",
       "complete_observed_path requires all hashed windows to be received",
-      "complete_observed_path requires udp_sends_failed=0"
+      "complete_observed_path requires udp_sends_failed=0",
+      "complete_observed_path requires one daemon ACK dispatch per received packet"
     ]
   },
   {
@@ -591,7 +598,7 @@
         {
           "claim": "observed_stem_linked_to_export",
           "value": false,
-          "evidence": "association unavailable",
+          "evidence": "No routed-feature comparison was supplied.",
           "apw:proof_level": "unknown_unobserved"
         },
         {
@@ -712,7 +719,7 @@
         {
           "claim": "observed_stem_linked_to_export",
           "value": false,
-          "evidence": "association unavailable",
+          "evidence": "No routed-feature comparison was supplied.",
           "apw:proof_level": "unknown_unobserved"
         },
         {
@@ -853,7 +860,7 @@
         {
           "claim": "observed_stem_linked_to_export",
           "value": false,
-          "evidence": "association unavailable",
+          "evidence": "No routed-feature comparison was supplied.",
           "apw:proof_level": "unknown_unobserved"
         },
         {
@@ -974,7 +981,7 @@
         {
           "claim": "observed_stem_linked_to_export",
           "value": false,
-          "evidence": "association unavailable",
+          "evidence": "No routed-feature comparison was supplied.",
           "apw:proof_level": "unknown_unobserved"
         },
         {

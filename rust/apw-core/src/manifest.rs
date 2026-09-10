@@ -8,7 +8,7 @@ use crate::canonical::{
 };
 use crate::error::{CoreError, Result};
 use crate::proof::{ProofLevel, PROOF_LEVEL_KEY};
-use crate::pyvalue::{get, is_truthy, python_str};
+use crate::pyvalue::{get, is_string_equal, is_truthy, python_repr, python_str};
 use crate::timestamp::utc_timestamp;
 
 pub const APW_VERSION: &str = "0.9.0";
@@ -647,15 +647,7 @@ impl ManifestBuilder {
             json!({
                 "claim": "observed_stem_linked_to_export",
                 "value": association,
-                "evidence": match association_map {
-                    Some(map) if !map.is_empty() => format!(
-                        "{}: confidence {} / coverage {}",
-                        python_str(get(map, "method")),
-                        python_str(get(map, "confidence")),
-                        python_str(get(map, "matched_coverage")),
-                    ),
-                    _ => "association unavailable".to_owned(),
-                },
+                "evidence": association_evidence(association_map),
                 PROOF_LEVEL_KEY: if association {
                     ProofLevel::Inferred.as_str()
                 } else {
@@ -777,6 +769,46 @@ fn proof_str(observed: bool) -> &'static str {
     } else {
         ProofLevel::UnknownUnobserved.as_str()
     }
+}
+
+/// Render a measurement, or say it was not measured. Never `str(None)`.
+fn measurement(value: &Value) -> String {
+    match value {
+        Value::Number(number) if number.is_f64() => match number.as_f64() {
+            Some(float) => format!("{float:.4}"),
+            None => "not measured".to_owned(),
+        },
+        Value::Number(_) => python_repr(value),
+        _ => "not measured".to_owned(),
+    }
+}
+
+/// Evidence line for the stem-to-export claim card.
+///
+/// IMPORTANT: this is signed and rendered verbatim on the fight card the founder
+/// demo closes on, so an unavailable comparison reports its cause rather than
+/// interpolating a missing value into the record.
+fn association_evidence(record: Option<&Map<String, Value>>) -> String {
+    let record = match record {
+        Some(map) if !map.is_empty() => map,
+        _ => return "No routed-feature comparison was supplied.".to_owned(),
+    };
+    let method = match get(record, "method") {
+        value if is_truthy(value) => python_str(value),
+        _ => "no method recorded".to_owned(),
+    };
+    if is_string_equal(get(record, "status"), "unavailable") {
+        let reason = match record.get("reason") {
+            Some(value) => python_str(value),
+            None => "no reason recorded".to_owned(),
+        };
+        return format!("{method}: not measured ({reason})");
+    }
+    format!(
+        "{method}: confidence {} / coverage {}",
+        measurement(get(record, "confidence")),
+        measurement(get(record, "matched_coverage")),
+    )
 }
 
 fn lookup_or(map: Option<&Map<String, Value>>, key: &str, fallback: Value) -> Value {
