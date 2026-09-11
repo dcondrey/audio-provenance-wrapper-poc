@@ -1,0 +1,111 @@
+{
+  "event_type": "ableton_session_probe",
+  "proof_level": "directly_observed_via_live_api",
+  "observed_at_local": "2026-05-19T23:58:00.000Z",
+  "live_api_root": "live_set",
+  "track_count_observed": 2,
+  "selected_track": {
+    "track_name": "Drums",
+    "live_api_path": "live_set tracks 0",
+    "live_api_id": 7,
+    "accessible": true
+  },
+  "tracks": [
+    {
+      "track_index": 0,
+      "track_name": "Drums",
+      "live_api_path": "live_set tracks 0",
+      "clip_slot_count_observed": 8,
+      "device_count_observed": 2,
+      "devices": [
+        {
+          "device_index": 0,
+          "name": "Drum Rack",
+          "class_name": "DrumGroupDevice",
+          "class_display_name": "Drum Rack",
+          "type": 1,
+          "likely_third_party_plugin": false,
+          "parameters": [
+            {
+              "parameter_index": 0,
+              "name": "Device On",
+              "value": 1,
+              "display_value": "On",
+              "min": 0,
+              "max": 1,
+              "is_enabled": true
+            }
+          ]
+        },
+        {
+          "device_index": 1,
+          "name": "Compressor",
+          "class_name": "Compressor2",
+          "class_display_name": "Compressor",
+          "type": 2,
+          "likely_third_party_plugin": false,
+          "parameters": []
+        }
+      ],
+      "clips": [
+        {
+          "clip_slot_index": 0,
+          "clip_name": "Break Loop",
+          "is_audio_clip": true,
+          "is_midi_clip": false,
+          "source_file_path": "/Users/example/Music/ProvenanceSamples/break_loop.wav",
+          "source_file_accessible": true,
+          "source_file_probe_error": null,
+          "live_api_path": "live_set tracks 0 clip_slots 0 clip"
+        }
+      ]
+    },
+    {
+      "track_index": 1,
+      "track_name": "Bass",
+      "live_api_path": "live_set tracks 1",
+      "clip_slot_count_observed": 8,
+      "device_count_observed": 1,
+      "devices": [
+        {
+          "device_index": 0,
+          "name": "Third Party Synth",
+          "class_name": "PluginDevice",
+          "class_display_name": "Plugin",
+          "type": 1,
+          "likely_third_party_plugin": true,
+          "parameters": [
+            {
+              "parameter_index": 0,
+              "name": "Device On",
+              "value": 1,
+              "display_value": "On",
+              "min": 0,
+              "max": 1,
+              "is_enabled": true
+            }
+          ]
+        }
+      ],
+      "clips": [
+        {
+          "clip_slot_index": 0,
+          "clip_name": "Bass Pattern",
+          "is_audio_clip": false,
+          "is_midi_clip": true,
+          "source_file_path": null,
+          "source_file_accessible": false,
+          "source_file_probe_error": null,
+          "live_api_path": "live_set tracks 1 clip_slots 0 clip"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "This probe reads only fields exposed by Ableton Live API / Live Object Model.",
+    "This probe does not prove that a clip or device contributed audio to a final export.",
+    "Track, clip, device, and parameter values are session metadata, not audio-buffer evidence.",
+    "Third-party plugin internals and preset state are not exposed unless Live exposes them as device parameters.",
+    "Exact provenance relationships between imported samples, routed plugin audio, and final exports remain unverified here."
+  ]
+}

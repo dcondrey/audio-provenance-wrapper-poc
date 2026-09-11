@@ -196,6 +196,17 @@ Unknown coverage remains `unknown_unobserved`.
 | `sample_file_observed`  | directly_observed  | daemon    |
 | `ingredient_correlation`| inferred           | daemon    |
 
+## Ableton Semantic Bridge Research
+
+A Max for Live / Live API bridge may be used as a research-only session metadata probe.
+
+Responsibilities:
+- inspect tracks, clips, selected track, devices, and exposed parameters where Live API allows it
+- test whether audio clip file paths are exposed
+- report limitations and proof levels
+
+This bridge does not replace the capture plugin trust boundary and must not claim full DAW provenance.
+
 ## Internal Provenance Record
 
 The internal provenance record is the primary truth model.

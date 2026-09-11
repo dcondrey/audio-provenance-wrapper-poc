@@ -239,6 +239,12 @@ Manual validation for the local sample-folder watcher is documented in `docs/SAM
 
 This spike records filesystem-observed sample metadata and SHA-256 hashes in `evidence/sample_import_events.jsonl`. It does not modify the plugin, add C2PA signing, add wrapper-host behavior, or claim exact Ableton track attribution.
 
+## Ableton Semantic Bridge Research Spike
+
+Manual validation for the Max for Live / Live API probe is documented in `docs/ABLETON_BRIDGE_VALIDATION.md`.
+
+This research spike probes Live session metadata exposed by the Live API. It does not modify the plugin, add C2PA signing, add wrapper-host behavior, or claim full Ableton provenance.
+
 ## Epic 3 - Audio Buffer Observation Validation
 
 This section documents manual validation for GitHub issue `#6`, Epic 3 - Audio Buffer Observation.
