@@ -1,10 +1,14 @@
 <!-- repo-header:start -->
-<h1>Audio Provenance Capture</h1>
+<h3 align="center">Audio Provenance Capture</h3>
 
-<p><strong>Proof of concept for audio provenance capture in Ableton Live using a wrapper/capture plugin, local daemon, audio hashing, and JSON manifests for stem-to-export traceability.</strong></p>
+<p align="center"><strong>Proof of concept for audio provenance capture in Ableton Live using a wrapper/capture plugin, local daemon, audio hashing, and JSON manifests for stem-to-export traceability.</strong></p>
 
-[![Best Practices Evidence](https://img.shields.io/badge/best%20practices-evidence%20reviewed-6a4c93?style=flat-square&labelColor=20232a)](.bestpractices.json)
+<p align="center">
+  <a href=".bestpractices.json"><img src="https://img.shields.io/badge/best%20practices-evidence%20reviewed-6a4c93?style=flat-square&labelColor=20232a" alt="Best Practices Evidence"></a>
+</p>
 <!-- repo-header:end -->
+
+---
 
 One monorepo for creation-stage capture, signed provenance records, resilient audio recovery, and
 verification.
