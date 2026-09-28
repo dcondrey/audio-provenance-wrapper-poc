@@ -1,0 +1,3696 @@
+{
+  "note": "Only key paths, value kinds and key order are compared; values (ids, hashes, paths, timestamps, signatures, counts) are run-specific and never compared.",
+  "paths": {
+    "/": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "apw_version",
+        "schema",
+        "session_id",
+        "capture_session",
+        "created_at",
+        "core_principle",
+        "daemon_receipt_acknowledgement",
+        "observed_stems",
+        "export",
+        "forgery_analysis",
+        "apw:unobserved",
+        "observation_coverage",
+        "session_diagnostics",
+        "host_environment",
+        "stem_export_association",
+        "claim_summary",
+        "c2pa_mapping",
+        "c2pa_claim",
+        "evidence_binding",
+        "presentation",
+        "downstream_registration_handoff",
+        "time_anchor",
+        "hardware_binding",
+        "portable_signature",
+        "manifest_signature"
+      ]
+    },
+    "/apw_version": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/schema": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/capture_session": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "id",
+        "scope",
+        "apw:proof_level",
+        "started_at",
+        "state_at_manifest"
+      ]
+    },
+    "/capture_session/id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/capture_session/scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/capture_session/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/capture_session/started_at": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/capture_session/state_at_manifest": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/created_at": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/core_principle": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "protocol",
+        "status",
+        "daemon_instance_id",
+        "daemon_capture_session_id",
+        "streams",
+        "counters",
+        "stream_evictions",
+        "scope",
+        "apw:proof_level"
+      ]
+    },
+    "/daemon_receipt_acknowledgement/protocol": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/daemon_instance_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/daemon_capture_session_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/streams": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/streams[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "plugin_instance_id",
+        "plugin_capture_session_id",
+        "highest_accepted_sequence",
+        "highest_contiguous_sequence",
+        "gaps",
+        "rejections",
+        "chain_breaks"
+      ]
+    },
+    "/daemon_receipt_acknowledgement/streams[]/plugin_instance_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/streams[]/plugin_capture_session_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/streams[]/highest_accepted_sequence": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/streams[]/highest_contiguous_sequence": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/streams[]/gaps": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/streams[]/rejections": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/streams[]/chain_breaks": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/counters": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "attempted",
+        "sent",
+        "failed"
+      ]
+    },
+    "/daemon_receipt_acknowledgement/counters/attempted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/counters/sent": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/counters/failed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/stream_evictions": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/daemon_receipt_acknowledgement/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observed_stems": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "stem_id",
+        "hash_chain_root",
+        "hash_chain_genesis",
+        "hash_chain_length",
+        "first_observed_ms",
+        "last_observed_ms",
+        "first_received_at",
+        "last_received_at",
+        "sample_rate_hz",
+        "channel_count",
+        "source_category",
+        "source_category_proof_level",
+        "source",
+        "plugin_instance_ids",
+        "apw:proof_level"
+      ]
+    },
+    "/observed_stems[]/stem_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/hash_chain_root": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/hash_chain_genesis": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/hash_chain_length": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/first_observed_ms": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/last_observed_ms": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/first_received_at": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/last_received_at": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/sample_rate_hz": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/channel_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/source_category": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/source_category_proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/source": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "category",
+        "apw:proof_level"
+      ]
+    },
+    "/observed_stems[]/source/category": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/source/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/plugin_instance_ids": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/plugin_instance_ids[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observed_stems[]/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/export": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "file_path",
+        "file_name",
+        "sha256",
+        "format",
+        "file_size_bytes",
+        "duration_seconds",
+        "sample_rate_hz",
+        "channel_count",
+        "exported_at",
+        "export_version",
+        "apw:proof_level"
+      ]
+    },
+    "/export/file_path": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/export/file_name": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/export/sha256": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/export/format": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/export/file_size_bytes": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/export/duration_seconds": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/export/sample_rate_hz": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/export/channel_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/export/exported_at": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/export/export_version": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/export/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "apw:proof_level",
+        "method",
+        "scope",
+        "suspicion_score",
+        "analyzers"
+      ]
+    },
+    "/forgery_analysis/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/method": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/suspicion_score": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/analyzers": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "audio_stream",
+        "hash_chain",
+        "input_behavior"
+      ]
+    },
+    "/forgery_analysis/analyzers/audio_stream": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "suspicion_score",
+        "sample_count",
+        "flags"
+      ]
+    },
+    "/forgery_analysis/analyzers/audio_stream/suspicion_score": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/analyzers/audio_stream/sample_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/analyzers/audio_stream/flags": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/analyzers/hash_chain": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "suspicion_score",
+        "sample_count",
+        "flags"
+      ]
+    },
+    "/forgery_analysis/analyzers/hash_chain/suspicion_score": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/analyzers/hash_chain/sample_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/analyzers/hash_chain/flags": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/analyzers/input_behavior": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "suspicion_score",
+        "sample_count",
+        "flags",
+        "note"
+      ]
+    },
+    "/forgery_analysis/analyzers/input_behavior/suspicion_score": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/analyzers/input_behavior/sample_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/analyzers/input_behavior/flags": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/forgery_analysis/analyzers/input_behavior/note": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/apw:unobserved": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/apw:unobserved[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observation_coverage": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "status",
+        "basis",
+        "counters",
+        "apw:proof_level"
+      ]
+    },
+    "/observation_coverage/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/basis": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "buffers_submitted",
+        "samples_submitted",
+        "windows_hashed",
+        "fifo_samples_dropped",
+        "fifo_windows_dropped",
+        "midi_events_dropped",
+        "bypassed_buffers",
+        "bypassed_samples",
+        "events_prepared",
+        "udp_sends_attempted",
+        "udp_sends_failed",
+        "daemon_acknowledgements_processed",
+        "daemon_highest_accepted_sequence",
+        "daemon_highest_contiguous_sequence",
+        "daemon_ack_session_mismatches_ignored",
+        "daemon_restarts_observed",
+        "packets_received",
+        "events_received",
+        "events_rejected",
+        "sequence_gaps",
+        "events_missing_sequence",
+        "sequence_out_of_order",
+        "hash_chain_breaks",
+        "stream_evictions",
+        "daemon_acknowledgements_attempted",
+        "daemon_acknowledgements_sent",
+        "daemon_acknowledgements_failed",
+        "plugin_telemetry_regressions",
+        "udp_sends_locally_emitted",
+        "buffer_hash_events_received",
+        "feature_windows_dropped_from_alignment_buffer"
+      ]
+    },
+    "/observation_coverage/counters/buffers_submitted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/samples_submitted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/windows_hashed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/fifo_samples_dropped": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/fifo_windows_dropped": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/midi_events_dropped": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/bypassed_buffers": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/bypassed_samples": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/events_prepared": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/udp_sends_attempted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/udp_sends_failed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/daemon_acknowledgements_processed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/daemon_highest_accepted_sequence": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/daemon_highest_contiguous_sequence": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/daemon_ack_session_mismatches_ignored": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/daemon_restarts_observed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/packets_received": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/events_received": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/events_rejected": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/sequence_gaps": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/events_missing_sequence": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/sequence_out_of_order": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/hash_chain_breaks": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/stream_evictions": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/daemon_acknowledgements_attempted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/daemon_acknowledgements_sent": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/daemon_acknowledgements_failed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/plugin_telemetry_regressions": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/udp_sends_locally_emitted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/buffer_hash_events_received": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/counters/feature_windows_dropped_from_alignment_buffer": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/observation_coverage/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "receiver",
+        "correlation",
+        "session_memory",
+        "daemon_receipt_acknowledgement",
+        "apw:proof_level"
+      ]
+    },
+    "/session_diagnostics/receiver": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "packets_received",
+        "events_received",
+        "events_rejected",
+        "sequence_gaps",
+        "events_missing_sequence",
+        "sequence_out_of_order",
+        "hash_chain_breaks",
+        "stream_evictions",
+        "daemon_acknowledgements_attempted",
+        "daemon_acknowledgements_sent",
+        "daemon_acknowledgements_failed"
+      ]
+    },
+    "/session_diagnostics/receiver/packets_received": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/receiver/events_received": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/receiver/events_rejected": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/receiver/sequence_gaps": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/receiver/events_missing_sequence": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/receiver/sequence_out_of_order": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/receiver/hash_chain_breaks": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/receiver/stream_evictions": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/receiver/daemon_acknowledgements_attempted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/receiver/daemon_acknowledgements_sent": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/receiver/daemon_acknowledgements_failed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/correlation": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "buffer_events",
+        "buffer_max_events",
+        "capacity_drops",
+        "duplicate_matches_suppressed",
+        "composite_events_emitted",
+        "clock"
+      ]
+    },
+    "/session_diagnostics/correlation/buffer_events": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/correlation/buffer_max_events": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/correlation/capacity_drops": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/correlation/duplicate_matches_suppressed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/correlation/composite_events_emitted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/correlation/clock": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/session_memory": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "events_retained",
+        "max_events",
+        "events_dropped_from_memory_only"
+      ]
+    },
+    "/session_diagnostics/session_memory/events_retained": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/session_memory/max_events": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/session_memory/events_dropped_from_memory_only": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "protocol",
+        "status",
+        "daemon_instance_id",
+        "daemon_capture_session_id",
+        "streams",
+        "counters",
+        "stream_evictions",
+        "scope",
+        "apw:proof_level"
+      ]
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/protocol": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/daemon_instance_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/daemon_capture_session_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/streams": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/streams[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "plugin_instance_id",
+        "plugin_capture_session_id",
+        "highest_accepted_sequence",
+        "highest_contiguous_sequence",
+        "gaps",
+        "rejections",
+        "chain_breaks"
+      ]
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/streams[]/plugin_instance_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/streams[]/plugin_capture_session_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/streams[]/highest_accepted_sequence": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/streams[]/highest_contiguous_sequence": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/streams[]/gaps": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/streams[]/rejections": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/streams[]/chain_breaks": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/counters": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "attempted",
+        "sent",
+        "failed"
+      ]
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/counters/attempted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/counters/sent": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/counters/failed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/stream_evictions": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/daemon_receipt_acknowledgement/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_diagnostics/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/host_environment": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "status",
+        "host_recognised",
+        "host_name",
+        "host_executable_name",
+        "wrapper_format",
+        "basis",
+        "scope",
+        "apw:proof_level"
+      ]
+    },
+    "/host_environment/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/host_environment/host_recognised": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/host_environment/host_name": {
+      "kinds": [
+        "null"
+      ],
+      "keys": null
+    },
+    "/host_environment/host_executable_name": {
+      "kinds": [
+        "null"
+      ],
+      "keys": null
+    },
+    "/host_environment/wrapper_format": {
+      "kinds": [
+        "null"
+      ],
+      "keys": null
+    },
+    "/host_environment/basis": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/host_environment/scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/host_environment/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/stem_export_association": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "status",
+        "method",
+        "method_version",
+        "confidence",
+        "matched_coverage",
+        "routed_coverage",
+        "matched_window_count",
+        "comparable_window_count",
+        "overlap_window_count",
+        "routed_window_count",
+        "export_window_count",
+        "best_offset_windows",
+        "best_offset_seconds",
+        "alignment_threshold",
+        "alignment_series",
+        "alignment_similarity",
+        "feature_dimensions",
+        "reason",
+        "apw:proof_level",
+        "limitations",
+        "export_feature_extraction",
+        "routed_feature_source",
+        "bounded_routed_window_limit",
+        "capture_session_id",
+        "stem_ids",
+        "export_file_name",
+        "basis"
+      ]
+    },
+    "/stem_export_association/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/method": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/method_version": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/confidence": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/matched_coverage": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/routed_coverage": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/matched_window_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/comparable_window_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/overlap_window_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/routed_window_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/export_window_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/best_offset_windows": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/best_offset_seconds": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/alignment_threshold": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/alignment_series": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/alignment_series[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "relative_window",
+        "similarity",
+        "matched"
+      ]
+    },
+    "/stem_export_association/alignment_series[]/relative_window": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/alignment_series[]/similarity": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/alignment_series[]/matched": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/alignment_similarity": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/alignment_similarity[]": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/feature_dimensions": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/feature_dimensions[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/reason": {
+      "kinds": [
+        "null"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/limitations": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/limitations[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/export_feature_extraction": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "sample_rate_hz",
+        "channel_count",
+        "sample_width_bytes",
+        "window_size_frames",
+        "window_duration_seconds",
+        "truncated_at_window_limit",
+        "streaming_extraction"
+      ]
+    },
+    "/stem_export_association/export_feature_extraction/sample_rate_hz": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/export_feature_extraction/channel_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/export_feature_extraction/sample_width_bytes": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/export_feature_extraction/window_size_frames": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/export_feature_extraction/window_duration_seconds": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/export_feature_extraction/truncated_at_window_limit": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/export_feature_extraction/streaming_extraction": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/routed_feature_source": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/bounded_routed_window_limit": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/capture_session_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/stem_ids": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/stem_ids[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/export_file_name": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/stem_export_association/basis": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/claim_summary": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/claim_summary[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "claim",
+        "value",
+        "evidence",
+        "apw:proof_level"
+      ]
+    },
+    "/claim_summary[]/claim": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/claim_summary[]/value": {
+      "kinds": [
+        "bool",
+        "str"
+      ],
+      "keys": null
+    },
+    "/claim_summary[]/evidence": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/claim_summary[]/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "status",
+        "claim_generator",
+        "assertions"
+      ]
+    },
+    "/c2pa_mapping/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/claim_generator": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/assertions": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/assertions[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "label",
+        "data"
+      ]
+    },
+    "/c2pa_mapping/assertions[]/label": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/assertions[]/data": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "name",
+        "hash",
+        "algorithm"
+      ]
+    },
+    "/c2pa_mapping/assertions[]/data/name": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/assertions[]/data/hash": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/assertions[]/data/algorithm": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/assertions[]/data/title": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/assertions[]/data/relationship": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/assertions[]/data/apw:hash_chain_root": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/assertions[]/data/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/assertions[]/data/items": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/c2pa_mapping/assertions[]/data/items[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "status",
+        "mime",
+        "claim_generator",
+        "signed_asset",
+        "sidecar_manifest",
+        "source_export_sha256",
+        "source_sha256_matches_export",
+        "hard_binding",
+        "validation",
+        "signer",
+        "ingredients",
+        "unresolved_ingredient_references",
+        "scope",
+        "apw:proof_level"
+      ]
+    },
+    "/c2pa_claim/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/mime": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/claim_generator": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/claim_generator[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "name",
+        "version"
+      ]
+    },
+    "/c2pa_claim/claim_generator[]/name": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/claim_generator[]/version": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signed_asset": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "file_name",
+        "file_path",
+        "relative_path",
+        "sha256",
+        "apw:proof_level"
+      ]
+    },
+    "/c2pa_claim/signed_asset/file_name": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signed_asset/file_path": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signed_asset/relative_path": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signed_asset/sha256": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signed_asset/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/sidecar_manifest": {
+      "kinds": [
+        "null"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/source_export_sha256": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/source_sha256_matches_export": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/hard_binding": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "type",
+        "algorithm",
+        "covers",
+        "excluded_region",
+        "rewritten_header_field",
+        "container_rewrite_tolerance",
+        "source_sha256"
+      ]
+    },
+    "/c2pa_claim/hard_binding/type": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/hard_binding/algorithm": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/hard_binding/covers": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/hard_binding/excluded_region": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "start",
+        "length"
+      ]
+    },
+    "/c2pa_claim/hard_binding/excluded_region/start": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/hard_binding/excluded_region/length": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/hard_binding/rewritten_header_field": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "start",
+        "length"
+      ]
+    },
+    "/c2pa_claim/hard_binding/rewritten_header_field/start": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/hard_binding/rewritten_header_field/length": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/hard_binding/container_rewrite_tolerance": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/hard_binding/source_sha256": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/validation": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "state",
+        "library_validation_state",
+        "failure_codes",
+        "assertion_labels",
+        "trust_evaluated",
+        "trust_anchor_scope",
+        "detail"
+      ]
+    },
+    "/c2pa_claim/validation/state": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/validation/library_validation_state": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/validation/failure_codes": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/validation/assertion_labels": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/validation/assertion_labels[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/validation/trust_evaluated": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/validation/trust_anchor_scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/validation/detail": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signer": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "key_id",
+        "subject_common_name",
+        "algorithm",
+        "identity_evidence",
+        "revoked",
+        "created_at_ms",
+        "trust_anchor_sha256",
+        "apw:proof_level",
+        "limits",
+        "signer_identity",
+        "trust_anchor_pem"
+      ]
+    },
+    "/c2pa_claim/signer/key_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signer/subject_common_name": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signer/algorithm": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signer/identity_evidence": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signer/revoked": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signer/created_at_ms": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signer/trust_anchor_sha256": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signer/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signer/limits": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signer/signer_identity": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/signer/trust_anchor_pem": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/ingredients": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/ingredients[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "title",
+        "ingredient_id",
+        "relationship",
+        "sha256",
+        "digest_meaning",
+        "apw:proof_level"
+      ]
+    },
+    "/c2pa_claim/ingredients[]/title": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/ingredients[]/ingredient_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/ingredients[]/relationship": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/ingredients[]/sha256": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/ingredients[]/digest_meaning": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/ingredients[]/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/unresolved_ingredient_references": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/evidence_binding": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "evidence_directory",
+        "evidence_file_hashes",
+        "evidence_files",
+        "last_window_hash",
+        "chain_length",
+        "apw:proof_level"
+      ]
+    },
+    "/evidence_binding/evidence_directory": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/evidence_binding/evidence_file_hashes": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "plugin_events.jsonl",
+        "session_events.jsonl"
+      ]
+    },
+    "/evidence_binding/evidence_file_hashes/plugin_events.jsonl": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/evidence_binding/evidence_file_hashes/session_events.jsonl": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/evidence_binding/evidence_files": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "plugin_events.jsonl",
+        "session_events.jsonl"
+      ]
+    },
+    "/evidence_binding/evidence_files/plugin_events.jsonl": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "sha256",
+        "byte_length",
+        "binding_scope"
+      ]
+    },
+    "/evidence_binding/evidence_files/plugin_events.jsonl/sha256": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/evidence_binding/evidence_files/plugin_events.jsonl/byte_length": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/evidence_binding/evidence_files/plugin_events.jsonl/binding_scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/evidence_binding/evidence_files/session_events.jsonl": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "sha256",
+        "byte_length",
+        "binding_scope"
+      ]
+    },
+    "/evidence_binding/evidence_files/session_events.jsonl/sha256": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/evidence_binding/evidence_files/session_events.jsonl/byte_length": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/evidence_binding/evidence_files/session_events.jsonl/binding_scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/evidence_binding/last_window_hash": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/evidence_binding/chain_length": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/evidence_binding/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/presentation": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "html_report",
+        "derived_from",
+        "verifier_result",
+        "downstream_handoff",
+        "bundle_index",
+        "evidence_bundle",
+        "c2pa_signed_asset",
+        "c2pa_sidecar_manifest",
+        "apw:proof_level"
+      ]
+    },
+    "/presentation/html_report": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/presentation/derived_from": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/presentation/verifier_result": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/presentation/downstream_handoff": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/presentation/bundle_index": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/presentation/evidence_bundle": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/presentation/c2pa_signed_asset": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/presentation/c2pa_sidecar_manifest": {
+      "kinds": [
+        "null"
+      ],
+      "keys": null
+    },
+    "/presentation/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "record_type",
+        "status",
+        "capture_session_id",
+        "export_hard_hash",
+        "routed_observation_commitment",
+        "coverage",
+        "audio_association",
+        "creator_declarations",
+        "signing_key",
+        "evidence_bundle",
+        "c2pa_claim",
+        "descriptive_c2pa_assertion_mapping",
+        "missing_downstream_requirements",
+        "boundary"
+      ]
+    },
+    "/downstream_registration_handoff/record_type": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/capture_session_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/export_hard_hash": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "algorithm",
+        "value",
+        "apw:proof_level"
+      ]
+    },
+    "/downstream_registration_handoff/export_hard_hash/algorithm": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/export_hard_hash/value": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/export_hard_hash/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/routed_observation_commitment": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "hash_chain_root",
+        "hash_chain_length",
+        "apw:proof_level"
+      ]
+    },
+    "/downstream_registration_handoff/routed_observation_commitment/hash_chain_root": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/routed_observation_commitment/hash_chain_length": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/routed_observation_commitment/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "status",
+        "basis",
+        "counters",
+        "apw:proof_level"
+      ]
+    },
+    "/downstream_registration_handoff/coverage/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/basis": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "buffers_submitted",
+        "samples_submitted",
+        "windows_hashed",
+        "fifo_samples_dropped",
+        "fifo_windows_dropped",
+        "midi_events_dropped",
+        "bypassed_buffers",
+        "bypassed_samples",
+        "events_prepared",
+        "udp_sends_attempted",
+        "udp_sends_failed",
+        "daemon_acknowledgements_processed",
+        "daemon_highest_accepted_sequence",
+        "daemon_highest_contiguous_sequence",
+        "daemon_ack_session_mismatches_ignored",
+        "daemon_restarts_observed",
+        "packets_received",
+        "events_received",
+        "events_rejected",
+        "sequence_gaps",
+        "events_missing_sequence",
+        "sequence_out_of_order",
+        "hash_chain_breaks",
+        "stream_evictions",
+        "daemon_acknowledgements_attempted",
+        "daemon_acknowledgements_sent",
+        "daemon_acknowledgements_failed",
+        "plugin_telemetry_regressions",
+        "udp_sends_locally_emitted",
+        "buffer_hash_events_received",
+        "feature_windows_dropped_from_alignment_buffer"
+      ]
+    },
+    "/downstream_registration_handoff/coverage/counters/buffers_submitted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/samples_submitted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/windows_hashed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/fifo_samples_dropped": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/fifo_windows_dropped": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/midi_events_dropped": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/bypassed_buffers": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/bypassed_samples": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/events_prepared": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/udp_sends_attempted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/udp_sends_failed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/daemon_acknowledgements_processed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/daemon_highest_accepted_sequence": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/daemon_highest_contiguous_sequence": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/daemon_ack_session_mismatches_ignored": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/daemon_restarts_observed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/packets_received": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/events_received": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/events_rejected": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/sequence_gaps": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/events_missing_sequence": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/sequence_out_of_order": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/hash_chain_breaks": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/stream_evictions": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/daemon_acknowledgements_attempted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/daemon_acknowledgements_sent": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/daemon_acknowledgements_failed": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/plugin_telemetry_regressions": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/udp_sends_locally_emitted": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/buffer_hash_events_received": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/counters/feature_windows_dropped_from_alignment_buffer": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/coverage/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "status",
+        "method",
+        "method_version",
+        "confidence",
+        "matched_coverage",
+        "routed_coverage",
+        "matched_window_count",
+        "comparable_window_count",
+        "overlap_window_count",
+        "routed_window_count",
+        "export_window_count",
+        "best_offset_windows",
+        "best_offset_seconds",
+        "alignment_threshold",
+        "alignment_series",
+        "alignment_similarity",
+        "feature_dimensions",
+        "reason",
+        "apw:proof_level",
+        "limitations",
+        "export_feature_extraction",
+        "routed_feature_source",
+        "bounded_routed_window_limit",
+        "capture_session_id",
+        "stem_ids",
+        "export_file_name",
+        "basis"
+      ]
+    },
+    "/downstream_registration_handoff/audio_association/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/method": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/method_version": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/confidence": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/matched_coverage": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/routed_coverage": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/matched_window_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/comparable_window_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/overlap_window_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/routed_window_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/export_window_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/best_offset_windows": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/best_offset_seconds": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/alignment_threshold": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/alignment_series": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/alignment_series[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "relative_window",
+        "similarity",
+        "matched"
+      ]
+    },
+    "/downstream_registration_handoff/audio_association/alignment_series[]/relative_window": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/alignment_series[]/similarity": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/alignment_series[]/matched": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/alignment_similarity": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/alignment_similarity[]": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/feature_dimensions": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/feature_dimensions[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/reason": {
+      "kinds": [
+        "null"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/limitations": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/limitations[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/export_feature_extraction": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "sample_rate_hz",
+        "channel_count",
+        "sample_width_bytes",
+        "window_size_frames",
+        "window_duration_seconds",
+        "truncated_at_window_limit",
+        "streaming_extraction"
+      ]
+    },
+    "/downstream_registration_handoff/audio_association/export_feature_extraction/sample_rate_hz": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/export_feature_extraction/channel_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/export_feature_extraction/sample_width_bytes": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/export_feature_extraction/window_size_frames": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/export_feature_extraction/window_duration_seconds": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/export_feature_extraction/truncated_at_window_limit": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/export_feature_extraction/streaming_extraction": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/routed_feature_source": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/bounded_routed_window_limit": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/capture_session_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/stem_ids": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/stem_ids[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/export_file_name": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/audio_association/basis": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/creator_declarations": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/creator_declarations[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "name",
+        "value",
+        "apw:proof_level"
+      ]
+    },
+    "/downstream_registration_handoff/creator_declarations[]/name": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/creator_declarations[]/value": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/creator_declarations[]/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/signing_key": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "algorithm",
+        "public_key_hex",
+        "public_key_file",
+        "trust_scope",
+        "signer_identity",
+        "apw:proof_level"
+      ]
+    },
+    "/downstream_registration_handoff/signing_key/algorithm": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/signing_key/public_key_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/signing_key/public_key_file": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/signing_key/trust_scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/signing_key/signer_identity": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/signing_key/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "manifest",
+        "export",
+        "evidence_directory",
+        "files",
+        "downloadable_archive",
+        "signed_bundle_index",
+        "index_scope",
+        "apw:proof_level"
+      ]
+    },
+    "/downstream_registration_handoff/evidence_bundle/manifest": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/export": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/evidence_directory": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/files": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "plugin_events.jsonl",
+        "session_events.jsonl"
+      ]
+    },
+    "/downstream_registration_handoff/evidence_bundle/files/plugin_events.jsonl": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "sha256",
+        "byte_length",
+        "binding_scope"
+      ]
+    },
+    "/downstream_registration_handoff/evidence_bundle/files/plugin_events.jsonl/sha256": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/files/plugin_events.jsonl/byte_length": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/files/plugin_events.jsonl/binding_scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/files/session_events.jsonl": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "sha256",
+        "byte_length",
+        "binding_scope"
+      ]
+    },
+    "/downstream_registration_handoff/evidence_bundle/files/session_events.jsonl/sha256": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/files/session_events.jsonl/byte_length": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/files/session_events.jsonl/binding_scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/downloadable_archive": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/signed_bundle_index": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/index_scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/evidence_bundle/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/c2pa_claim": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "status",
+        "signed_asset",
+        "signed_asset_sha256",
+        "sidecar_manifest",
+        "hard_binding_algorithm",
+        "validation_state",
+        "trust_anchor_scope",
+        "signer_key_id",
+        "signer_identity",
+        "boundary",
+        "apw:proof_level"
+      ]
+    },
+    "/downstream_registration_handoff/c2pa_claim/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/c2pa_claim/signed_asset": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/c2pa_claim/signed_asset_sha256": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/c2pa_claim/sidecar_manifest": {
+      "kinds": [
+        "null"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/c2pa_claim/hard_binding_algorithm": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/c2pa_claim/validation_state": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/c2pa_claim/trust_anchor_scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/c2pa_claim/signer_key_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/c2pa_claim/signer_identity": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/c2pa_claim/boundary": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/c2pa_claim/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/descriptive_c2pa_assertion_mapping": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "status",
+        "assertions",
+        "apw:proof_level"
+      ]
+    },
+    "/downstream_registration_handoff/descriptive_c2pa_assertion_mapping/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/descriptive_c2pa_assertion_mapping/assertions": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/descriptive_c2pa_assertion_mapping/assertions[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/descriptive_c2pa_assertion_mapping/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/missing_downstream_requirements": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/missing_downstream_requirements[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/downstream_registration_handoff/boundary": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "status",
+        "data_hash",
+        "source",
+        "timestamp_ms",
+        "timestamp",
+        "nonce_hex",
+        "response_der_hex",
+        "cms_signature_verified",
+        "scope",
+        "apw:proof_level"
+      ]
+    },
+    "/time_anchor/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor/data_hash": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor/source": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor/timestamp_ms": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/time_anchor/timestamp": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor/nonce_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor/response_der_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor/cms_signature_verified": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/time_anchor/scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/hardware_binding": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "chain_root_hash",
+        "device_id",
+        "monotonic_counter",
+        "clock_ms",
+        "signature_hex",
+        "public_key_hex",
+        "hardware_attested",
+        "apw:proof_level"
+      ]
+    },
+    "/hardware_binding/chain_root_hash": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/hardware_binding/device_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/hardware_binding/monotonic_counter": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/hardware_binding/clock_ms": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/hardware_binding/signature_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/hardware_binding/public_key_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/hardware_binding/hardware_attested": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/hardware_binding/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "algorithm",
+        "canonicalization",
+        "public_key_hex",
+        "public_key_file",
+        "signer_id",
+        "signature_hex",
+        "signed_content_hash",
+        "trust_scope",
+        "signer_identity",
+        "signer_identity_proof_level",
+        "apw:proof_level",
+        "notes"
+      ]
+    },
+    "/portable_signature/algorithm": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature/canonicalization": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature/public_key_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature/public_key_file": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature/signer_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature/signature_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature/signed_content_hash": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature/trust_scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature/signer_identity": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature/signer_identity_proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/portable_signature/notes": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "algorithm",
+        "device_id",
+        "public_key_hex",
+        "signature_hex",
+        "signed_content_hash",
+        "trust_scope",
+        "hardware_attested",
+        "apw:proof_level",
+        "notes",
+        "hardware_cosignature"
+      ]
+    },
+    "/manifest_signature/algorithm": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/device_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/public_key_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/signature_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/signed_content_hash": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/trust_scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/hardware_attested": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/notes": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/hardware_cosignature": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "entangled_hash",
+        "content_hash",
+        "hardware_clock_ms",
+        "monotonic_counter",
+        "device_id",
+        "signature_hex",
+        "previous_cosignature_hash",
+        "counter_scope",
+        "apw:proof_level"
+      ]
+    },
+    "/manifest_signature/hardware_cosignature/entangled_hash": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/hardware_cosignature/content_hash": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/hardware_cosignature/hardware_clock_ms": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/hardware_cosignature/monotonic_counter": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/hardware_cosignature/device_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/hardware_cosignature/signature_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/hardware_cosignature/previous_cosignature_hash": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/hardware_cosignature/counter_scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/manifest_signature/hardware_cosignature/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    }
+  }
+}

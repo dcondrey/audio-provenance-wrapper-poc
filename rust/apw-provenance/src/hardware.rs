@@ -86,6 +86,12 @@ pub trait HardwareProvider: Send + Sync {
     /// detect replay against the hash chain.
     fn monotonic_counter(&self) -> u64;
 
+    /// What the monotonic counter is actually backed by, in the words the
+    /// manifest records (`hardware_cosignature.counter_scope`).
+    fn counter_scope(&self) -> String {
+        "provider_defined".to_owned()
+    }
+
     fn clock_ms(&self) -> u64;
 
     /// Attest that a hash chain root was produced on this device at this counter.
@@ -209,6 +215,12 @@ impl SoftwareProvider {
 }
 
 impl HardwareProvider for SoftwareProvider {
+    fn counter_scope(&self) -> String {
+        "persisted local file counter, not hardware-backed; rollback is prevented only by \
+         filesystem permissions on the signer state file"
+            .to_owned()
+    }
+
     fn device_identity(&self) -> Result<DeviceIdentity> {
         let created_at_ms = std::fs::metadata(&self.key_path)
             .and_then(|meta| meta.modified())

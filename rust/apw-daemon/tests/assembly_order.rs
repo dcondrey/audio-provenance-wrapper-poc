@@ -116,6 +116,7 @@ fn both_signatures_cover_everything_assembled_before_them() {
         plugin_instance_count: 1,
         chain_length: snapshot.chain_length,
         feature_window_drops: snapshot.feature_window_drops,
+        telemetry_regressions: snapshot.telemetry_regressions,
     });
 
     let signer = Ed25519Signer::load_or_create(

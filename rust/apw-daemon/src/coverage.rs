@@ -5,13 +5,15 @@ use crate::receiver::ReceiverDiagnostics;
 
 /// Cumulative plug-in counters that must all be present before coverage can be
 /// graded at all. A build that omits one cannot be graded complete, only unknown.
-const REQUIRED_TELEMETRY: [&str; 9] = [
+const REQUIRED_TELEMETRY: [&str; 11] = [
     "buffers_submitted",
     "samples_submitted",
     "windows_hashed",
     "fifo_samples_dropped",
     "fifo_windows_dropped",
     "midi_events_dropped",
+    "bypassed_buffers",
+    "bypassed_samples",
     "events_prepared",
     "udp_sends_attempted",
     "udp_sends_failed",
@@ -33,6 +35,7 @@ pub struct CoverageInputs<'a> {
     pub plugin_instance_count: usize,
     pub chain_length: u64,
     pub feature_window_drops: u64,
+    pub telemetry_regressions: u64,
 }
 
 /// The signed `observation_coverage` record.
@@ -60,6 +63,10 @@ pub fn derive_coverage(inputs: &CoverageInputs) -> Value {
             counters.insert(key, value);
         }
     }
+    counters.insert(
+        "plugin_telemetry_regressions".to_owned(),
+        json!(inputs.telemetry_regressions),
+    );
     counters.insert(
         "udp_sends_locally_emitted".to_owned(),
         json!(telemetry_or_zero("udp_sends_attempted")
@@ -96,9 +103,13 @@ pub fn derive_coverage(inputs: &CoverageInputs) -> Value {
         telemetry_or_zero("fifo_samples_dropped"),
         telemetry_or_zero("fifo_windows_dropped"),
         telemetry_or_zero("midi_events_dropped"),
+        telemetry_or_zero("bypassed_buffers"),
         // Optional: older plug-in builds omit it, so it is not in REQUIRED_TELEMETRY.
         telemetry_or_zero("midi_unsupported_dropped"),
         telemetry_or_zero("udp_sends_failed"),
+        // A counter that went backwards means a spoof or a restarted instance;
+        // neither supports a claim of complete coverage.
+        i64::try_from(inputs.telemetry_regressions).unwrap_or(i64::MAX),
         receiver.sequence_gaps as i64,
         receiver.sequence_out_of_order as i64,
         receiver.hash_chain_breaks as i64,

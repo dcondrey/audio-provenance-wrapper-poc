@@ -30,6 +30,8 @@ fn routed_packet(sequence: i64, prev: &str, window: &str) -> Vec<u8> {
             "fifo_samples_dropped": 0,
             "fifo_windows_dropped": 0,
             "midi_events_dropped": 0,
+            "bypassed_buffers": 0,
+            "bypassed_samples": 0,
             "events_prepared": sequence,
             "udp_sends_attempted": sequence,
             "udp_sends_failed": 0,

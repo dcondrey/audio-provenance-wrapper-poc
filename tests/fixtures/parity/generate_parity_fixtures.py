@@ -495,26 +495,7 @@ def time_anchor_fixture() -> dict:
 
 
 # --------------------------- a real signed rehearsal manifest ---------------------------
-def rehearsal_fixture() -> dict:
-    import synthetic_rehearsal
-
-    def fake_tsa(request, timeout=None):
-        der = request.data
-        _tag, content, _ = _der_read(der, 0)
-        children = _der_children(content)
-        imprint = _der_children(children[1][1])
-        data_hash = imprint[1][1].hex()
-        nonce = children[2][1]
-        body = synthetic_token(data_hash, nonce)
-        fake = unittest.mock.MagicMock()
-        fake.__enter__.return_value.read = lambda limit: body[:limit]
-        return fake
-
-    with tempfile.TemporaryDirectory() as directory, \
-            unittest.mock.patch.object(anchor_module.urllib.request, "urlopen", side_effect=fake_tsa), \
-            contextlib.redirect_stdout(io.StringIO()):
-        manifest_path = synthetic_rehearsal.run(Path(directory), time_anchor_url="http://tsa.parity.example/ts")
-        manifest = json.loads(manifest_path.read_text())
+def rehearsal_fixture(manifest: dict) -> dict:
 
     portable_input = {k: v for k, v in manifest.items() if k not in {"portable_signature", "manifest_signature"}}
     local_input = {k: v for k, v in manifest.items() if k != "manifest_signature"}
@@ -538,10 +519,211 @@ def rehearsal_fixture() -> dict:
     }
 
 
+# ----------------------- session state, host environment, key paths -----------------------
+def _fake_daemon():
+    import collections
+    import threading
+    import types
+
+    from daemon.__main__ import Daemon
+
+    fake = types.SimpleNamespace(
+        _session_lock=threading.Lock(),
+        _active_layers=set(),
+        _plugin_instance_ids=collections.OrderedDict(),
+        _latest_plugin_telemetry=collections.OrderedDict(),
+        _telemetry_regressions=0,
+        _buffer_hash_count=0,
+        _first_hash_event=None,
+        _last_hash_event=None,
+        _feature_events=collections.deque(maxlen=12_000),
+        _feature_window_drops=0,
+        _host_environment=None,
+        _host_environment_conflicts=0,
+        _append_event=lambda event: None,
+    )
+    fake._record_host_environment = lambda event: Daemon._record_host_environment(fake, event)
+    return fake, Daemon
+
+
+def session_cases() -> list[dict]:
+    from daemon.manifest_builder.generator import derive_host_environment
+
+    def plugin(instance: str, **telemetry: int) -> dict:
+        return {"event_type": "session_config_change", "plugin_instance_id": instance, "telemetry": telemetry}
+
+    def host(recognised: object, name: object = None, executable: object = None, fmt: object = "VST3") -> dict:
+        return {"event_type": "host_environment", "host_recognised": recognised, "host_name": name,
+                "host_executable_name": executable, "wrapper_format": fmt}
+
+    cases = [
+        ("no_events", []),
+        ("telemetry_monotonic", [plugin("a", x=1, y=5), plugin("a", x=2, y=5), plugin("a", z=9)]),
+        ("telemetry_regression_ignored_and_counted", [plugin("a", x=10, y=5), plugin("a", x=3), plugin("a", x=11, y=4)]),
+        ("telemetry_equal_is_not_a_regression", [plugin("a", x=10), plugin("a", x=10)]),
+        ("telemetry_non_int_ignored", [{"event_type": "midi_event", "plugin_instance_id": "a",
+                                        "telemetry": {"f": 1.5, "s": "3", "b": True, "n": None, "i": 4}}]),
+        ("telemetry_lru_eviction", [plugin("a", **{f"k{i:02d}": i for i in range(40)}),
+                                     plugin("a", **{f"m{i:02d}": i for i in range(40)}),
+                                     plugin("a", k00=1, k01=99)]),
+        ("host_none_reported", [plugin("a", x=1)]),
+        ("host_recognised", [host(True, "Ableton Live", "Live", "AU")]),
+        ("host_unrecognised", [host(False, None, "mystery.exe", "VST3")]),
+        ("host_recognised_then_other_format_same_host", [host(True, "Logic", "Logic Pro", "AU"), host(True, "Logic", "Logic Pro X", "VST3")]),
+        ("host_conflict_on_name", [host(True, "Logic"), host(True, "Cubase")]),
+        ("host_conflict_on_recognition", [host(True, "Logic"), host(False, None)]),
+        ("host_conflicts_counted", [host(True, "Logic"), host(True, "X"), host(True, "Y"), host(True, "Logic")]),
+        ("host_first_wins", [host(False, None, "a"), host(False, None, "b")]),
+        ("host_falsy_fields_normalised", [host(0, "", "", "")]),
+        ("host_truthy_non_bool_recognised", [host(1, "Reaper", "reaper", "CLAP")]),
+        ("host_name_ignored_when_unrecognised", [host(False, "Ghost", "g", "VST3")]),
+    ]
+    out = []
+    for name, events in cases:
+        fake, daemon_cls = _fake_daemon()
+        for event in events:
+            daemon_cls._record_plugin_event(fake, event, "session")
+        out.append({
+            "name": name,
+            "events": events,
+            "telemetry": [[key, value] for key, value in fake._latest_plugin_telemetry.items()],
+            "telemetry_regressions": fake._telemetry_regressions,
+            "host_environment": derive_host_environment(fake),
+        })
+    return out
+
+
+def network_validation_cases() -> list[dict]:
+    from daemon.evidence_receiver.taxonomy import validate_network_event
+
+    def host(**overrides: object) -> dict:
+        event = {"event_type": "host_environment", "proof_level": "directly_observed",
+                 "host_recognised": True, "host_name": "Live", "host_executable_name": "Live",
+                 "wrapper_format": "AU"}
+        event.update(overrides)
+        return {k: v for k, v in event.items() if v is not ...}
+
+    def config(**overrides: object) -> dict:
+        event = {"event_type": "session_config_change", "proof_level": "directly_observed",
+                 "sample_rate_hz": 44100, "channel_count": 2}
+        event.update(overrides)
+        return event
+
+    nested: object = 1
+    for _ in range(9):
+        nested = {"a": nested}
+    cases = [
+        ("host_valid", host()),
+        ("host_unrecognised_null_name", host(host_recognised=False, host_name=None, host_executable_name=None)),
+        ("host_missing_wrapper_format", host(wrapper_format=...)),
+        ("host_null_wrapper_format", host(wrapper_format=None)),
+        ("host_missing_recognised", host(host_recognised=...)),
+        ("host_recognised_not_bool", host(host_recognised=1)),
+        ("host_name_not_string", host(host_name=5)),
+        ("host_name_at_limit", host(host_name="x" * 128)),
+        ("host_name_over_limit", host(host_name="x" * 129)),
+        ("host_name_multibyte_at_limit", host(host_name="\u00e9" * 128)),
+        ("host_name_absent", host(host_name=...)),
+        ("host_proof_level_too_strong", host(proof_level="externally_verified")),
+        ("telemetry_valid", config(telemetry={"a": 0, "b": 2**53})),
+        ("telemetry_not_object", config(telemetry=[1])),
+        ("telemetry_null", config(telemetry=None)),
+        ("telemetry_33_entries", config(telemetry={f"k{i}": 1 for i in range(33)})),
+        ("telemetry_32_entries", config(telemetry={f"k{i}": 1 for i in range(32)})),
+        ("telemetry_empty_key", config(telemetry={"": 1})),
+        ("telemetry_key_65_chars", config(telemetry={"k" * 65: 1})),
+        ("telemetry_key_64_chars", config(telemetry={"k" * 64: 1})),
+        ("telemetry_float", config(telemetry={"a": 1.0})),
+        ("telemetry_bool", config(telemetry={"a": True})),
+        ("telemetry_string", config(telemetry={"a": "1"})),
+        ("telemetry_negative", config(telemetry={"a": -1})),
+        ("telemetry_over_range", config(telemetry={"a": 2**53 + 1})),
+        ("telemetry_huge_int", config(telemetry={"a": 10**40})),
+        ("telemetry_quote_in_key", config(telemetry={"it's": 1.5})),
+        ("nested_at_depth_limit", config(extra={"a": {"a": {"a": {"a": {"a": {"a": {"a": 1}}}}}}})),
+        ("nested_over_depth_limit", config(extra=nested)),
+        ("instance_id_long", config(plugin_instance_id="i" * 129)),
+        ("instance_id_at_limit", config(plugin_instance_id="i" * 128)),
+        ("instance_id_not_string", config(plugin_instance_id=7)),
+        ("capture_session_id_not_string", config(plugin_capture_session_id=[])),
+        ("numeric_field_string", config(sample_rate_hz="44100")),
+    ]
+    out = []
+    for name, event in cases:
+        ok, message = validate_network_event(event)
+        out.append({"name": name, "event": event, "ok": ok, "message": message})
+    return out
+
+
+def key_paths(value: object, path: str = "", out: dict | None = None) -> dict:
+    """path -> {kind, keys}: every dict key path (list indexes collapse to []), the
+    value kinds seen there, and the insertion order of each object's keys."""
+    out = {} if out is None else out
+    kind = ("null" if value is None else "bool" if isinstance(value, bool) else "int" if isinstance(value, int)
+            else "float" if isinstance(value, float) else "str" if isinstance(value, str)
+            else "list" if isinstance(value, list) else "object")
+    entry = out.setdefault(path or "/", {"kinds": [], "keys": None})
+    if kind not in entry["kinds"]:
+        entry["kinds"].append(kind)
+        entry["kinds"].sort()
+    if isinstance(value, dict):
+        if entry["keys"] is None:
+            entry["keys"] = list(value)
+        for key, child in value.items():
+            key_paths(child, f"{path}/{key}", out)
+    elif isinstance(value, list):
+        for child in value:
+            key_paths(child, f"{path}[]", out)
+    return out
+
+
+# Values that differ per run and are excluded from the comparison: only the kind and the
+# key order are compared at these paths, never the content. Kept deliberately empty of
+# key paths: every difference in which keys exist is a failure.
+RUN_SPECIFIC_NOTE = (
+    "Only key paths, value kinds and key order are compared; values (ids, hashes, paths, "
+    "timestamps, signatures, counts) are run-specific and never compared."
+)
+
+
+def rehearsal_capture() -> dict:
+    """Run the Python rehearsal once, capturing the exact wire events it sent."""
+    import synthetic_rehearsal
+
+    sent: list[dict] = []
+    original = synthetic_rehearsal._send_with_acknowledgements
+
+    def capture(events, port):
+        result = original(events, port)
+        sent.extend(json.loads(json.dumps(events)))
+        return result
+
+    def fake_tsa(request, timeout=None):
+        _tag, content, _ = _der_read(request.data, 0)
+        children = _der_children(content)
+        body = synthetic_token(_der_children(children[1][1])[1][1].hex(), children[2][1])
+        fake = unittest.mock.MagicMock()
+        fake.__enter__.return_value.read = lambda limit: body[:limit]
+        return fake
+
+    with tempfile.TemporaryDirectory() as directory, \
+            unittest.mock.patch.object(synthetic_rehearsal, "_send_with_acknowledgements", capture), \
+            unittest.mock.patch.object(anchor_module.urllib.request, "urlopen", side_effect=fake_tsa), \
+            contextlib.redirect_stdout(io.StringIO()):
+        manifest_path = synthetic_rehearsal.run(Path(directory), time_anchor_url="http://tsa.parity.example/ts")
+        manifest = json.loads(manifest_path.read_text())
+    return {"manifest": manifest, "events": sent}
+
+
 def main() -> None:
     dump("forgery_analysis.json", forgery_cases())
     dump("time_anchor.json", time_anchor_fixture())
-    dump("manifest_rehearsal.json", rehearsal_fixture())
+    capture = rehearsal_capture()
+    dump("manifest_rehearsal.json", rehearsal_fixture(capture["manifest"]))
+    dump("synthetic_events.json", capture["events"])
+    dump("manifest_key_paths.json", {"note": RUN_SPECIFIC_NOTE, "paths": key_paths(capture["manifest"])})
+    dump("session_state.json", session_cases())
+    dump("network_validation.json", network_validation_cases())
 
 
 if __name__ == "__main__":

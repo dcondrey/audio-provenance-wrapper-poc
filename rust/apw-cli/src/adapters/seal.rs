@@ -100,7 +100,15 @@ impl LocalSealer for ProviderSealer {
             }
         };
         let cosignature_record = match serde_json::to_value(&cosignature) {
-            Ok(value) => value,
+            Ok(Value::Object(mut fields)) => {
+                fields.insert("counter_scope".to_owned(), json!(self.provider.counter_scope()));
+                fields.insert(PROOF_LEVEL_KEY.to_owned(), json!(self.proof_level().as_str()));
+                Value::Object(fields)
+            }
+            Ok(_) => {
+                log::warn!("The hardware cosignature did not encode as an object");
+                return None;
+            }
             Err(error) => {
                 log::warn!("Could not encode the hardware cosignature: {error}");
                 return None;

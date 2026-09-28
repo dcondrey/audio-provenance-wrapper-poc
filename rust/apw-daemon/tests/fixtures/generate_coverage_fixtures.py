@@ -30,11 +30,11 @@ CLEAN_DIAGNOSTICS = {
 FULL_TELEMETRY = {
     "buffers_submitted": 10, "samples_submitted": 100, "windows_hashed": 3,
     "fifo_samples_dropped": 0, "fifo_windows_dropped": 0, "midi_events_dropped": 0,
-    "events_prepared": 3, "udp_sends_attempted": 3, "udp_sends_failed": 0,
+    "bypassed_buffers": 0, "bypassed_samples": 0, "events_prepared": 3, "udp_sends_attempted": 3, "udp_sends_failed": 0,
 }
 
 
-def coverage(diagnostics, telemetry, instances, chain_length, feature_drops):
+def coverage(diagnostics, telemetry, instances, chain_length, feature_drops, regressions=0):
     receiver = types.SimpleNamespace(diagnostics=lambda: dict(diagnostics))
     daemon = types.SimpleNamespace(
         receiver=receiver,
@@ -42,6 +42,7 @@ def coverage(diagnostics, telemetry, instances, chain_length, feature_drops):
         _latest_plugin_telemetry=dict(telemetry),
         _plugin_instance_ids={f"instance-{n}": None for n in range(instances)},
         _feature_window_drops=feature_drops,
+        _telemetry_regressions=regressions,
     )
     return derive_coverage(daemon, chain_length)
 
@@ -81,6 +82,14 @@ def main() -> int:
         "missing_counter": coverage(CLEAN_DIAGNOSTICS, partial_telemetry, 1, 3, 2),
         "stream_evicted": coverage(evicted, FULL_TELEMETRY, 1, 3, 0),
         "two_plugin_instances": coverage(CLEAN_DIAGNOSTICS, FULL_TELEMETRY, 2, 3, 0),
+        "telemetry_regressed": coverage(CLEAN_DIAGNOSTICS, FULL_TELEMETRY, 1, 3, 0, 1),
+        "bypassed_buffers": coverage(
+            CLEAN_DIAGNOSTICS, dict(FULL_TELEMETRY, bypassed_buffers=2), 1, 3, 0
+        ),
+        "missing_bypassed_counter": coverage(
+            CLEAN_DIAGNOSTICS,
+            {k: v for k, v in FULL_TELEMETRY.items() if k != "bypassed_samples"}, 1, 3, 0
+        ),
     }
     rendered = {
         name: json.dumps(record, separators=(",", ":"), ensure_ascii=False)
@@ -89,7 +98,7 @@ def main() -> int:
     out = pathlib.Path(__file__).with_name("coverage_oracle.json")
     out.write_text(json.dumps(rendered, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"wrote {out} ({len(rendered)} cases)")
-    return write_manifest_key_order()
+    return 0
 
 
 if __name__ == "__main__":

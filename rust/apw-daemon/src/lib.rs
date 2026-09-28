@@ -25,6 +25,7 @@ mod watcher;
 
 pub use anchor::{HttpTransport, Rfc3161Anchor, TsaTransport};
 pub use assembly::{
+    derive_host_environment,
     generate_manifest, AssemblyContext, AssemblyInputs, GeneratedManifest, ManifestServices,
     ALL_LAYERS,
 };

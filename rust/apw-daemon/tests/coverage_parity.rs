@@ -27,6 +27,8 @@ fn full_telemetry() -> Vec<(String, i64)> {
         ("fifo_samples_dropped", 0),
         ("fifo_windows_dropped", 0),
         ("midi_events_dropped", 0),
+        ("bypassed_buffers", 0),
+        ("bypassed_samples", 0),
         ("events_prepared", 3),
         ("udp_sends_attempted", 3),
         ("udp_sends_failed", 0),
@@ -60,6 +62,7 @@ fn coverage_records_match_the_python_generator_byte_for_byte() {
             plugin_instance_count: 1,
             chain_length: 3,
             feature_window_drops: 0,
+            telemetry_regressions: 0,
         }),
         oracle["complete"]
     );
@@ -71,6 +74,7 @@ fn coverage_records_match_the_python_generator_byte_for_byte() {
             plugin_instance_count: 1,
             chain_length: 0,
             feature_window_drops: 0,
+            telemetry_regressions: 0,
         }),
         oracle["no_chain"]
     );
@@ -87,6 +91,7 @@ fn coverage_records_match_the_python_generator_byte_for_byte() {
             plugin_instance_count: 1,
             chain_length: 3,
             feature_window_drops: 2,
+            telemetry_regressions: 0,
         }),
         oracle["missing_counter"]
     );
@@ -102,6 +107,7 @@ fn coverage_records_match_the_python_generator_byte_for_byte() {
             plugin_instance_count: 1,
             chain_length: 3,
             feature_window_drops: 0,
+            telemetry_regressions: 0,
         }),
         oracle["stream_evicted"],
         "an evicted stream can never grade complete"
@@ -114,8 +120,39 @@ fn coverage_records_match_the_python_generator_byte_for_byte() {
             plugin_instance_count: 2,
             chain_length: 3,
             feature_window_drops: 0,
+            telemetry_regressions: 0,
         }),
         oracle["two_plugin_instances"],
         "a second plug-in instance means the observed path is not the only path"
     );
+
+    for (name, telemetry, regressions) in [
+        ("telemetry_regressed", full_telemetry(), 1),
+        (
+            "bypassed_buffers",
+            full_telemetry()
+                .into_iter()
+                .map(|(name, value)| if name == "bypassed_buffers" { (name, 2) } else { (name, value) })
+                .collect(),
+            0,
+        ),
+        (
+            "missing_bypassed_counter",
+            full_telemetry().into_iter().filter(|(name, _)| name != "bypassed_samples").collect(),
+            0,
+        ),
+    ] {
+        assert_eq!(
+            rendered(&CoverageInputs {
+                telemetry: &telemetry,
+                receiver: &clean,
+                plugin_instance_count: 1,
+                chain_length: 3,
+                feature_window_drops: 0,
+                telemetry_regressions: regressions,
+            }),
+            oracle[name],
+            "{name}"
+        );
+    }
 }

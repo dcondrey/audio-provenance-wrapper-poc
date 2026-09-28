@@ -79,6 +79,47 @@ class TimeAnchorFixtureTests(unittest.TestCase):
         self.assertEqual(codes, {"time_anchor_invalid", "time_anchor_consistent", "time_anchor_unavailable"})
 
 
+class SessionFixtureTests(unittest.TestCase):
+    def test_session_and_validation_vectors_are_current(self):
+        generator = _load("parity_generator", PARITY / "generate_parity_fixtures.py")
+        for name, produced in (
+            ("session_state.json", generator.session_cases()),
+            ("network_validation.json", generator.network_validation_cases()),
+        ):
+            with self.subTest(name):
+                self.assertEqual(produced, json.loads((PARITY / name).read_text()))
+
+    def test_host_environment_and_regression_cases_cover_each_branch(self):
+        cases = json.loads((PARITY / "session_state.json").read_text())
+        statuses = {case["host_environment"]["status"] for case in cases}
+        self.assertEqual(statuses, {"unobserved", "observed", "host_unrecognised", "conflicting_observations"})
+        self.assertTrue(any(case["telemetry_regressions"] > 0 for case in cases))
+
+
+class KeyPathTests(unittest.TestCase):
+    """The Python side of the key-path diff. The Rust side is
+    rust/apw-cli/tests/manifest_key_paths.rs, which runs the real `apw daemon` over
+    the same wire events and compares against this same fixture."""
+
+    def test_a_fresh_python_session_has_the_committed_key_paths(self):
+        generator = _load("parity_generator", PARITY / "generate_parity_fixtures.py")
+        capture = generator.rehearsal_capture()
+        fixture = json.loads((PARITY / "manifest_key_paths.json").read_text())
+        self.assertEqual(generator.key_paths(capture["manifest"]), fixture["paths"])
+        self.assertEqual(capture["events"], json.loads((PARITY / "synthetic_events.json").read_text()))
+
+    def test_committed_manifest_matches_the_key_paths(self):
+        generator = _load("parity_generator", PARITY / "generate_parity_fixtures.py")
+        manifest = json.loads((PARITY / "manifest_rehearsal.json").read_text())["manifest"]
+        fixture = json.loads((PARITY / "manifest_key_paths.json").read_text())
+        self.assertEqual(generator.key_paths(manifest), fixture["paths"])
+        for path in ("/host_environment/status", "/observation_coverage/counters/plugin_telemetry_regressions",
+                     "/manifest_signature/hardware_cosignature/counter_scope",
+                     "/manifest_signature/hardware_cosignature/apw:proof_level", "/time_anchor/status",
+                     "/forgery_analysis/analyzers/hash_chain/flags"):
+            self.assertIn(path, fixture["paths"])
+
+
 class RehearsalManifestTests(unittest.TestCase):
     """A real manifest from the Python daemon carrying both new sections."""
 

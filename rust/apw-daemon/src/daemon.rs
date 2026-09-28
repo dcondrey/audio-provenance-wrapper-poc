@@ -388,15 +388,16 @@ impl Daemon {
     /// manifest grades.
     pub fn coverage(&self) -> Value {
         let receiver = self.receiver.diagnostics();
-        let (telemetry, plugin_instance_count, chain_length, feature_window_drops) =
+        let (telemetry, plugin_instance_count, chain_length, feature_window_drops, regressions) =
             match self.session.lock() {
                 Ok(session) => (
                     session.telemetry(),
                     session.plugin_instance_count(),
                     session.chain_length(),
                     session.feature_window_drops(),
+                    session.telemetry_regressions(),
                 ),
-                Err(_) => (Vec::new(), 0, 0, 0),
+                Err(_) => (Vec::new(), 0, 0, 0, 0),
             };
         derive_coverage(&CoverageInputs {
             telemetry: &telemetry,
@@ -404,6 +405,7 @@ impl Daemon {
             plugin_instance_count,
             chain_length,
             feature_window_drops,
+            telemetry_regressions: regressions,
         })
     }
 
@@ -511,6 +513,7 @@ impl Daemon {
             plugin_instance_count,
             chain_length: snapshot.chain_length,
             feature_window_drops: snapshot.feature_window_drops,
+            telemetry_regressions: snapshot.telemetry_regressions,
         });
         let receipt_summary = self.receiver.receipt_summary();
         let diagnostics = session_diagnostics(

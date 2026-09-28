@@ -1,0 +1,542 @@
+[
+  {
+    "name": "host_valid",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "directly_observed",
+      "host_recognised": true,
+      "host_name": "Live",
+      "host_executable_name": "Live",
+      "wrapper_format": "AU"
+    },
+    "ok": true,
+    "message": ""
+  },
+  {
+    "name": "host_unrecognised_null_name",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "directly_observed",
+      "host_recognised": false,
+      "host_name": null,
+      "host_executable_name": null,
+      "wrapper_format": "AU"
+    },
+    "ok": true,
+    "message": ""
+  },
+  {
+    "name": "host_missing_wrapper_format",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "directly_observed",
+      "host_recognised": true,
+      "host_name": "Live",
+      "host_executable_name": "Live"
+    },
+    "ok": false,
+    "message": "Missing required field 'wrapper_format' for host_environment"
+  },
+  {
+    "name": "host_null_wrapper_format",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "directly_observed",
+      "host_recognised": true,
+      "host_name": "Live",
+      "host_executable_name": "Live",
+      "wrapper_format": null
+    },
+    "ok": false,
+    "message": "Field 'wrapper_format' must be a string of at most 128 characters for host_environment"
+  },
+  {
+    "name": "host_missing_recognised",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "directly_observed",
+      "host_name": "Live",
+      "host_executable_name": "Live",
+      "wrapper_format": "AU"
+    },
+    "ok": false,
+    "message": "Missing required field 'host_recognised' for host_environment"
+  },
+  {
+    "name": "host_recognised_not_bool",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "directly_observed",
+      "host_recognised": 1,
+      "host_name": "Live",
+      "host_executable_name": "Live",
+      "wrapper_format": "AU"
+    },
+    "ok": false,
+    "message": "Field 'host_recognised' must be a boolean for host_environment"
+  },
+  {
+    "name": "host_name_not_string",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "directly_observed",
+      "host_recognised": true,
+      "host_name": 5,
+      "host_executable_name": "Live",
+      "wrapper_format": "AU"
+    },
+    "ok": false,
+    "message": "Field 'host_name' must be a string of at most 128 characters for host_environment"
+  },
+  {
+    "name": "host_name_at_limit",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "directly_observed",
+      "host_recognised": true,
+      "host_name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "host_executable_name": "Live",
+      "wrapper_format": "AU"
+    },
+    "ok": true,
+    "message": ""
+  },
+  {
+    "name": "host_name_over_limit",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "directly_observed",
+      "host_recognised": true,
+      "host_name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "host_executable_name": "Live",
+      "wrapper_format": "AU"
+    },
+    "ok": false,
+    "message": "Field 'host_name' must be a string of at most 128 characters for host_environment"
+  },
+  {
+    "name": "host_name_multibyte_at_limit",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "directly_observed",
+      "host_recognised": true,
+      "host_name": "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+      "host_executable_name": "Live",
+      "wrapper_format": "AU"
+    },
+    "ok": true,
+    "message": ""
+  },
+  {
+    "name": "host_name_absent",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "directly_observed",
+      "host_recognised": true,
+      "host_executable_name": "Live",
+      "wrapper_format": "AU"
+    },
+    "ok": true,
+    "message": ""
+  },
+  {
+    "name": "host_proof_level_too_strong",
+    "event": {
+      "event_type": "host_environment",
+      "proof_level": "externally_verified",
+      "host_recognised": true,
+      "host_name": "Live",
+      "host_executable_name": "Live",
+      "wrapper_format": "AU"
+    },
+    "ok": false,
+    "message": "Proof level 'externally_verified' exceeds network cap 'ProofLevel.DIRECTLY_OBSERVED' for host_environment"
+  },
+  {
+    "name": "telemetry_valid",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "a": 0,
+        "b": 9007199254740992
+      }
+    },
+    "ok": true,
+    "message": ""
+  },
+  {
+    "name": "telemetry_not_object",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": [
+        1
+      ]
+    },
+    "ok": false,
+    "message": "Field 'telemetry' must be an object of cumulative integer counters"
+  },
+  {
+    "name": "telemetry_null",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": null
+    },
+    "ok": true,
+    "message": ""
+  },
+  {
+    "name": "telemetry_33_entries",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "k0": 1,
+        "k1": 1,
+        "k2": 1,
+        "k3": 1,
+        "k4": 1,
+        "k5": 1,
+        "k6": 1,
+        "k7": 1,
+        "k8": 1,
+        "k9": 1,
+        "k10": 1,
+        "k11": 1,
+        "k12": 1,
+        "k13": 1,
+        "k14": 1,
+        "k15": 1,
+        "k16": 1,
+        "k17": 1,
+        "k18": 1,
+        "k19": 1,
+        "k20": 1,
+        "k21": 1,
+        "k22": 1,
+        "k23": 1,
+        "k24": 1,
+        "k25": 1,
+        "k26": 1,
+        "k27": 1,
+        "k28": 1,
+        "k29": 1,
+        "k30": 1,
+        "k31": 1,
+        "k32": 1
+      }
+    },
+    "ok": false,
+    "message": "Field 'telemetry' carries more than 32 counters"
+  },
+  {
+    "name": "telemetry_32_entries",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "k0": 1,
+        "k1": 1,
+        "k2": 1,
+        "k3": 1,
+        "k4": 1,
+        "k5": 1,
+        "k6": 1,
+        "k7": 1,
+        "k8": 1,
+        "k9": 1,
+        "k10": 1,
+        "k11": 1,
+        "k12": 1,
+        "k13": 1,
+        "k14": 1,
+        "k15": 1,
+        "k16": 1,
+        "k17": 1,
+        "k18": 1,
+        "k19": 1,
+        "k20": 1,
+        "k21": 1,
+        "k22": 1,
+        "k23": 1,
+        "k24": 1,
+        "k25": 1,
+        "k26": 1,
+        "k27": 1,
+        "k28": 1,
+        "k29": 1,
+        "k30": 1,
+        "k31": 1
+      }
+    },
+    "ok": true,
+    "message": ""
+  },
+  {
+    "name": "telemetry_empty_key",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "": 1
+      }
+    },
+    "ok": false,
+    "message": "Telemetry counter names must be non-empty strings of at most 64 characters"
+  },
+  {
+    "name": "telemetry_key_65_chars",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk": 1
+      }
+    },
+    "ok": false,
+    "message": "Telemetry counter names must be non-empty strings of at most 64 characters"
+  },
+  {
+    "name": "telemetry_key_64_chars",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk": 1
+      }
+    },
+    "ok": true,
+    "message": ""
+  },
+  {
+    "name": "telemetry_float",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "a": 1.0
+      }
+    },
+    "ok": false,
+    "message": "Telemetry counter 'a' must be an integer"
+  },
+  {
+    "name": "telemetry_bool",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "a": true
+      }
+    },
+    "ok": false,
+    "message": "Telemetry counter 'a' must be an integer"
+  },
+  {
+    "name": "telemetry_string",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "a": "1"
+      }
+    },
+    "ok": false,
+    "message": "Telemetry counter 'a' must be an integer"
+  },
+  {
+    "name": "telemetry_negative",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "a": -1
+      }
+    },
+    "ok": false,
+    "message": "Telemetry counter 'a' is outside the plausible cumulative range"
+  },
+  {
+    "name": "telemetry_over_range",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "a": 9007199254740993
+      }
+    },
+    "ok": false,
+    "message": "Telemetry counter 'a' is outside the plausible cumulative range"
+  },
+  {
+    "name": "telemetry_huge_int",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "a": 10000000000000000000000000000000000000000
+      }
+    },
+    "ok": false,
+    "message": "Telemetry counter 'a' is outside the plausible cumulative range"
+  },
+  {
+    "name": "telemetry_quote_in_key",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "telemetry": {
+        "it's": 1.5
+      }
+    },
+    "ok": false,
+    "message": "Telemetry counter \"it's\" must be an integer"
+  },
+  {
+    "name": "nested_at_depth_limit",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "extra": {
+        "a": {
+          "a": {
+            "a": {
+              "a": {
+                "a": {
+                  "a": {
+                    "a": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ok": true,
+    "message": ""
+  },
+  {
+    "name": "nested_over_depth_limit",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "extra": {
+        "a": {
+          "a": {
+            "a": {
+              "a": {
+                "a": {
+                  "a": {
+                    "a": {
+                      "a": {
+                        "a": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ok": false,
+    "message": "Event contains a non-finite number, a non-string key, or exceeds 8 levels of nesting"
+  },
+  {
+    "name": "instance_id_long",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "plugin_instance_id": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
+    },
+    "ok": false,
+    "message": "Field 'plugin_instance_id' must be a string of at most 128 characters"
+  },
+  {
+    "name": "instance_id_at_limit",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "plugin_instance_id": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
+    },
+    "ok": true,
+    "message": ""
+  },
+  {
+    "name": "instance_id_not_string",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "plugin_instance_id": 7
+    },
+    "ok": false,
+    "message": "Field 'plugin_instance_id' must be a string of at most 128 characters"
+  },
+  {
+    "name": "capture_session_id_not_string",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": 44100,
+      "channel_count": 2,
+      "plugin_capture_session_id": []
+    },
+    "ok": false,
+    "message": "Field 'plugin_capture_session_id' must be a string of at most 128 characters"
+  },
+  {
+    "name": "numeric_field_string",
+    "event": {
+      "event_type": "session_config_change",
+      "proof_level": "directly_observed",
+      "sample_rate_hz": "44100",
+      "channel_count": 2
+    },
+    "ok": false,
+    "message": "Field 'sample_rate_hz' must be a finite number for session_config_change"
+  }
+]

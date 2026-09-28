@@ -15,7 +15,7 @@ pub const MAX_SESSION_EVENTS: usize = 50_000;
 /// reads at most this many routed windows, so retaining more buys nothing.
 pub const MAX_FEATURE_WINDOWS: usize = 12_000;
 
-const LAYER_MAP: [(&str, &str); 8] = [
+const LAYER_MAP: [(&str, &str); 9] = [
     ("buffer_hash", "audio_buffer"),
     ("audio_transition", "audio_buffer"),
     ("spectral_shift", "audio_buffer"),
@@ -24,6 +24,7 @@ const LAYER_MAP: [(&str, &str); 8] = [
     ("midi_event", "midi"),
     ("parameter_change", "midi"),
     ("session_config_change", "session"),
+    ("host_environment", "session"),
 ];
 
 pub fn event_type_to_layer(event_type: &str) -> &'static str {
@@ -45,6 +46,11 @@ pub struct SessionSnapshot {
     pub plugin_instance_ids: Vec<String>,
     pub active_layers: BTreeSet<String>,
     pub telemetry: Vec<(String, i64)>,
+    /// Cumulative plug-in counters that went backwards and were ignored.
+    pub telemetry_regressions: u64,
+    /// The first host environment the plug-in reported (four normalised keys).
+    pub host_environment: Option<Map<String, Value>>,
+    pub host_environment_conflicts: u64,
     pub feature_window_drops: u64,
     pub events_retained: usize,
     pub events_dropped: u64,
@@ -67,6 +73,9 @@ pub struct SessionState {
     /// [`MAX_TRACKED_PLUGIN_KEYS`].
     plugin_instance_ids: Vec<String>,
     latest_plugin_telemetry: Vec<(String, i64)>,
+    telemetry_regressions: u64,
+    host_environment: Option<Map<String, Value>>,
+    host_environment_conflicts: u64,
     active_layers: BTreeSet<String>,
 }
 
@@ -88,6 +97,9 @@ impl SessionState {
             last_hash_event: None,
             plugin_instance_ids: Vec::new(),
             latest_plugin_telemetry: Vec::new(),
+            telemetry_regressions: 0,
+            host_environment: None,
+            host_environment_conflicts: 0,
             active_layers: BTreeSet::from(["sample_watcher".to_owned()]),
         }
     }
@@ -132,6 +144,21 @@ impl SessionState {
                 let Some(counter) = integer_counter(value) else {
                     continue;
                 };
+                // IMPORTANT: cumulative counters. A lower value is a spoofed
+                // datagram or a restarted instance; it is counted, ignored, and
+                // never lowers the recorded loss.
+                if self
+                    .latest_plugin_telemetry
+                    .iter()
+                    .any(|(existing, previous)| existing == key && counter < *previous)
+                {
+                    self.telemetry_regressions = self.telemetry_regressions.saturating_add(1);
+                    log::warn!(
+                        "Plug-in telemetry counter {key} went backwards; ignoring the lower \
+                         value and grading coverage as partial"
+                    );
+                    continue;
+                }
                 match self
                     .latest_plugin_telemetry
                     .iter()
@@ -151,6 +178,10 @@ impl SessionState {
             }
         }
 
+        if map.get("event_type").and_then(Value::as_str) == Some("host_environment") {
+            self.record_host_environment(&map);
+        }
+
         if map.get("event_type").and_then(Value::as_str) == Some("buffer_hash") {
             self.buffer_hash_count = self.buffer_hash_count.saturating_add(1);
             if self.first_hash_event.is_none() {
@@ -163,6 +194,47 @@ impl SessionState {
             }
             self.feature_events.push_back(Value::Object(map));
         }
+    }
+
+    /// Hold the first host environment and count any later identity
+    /// disagreement. Only recognition and name are compared: one host routinely
+    /// loads the plug-in in two formats at once.
+    fn record_host_environment(&mut self, event: &Map<String, Value>) {
+        let or_null = |key: &str| {
+            let value = event.get(key).cloned().unwrap_or(Value::Null);
+            if apw_core::is_truthy(&value) { value } else { Value::Null }
+        };
+        let mut observed = Map::new();
+        observed.insert(
+            "host_recognised".to_owned(),
+            Value::Bool(event.get("host_recognised").is_some_and(apw_core::is_truthy)),
+        );
+        observed.insert("host_name".to_owned(), or_null("host_name"));
+        observed.insert("host_executable_name".to_owned(), or_null("host_executable_name"));
+        observed.insert("wrapper_format".to_owned(), or_null("wrapper_format"));
+        match &self.host_environment {
+            None => self.host_environment = Some(observed),
+            Some(first) => {
+                let differs = ["host_recognised", "host_name"].iter().any(|key| {
+                    !apw_core::python_eq(
+                        observed.get(*key).unwrap_or(&Value::Null),
+                        first.get(*key).unwrap_or(&Value::Null),
+                    )
+                });
+                if differs {
+                    self.host_environment_conflicts =
+                        self.host_environment_conflicts.saturating_add(1);
+                    log::warn!(
+                        "Host environment reported differently after the first report; the \
+                         manifest will record the host as unobserved"
+                    );
+                }
+            }
+        }
+    }
+
+    pub fn telemetry_regressions(&self) -> u64 {
+        self.telemetry_regressions
     }
 
     pub fn chain_length(&self) -> u64 {
@@ -213,6 +285,9 @@ impl SessionState {
             plugin_instance_ids,
             active_layers: self.active_layers.clone(),
             telemetry: self.latest_plugin_telemetry.clone(),
+            telemetry_regressions: self.telemetry_regressions,
+            host_environment: self.host_environment.clone(),
+            host_environment_conflicts: self.host_environment_conflicts,
             feature_window_drops: self.feature_window_drops,
             events_retained: self.session_events.len(),
             events_dropped: self.session_event_drops,

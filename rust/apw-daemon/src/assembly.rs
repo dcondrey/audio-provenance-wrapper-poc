@@ -219,6 +219,7 @@ pub fn generate_manifest(
     }
     builder.set_audio_association(association.clone());
     builder.set_session_diagnostics(inputs.session_diagnostics.clone());
+    builder.set_host_environment(derive_host_environment(snapshot));
 
     let active: BTreeSet<&str> = snapshot
         .active_layers
@@ -691,4 +692,59 @@ fn relative_artifact(path: &Path, manifest_dir: &Path) -> String {
     path.strip_prefix(manifest_dir)
         .map(|relative| relative.to_string_lossy().into_owned())
         .unwrap_or_else(|_| path.to_string_lossy().into_owned())
+}
+
+const HOST_ENVIRONMENT_SCOPE: &str = "The host application that loaded the capture plug-in, as reported by the \
+plug-in wrapper. Naming the host does not extend observation to anything \
+the host did outside the capture path.";
+
+/// `derive_host_environment`: recognition and identity are separate, so an
+/// unrecognised host is never read back as a host named "Unknown".
+pub fn derive_host_environment(snapshot: &SessionSnapshot) -> Value {
+    let unknown = |status: &str, basis: String| {
+        json!({
+            "status": status,
+            "host_recognised": false,
+            "host_name": Value::Null,
+            "host_executable_name": Value::Null,
+            "wrapper_format": Value::Null,
+            "basis": basis,
+            "scope": HOST_ENVIRONMENT_SCOPE,
+            PROOF_LEVEL_KEY: ProofLevel::UnknownUnobserved.as_str(),
+        })
+    };
+    let Some(observed) = &snapshot.host_environment else {
+        return unknown("unobserved", "The plug-in reported no host environment in this session.".to_owned());
+    };
+    if snapshot.host_environment_conflicts > 0 {
+        return unknown(
+            "conflicting_observations",
+            format!(
+                "{} later host environment report(s) disagreed with the first, so no single \
+                 host is established.",
+                snapshot.host_environment_conflicts
+            ),
+        );
+    }
+    let field = |key: &str| observed.get(key).cloned().unwrap_or(Value::Null);
+    let recognised = observed.get("host_recognised") == Some(&Value::Bool(true));
+    json!({
+        "status": if recognised { "observed" } else { "host_unrecognised" },
+        "host_recognised": recognised,
+        "host_name": if recognised { field("host_name") } else { Value::Null },
+        "host_executable_name": field("host_executable_name"),
+        "wrapper_format": field("wrapper_format"),
+        "basis": if recognised {
+            "The plug-in wrapper named the host application that loaded it."
+        } else {
+            "The plug-in wrapper did not recognise the host application, so the host is not \
+             identified. Its executable name and the plug-in format remain as observed."
+        },
+        "scope": HOST_ENVIRONMENT_SCOPE,
+        PROOF_LEVEL_KEY: if recognised {
+            ProofLevel::DirectlyObserved.as_str()
+        } else {
+            ProofLevel::UnknownUnobserved.as_str()
+        },
+    })
 }
