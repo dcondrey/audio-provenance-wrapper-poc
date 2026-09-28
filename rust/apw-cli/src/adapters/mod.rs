@@ -7,7 +7,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use apw_core::Ed25519Signer;
-use apw_daemon::DaemonServices;
+use apw_daemon::{DaemonServices, Rfc3161Anchor, StatisticalForgeryScreen};
 use apw_provenance::{
     detect_hardware_provider, detect_provider, expand_user, HardwareProvider, ProvenanceProvider,
 };
@@ -73,7 +73,9 @@ impl Engines {
         })
     }
 
-    pub fn daemon_services(&self) -> DaemonServices {
+    /// `time_anchor_url` is the `--time-anchor` TSA; absent, the manifest carries
+    /// no `time_anchor` record, as in the Python daemon.
+    pub fn daemon_services(&self, time_anchor_url: Option<&str>) -> DaemonServices {
         DaemonServices {
             audio: Arc::new(PcmAudioProbe),
             associator: Arc::new(FeatureAssociator),
@@ -83,10 +85,10 @@ impl Engines {
                 self.hardware_attested,
             )),
             portable_signer: self.portable_signer.clone(),
-            // No statistical forgery screen and no RFC 3161 client are compiled
-            // into this binary. Both stay at the honest "did not run" default
-            // rather than emitting an empty result that would read as clean.
-            ..DaemonServices::default()
+            forgery: Arc::new(StatisticalForgeryScreen),
+            time_anchor: time_anchor_url.map(|url| {
+                Arc::new(Rfc3161Anchor::new(url)) as Arc<dyn apw_daemon::TimeAnchor>
+            }),
         }
     }
 }

@@ -96,7 +96,6 @@ def builder_cases() -> list[dict[str, object]]:
     full.add_composite_edit({"edit_type": "clip_paste", "timestamp_ms": 42, "confidence": 0.5})
     full.add_composite_edit({"edit_type": "mystery", "timestamp_ms": None, "confidence": None})
     full.set_hardware_binding({"provider": "software", "apw:proof_level": "inferred"})
-    full.add_time_anchor({"source": "local_clock", "apw:proof_level": "inferred"})
     full.set_forgery_report({"suspicion_score": 0.0, "flags": []})
     full.coverage = {
         "status": "complete_observed_path",

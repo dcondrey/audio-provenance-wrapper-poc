@@ -8,11 +8,13 @@
 //! traits with an honest "not configured" default, so a manifest never claims an
 //! observation that no engine made.
 
+mod anchor;
 mod assembly;
 mod correlation;
 mod coverage;
 mod daemon;
 mod error;
+mod forgery;
 mod probe;
 mod receiver;
 mod services;
@@ -21,6 +23,7 @@ mod taxonomy;
 mod util;
 mod watcher;
 
+pub use anchor::{HttpTransport, Rfc3161Anchor, TsaTransport};
 pub use assembly::{
     generate_manifest, AssemblyContext, AssemblyInputs, GeneratedManifest, ManifestServices,
     ALL_LAYERS,
@@ -36,6 +39,10 @@ pub use daemon::{
     Daemon, DaemonConfig, DaemonServices, SourceCategory, StopSignal, DEFAULT_UDP_PORT,
 };
 pub use error::{DaemonError, Result};
+pub use forgery::{
+    derive_forgery_analysis, AudioStreamAnalyzer, ForgeryFlag, ForgeryReport, HashChainAnalyzer,
+    InputBehaviorAnalyzer, StatisticalForgeryScreen,
+};
 pub use probe::{AudioFingerprint, AudioMetadata, AudioProbe, UnavailableAudioProbe};
 pub use receiver::{
     EvidenceReceiver, PacketOutcome, ReceiverDiagnostics, StreamReceiptState, ACK_PROTOCOL,

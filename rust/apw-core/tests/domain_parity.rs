@@ -128,7 +128,6 @@ fn full_builder() -> ManifestBuilder {
         json!({"edit_type": "mystery", "timestamp_ms": null, "confidence": null}),
     );
     builder.set_hardware_binding(json!({"provider": "software", "apw:proof_level": "inferred"}));
-    builder.add_time_anchor(json!({"source": "local_clock", "apw:proof_level": "inferred"}));
     builder.set_forgery_report(json!({"suspicion_score": 0.0, "flags": []}));
     builder.set_coverage(json!({
         "status": "complete_observed_path",

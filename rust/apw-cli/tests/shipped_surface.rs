@@ -153,12 +153,12 @@ fn manifest_seals_a_wav_with_a_signed_claim_and_an_unattested_local_seal(
         "sample_rate_hz must serialise as an integer"
     );
 
-    // No forgery screen is compiled in. An empty flag list from a screen that
-    // never ran must not read as a clean result.
+    // The statistical screen runs, and its record says what it is.
     assert_eq!(
-        manifest.pointer("/forgery_analysis/status").and_then(Value::as_str),
-        Some("not_analyzed")
+        manifest.pointer("/forgery_analysis/method").and_then(Value::as_str),
+        Some("statistical_screen_v1")
     );
+    assert!(manifest.get("time_anchor").is_none(), "no --time-anchor, no record");
     Ok(())
 }
 

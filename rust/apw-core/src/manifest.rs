@@ -330,7 +330,6 @@ pub struct ManifestBuilder {
     ingredients: Vec<IngredientEvidence>,
     composite_edits: Vec<Value>,
     hardware_binding: Option<Value>,
-    time_anchors: Vec<Value>,
     forgery_report: Option<Value>,
     coverage: Option<Value>,
     c2pa_claim: Option<Value>,
@@ -350,7 +349,6 @@ impl Default for ManifestBuilder {
             ingredients: Vec::new(),
             composite_edits: Vec::new(),
             hardware_binding: None,
-            time_anchors: Vec::new(),
             forgery_report: None,
             coverage: None,
             c2pa_claim: None,
@@ -429,11 +427,6 @@ impl ManifestBuilder {
         self
     }
 
-    pub fn add_time_anchor(&mut self, anchor: Value) -> &mut Self {
-        self.time_anchors.push(anchor);
-        self
-    }
-
     pub fn unobserved_mut(&mut self) -> &mut Vec<String> {
         &mut self.unobserved
     }
@@ -494,13 +487,6 @@ impl ManifestBuilder {
 
         if let Some(binding) = &self.hardware_binding {
             manifest.insert("hardware_binding".to_owned(), binding.clone());
-        }
-
-        if !self.time_anchors.is_empty() {
-            manifest.insert(
-                "time_anchors".to_owned(),
-                Value::Array(self.time_anchors.clone()),
-            );
         }
 
         if let Some(report) = &self.forgery_report {

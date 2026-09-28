@@ -49,7 +49,7 @@ pub fn run(args: &DaemonArgs) -> Result<i32> {
         ..DaemonConfig::default()
     };
 
-    let daemon = Daemon::new(config, engines.daemon_services())?;
+    let daemon = Daemon::new(config, engines.daemon_services(args.time_anchor.as_deref()))?;
     log::info!("Capture session: {}", daemon.session_id());
     log::info!(
         "Declared source category: {} ({})",
@@ -122,12 +122,6 @@ fn warn_about_uncompiled_engines(args: &DaemonArgs) {
         log::warn!(
             "--project is accepted but no saved-project watcher is compiled into the native \
              daemon; the manifest will carry no session_facts and no project sample ingredients"
-        );
-    }
-    if let Some(url) = &args.time_anchor {
-        log::warn!(
-            "--time-anchor {url} is accepted but no RFC 3161 client is compiled into the native \
-             daemon; the manifest will carry no time_anchor record"
         );
     }
     if args.open_artifacts {

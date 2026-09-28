@@ -18,6 +18,7 @@ mod pyvalue;
 mod schema;
 mod signature;
 mod state;
+mod time_anchor;
 mod timestamp;
 
 pub use canonical::{
@@ -51,4 +52,10 @@ pub use signature::{
     TRUST_SCOPE_LOCAL_SOFTWARE, TRUST_SCOPE_SELF_GENERATED,
 };
 pub use state::{LocalOutcome, VerificationState, NOTHING_FOUND_NORMATIVE_NOTE};
+pub use time_anchor::{
+    anchored_record, check_time_anchor, encode_timestamp_request, iso_from_ms,
+    parse_timestamp_request, parse_timestamp_response, python_from_hex, unavailable_anchor_record,
+    verify_time_proof, ParsedTimestampResponse, TimeAnchorError, TimeProof, DEFAULT_TSA_URL,
+    MAX_TSA_RESPONSE_BYTES, TSA_TIMEOUT_SECONDS,
+};
 pub use timestamp::{utc_timestamp, utc_timestamp_seconds};
