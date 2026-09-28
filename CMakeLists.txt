@@ -43,6 +43,23 @@ else()
     endif()
 endif()
 
+# Plug-in formats are per platform. AU is Apple-only (JUCE also disables it
+# elsewhere). VST3 builds everywhere. LV2 is enabled by default off Apple and
+# can be requested on Apple with -DAPW_BUILD_LV2=ON. AAX needs Avid's SDK and
+# PACE signing and is deliberately not built. Standalone is not built: the
+# plug-in observes a host and a standalone shell has none.
+set(APW_PLUGIN_FORMATS VST3)
+if(APPLE)
+    list(APPEND APW_PLUGIN_FORMATS AU)
+    option(APW_BUILD_LV2 "Also build the LV2 format" OFF)
+else()
+    option(APW_BUILD_LV2 "Also build the LV2 format" ON)
+endif()
+if(APW_BUILD_LV2)
+    list(APPEND APW_PLUGIN_FORMATS LV2)
+endif()
+message(STATUS "AudioProvenanceCapture plug-in formats: ${APW_PLUGIN_FORMATS}")
+
 juce_add_plugin(AudioProvenanceCapture
     COMPANY_NAME "Audio Provenance POC"
     BUNDLE_ID "com.audioprovenance.capture"
@@ -54,7 +71,8 @@ juce_add_plugin(AudioProvenanceCapture
     COPY_PLUGIN_AFTER_BUILD FALSE
     PLUGIN_MANUFACTURER_CODE ApPr
     PLUGIN_CODE ApCa
-    FORMATS VST3 AU
+    FORMATS ${APW_PLUGIN_FORMATS}
+    LV2URI "urn:audioprovenance:capture"
     PRODUCT_NAME "Audio Provenance Capture")
 
 target_sources(AudioProvenanceCapture
@@ -89,6 +107,13 @@ target_link_libraries(AudioProvenanceCapture
 include(CTest)
 
 if(BUILD_TESTING)
+    find_package(Python3 QUIET COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+        set(APW_PYTHON "${Python3_EXECUTABLE}")
+    else()
+        set(APW_PYTHON python3)
+    endif()
+
     juce_add_console_app(AudioProvenanceCaptureTests
         PRODUCT_NAME "Audio Provenance Capture Tests")
 
@@ -121,45 +146,51 @@ if(BUILD_TESTING)
 
     add_test(NAME plugin_realtime_lifecycle COMMAND AudioProvenanceCaptureTests)
 
-    juce_add_console_app(AudioProvenanceHeadlessHostTests
-        PRODUCT_NAME "Audio Provenance Headless DAW Lifecycle Tests")
+    # The lifecycle harness replaces global operator new/delete and sizes blocks
+    # with malloc_size (macOS) or malloc_usable_size (Linux); it has no Windows
+    # allocator port, so it is not built there.
+    if(APPLE OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        juce_add_console_app(AudioProvenanceHeadlessHostTests
+            PRODUCT_NAME "Audio Provenance Headless DAW Lifecycle Tests")
 
-    target_sources(AudioProvenanceHeadlessHostTests
-        PRIVATE
-            tests/cpp/HeadlessDawLifecycleTests.cpp
-            src/AudioObserver.cpp
-            src/AcknowledgementLogic.cpp
-            src/EventEmitter.cpp
-            src/PluginEditor.cpp
-            src/PluginProcessor.cpp)
+        target_sources(AudioProvenanceHeadlessHostTests
+            PRIVATE
+                tests/cpp/HeadlessDawLifecycleTests.cpp
+                src/AudioObserver.cpp
+                src/AcknowledgementLogic.cpp
+                src/EventEmitter.cpp
+                src/PluginEditor.cpp
+                src/PluginProcessor.cpp)
 
-    target_include_directories(AudioProvenanceHeadlessHostTests PRIVATE src)
+        target_include_directories(AudioProvenanceHeadlessHostTests PRIVATE src)
 
-    target_compile_definitions(AudioProvenanceHeadlessHostTests
-        PRIVATE
-            JucePlugin_Name="Audio Provenance Capture"
-            JUCE_WEB_BROWSER=0
-            JUCE_USE_CURL=0
-            JUCE_VST3_CAN_REPLACE_VST2=0)
+        target_compile_definitions(AudioProvenanceHeadlessHostTests
+            PRIVATE
+                JucePlugin_Name="Audio Provenance Capture"
+                JUCE_WEB_BROWSER=0
+                JUCE_USE_CURL=0
+                JUCE_VST3_CAN_REPLACE_VST2=0)
 
-    target_link_libraries(AudioProvenanceHeadlessHostTests
-        PRIVATE
-            juce::juce_audio_processors
-            juce::juce_audio_utils
-            juce::juce_cryptography
-            juce::juce_dsp
-            juce::juce_gui_basics
-            juce::juce_recommended_config_flags
-            juce::juce_recommended_warning_flags)
+        target_link_libraries(AudioProvenanceHeadlessHostTests
+            PRIVATE
+                juce::juce_audio_processors
+                juce::juce_audio_utils
+                juce::juce_cryptography
+                juce::juce_dsp
+                juce::juce_gui_basics
+                juce::juce_recommended_config_flags
+                juce::juce_recommended_warning_flags)
 
-    add_test(
-        NAME plugin_headless_daw_matrix
-        COMMAND AudioProvenanceHeadlessHostTests
-                --soak-seconds ${APW_HEADLESS_SOAK_SECONDS}
-                --seed 4706347393385544497)
-    set_tests_properties(plugin_headless_daw_matrix PROPERTIES TIMEOUT 33000)
+        add_test(
+            NAME plugin_headless_daw_matrix
+            COMMAND AudioProvenanceHeadlessHostTests
+                    --soak-seconds ${APW_HEADLESS_SOAK_SECONDS}
+                    --seed 4706347393385544497)
+        set_tests_properties(plugin_headless_daw_matrix PROPERTIES TIMEOUT 33000)
+    endif()
+
     add_test(
         NAME plugin_realtime_source_audit
         COMMAND ${CMAKE_COMMAND} -E env PYTHONDONTWRITEBYTECODE=1
-                python3 ${CMAKE_SOURCE_DIR}/scripts/audit_plugin_realtime.py)
+                ${APW_PYTHON} ${CMAKE_SOURCE_DIR}/scripts/audit_plugin_realtime.py)
 endif()

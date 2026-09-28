@@ -1,0 +1,113 @@
+name: Platform matrix
+
+# macOS is the only platform whose results have been reproduced by the
+# maintainers. The ubuntu and windows legs are `experimental`: they run and
+# report, but do not gate, until each has produced a first green run.
+
+on:
+  push:
+    paths:
+      - "CMakeLists.txt"
+      - "src/**"
+      - "tests/**"
+      - "daemon/**"
+      - "requirements.txt"
+      - "pytest.ini"
+      - "scripts/audit_plugin_realtime.py"
+      - ".github/workflows/platform-matrix.yml"
+  pull_request:
+    paths:
+      - "CMakeLists.txt"
+      - "src/**"
+      - "tests/**"
+      - "daemon/**"
+      - "requirements.txt"
+      - "pytest.ini"
+      - "scripts/audit_plugin_realtime.py"
+      - ".github/workflows/platform-matrix.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: platform-matrix-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    name: pytest (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            experimental: false
+          - os: ubuntu-latest
+            experimental: true
+          - os: windows-latest
+            experimental: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt pytest
+      - name: Run pytest
+        run: python -m pytest -q
+
+  plugin:
+    name: plug-in build and ctest (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            experimental: false
+            ctest_prefix: ""
+          - os: ubuntu-latest
+            experimental: true
+            # JUCE creates GUI objects in the tests; Linux needs an X server.
+            ctest_prefix: "xvfb-run -a"
+          - os: windows-latest
+            experimental: true
+            ctest_prefix: ""
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        # JUCE's documented Linux packages, minus webkit and curl, which the
+        # project disables with JUCE_WEB_BROWSER=0 and JUCE_USE_CURL=0.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libasound2-dev libjack-jackd2-dev ladspa-sdk \
+            libfreetype-dev libfontconfig1-dev \
+            libx11-dev libxcomposite-dev libxcursor-dev libxext-dev \
+            libxinerama-dev libxrandr-dev libxrender-dev \
+            libglu1-mesa-dev mesa-common-dev xvfb
+      - name: Configure
+        shell: bash
+        run: |
+          extra=()
+          if [ "$RUNNER_OS" = "macOS" ]; then extra+=(-DCMAKE_OSX_ARCHITECTURES="$(uname -m)"); fi
+          cmake -S . -B build-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release "${extra[@]}"
+      - name: Build plug-in and tests
+        shell: bash
+        run: |
+          targets=(AudioProvenanceCaptureTests AudioProvenanceCapture_VST3)
+          if [ "$RUNNER_OS" != "Windows" ]; then targets+=(AudioProvenanceHeadlessHostTests); fi
+          cmake --build build-ci --config Release --target "${targets[@]}" --parallel 4
+      - name: Run ctest
+        shell: bash
+        run: ${{ matrix.ctest_prefix }} ctest --test-dir build-ci -C Release --output-on-failure

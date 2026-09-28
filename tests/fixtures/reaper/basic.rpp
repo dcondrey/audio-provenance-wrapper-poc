@@ -1,0 +1,67 @@
+<REAPER_PROJECT 0.1 "7.0/x64" 1700000000
+  RIPPLE 0
+  SAMPLERATE 48000 0 0
+  TEMPO 90 3 4
+  LOOP 1
+  MARKER 1 2.5 "Verse" 0 0 1 {AAAA0000-0000-0000-0000-000000000001} 0
+  MARKER 2 8 "Chorus" 1 0 1 {AAAA0000-0000-0000-0000-000000000002} 0
+  MARKER 3 16 "" 1 0 1 R {AAAA0000-0000-0000-0000-000000000003} 0
+  <TEMPOENVEX
+    ACT 1 -1
+    PT 0 90 0
+  >
+  <TRACK {11111111-0000-0000-0000-000000000001}
+    NAME "Drums"
+    ISBUS 1 1
+    <FXCHAIN
+      <VST "VST3: ReaEQ (Cockos)" reaeq.vst 0 "" 1919247729 ""
+        ZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFxZXFx
+      >
+      <JS "utility/gain" ""
+      >
+    >
+    <VOLENV2
+      ACT 1 -1
+      PT 0 1 0
+      PT 2 0.5 0
+      PT 4 1 0
+    >
+  >
+  <TRACK {11111111-0000-0000-0000-000000000002}
+    NAME "Kick and Snare"
+    <ITEM
+      POSITION 1.5
+      LENGTH 3
+      NAME "kick loop"
+      IGUID {22222222-0000-0000-0000-000000000001}
+      <SOURCE WAVE
+        FILE "Media/kick loop.wav"
+      >
+    >
+    <ITEM
+      POSITION 6
+      LENGTH 1.5
+      NAME "midi part"
+      IGUID {22222222-0000-0000-0000-000000000002}
+      <SOURCE MIDI
+        HASDATA 1 960 QN
+        E 0 90 3c 60
+        e 480 80 3c 00
+        E 0 90 40 00
+        E 0 90 43 7f
+      >
+    >
+    <ITEM
+      POSITION 9
+      LENGTH 2
+      NAME "section"
+      IGUID {22222222-0000-0000-0000-000000000003}
+      <SOURCE SECTION
+        LENGTH 2
+        <SOURCE WAVE
+          FILE "/abs/path/snare.flac"
+        >
+      >
+    >
+  >
+>

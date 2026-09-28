@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import time
 from dataclasses import dataclass
@@ -282,12 +283,29 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def platform_support(system: str | None = None) -> dict[str, object]:
+    """Report whether DAW window capture works on this OS.
+
+    No OS has a capture backend integrated (CGWindowListCreateImage / X11 / Windows.Graphics.Capture are
+    not wired), so every platform reports unsupported and nothing is captured.
+    """
+    import platform
+
+    system = system or platform.system() or "unknown"
+    return {
+        "layer": "screen_observer",
+        "platform": system,
+        "supported": False,
+        "status": "unsupported_platform",
+        "proof_level": "unknown_unobserved",
+        "reason": f"no DAW window capture backend is implemented for {system}",
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     args = parse_args(argv)
-    log.info(
-        "Screen observer scaffold loaded. Platform capture integration pending. "
-        "Target: %s",
-        args.bundle_id,
-    )
-    return 0
+    status = platform_support()
+    log.warning("%s (target %s); nothing will be captured", status["reason"], args.bundle_id)
+    print(json.dumps(status))
+    return 2

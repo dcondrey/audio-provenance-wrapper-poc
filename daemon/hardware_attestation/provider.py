@@ -295,6 +295,10 @@ class SoftwareProvider(HardwareProvider):
         verifier accepts, and machines provisioned before this check existed
         still carry the world-readable file.
         """
+        if os.name == "nt":
+            # POSIX mode bits do not express Windows ACLs; nothing is enforced here.
+            log.warning("Signing seed %s: file permissions are not managed on Windows", path)
+            return
         try:
             mode = path.stat().st_mode & 0o777
             if mode & 0o077:
@@ -421,30 +425,47 @@ class SoftwareProvider(HardwareProvider):
         return int(time.time() * 1000)
 
 
-def detect_provider(
-    software_key_path: Path = Path("~/.apw/demo_signing_key.bin"),
-) -> HardwareProvider:
-    """Auto-detect the best available hardware provider for this platform.
+def attestation_status(system: str | None = None) -> dict[str, object]:
+    """What this platform's provider proves. Never claims hardware it does not use.
 
-    Hardware providers remain explicit stubs. Until one is implemented, this
-    function returns the operational local software signer and logs that its
-    output is not hardware-attested.
+    Every platform currently maps to SoftwareProvider, so the answer is the
+    same on all of them: a local key file, not hardware-attested.
     """
     import platform
 
-    system = platform.system()
-
+    system = system or platform.system()
     if system == "Darwin":
-        log.warning(
-            "Secure Enclave integration is not implemented; "
-            "using a local software integrity key"
-        )
+        candidate = "Secure Enclave (not integrated)"
+    elif system == "Linux":
+        present = Path("/dev/tpm0").exists() or Path("/dev/tpmrm0").exists()
+        candidate = "TPM 2.0 device present (not integrated)" if present else "no TPM device node found"
+    elif system == "Windows":
+        candidate = "TPM via CNG/Platform Crypto Provider (not integrated)"
+    else:
+        candidate = "no hardware provider known for this platform"
+    return {
+        "platform": system or "unknown",
+        "provider": "SoftwareProvider",
+        "hardware_attested": False,
+        "proof_level": "unknown_unobserved",
+        "hardware_candidate": candidate,
+    }
 
-    if system == "Linux":
-        if Path("/dev/tpm0").exists() or Path("/dev/tpmrm0").exists():
-            log.warning(
-                "TPM 2.0 hardware is present but its provider is not implemented; "
-                "using a local software integrity key"
-            )
 
+def detect_provider(
+    software_key_path: Path = Path("~/.apw/demo_signing_key.bin"),
+) -> HardwareProvider:
+    """Return the provider for this platform: always SoftwareProvider today.
+
+    No Secure Enclave, TPM or Windows platform-crypto provider is integrated on
+    any OS. The result is a local software integrity key and is logged as not
+    hardware-attested; see attestation_status() for the per-platform detail.
+    """
+    status = attestation_status()
+    log.warning(
+        "Hardware attestation unavailable on %s (%s); using a local software "
+        "integrity key that is not hardware-attested",
+        status["platform"],
+        status["hardware_candidate"],
+    )
     return SoftwareProvider(key_path=software_key_path)

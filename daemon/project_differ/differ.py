@@ -80,6 +80,10 @@ class ProjectSnapshot:
     transport_loop_on: bool
     transport_loop_range: tuple[float, float]
     locator_count: int
+    # Populated only by parsers whose format records them. Not part of the
+    # emitted project_diff event for .als.
+    sample_rate: int | None = None
+    project_format: str = "ableton_als"
 
 
 @dataclass
@@ -468,10 +472,10 @@ def diff_to_event(diff: ProjectDiff) -> dict[str, object]:
 
 
 class ProjectWatcher:
-    """Watches an Ableton .als file for saves and emits structural diffs.
+    """Watches a project file for saves and emits structural diffs.
 
-    Stub: the extract_snapshot parser still needs validation against real
-    .als files across Ableton versions.
+    The parser is chosen by extension through daemon.project_formats. The .als
+    parser still needs validation against real files across Ableton versions.
     """
 
     def __init__(
@@ -488,6 +492,20 @@ class ProjectWatcher:
 
     def run_forever(self) -> None:
         """Poll the project file and write a project_diff event on each save."""
+        from daemon.project_formats import (
+            UnsupportedProjectFormat,
+            detect_format,
+            parse_project,
+            unsupported_format_event,
+        )
+
+        project_format = detect_format(self.project_path)
+        if project_format is not None and not project_format.supported:
+            log.warning("%s", UnsupportedProjectFormat(project_format, self.project_path))
+            append_jsonl(
+                self.evidence_path, unsupported_format_event(project_format, self.project_path)
+            )
+            return
         log.info("Watching %s for saves; writing %s", self.project_path, self.evidence_path)
 
         while True:
@@ -500,7 +518,7 @@ class ProjectWatcher:
             if stat.st_mtime_ns != self._previous_mtime_ns:
                 self._previous_mtime_ns = stat.st_mtime_ns
                 try:
-                    snapshot = extract_snapshot(self.project_path)
+                    snapshot = parse_project(self.project_path)
                 except Exception:
                     log.exception("Failed to parse %s", self.project_path)
                     time.sleep(self.poll_interval_seconds)
@@ -509,7 +527,10 @@ class ProjectWatcher:
                 if self._previous_snapshot is not None:
                     diff = compute_diff(self._previous_snapshot, snapshot)
                     if diff.has_changes():
-                        append_jsonl(self.evidence_path, diff_to_event(diff))
+                        event = diff_to_event(diff)
+                        if snapshot.project_format != "ableton_als":
+                            event["project_format"] = snapshot.project_format
+                        append_jsonl(self.evidence_path, event)
                         log.info(
                             "Project diff: +%d/-%d/%d~ clips, %d samples added",
                             diff.clips_added,
@@ -525,9 +546,9 @@ class ProjectWatcher:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Watch an Ableton .als project file and emit structural diffs.",
+        description="Watch a project file (.als, .rpp) and emit structural diffs.",
     )
-    parser.add_argument("project_path", type=Path, help="Path to the .als file.")
+    parser.add_argument("project_path", type=Path, help="Path to the project file.")
     parser.add_argument(
         "--evidence-file",
         type=Path,

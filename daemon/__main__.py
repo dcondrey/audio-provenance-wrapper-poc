@@ -493,7 +493,22 @@ class Daemon:
             self._stop.wait(self.sample_watcher.poll_interval_seconds)
 
     def _run_project_watcher(self) -> None:
-        from daemon.project_differ.differ import extract_snapshot, compute_diff, diff_to_event
+        from daemon.project_differ.differ import compute_diff, diff_to_event
+        from daemon.project_formats import (
+            UnsupportedProjectFormat,
+            detect_format,
+            parse_project,
+            unsupported_format_event,
+        )
+
+        project_format = detect_format(self.project_path)
+        if project_format is not None and not project_format.supported:
+            log.warning("%s", UnsupportedProjectFormat(project_format, self.project_path))
+            self._write_evidence(
+                "project_diff_events.jsonl",
+                unsupported_format_event(project_format, self.project_path),
+            )
+            return
 
         log.info("Project watcher on %s", self.project_path)
         prev_snapshot = None
@@ -509,7 +524,7 @@ class Daemon:
             if stat.st_mtime_ns != prev_mtime_ns:
                 prev_mtime_ns = stat.st_mtime_ns
                 try:
-                    snapshot = extract_snapshot(self.project_path)
+                    snapshot = parse_project(self.project_path)
                 except Exception:
                     log.exception("Failed to parse %s", self.project_path)
                     self._stop.wait(2.0)
@@ -522,6 +537,8 @@ class Daemon:
                     diff = compute_diff(prev_snapshot, snapshot)
                     if diff.has_changes():
                         diff_event = diff_to_event(diff)
+                        if snapshot.project_format != "ableton_als":
+                            diff_event["project_format"] = snapshot.project_format
                         self._write_evidence("project_diff_events.jsonl", diff_event)
                         self._append_event(diff_event)
 
@@ -752,7 +769,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--port", type=int, default=DEFAULT_UDP_PORT, help="UDP port for plugin events.")
     parser.add_argument("--evidence-dir", type=Path, default=DEFAULT_EVIDENCE_DIR, help="Evidence output directory.")
     parser.add_argument("--sample-dir", type=Path, default=DEFAULT_SAMPLE_DIR, help="Sample watch directory.")
-    parser.add_argument("--project", type=Path, default=None, help="Ableton .als project file to watch.")
+    parser.add_argument("--project", type=Path, default=None, help="Project file to watch (.als or .rpp; other hosts are recorded as unsupported).")
     parser.add_argument("--export-dir", type=Path, default=None, help="Export directory to watch for WAV/AIFF.")
     parser.add_argument("--manifest-dir", type=Path, default=DEFAULT_MANIFEST_DIR, help="Manifest output directory.")
     parser.add_argument(

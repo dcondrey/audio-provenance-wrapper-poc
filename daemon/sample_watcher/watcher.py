@@ -5,11 +5,11 @@ import array
 import json
 import logging
 import math
+import platform
 import re
 import subprocess
 import sys
 import time
-import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterable, Iterator
@@ -77,31 +77,87 @@ def _read_wave(path: Path) -> MetadataDict:
                 handle.getframerate(), handle.getnframes(), handle.getnchannels()
             )
     except (EOFError, OSError, wave.Error):
-        return _read_afinfo(path)
+        return _read_riff_header(path) or _read_afinfo(path)
+
+
+def _iter_chunks(handle, byte_order: str, limit: int = 256) -> Iterator[tuple[bytes, int, int]]:
+    """Yield (chunk_id, data_offset, size) for a RIFF/IFF stream, bounded in count."""
+    import struct
+
+    for _ in range(limit):
+        header = handle.read(8)
+        if len(header) < 8:
+            return
+        chunk_id = header[:4]
+        (size,) = struct.unpack(byte_order + "I", header[4:])
+        offset = handle.tell()
+        yield chunk_id, offset, size
+        handle.seek(offset + size + (size & 1))
+
+
+def _read_riff_header(path: Path) -> MetadataDict | None:
+    """Portable WAV header reader for what `wave` rejects (float, extensible)."""
+    import struct
+
+    try:
+        with path.open("rb") as handle:
+            head = handle.read(12)
+            if head[:4] not in (b"RIFF", b"RF64") or head[8:12] != b"WAVE":
+                return None
+            channels = rate = block_align = 0
+            data_size = None
+            for chunk_id, offset, size in _iter_chunks(handle, "<"):
+                if chunk_id == b"fmt " and size >= 16:
+                    handle.seek(offset)
+                    _fmt, channels, rate, _bps, block_align, _bits = struct.unpack(
+                        "<HHIIHH", handle.read(16)
+                    )
+                elif chunk_id == b"data":
+                    data_size = size
+                    break
+            if not (rate and channels and block_align) or data_size is None:
+                return None
+            if data_size == 0xFFFFFFFF:  # RF64 / streamed placeholder: size unknown here
+                return None
+            return _metadata_from_rate_and_frames(rate, data_size // block_align, channels)
+    except (OSError, struct.error):
+        return None
+
+
+def _read_aiff_header(path: Path) -> MetadataDict | None:
+    """Portable AIFF/AIFC COMM-chunk reader (the stdlib `aifc` module is gone in 3.13)."""
+    import struct
+
+    try:
+        with path.open("rb") as handle:
+            head = handle.read(12)
+            if head[:4] != b"FORM" or head[8:12] not in (b"AIFF", b"AIFC"):
+                return None
+            for chunk_id, offset, size in _iter_chunks(handle, ">"):
+                if chunk_id == b"COMM" and size >= 18:
+                    handle.seek(offset)
+                    channels, frames, _bits = struct.unpack(">hIh", handle.read(8))
+                    exponent, mantissa = struct.unpack(">HQ", handle.read(10))
+                    sign = -1.0 if exponent & 0x8000 else 1.0
+                    exponent &= 0x7FFF
+                    rate = sign * mantissa * 2.0 ** (exponent - 16383 - 63) if exponent else 0.0
+                    if channels <= 0 or not 0 < rate < 1e8:
+                        return None
+                    return _metadata_from_rate_and_frames(int(round(rate)), frames, channels)
+    except (OverflowError, OSError, struct.error):
+        return None
+    return None
 
 
 def _read_aiff(path: Path) -> MetadataDict:
-    try:
-        with warnings.catch_warnings():
-            # aifc is deprecated and removed in newer CPython; fall through to
-            # afinfo rather than letting the import warning surface to callers.
-            warnings.simplefilter("ignore", DeprecationWarning)
-            import aifc
-    except ModuleNotFoundError:
-        return _read_afinfo(path)
-
-    try:
-        with aifc.open(str(path), "rb") as handle:
-            return _metadata_from_rate_and_frames(
-                handle.getframerate(), handle.getnframes(), handle.getnchannels()
-            )
-    except (EOFError, OSError, aifc.Error):
-        return _read_afinfo(path)
+    return _read_aiff_header(path) or _read_afinfo(path)
 
 
 def _read_afinfo(path: Path) -> MetadataDict:
-    """Last resort: shell out to macOS `afinfo` for anything the stdlib cannot open."""
+    """macOS only: shell out to `afinfo`. Elsewhere, or on failure, metadata is unavailable."""
     metadata = empty_audio_metadata()
+    if platform.system() != "Darwin":
+        return metadata
     try:
         completed = subprocess.run(
             ["afinfo", str(path)],
@@ -241,6 +297,12 @@ def build_sample_file_event(
         raise OSError(f"{target} changed while being read; evidence not recorded")
 
     suffix = target.suffix.lower()
+    notes = list(DEFAULT_NOTES)
+    if all(value is None for value in audio_metadata.values()):
+        notes.append(
+            "Audio metadata unavailable: no portable reader for this format on "
+            f"{platform.system() or 'this platform'}; fields are null, not measured."
+        )
     return {
         "event_type": "sample_file_observed",
         "proof_level": "directly_observed",
@@ -255,7 +317,7 @@ def build_sample_file_event(
         "observed_at": observed_at or utc_timestamp(),
         "audio_metadata": audio_metadata,
         "audio_fingerprint": audio_fingerprint,
-        "notes": list(DEFAULT_NOTES),
+        "notes": notes,
     }
 
 
