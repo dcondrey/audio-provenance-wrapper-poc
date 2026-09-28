@@ -14,6 +14,7 @@ from daemon.forgery_analysis.analyzer import HashChainAnalyzer
 from daemon.hardware_attestation.provider import SoftwareProvider
 from daemon.schema import validate_manifest_invariants
 from daemon.signing import pinned_public_key, verify_ed25519_signature
+from daemon.time_anchor.anchor import RFC3161Provider, TimeProof
 
 log = logging.getLogger(__name__)
 DEFAULT_SIGNING_KEY = Path("~/.apw/demo_signing_key.bin")
@@ -493,6 +494,62 @@ def _load_trust_anchors(trust_anchor_path: Path | None) -> str | None:
     return pem if "BEGIN CERTIFICATE" in pem else None
 
 
+# IMPORTANT: this daemon relays the TSA's assertion and never authenticates the
+# token's CMS signature, so neither label may claim more than "inferred".
+_TIME_ANCHOR_LABELS = frozenset({"inferred", "unknown_unobserved"})
+
+
+def _check_time_anchor(data: dict[str, object], result: VerificationResult) -> None:
+    anchor = data.get("time_anchor")
+    if anchor is None:
+        return
+    if not isinstance(anchor, dict):
+        result.error("time_anchor_invalid", "time_anchor must be an object")
+        return
+    status = anchor.get("status")
+    if status == "unavailable":
+        result.info("time_anchor_unavailable", "No external timestamp was obtained; no external time is asserted")
+        return
+    if status != "anchored":
+        result.error("time_anchor_invalid", "time_anchor status must be anchored or unavailable")
+        return
+    if anchor.get("apw:proof_level") not in _TIME_ANCHOR_LABELS or anchor.get("cms_signature_verified") is not False:
+        result.error(
+            "time_anchor_invalid",
+            "time_anchor claims stronger evidence than a relayed, unauthenticated TSA token",
+        )
+        return
+    export = data.get("export")
+    export_hash = export.get("sha256") if isinstance(export, dict) else None
+    if anchor.get("data_hash") != export_hash:
+        result.error("time_anchor_invalid", "time_anchor data_hash does not match the export hash")
+        return
+    timestamp_ms = anchor.get("timestamp_ms")
+    source = anchor.get("source")
+    nonce_hex = anchor.get("nonce_hex")
+    token_hex = anchor.get("response_der_hex")
+    if (
+        not isinstance(timestamp_ms, int)
+        or isinstance(timestamp_ms, bool)
+        or not isinstance(source, str)
+        or not isinstance(nonce_hex, str)
+        or not isinstance(token_hex, str)
+    ):
+        result.error("time_anchor_invalid", "time_anchor is missing its token fields")
+        return
+    proof = TimeProof(source, timestamp_ms, nonce_hex, token_hex, None)
+    if not RFC3161Provider().verify(proof, str(export_hash)):
+        result.error(
+            "time_anchor_invalid",
+            "time_anchor token does not match its imprint, nonce, or reported time",
+        )
+        return
+    result.info(
+        "time_anchor_consistent",
+        "TSA token imprint, nonce, and time are consistent; its CMS signature was not verified",
+    )
+
+
 def verify_manifest(
     manifest_path: Path,
     signing_key_path: Path | None = DEFAULT_SIGNING_KEY,
@@ -806,6 +863,8 @@ def verify_manifest(
         _load_trust_anchors(trust_anchor_path),
         c2pa_asset_override,
     )
+
+    _check_time_anchor(data, result)
 
     facts = data.get("session_facts")
     if isinstance(facts, dict):

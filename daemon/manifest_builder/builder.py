@@ -100,7 +100,6 @@ class ManifestBuilder:
         hash_chain    → c2pa.hash assertion (content binding)
         ingredients   → c2pa.ingredient assertions (samples)
         hardware      → c2pa.claim_signature (device binding)
-        time_anchors  → c2pa.timestamp assertions
 
     Proof levels are preserved as custom extensions:
         "apw:proof_level": "directly_observed" | "inferred" | etc.
@@ -116,7 +115,6 @@ class ManifestBuilder:
     ingredients: list[IngredientEvidence] = field(default_factory=list)
     composite_edits: list[dict[str, object]] = field(default_factory=list)
     hardware_binding: dict[str, object] | None = None
-    time_anchors: list[dict[str, object]] = field(default_factory=list)
     forgery_report: dict[str, object] | None = None
     coverage: dict[str, object] | None = None
     c2pa_claim: dict[str, object] | None = None
@@ -145,9 +143,6 @@ class ManifestBuilder:
 
     def set_hardware_binding(self, binding: dict[str, object]) -> None:
         self.hardware_binding = binding
-
-    def add_time_anchor(self, anchor: dict[str, object]) -> None:
-        self.time_anchors.append(anchor)
 
     def set_forgery_report(self, report: dict[str, object]) -> None:
         self.forgery_report = report
@@ -237,9 +232,6 @@ class ManifestBuilder:
 
         if self.hardware_binding is not None:
             manifest["hardware_binding"] = self.hardware_binding
-
-        if self.time_anchors:
-            manifest["time_anchors"] = self.time_anchors
 
         if self.forgery_report is not None:
             manifest["forgery_analysis"] = self.forgery_report

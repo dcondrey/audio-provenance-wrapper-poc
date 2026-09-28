@@ -118,3 +118,51 @@ class AnchorRecordTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class VerifierTimeAnchorTests(unittest.TestCase):
+    """verify_manifest must re-check the retained token, not trust the record."""
+
+    def _record(self):
+        from daemon.verify import VerificationResult
+
+        response, data_hash, nonce_hex = _load_fixture()
+        record = {
+            "status": "anchored",
+            "data_hash": data_hash,
+            "source": "rfc3161:fixture",
+            "timestamp_ms": parse_timestamp_response(response).gentime_ms,
+            "nonce_hex": nonce_hex,
+            "response_der_hex": response.hex(),
+            "cms_signature_verified": False,
+            "apw:proof_level": "inferred",
+        }
+        return VerificationResult(), {"export": {"sha256": data_hash}, "time_anchor": record}
+
+    def _codes(self, mutate):
+        from daemon.verify import _check_time_anchor
+
+        result, data = self._record()
+        mutate(data)
+        _check_time_anchor(data, result)
+        return {finding.code for finding in result.findings}
+
+    def test_consistent_token_passes(self):
+        self.assertEqual(self._codes(lambda d: None), {"time_anchor_consistent"})
+
+    def test_each_tamper_is_rejected(self):
+        tampers = {
+            "timestamp": lambda d: d["time_anchor"].update(timestamp_ms=d["time_anchor"]["timestamp_ms"] + 1),
+            "data_hash": lambda d: d["export"].update(sha256="0" * 64),
+            "non_hex_token": lambda d: d["time_anchor"].update(response_der_hex="zz"),
+            "overclaimed_label": lambda d: d["time_anchor"].update(**{"apw:proof_level": "directly_observed"}),
+            "claimed_cms": lambda d: d["time_anchor"].update(cms_signature_verified=True),
+            "bool_timestamp": lambda d: d["time_anchor"].update(timestamp_ms=True),
+        }
+        for name, mutate in tampers.items():
+            with self.subTest(name):
+                self.assertEqual(self._codes(mutate), {"time_anchor_invalid"})
+
+    def test_unavailable_is_informational(self):
+        codes = self._codes(lambda d: d["time_anchor"].update(status="unavailable"))
+        self.assertEqual(codes, {"time_anchor_unavailable"})
