@@ -128,3 +128,12 @@ class HashChainAnalyzerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FiniteNumberTests(unittest.TestCase):
+    def test_integers_wider_than_a_float_are_rejected_not_raised(self):
+        from daemon.forgery_analysis.analyzer import _finite_number
+
+        self.assertIsNone(_finite_number(10**400))
+        self.assertEqual(_finite_number(3), 3.0)
+        self.assertIsNone(_finite_number(float("inf")))

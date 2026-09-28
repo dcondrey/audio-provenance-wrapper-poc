@@ -474,9 +474,11 @@ def _finite_number(value: object) -> float | None:
     """Numeric value safe for statistics; None for bool, non-numbers, inf, NaN."""
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
-    if not math.isfinite(value):
+    try:
+        number = float(value)
+    except OverflowError:
         return None
-    return float(value)
+    return number if math.isfinite(number) else None
 
 
 def _mean_std(values: list[float]) -> tuple[float, float]:
