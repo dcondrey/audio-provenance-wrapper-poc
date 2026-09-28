@@ -19,7 +19,10 @@ workspace = true
 apw-watermark = { workspace = true }
 audio-provenance-audio = { workspace = true, features = ["codecs"] }
 audio-provenance-core = { workspace = true, features = ["std"] }
+audio-provenance-manifest = { workspace = true, features = ["std"] }
 audio-provenance-registry = { workspace = true }
+audio-provenance-trust = { workspace = true }
+getrandom = { workspace = true }
 # IMPORTANT: the workspace entry is default-features = false, which drops
 # `audio-provenance-registry/http`, whose ureq -> rustls -> ring chain has no wasm32-unknown-unknown build.
 # Nothing here loses a capability by it: a browser cannot open a raw socket anyway, and the JS side

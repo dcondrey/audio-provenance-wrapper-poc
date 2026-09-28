@@ -14,7 +14,7 @@ import * as wasm from "../wasm/bundler/audio_provenance_wasm.js";
 
 import { createClient, type AudioProvenanceWasm } from "./core.js";
 
-export { AudioProvenanceError } from "./core.js";
+export { AudioProvenanceError, webCryptoSigner } from "./core.js";
 export type { AudioProvenanceClient, AudioProvenanceWasm, PathReader, Runtime } from "./core.js";
 export * from "./public.js";
 
@@ -22,6 +22,7 @@ const client = createClient({ wasm: wasm as unknown as AudioProvenanceWasm });
 
 export const verify = client.verify;
 export const inspect = client.inspect;
+export const sign = client.sign;
 export const locators = client.locators;
 export const capabilities = client.capabilities;
 export const statuses = client.statuses;

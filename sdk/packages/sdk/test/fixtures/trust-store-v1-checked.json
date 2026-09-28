@@ -1,0 +1,50 @@
+{
+  "anchors": [
+    {
+      "algorithm": "ed25519",
+      "anchor_id": "fixture-authority",
+      "max_chain_depth": 2,
+      "name": "Fixture Authority",
+      "not_after": "2126-09-04T19:48:50Z",
+      "not_before": "2026-09-28T19:48:50Z",
+      "public_key_hex": "ebbe3adbdd71f7be0eb36a97d8641285278859562ff9fe8af3563de743c789d5",
+      "self_signature_hex": "ae34207bdc90427931b4cec3f1c4747daea9bd9a1663f2eccbe5be25686c77c5b5b2c996dfe927381ca99bcd9681cfe8581e92b682e80d5fc1ea6a21d00e3705",
+      "type": "audio-provenance-trust-anchor-v1"
+    }
+  ],
+  "format": "audio-provenance-trust-store-v1",
+  "records": [
+    {
+      "algorithm": "ed25519",
+      "capability": "leaf",
+      "display_name": "Signal Room Studios",
+      "issuer_anchor_id": "fixture-authority",
+      "issuer_public_key_hex": "ebbe3adbdd71f7be0eb36a97d8641285278859562ff9fe8af3563de743c789d5",
+      "not_after": "2126-09-04T19:48:51Z",
+      "not_before": "2026-09-28T19:48:51Z",
+      "record_id": "fixture-signal-room",
+      "signature_hex": "882587f3701796f3f9f456919e908c6874924bf9454351217a6fd39620f14187d8337ff2abbcc9bf7b312c9e9062ab76991881a28dd69f500f1aa41a3b748f0b",
+      "subject_public_key_hex": "c7830efdbecf798fb41b3fea347ce59d16caa76af63806729fc9f0505732dbd2",
+      "subject_signer_id": "1a47831d461f7581",
+      "type": "audio-provenance-trust-signer-record-v1"
+    }
+  ],
+  "revocations": [
+    {
+      "algorithm": "ed25519",
+      "anchor_id": "fixture-authority",
+      "entries": [
+        {
+          "reason": "superseded",
+          "revoked_at": "2026-09-28T19:48:51Z",
+          "subject_public_key_hex": "4296d72522dda06523050c7f4d2766b6c5269b542c4667be2b18b032cf8362cc",
+          "subject_signer_id": "488ea1cd0e77b2f6"
+        }
+      ],
+      "issued_at": "2026-09-28T19:48:51Z",
+      "issuer_public_key_hex": "ebbe3adbdd71f7be0eb36a97d8641285278859562ff9fe8af3563de743c789d5",
+      "signature_hex": "4d0e9a0e0db0c25e06d2d07fc98f92f356e1ccdcbac386ed396f9d6fca58aa28142f00e6c27c4045e27a366040db662d834e2d73742aef6dac1e7cbd4ffa5200",
+      "type": "audio-provenance-trust-revocations-v1"
+    }
+  ]
+}

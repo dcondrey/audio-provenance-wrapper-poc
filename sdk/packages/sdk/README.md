@@ -44,7 +44,7 @@ a browser `<input type="file">`. Paths are readable in Node only; the browser en
 
 ```ts
 const result = await verify(file, {
-  trustStore,   // a audio-provenance-trust-store-v0 document: without one, identity is always null
+  trustStore,   // a trust-store-v0 or -v1 document (v1 carries signed revocation lists): without one, identity is always null
   nullTest,     // a audio-provenance-bench null-test report: without one, no soft binding verifies
   records,      // the registry, as record envelopes you fetched yourself
   registryName: "public",
@@ -191,3 +191,23 @@ pnpm --filter @writerslogic/audio-provenance-sdk test
 `test/fixtures` holds a real signed WAV, the marked-and-registered WAV it came from, a 128k mp3
 transcode of that, an unregistered original, the registry record, a trust store and a bench
 null-test report. Every test drives the published entry point over those bytes; nothing is mocked.
+
+## Revocation and external signing
+
+`result.revocationStatus` is `checked_not_revoked`, `revoked`, `not_applicable`, or
+`revocation_unchecked`. The last means a name resolved but no revocation list from its anchor was
+supplied: that is not the same as "not revoked". A revoked key fails the verdict. Lists ride inside
+a v1 `trustStore` (pin `trustEvaluatedAt` for reproducible windows); nothing here fetches them.
+
+`sign(audio, signer)` seals a record with a signer you control, so this package never holds a
+private key:
+
+```ts
+import { sign, webCryptoSigner } from "@writerslogic/audio-provenance-sdk";
+const signer = webCryptoSigner(privateKeyHandle, publicKeyBytes); // or { publicKeyHex, sign(digest32) }
+const { record, registryRecord } = await sign(file, signer);
+```
+
+The signer receives a 32-byte SHA-256 digest and returns a 64-byte Ed25519 signature
+(`Ed25519-SHA256`). The package verifies it under `publicKeyHex` before returning. Identity stays
+`not_established`; only a configured trust anchor names a signer.

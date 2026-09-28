@@ -15,7 +15,8 @@
 //! | `local` filesystem registry | no |
 //! | `http` registry | no; a browser cannot open a raw socket, and the JS side fetches instead |
 //! | Trust store, null-test report | yes, passed in as JSON rather than read from a path |
-//! | Signing, marking, publishing | no; the producer surface is native-only |
+//! | Signing | two-call only: `prepareSigning` then a caller-supplied signer then `sealManifest`; no private key is ever held here |
+//! | Marking, publishing | no; the producer surface is native-only |
 //!
 //! Nothing about the verdict changes. The status mapping, the soft-binding gates, the null-test
 //! requirement and the identity rule are `apw_trace`'s, compiled unmodified.
@@ -36,6 +37,7 @@ use wasm_bindgen::prelude::*;
 mod json;
 mod options;
 mod records;
+mod signing;
 
 use crate::json::{coded, to_camel_json};
 use crate::options::Options;
@@ -184,8 +186,9 @@ const PLATFORM: Platform = Platform {
     sidecar_manifest: false,
     registry_backends: ["caller_supplied_records"],
     signing: false,
+    external_signing: true,
     marking: false,
-    note: "Rungs beyond the embedded manifest run only over records the caller supplies; a browser cannot open a socket, so fetch them in JavaScript and pass them to verify().",
+    note: "Rungs beyond the embedded manifest run only over records the caller supplies; a browser cannot open a socket, so fetch them in JavaScript and pass them to verify(). Signing is external only: prepareSigning returns a digest, a caller-supplied signer signs it, sealManifest verifies and assembles the record. The package never holds a private key.",
 };
 
 #[derive(Debug, Clone, Copy, Serialize)]
@@ -195,7 +198,10 @@ struct Platform {
     network: bool,
     sidecar_manifest: bool,
     registry_backends: [&'static str; 1],
+    /// Always false: this build holds no private key and cannot sign by itself.
     signing: bool,
+    /// True: `prepareSigning` and `sealManifest` accept a signature made elsewhere.
+    external_signing: bool,
     marking: bool,
     note: &'static str,
 }

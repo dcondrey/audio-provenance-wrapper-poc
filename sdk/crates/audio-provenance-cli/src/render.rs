@@ -410,6 +410,7 @@ mod tests {
             identity: None,
             identity_proof_level: ProofLevel::UnknownUnobserved,
             identity_authority: None,
+            revocation_status: apw_trace::RevocationStatus::NotApplicable,
             signed_at: None,
             r#match: 0.0,
             match_basis: MatchBasis::None,

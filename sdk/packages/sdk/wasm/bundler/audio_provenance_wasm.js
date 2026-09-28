@@ -5,5 +5,5 @@ import { __wbg_set_wasm } from "./audio_provenance_wasm_bg.js";
 __wbg_set_wasm(wasm);
 wasm.__wbindgen_start();
 export {
-    capabilities, inspectBytes, locators, start, statuses, verifyBytes, version
+    capabilities, inspectBytes, locators, prepareSigning, sealManifest, start, statuses, verifyBytes, version
 } from "./audio_provenance_wasm_bg.js";

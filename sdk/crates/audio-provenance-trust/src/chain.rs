@@ -29,6 +29,9 @@ pub struct VouchedIdentity {
     pub anchor_name: String,
     pub anchor_key_id: String,
     pub chain_depth: u64,
+    /// True when the store holds a revocation list signed by this chain's anchor. False means no
+    /// list was available to consult, which is not the same as the key being unrevoked.
+    pub revocation_list_consulted: bool,
 }
 
 impl VouchedIdentity {
@@ -306,6 +309,16 @@ impl TrustStore {
             anchor_name: anchor.name.clone(),
             anchor_key_id: anchor.key_id(),
             chain_depth: depth,
+            revocation_list_consulted: self.has_revocation_list_for(anchor),
+        })
+    }
+
+    /// The same selection `revocation_for` applies: only a list signed by this anchor's own key
+    /// counts as having asked the revocation question.
+    fn has_revocation_list_for(&self, anchor: &crate::document::Anchor) -> bool {
+        self.revocation_lists().any(|signed| {
+            let list = signed.list();
+            list.anchor_id == anchor.anchor_id && list.issuer_public_key == anchor.public_key
         })
     }
 

@@ -39,15 +39,49 @@ evidence first, then invokes the public Rust SDK through the same CLI used by di
   registry and authenticated HTTP `PUT /v0/record/{record_id}` protocol tolerate republishing the
   same record after a crash.
 
+## Landed since the last deferral
+
+- Revocation reaches the TypeScript/WASM verifier. `options.trustStore` accepts the chained
+  `audio-provenance-trust-store-v1` document, whose Ed25519-signed revocation lists are the same
+  ones `audio-provenance trust revoke` writes and the Rust verifier already consumed. A revoked key
+  fails closed (`untrusted`, `trust_anchor_rejected` starting `signer_revoked`, no identity).
+- Every result carries `revocationStatus`: `not_applicable` (no identity), `checked_not_revoked`
+  (a list signed by the vouching anchor was consulted), `revoked`, or `revocation_unchecked`
+  (an identity resolved but no list from its anchor was available, with a `revocation_unchecked`
+  warning finding). The last is never reported as ok. Flat v0 stores count as unchecked unless they
+  declare a `revoked` array, which is unsigned.
+- WASM has no clock it may trust: a v1 store is judged at `trustEvaluatedAt`, defaulting to the
+  JavaScript clock. Pin it for reproducible results.
+- A pluggable signer for TypeScript/WASM: `sign(audio, signer)` with
+  `signer = { publicKeyHex, sign(digest32) -> signature64 }` (`webCryptoSigner` adapts a WebCrypto
+  Ed25519 key handle). The package prepares the record, hands the signer a SHA-256 digest
+  (`Ed25519-SHA256`, the algorithm the remote key-custody Worker returns), verifies the returned
+  signature under the declared public key, and re-admits the sealed record before returning it. No
+  API takes a private key. The record claims `self_generated_demo_key_integrity`, the weakest
+  existing trust scope, because the package cannot observe where the caller's key lives; identity
+  stays `not_established`.
+
 ## Deliberately deferred
 
-- The capture application and SDK currently have separate local provider/trust-store formats.
-- The capture installer ships the frozen Python daemon; the Rust capture engine under `rust/` is
-  built and tested separately.
-- The TypeScript/WASM surface verifies caller-supplied records but cannot sign or publish.
-- No production identity authority or portable revocation service is configured. Remote key
-  custody and authenticated registry publication are implemented but still require deployment
-  credentials and a trust anchor before a release can name an identity.
+Needs an outside decision or infrastructure; nothing below is stubbed:
+
+- Production identity authority. Needs a decision on who operates the trust anchor and the
+  issuance governance behind it. Until one is configured, identity stays `not_established` and only
+  a caller-configured anchor can attach a name.
+- Revocation distribution and freshness. Lists are caller-supplied; no service publishes them and
+  nothing fetches them. Lists carry `issued_at` but no `next_update`, so a stale list is
+  indistinguishable from a current one. Needs a publication endpoint and a freshness policy.
+- Deploying the remote key-custody Worker (`sdk/workers/hsm-signer`). Needs a Cloudflare account,
+  `SERVICE_TOKEN` and `SIGNING_KEY_PKCS8` secrets, and, for a hardware non-exportability claim, a
+  managed HSM/KMS instead of the Worker's secret binding.
+- Authenticated registry publication. The client exists; it needs deployment credentials and a
+  trust anchor before a release names an identity. The TypeScript/WASM surface still cannot
+  publish or embed marks; it signs only through the two-call signer above.
+- CMS verification of a time-stamp token against a TSA certificate chain. Needs a choice of TSA and
+  root set and a decision on an ASN.1/CMS parser dependency.
+- The capture application and SDK still use separate local provider/trust-store formats, and the
+  capture installer ships the frozen Python daemon while the Rust capture engine under `rust/` is
+  built and tested separately. Both live outside `sdk/` and need a cross-component decision.
 - Ableton-only compatibility checks remain separate from the automated headless lifecycle/soak
   gate. The classical watermark baseline is versioned and currently records target failures.
 

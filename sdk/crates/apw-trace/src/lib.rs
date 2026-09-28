@@ -64,7 +64,9 @@ pub use status::{
     BindingClass, Exhaustion, RejectionReason, SignatureOutcome, StatusInputs, StatusReason,
     TrustOutcome, Verdict, derive_status,
 };
-pub use trust::{FileTrustStore, NoTrustAnchors, TrustAnchor, TrustResolution, TrustStore};
+pub use trust::{
+    FileTrustStore, NoTrustAnchors, RevocationStatus, TrustAnchor, TrustResolution, TrustStore,
+};
 
 use crate::fingerprint::score::ScoreLimits;
 use crate::ladder::{LadderInputs, Rejected};
@@ -348,6 +350,7 @@ fn run(ingested: &Ingested, path: Option<&Path>, options: &VerifyOptions<'_>) ->
             manifest: assembly.manifest,
             signature: assembly.signature,
             anchored_identity: assembly.anchored_identity,
+            revocation: assembly.revocation,
             trace: outcome.trace.clone(),
             recovery: report.clone(),
             findings: result::findings_report(&findings),
@@ -436,6 +439,7 @@ fn run(ingested: &Ingested, path: Option<&Path>, options: &VerifyOptions<'_>) ->
         signer_id: manifest.signer().signer_id().map(str::to_string),
         valid: true,
     };
+    let revocation = trust.revocation();
     let anchored_identity = trust
         .anchor()
         .map(|anchor| (anchor.identity.clone(), anchor.authority.clone()));
@@ -453,11 +457,20 @@ fn run(ingested: &Ingested, path: Option<&Path>, options: &VerifyOptions<'_>) ->
              does: the container was rewritten and no sample moved",
         ));
     }
-    if let TrustResolution::Failed { reason } = &trust {
+    if let TrustResolution::Failed { reason } | TrustResolution::Revoked { reason } = &trust {
         extra.push(audio_provenance_manifest::Finding::warning(
             "trust_anchor_rejected",
             "$.portable_signature",
             reason.clone(),
+        ));
+    }
+
+    if revocation == RevocationStatus::RevocationUnchecked {
+        extra.push(audio_provenance_manifest::Finding::warning(
+            "revocation_unchecked",
+            "$.portable_signature",
+            "the signer resolved to an identity, but no revocation list from its anchor was \
+             available; the key may have been revoked and this result cannot say",
         ));
     }
 
@@ -472,6 +485,7 @@ fn run(ingested: &Ingested, path: Option<&Path>, options: &VerifyOptions<'_>) ->
             manifest: Some(*manifest),
             signature: Some(signature),
             anchored_identity,
+            revocation,
             method: Some(candidate.method),
         },
         extra,
@@ -484,6 +498,7 @@ struct PartialAssembly {
     manifest: Option<audio_provenance_manifest::Manifest>,
     signature: Option<SigReport>,
     anchored_identity: Option<(String, String)>,
+    revocation: RevocationStatus,
     method: Option<RecoveryMethod>,
 }
 

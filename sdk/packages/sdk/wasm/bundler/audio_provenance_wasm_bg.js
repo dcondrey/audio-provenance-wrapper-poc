@@ -88,6 +88,62 @@ export function locators(audio) {
 }
 
 /**
+ * Builds the unsigned record for `audio` and the digest a signer must sign.
+ * @param {Uint8Array} audio
+ * @param {string} options_json
+ * @returns {string}
+ */
+export function prepareSigning(audio, options_json) {
+    let deferred4_0;
+    let deferred4_1;
+    try {
+        const ptr0 = passArray8ToWasm0(audio, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(options_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.prepareSigning(ptr0, len0, ptr1, len1);
+        var ptr3 = ret[0];
+        var len3 = ret[1];
+        if (ret[3]) {
+            ptr3 = 0; len3 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred4_0 = ptr3;
+        deferred4_1 = len3;
+        return getStringFromWasm0(ptr3, len3);
+    } finally {
+        wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
+    }
+}
+
+/**
+ * Attaches `signature_hex` to a prepared manifest and returns the canonical record bytes.
+ *
+ * The signature is verified under `public_key_hex` and the finished record is re-admitted through
+ * the same path a verifier uses before any byte is returned, so a wrong key, a signature over other
+ * bytes, or a tampered `unsigned_manifest` is refused here rather than at the verifier.
+ * @param {string} unsigned_manifest
+ * @param {string} public_key_hex
+ * @param {string} signature_hex
+ * @returns {Uint8Array}
+ */
+export function sealManifest(unsigned_manifest, public_key_hex, signature_hex) {
+    const ptr0 = passStringToWasm0(unsigned_manifest, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(public_key_hex, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passStringToWasm0(signature_hex, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ret = wasm.sealManifest(ptr0, len0, ptr1, len1, ptr2, len2);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v4 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v4;
+}
+
+/**
  * Turns a wasm trap into a readable JS stack trace. Without it a panic anywhere in the graph
  * reaches the caller as `RuntimeError: unreachable` and nothing else.
  */
@@ -171,12 +227,19 @@ export function __wbg_error_757e9472f8410341(arg0, arg1) {
         wasm.__wbindgen_free(deferred0_0, deferred0_1, 1);
     }
 }
+export function __wbg_getRandomValues_436a51d0629d84e1() { return handleError(function (arg0, arg1) {
+    globalThis.crypto.getRandomValues(getArrayU8FromWasm0(arg0, arg1));
+}, arguments); }
 export function __wbg_new_227d7c05414eb861() {
     const ret = new Error();
     return ret;
 }
 export function __wbg_new_358857d90afd5a2d(arg0, arg1) {
     const ret = new Error(getStringFromWasm0(arg0, arg1));
+    return ret;
+}
+export function __wbg_now_8b265300afd5f2b9() {
+    const ret = Date.now();
     return ret;
 }
 export function __wbg_now_e7c6795a7f81e10f(arg0) {
@@ -246,6 +309,11 @@ function getArrayJsValueFromWasm0(ptr, len) {
     }
     wasm.__externref_drop_slice(ptr, len);
     return result;
+}
+
+function getArrayU8FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
 }
 
 let cachedDataViewMemory0 = null;

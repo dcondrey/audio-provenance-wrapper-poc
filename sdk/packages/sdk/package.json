@@ -46,7 +46,7 @@
     "build:wasm": "wasm-pack build ../../crates/audio-provenance-wasm --target nodejs --release --out-dir ../../packages/sdk/wasm/node --out-name audio_provenance_wasm && wasm-pack build ../../crates/audio-provenance-wasm --target bundler --release --out-dir ../../packages/sdk/wasm/bundler --out-name audio_provenance_wasm && rm -f wasm/node/.gitignore wasm/bundler/.gitignore && printf '{ \"type\": \"commonjs\" }\\n' > wasm/node/package.json && printf '{ \"type\": \"module\" }\\n' > wasm/bundler/package.json",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test test/verify.test.js",
+    "test": "node --test test/verify.test.js test/revocation-signing.test.js",
     "example": "node examples/verify.js"
   },
   "devDependencies": {

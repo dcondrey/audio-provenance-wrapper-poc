@@ -15,6 +15,7 @@ use audio_provenance_registry::{
     RegistryRecord, RegistrySource, ScoredCandidate, SignedAt, Unavailable, UnavailableKind,
 };
 use apw_trace::{
+    RevocationStatus,
     FileTrustStore, InferredAssociationPolicy, NoTrustAnchors, RecoveryMethod, StepOutcome,
     VerifyOptions, decoded_audio_sha256, verify,
 };
@@ -268,6 +269,15 @@ fn a_sidecar_manifest_with_an_anchored_signer_verifies_at_one() {
     assert_eq!(result.r#match, 1.0);
     assert_eq!(result.identity.as_deref(), Some("Signal Room Studios"));
     assert_eq!(result.identity_authority.as_deref(), Some("studio-ca"));
+    // A flat store declares no revocation list, so the name carries an explicit unchecked marker
+    // and finding rather than an implied clean bill.
+    assert_eq!(result.revocation_status, RevocationStatus::RevocationUnchecked);
+    assert!(
+        result
+            .findings
+            .iter()
+            .any(|finding| finding.code == "revocation_unchecked")
+    );
     assert_eq!(result.method, Some(RecoveryMethod::SidecarManifest));
     assert_eq!(result.signed_at.as_deref(), Some("2026-03-13"));
     assert!(!result.incomplete);
@@ -290,6 +300,7 @@ fn a_perfect_signature_without_an_anchor_is_untrusted_and_unnamed() {
     assert_eq!(result.reason, "trust_anchor_unresolved");
     assert!(result.identity.is_none());
     assert!(result.identity_authority.is_none());
+    assert_eq!(result.revocation_status, RevocationStatus::NotApplicable);
     // The binding still recomputed; the status is about the signer, not the audio.
     assert_eq!(result.r#match, 1.0);
 }

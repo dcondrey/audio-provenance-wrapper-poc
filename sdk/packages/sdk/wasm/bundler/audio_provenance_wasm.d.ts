@@ -28,6 +28,20 @@ export function inspectBytes(audio: Uint8Array, options_json?: string | null): s
 export function locators(audio: Uint8Array): string;
 
 /**
+ * Builds the unsigned record for `audio` and the digest a signer must sign.
+ */
+export function prepareSigning(audio: Uint8Array, options_json: string): string;
+
+/**
+ * Attaches `signature_hex` to a prepared manifest and returns the canonical record bytes.
+ *
+ * The signature is verified under `public_key_hex` and the finished record is re-admitted through
+ * the same path a verifier uses before any byte is returned, so a wrong key, a signature over other
+ * bytes, or a tampered `unsigned_manifest` is refused here rather than at the verifier.
+ */
+export function sealManifest(unsigned_manifest: string, public_key_hex: string, signature_hex: string): Uint8Array;
+
+/**
  * Turns a wasm trap into a readable JS stack trace. Without it a panic anywhere in the graph
  * reaches the caller as `RuntimeError: unreachable` and nothing else.
  */

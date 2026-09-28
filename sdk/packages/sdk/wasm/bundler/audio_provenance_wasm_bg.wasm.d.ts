@@ -4,6 +4,8 @@ export const memory: WebAssembly.Memory;
 export const capabilities: () => [number, number, number, number];
 export const inspectBytes: (a: number, b: number, c: number, d: number) => [number, number, number, number];
 export const locators: (a: number, b: number) => [number, number, number, number];
+export const prepareSigning: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+export const sealManifest: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
 export const statuses: () => [number, number];
 export const verifyBytes: (a: number, b: number, c: number, d: number) => [number, number, number, number];
 export const version: () => [number, number];

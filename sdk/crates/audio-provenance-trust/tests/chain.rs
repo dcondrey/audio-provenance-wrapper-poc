@@ -305,6 +305,82 @@ fn a_revoked_signer_is_refused_and_named() {
     ));
 }
 
+fn revocation_list(authority: &SigningKey, revoked: &SigningKey) -> audio_provenance_trust::SignedRevocationList {
+    RevocationList {
+        anchor_id: "signal-room-ca".to_string(),
+        issuer_public_key: authority.public_key_bytes(),
+        issued_at: at("2026-08-30T00:00:00Z"),
+        entries: vec![RevocationEntry {
+            subject_public_key: revoked.public_key_bytes(),
+            revoked_at: at("2026-08-30T00:00:00Z"),
+            reason: RevocationReason::Superseded,
+        }],
+    }
+    .sign(authority)
+    .unwrap()
+}
+
+/// "No list to consult" and "consulted and not revoked" must stay different answers, and only a
+/// list signed by the vouching anchor's own key may claim to have asked.
+#[test]
+fn vouching_reports_whether_a_revocation_list_was_consulted() {
+    let authority = key(1);
+    let signer = key(2);
+    let other = key(4);
+    let impostor = key(9);
+    let mut store = store(
+        anchor(&authority, 2),
+        vec![record(
+            "signal-room-master",
+            &signer,
+            "Signal Room Studios",
+            Capability::Leaf,
+            &authority,
+            live(),
+        )],
+    );
+    let consulted = |store: &TrustStore| {
+        let TrustEvaluation::Vouched(identity) =
+            store.evaluate(&signer.public_key_bytes(), &at(NOW))
+        else {
+            panic!("the chain is valid");
+        };
+        identity.revocation_list_consulted
+    };
+    let resolution = |store: &TrustStore| {
+        apw_trace::TrustStore::resolve(
+            &audio_provenance_trust::AnchoredTrustStore::new(store.clone(), at(NOW)),
+            &proof_for(&signer),
+        )
+        .revocation()
+    };
+    assert!(!consulted(&store));
+    assert_eq!(resolution(&store), apw_trace::RevocationStatus::RevocationUnchecked);
+
+    // A list from a foreign key does not count as a check.
+    store
+        .insert_revocations(revocation_list(&impostor, &other))
+        .unwrap();
+    assert!(!consulted(&store));
+
+    store
+        .insert_revocations(revocation_list(&authority, &other))
+        .unwrap();
+    assert!(consulted(&store));
+    assert_eq!(resolution(&store), apw_trace::RevocationStatus::CheckedNotRevoked);
+
+    store
+        .insert_revocations(revocation_list(&authority, &signer))
+        .unwrap();
+    assert_eq!(resolution(&store), apw_trace::RevocationStatus::Revoked);
+}
+
+fn proof_for(signer: &SigningKey) -> audio_provenance_core::KeyPossessionProof {
+    let unsigned = serde_json::json!({"probe": 1});
+    let signature = signer.sign_manifest(&unsigned, "signer.pub").unwrap();
+    audio_provenance_core::verify_manifest_signature(&unsigned, &signature, None).unwrap()
+}
+
 /// A list signed by anything but the anchor it names cannot take a name away.
 #[test]
 fn a_revocation_list_from_a_foreign_key_is_inert() {

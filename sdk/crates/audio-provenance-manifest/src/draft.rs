@@ -151,6 +151,29 @@ impl ManifestDraft {
     }
 }
 
+/// Attaches `signature` to an unsigned manifest value and returns the canonical record bytes.
+///
+/// For a caller that holds only the value a signer already signed (a two-call remote signing flow)
+/// and not the [`ManifestDraft`] that produced it. Nothing here checks the signature; admission of
+/// the returned bytes does.
+pub fn seal_unsigned_value(
+    unsigned: &Value,
+    signature: &PortableSignature,
+) -> Result<Vec<u8>, ManifestError> {
+    let mut value = unsigned.clone();
+    match &mut value {
+        Value::Object(map) => {
+            map.insert("portable_signature".into(), to_value(signature)?);
+        }
+        _ => {
+            return Err(ManifestError::SignatureBlock {
+                reason: "an unsigned manifest must be a JSON object".to_string(),
+            });
+        }
+    }
+    Ok(canonical_json(&value)?)
+}
+
 fn to_value<T: serde::Serialize>(value: &T) -> Result<Value, ManifestError> {
     serde_json::to_value(value).map_err(|error| ManifestError::SignatureBlock {
         reason: error.to_string(),

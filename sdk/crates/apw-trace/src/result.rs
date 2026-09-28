@@ -7,6 +7,7 @@ use serde::Serialize;
 
 use crate::nulltest::FalsePositiveRate;
 use crate::status::{BindingClass, Verdict};
+use crate::trust::RevocationStatus;
 
 /// Default coverage floor for a soft-only `verified`, the POC's `alignment_threshold`.
 pub const DEFAULT_SOFT_BINDING_THRESHOLD: f64 = 0.72;
@@ -542,6 +543,9 @@ pub struct VerifyResult {
     pub identity: Option<String>,
     pub identity_proof_level: ProofLevel,
     pub identity_authority: Option<String>,
+    /// Whether the signing key's revocation was checked. `revocation_unchecked` means an identity
+    /// was resolved with no revocation list from its anchor to consult; it is not "not revoked".
+    pub revocation_status: RevocationStatus,
     pub signed_at: Option<String>,
     pub r#match: f64,
     pub match_basis: MatchBasis,
@@ -574,6 +578,7 @@ pub(crate) struct ResultAssembly {
     pub manifest: Option<Manifest>,
     pub signature: Option<SignatureReport>,
     pub anchored_identity: Option<(String, String)>,
+    pub revocation: RevocationStatus,
     pub trace: Vec<RecoveryStep>,
     pub recovery: RecoveryReport,
     pub findings: Vec<FindingReport>,
@@ -589,6 +594,13 @@ impl ResultAssembly {
             (true, Some((identity, authority))) => (Some(identity), Some(authority)),
             // A verdict that discloses with no resolved name is not a name; it is nothing.
             (true, None) | (false, _) => (None, None),
+        };
+        // Revocation is reported only beside a disclosed name, or as the refusal that took it away.
+        let revocation_status = if identity.is_some() || self.revocation == RevocationStatus::Revoked
+        {
+            self.revocation
+        } else {
+            RevocationStatus::NotApplicable
         };
         let identity_proof_level = if identity.is_some() {
             ProofLevel::ExternallyVerified
@@ -716,6 +728,7 @@ impl ResultAssembly {
             identity,
             identity_proof_level,
             identity_authority: authority,
+            revocation_status,
             signed_at,
             r#match: score.value(),
             match_basis: basis,

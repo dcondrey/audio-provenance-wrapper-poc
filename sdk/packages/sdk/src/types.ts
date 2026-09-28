@@ -49,6 +49,20 @@ export type RecoveryMethod =
 
 export type StepOutcome = "hit" | "miss" | "skipped" | "degraded" | "unavailable";
 
+/**
+ * Whether the signing key's revocation was checked.
+ *
+ * `revocation_unchecked` is not `checked_not_revoked`: it means an identity resolved but no
+ * revocation list published by its anchor was available, so the key may have been revoked and this
+ * result cannot say. A revoked key is never reported here as ok: it fails the verdict (`untrusted`,
+ * finding `trust_anchor_rejected` beginning `signer_revoked`) and reads `revoked`.
+ */
+export type RevocationStatus =
+  | "not_applicable"
+  | "checked_not_revoked"
+  | "revoked"
+  | "revocation_unchecked";
+
 export type Severity = "info" | "warning" | "error";
 
 /**
@@ -158,6 +172,7 @@ export interface VerifyResult {
   readonly identity: string | null;
   readonly identityProofLevel: ProofLevel;
   readonly identityAuthority: string | null;
+  readonly revocationStatus: RevocationStatus;
   readonly signedAt: string | null;
   /**
    * The binding strength, or `null` when no binding was evaluated at all.
@@ -223,7 +238,10 @@ export interface PlatformCapabilities {
   readonly network: boolean;
   readonly sidecarManifest: boolean;
   readonly registryBackends: readonly string[];
+  /** Always false: this build holds no private key and cannot sign by itself. */
   readonly signing: boolean;
+  /** True: `sign()` accepts a signature made by a caller-supplied signer. */
+  readonly externalSigning: boolean;
   readonly marking: boolean;
   readonly note: string;
 }
@@ -263,10 +281,21 @@ export interface VerifyOptions {
   /** The name the result reports as the answering registry. Defaults to `caller`. */
   readonly registryName?: string;
   /**
-   * A `audio-provenance-trust-store-v0` document. Without one, `identity` is always `null`: a verifier with
-   * no configured anchors genuinely knows no identities, and saying so is the correct answer.
+   * A `audio-provenance-trust-store-v0` (flat) or `-v1` (chained, with signed revocation lists)
+   * document. Without one, `identity` is always `null`: a verifier with no configured anchors
+   * genuinely knows no identities, and saying so is the correct answer.
+   *
+   * Revocation lists ride inside a v1 store and are supplied by the caller: nothing here fetches
+   * one. A v1 store with no list from the vouching anchor, and any v0 store without a declared
+   * `revoked` array, yields `revocationStatus: "revocation_unchecked"` and a
+   * `revocation_unchecked` finding.
    */
   readonly trustStore?: Readonly<Record<string, unknown>>;
+  /**
+   * RFC 3339 UTC instant a v1 store's validity windows and revocations are judged against.
+   * Defaults to the current time on the JavaScript clock; pin it for reproducible results.
+   */
+  readonly trustEvaluatedAt?: string;
   /**
    * A `audio-provenance-bench` null-test report. Without one, no soft binding reaches `verified`, because
    * the false-positive rate such a verdict must publish has no honest value until a bench has run.
@@ -276,4 +305,44 @@ export interface VerifyOptions {
   readonly softBindingThreshold?: number;
   /** Lets the fingerprint rung emit a candidate. It can still never produce `verified`. */
   readonly acceptInferredAssociation?: boolean;
+}
+
+/**
+ * A signer the caller controls. The package never sees a private key: it hands over a 32-byte
+ * SHA-256 digest and takes back a signature, so the key can live in WebCrypto, a hardware token or
+ * a remote key-custody service.
+ */
+export interface ExternalSigner {
+  /** The Ed25519 public key the signatures verify under: 64 lowercase hex characters. */
+  readonly publicKeyHex: string;
+  /**
+   * Ed25519 over the given 32 bytes (`Ed25519-SHA256`: the message IS the digest). Must return the
+   * 64-byte signature.
+   */
+  sign(digest: Uint8Array): Promise<Uint8Array | ArrayBuffer> | Uint8Array | ArrayBuffer;
+}
+
+export interface SignOptions {
+  /** RFC 3339 UTC instant to record. Defaults to now, truncated to whole seconds. */
+  readonly signedAt?: string;
+  /** 32 hex characters. Random when absent; supply one only for a reproducible test vector. */
+  readonly locatorSaltHex?: string;
+}
+
+/**
+ * A sealed record. `identity` is never asserted by it: the signature proves key possession, and
+ * only a configured trust anchor attaches a name at verification time.
+ */
+export interface SignedRecord {
+  /** Canonical JSON bytes of the record: publish or embed exactly these. */
+  readonly record: Uint8Array;
+  /** A registry envelope for {@link VerifyOptions.records}. */
+  readonly registryRecord: RegistryRecordEnvelope;
+  readonly signerId: string;
+  readonly locator: string;
+  readonly locatorSalt: string;
+  readonly contentSha256: string;
+  readonly contentBytes: number;
+  readonly decodedAudioSha256: string;
+  readonly signedAt: string;
 }

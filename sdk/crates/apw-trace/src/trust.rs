@@ -8,18 +8,51 @@ use std::collections::BTreeMap;
 use std::path::Path;
 
 use audio_provenance_core::KeyPossessionProof;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::error::TraceError;
 use crate::status::TrustOutcome;
 
 pub const TRUST_STORE_FORMAT: &str = "audio-provenance-trust-store-v0";
 
-/// A resolved anchor: a name, and the authority that vouches for it.
+/// What is known about revocation of the signing key behind a resolved identity.
+///
+/// Four-way on purpose: "not revoked" and "no revocation list was available to ask" are different
+/// statements, and folding the second into the first would let a verifier with no list report a
+/// clean bill of health it never checked.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RevocationStatus {
+    /// No identity was resolved, so there is nothing to revoke.
+    #[default]
+    NotApplicable,
+    /// A revocation list published by the vouching anchor was consulted and does not list the key.
+    CheckedNotRevoked,
+    /// The vouching authority revoked the key. The verdict fails closed.
+    Revoked,
+    /// An identity was resolved but no revocation list from its anchor was available. This is not
+    /// evidence of non-revocation.
+    RevocationUnchecked,
+}
+
+impl RevocationStatus {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::NotApplicable => "not_applicable",
+            Self::CheckedNotRevoked => "checked_not_revoked",
+            Self::Revoked => "revoked",
+            Self::RevocationUnchecked => "revocation_unchecked",
+        }
+    }
+}
+
+/// A resolved anchor: a name, the authority that vouches for it, and whether revocation was checked.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TrustAnchor {
     pub identity: String,
     pub authority: String,
+    /// Only [`RevocationStatus::CheckedNotRevoked`] or [`RevocationStatus::RevocationUnchecked`].
+    pub revocation: RevocationStatus,
 }
 
 #[derive(Debug, Clone)]
@@ -27,6 +60,8 @@ pub enum TrustResolution {
     Anchored(TrustAnchor),
     Unanchored,
     Failed { reason: String },
+    /// The vouching authority revoked this signer. Verdict-wise identical to `Failed`.
+    Revoked { reason: String },
 }
 
 impl TrustResolution {
@@ -34,14 +69,22 @@ impl TrustResolution {
         match self {
             Self::Anchored(_) => TrustOutcome::Anchored,
             Self::Unanchored => TrustOutcome::Unanchored,
-            Self::Failed { .. } => TrustOutcome::Failed,
+            Self::Failed { .. } | Self::Revoked { .. } => TrustOutcome::Failed,
+        }
+    }
+
+    pub const fn revocation(&self) -> RevocationStatus {
+        match self {
+            Self::Anchored(anchor) => anchor.revocation,
+            Self::Revoked { .. } => RevocationStatus::Revoked,
+            Self::Unanchored | Self::Failed { .. } => RevocationStatus::NotApplicable,
         }
     }
 
     pub const fn anchor(&self) -> Option<&TrustAnchor> {
         match self {
             Self::Anchored(anchor) => Some(anchor),
-            Self::Unanchored | Self::Failed { .. } => None,
+            Self::Unanchored | Self::Failed { .. } | Self::Revoked { .. } => None,
         }
     }
 }
@@ -69,8 +112,10 @@ struct TrustStoreFile {
     format: String,
     #[serde(default)]
     anchors: Vec<AnchorEntry>,
+    /// `None` when the document declares no revocation list at all. This store is unsigned, so even
+    /// a declared list is only the operator's assertion; see `resolve`.
     #[serde(default)]
-    revoked: Vec<String>,
+    revoked: Option<Vec<String>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -85,6 +130,7 @@ struct AnchorEntry {
 pub struct FileTrustStore {
     anchors: BTreeMap<String, TrustAnchor>,
     revoked: BTreeMap<String, ()>,
+    revocation_declared: bool,
 }
 
 impl FileTrustStore {
@@ -116,15 +162,22 @@ impl FileTrustStore {
                 TrustAnchor {
                     identity: entry.identity,
                     authority: entry.authority,
+                    revocation: RevocationStatus::RevocationUnchecked,
                 },
             );
         }
+        let revocation_declared = parsed.revoked.is_some();
         let revoked = parsed
             .revoked
+            .unwrap_or_default()
             .into_iter()
             .map(|signer_id| (signer_id, ()))
             .collect();
-        Ok(Self { anchors, revoked })
+        Ok(Self {
+            anchors,
+            revoked,
+            revocation_declared,
+        })
     }
 
     pub fn load(path: &Path) -> Result<Self, TraceError> {
@@ -150,12 +203,22 @@ impl TrustStore for FileTrustStore {
         // Revocation is checked first. An anchor that also appears in the revocation list is a
         // store that contradicts itself, and the safe reading of a contradiction is the refusal.
         if self.revoked.contains_key(signer_id) {
-            return TrustResolution::Failed {
+            return TrustResolution::Revoked {
                 reason: format!("signer {signer_id} is revoked"),
             };
         }
         match self.anchors.get(signer_id) {
-            Some(anchor) => TrustResolution::Anchored(anchor.clone()),
+            Some(anchor) => {
+                let mut anchor = anchor.clone();
+                // A flat store's list is unsigned and names no issuer, so it is credited as a
+                // check only when the operator declared one.
+                anchor.revocation = if self.revocation_declared {
+                    RevocationStatus::CheckedNotRevoked
+                } else {
+                    RevocationStatus::RevocationUnchecked
+                };
+                TrustResolution::Anchored(anchor)
+            }
             None => TrustResolution::Unanchored,
         }
     }

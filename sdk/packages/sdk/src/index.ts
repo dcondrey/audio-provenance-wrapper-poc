@@ -20,7 +20,7 @@ import { readFile } from "node:fs/promises";
 
 import { createClient, AudioProvenanceError, type AudioProvenanceWasm } from "./core.js";
 
-export { AudioProvenanceError } from "./core.js";
+export { AudioProvenanceError, webCryptoSigner } from "./core.js";
 export type { AudioProvenanceClient, AudioProvenanceWasm, PathReader, Runtime } from "./core.js";
 export * from "./public.js";
 
@@ -36,9 +36,10 @@ const client = createClient({
 
 export const verify = client.verify;
 export const inspect = client.inspect;
+export const sign = client.sign;
 export const locators = client.locators;
 export const capabilities = client.capabilities;
 export const statuses = client.statuses;
 export const version = client.version;
 
-export default { verify, inspect, locators, capabilities, statuses, version, AudioProvenanceError };
+export default { verify, inspect, sign, locators, capabilities, statuses, version, AudioProvenanceError };

@@ -56,7 +56,7 @@ pub use c2pa::{
     C2paHardBinding, C2paStore, Exclusion, HARD_BINDING_LABEL, MAX_STORE_BYTES, StoreLocation,
     sidecar_path_for,
 };
-pub use draft::ManifestDraft;
+pub use draft::{ManifestDraft, seal_unsigned_value};
 pub use error::{C2paError, MAX_MANIFEST_BYTES, ManifestError};
 pub use finding::{Finding, Severity, has_errors};
 pub use invariants::{

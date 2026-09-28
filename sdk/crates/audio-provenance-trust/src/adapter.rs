@@ -6,9 +6,9 @@
 //! setter, here or anywhere, that raises a signer's proof level.
 
 use audio_provenance_core::KeyPossessionProof;
-use apw_trace::{TrustAnchor, TrustResolution};
+use apw_trace::{RevocationStatus, TrustAnchor, TrustResolution};
 
-use crate::chain::TrustEvaluation;
+use crate::chain::{Refusal, TrustEvaluation};
 use crate::store::TrustStore;
 use crate::time::Instant;
 
@@ -42,11 +42,21 @@ impl apw_trace::TrustStore for AnchoredTrustStore {
             TrustEvaluation::Vouched(identity) => TrustResolution::Anchored(TrustAnchor {
                 identity: identity.display_name.clone(),
                 authority: identity.authority(),
+                revocation: if identity.revocation_list_consulted {
+                    RevocationStatus::CheckedNotRevoked
+                } else {
+                    RevocationStatus::RevocationUnchecked
+                },
             }),
             TrustEvaluation::NotCovered => TrustResolution::Unanchored,
-            TrustEvaluation::Refused(refusal) => TrustResolution::Failed {
-                reason: format!("{}: {}", refusal.code(), refusal.describe()),
-            },
+            TrustEvaluation::Refused(refusal) => {
+                let reason = format!("{}: {}", refusal.code(), refusal.describe());
+                if matches!(refusal, Refusal::Revoked { .. }) {
+                    TrustResolution::Revoked { reason }
+                } else {
+                    TrustResolution::Failed { reason }
+                }
+            }
         }
     }
 }
