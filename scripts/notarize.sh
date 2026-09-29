@@ -98,6 +98,25 @@ xcrun notarytool history --keychain-profile "${KEYCHAIN_PROFILE}" >/dev/null 2>&
 submit_and_staple "${STAGE_DIR}/${VST3_NAME}" vst3
 submit_and_staple "${STAGE_DIR}/${AU_NAME}" au
 
+# Bundles that package_installer.sh staged for the pkg only (CLAP, VST2, AAX, ...). They are
+# never in the DMG, but the pkg embeds whatever is staged here, so a ticket stapled now
+# travels inside the pkg. Plain directories (LV2) cannot be stapled; the notarized pkg covers them.
+EXTRA_STAGE="$(dirname "${STAGE_DIR}")/extra"
+if [[ -f "$(dirname "${STAGE_DIR}")/formats.txt" ]]; then
+    # shellcheck source=../packaging/lib/formats.sh
+    source "${PROJECT_ROOT}/packaging/lib/formats.sh"
+    while IFS= read -r fmt; do
+        [[ "${fmt}" == vst3 || "${fmt}" == au || -z "${fmt}" ]] && continue
+        if apw_fmt_is_plain_dir "${fmt}"; then
+            echo "NOTE: ${fmt} is a plain directory; it is notarized as part of the pkg, not stapled here."
+            continue
+        fi
+        extra_bundle="${EXTRA_STAGE}/${fmt}/$(apw_fmt_bundle_name "${fmt}")"
+        [[ -d "${extra_bundle}" ]] || die "${fmt} is listed in formats.txt but ${extra_bundle} is missing"
+        submit_and_staple "${extra_bundle}" "${fmt}"
+    done < "$(dirname "${STAGE_DIR}")/formats.txt"
+fi
+
 step "Rebuilding the DMG around the stapled bundles"
 "${SCRIPT_DIR}/package_installer.sh" --dmg-only \
     || die "could not rebuild the DMG from the stapled bundles"

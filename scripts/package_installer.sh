@@ -37,9 +37,16 @@ DMG_SCRIPTS=("Install Plug-Ins.command" "Start Capture Daemon.command")
 SOURCE_REVISION_FILE=".apw-source-revision"
 FATWHEEL_DIR="${BUILD_DIR}/fatwheel"
 SOURCE_REVISION=""
+DMG_ENABLED=1
 
 VST3_NAME="Audio Provenance Capture.vst3"
 AU_NAME="Audio Provenance Capture.component"
+
+# Which plug-in formats to build, sign and stage: APW_INSTALL_FORMATS=vst3,au,clap,lv2,...
+# vst3 and au also feed the DMG; every other format is staged under stage/extra/ for the pkg.
+# shellcheck source=../packaging/lib/formats.sh
+source "${PROJECT_ROOT}/packaging/lib/formats.sh"
+apw_parse_formats "${APW_INSTALL_FORMATS:-}" || exit 1
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 step() { echo; echo "==> $*"; }
@@ -91,34 +98,98 @@ resolve_identity() {
 }
 
 # ------------------------------------------------------------------- build ---
+fmt_artefact() {
+    echo "${ARTEFACT_DIR}/$(apw_fmt_artefact_subdir "$1")/$(apw_fmt_bundle_name "$1")"
+}
+
+# Configure flags and build targets for the selected formats. AUv3 needs the Xcode generator
+# and a Standalone container app, which this script's Makefile/Ninja build cannot produce, so
+# it is only picked up when a prebuilt container is already in ${ARTEFACT_DIR}/Standalone.
+format_cmake_flags() {
+    local fmt
+    for fmt in "${APW_FORMATS[@]}"; do
+        case "${fmt}" in
+            clap) echo "-DAPW_BUILD_CLAP=ON" ;;
+            lv2) echo "-DAPW_BUILD_LV2=ON" ;;
+            vst2) [[ -n "${APW_VST2_SDK_PATH:-}" ]] || die "vst2 needs APW_VST2_SDK_PATH"
+                  echo "-DAPW_VST2_SDK_PATH=${APW_VST2_SDK_PATH}" ;;
+            aax) [[ -n "${APW_AAX_SDK_PATH:-}" ]] || die "aax needs APW_AAX_SDK_PATH"
+                 echo "-DAPW_AAX_SDK_PATH=${APW_AAX_SDK_PATH}" ;;
+        esac
+    done
+}
+format_build_targets() {
+    local fmt
+    for fmt in "${APW_FORMATS[@]}"; do
+        [[ "${fmt}" == auv3 ]] && continue
+        echo "AudioProvenanceCapture_$(apw_fmt_artefact_subdir "${fmt}")"
+    done
+}
+
+# die inside the process substitutions below would not stop the script, so SDK paths are
+# checked here in the main shell before any configure.
+validate_format_inputs() {
+    local fmt
+    for fmt in "${APW_FORMATS[@]}"; do
+        case "${fmt}" in
+            vst2) [[ -d "${APW_VST2_SDK_PATH:-}" ]] || die "vst2 needs APW_VST2_SDK_PATH pointing at the legacy Steinberg SDK" ;;
+            aax) [[ -d "${APW_AAX_SDK_PATH:-}" ]] || die "aax needs APW_AAX_SDK_PATH pointing at the Avid AAX SDK" ;;
+        esac
+    done
+}
+
 build_plugins() {
-    local vst3="${ARTEFACT_DIR}/VST3/${VST3_NAME}" au="${ARTEFACT_DIR}/AU/${AU_NAME}"
-    local stamp="${ARTEFACT_DIR}/${SOURCE_REVISION_FILE}" cached=""
+    validate_format_inputs
+    local stamp="${ARTEFACT_DIR}/${SOURCE_REVISION_FILE}" cached="" fmt all_present=1
     SOURCE_REVISION="$(source_revision)"
+    for fmt in "${APW_FORMATS[@]}"; do
+        [[ -e "$(fmt_artefact "${fmt}")" ]] || all_present=0
+    done
     [[ -f "${stamp}" ]] && cached="$(cat "${stamp}")"
-    if [[ -d "${vst3}" && -d "${au}" && "${APW_FORCE_BUILD:-0}" != "1" \
-          && "${cached}" == "${SOURCE_REVISION}" ]]; then
+    if [[ "${all_present}" == 1 && "${APW_FORCE_BUILD:-0}" != "1" && "${cached}" == "${SOURCE_REVISION}" ]]; then
         echo "Reusing the build in ${ARTEFACT_DIR} at source revision ${SOURCE_REVISION} (APW_FORCE_BUILD=1 to rebuild)."
     else
-        if [[ -d "${vst3}" && -d "${au}" && "${APW_FORCE_BUILD:-0}" != "1" ]]; then
+        if [[ "${all_present}" == 1 && "${APW_FORCE_BUILD:-0}" != "1" ]]; then
             echo "Cached build is at source revision ${cached:-none}, but src/ + CMakeLists.txt now hash to ${SOURCE_REVISION}."
             echo "Rebuilding rather than shipping a stale binary."
         fi
-        step "Building universal VST3 + AU"
+        step "Building universal ${APW_FORMATS[*]}"
+        local -a flags targets
+        while IFS= read -r line; do [[ -n "${line}" ]] && flags+=("${line}"); done < <(format_cmake_flags)
+        while IFS= read -r line; do [[ -n "${line}" ]] && targets+=("${line}"); done < <(format_build_targets)
         cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}" \
             -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
             -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
+            ${flags[@]+"${flags[@]}"} \
             || die "cmake configure failed"
         cmake --build "${BUILD_DIR}" --config "${BUILD_TYPE}" \
-            --target AudioProvenanceCapture_VST3 AudioProvenanceCapture_AU \
+            --target ${targets[@]+"${targets[@]}"} \
             || die "cmake build failed"
     fi
-    [[ -d "${vst3}" ]] || die "VST3 bundle missing: ${vst3}"
-    [[ -d "${au}" ]] || die "AU bundle missing: ${au}"
+    for fmt in "${APW_FORMATS[@]}"; do
+        [[ -e "$(fmt_artefact "${fmt}")" ]] || die "${fmt} artefact missing: $(fmt_artefact "${fmt}")"
+    done
     printf '%s\n' "${SOURCE_REVISION}" > "${stamp}"
-    assert_universal "${vst3}/Contents/MacOS/Audio Provenance Capture"
-    assert_universal "${au}/Contents/MacOS/Audio Provenance Capture"
+    local exe
+    for fmt in "${APW_FORMATS[@]}"; do
+        apw_fmt_is_plain_dir "${fmt}" && continue
+        exe="$(fmt_main_binary "$(fmt_artefact "${fmt}")")" \
+            || die "${fmt}: no Mach-O executable found in $(fmt_artefact "${fmt}")"
+        assert_universal "${exe}"
+    done
+}
+
+# The main Mach-O of a bundle, or, for a plain directory, the first Mach-O inside it.
+fmt_main_binary() {
+    local bundle="$1" f
+    if [[ -d "${bundle}/Contents/MacOS" ]]; then
+        f="$(find "${bundle}/Contents/MacOS" -type f | head -1)"
+    else
+        f="$(find "${bundle}" -type f \( -name '*.so' -o -name '*.dylib' \) | head -1)"
+    fi
+    [[ -n "${f}" ]] || return 1
+    printf '%s\n' "${f}"
 }
 
 assert_universal() {
@@ -364,26 +435,35 @@ stage_bundles() {
     rm -rf "${STAGE_DIR}"
     mkdir -p "${DMG_STAGE}"
 
-    ditto "${ARTEFACT_DIR}/VST3/${VST3_NAME}" "${DMG_STAGE}/${VST3_NAME}" || die "could not stage the VST3"
-    ditto "${ARTEFACT_DIR}/AU/${AU_NAME}" "${DMG_STAGE}/${AU_NAME}" || die "could not stage the AU"
-
-    local bundle
-    for bundle in "${DMG_STAGE}/${VST3_NAME}" "${DMG_STAGE}/${AU_NAME}"; do
-        rm -rf "${bundle}/Contents/Resources/${DAEMON_DIR_NAME}"
-        mkdir -p "${bundle}/Contents/Resources"
-        ditto "${FROZEN_DIR}" "${bundle}/Contents/Resources/${DAEMON_DIR_NAME}" \
-            || die "could not inject the frozen daemon into ${bundle}"
+    local fmt staged bundle
+    for fmt in "${APW_FORMATS[@]}"; do
+        staged="$(apw_fmt_staged_path "${fmt}")"
+        mkdir -p "$(dirname "${staged}")"
+        ditto "$(fmt_artefact "${fmt}")" "${staged}" || die "could not stage the ${fmt} format"
+        # Bundles carry the frozen daemon so a plug-in loaded from any format can find it.
+        # Plain directories (LV2) have no Contents/ and rely on the daemon pkg component.
+        if [[ -d "${staged}/Contents" ]]; then
+            rm -rf "${staged}/Contents/Resources/${DAEMON_DIR_NAME}"
+            mkdir -p "${staged}/Contents/Resources"
+            ditto "${FROZEN_DIR}" "${staged}/Contents/Resources/${DAEMON_DIR_NAME}" \
+                || die "could not inject the frozen daemon into ${staged}"
+            printf '%s\n' "${SOURCE_REVISION}" > "${staged}/Contents/Resources/apw-source-revision.txt"
+        fi
     done
-
-    printf '%s\n' "${SOURCE_REVISION}" > "${DMG_STAGE}/${VST3_NAME}/Contents/Resources/apw-source-revision.txt"
-    printf '%s\n' "${SOURCE_REVISION}" > "${DMG_STAGE}/${AU_NAME}/Contents/Resources/apw-source-revision.txt"
+    # The DMG needs both of its formats. A pkg-only selection leaves the DMG unbuilt.
+    if [[ ! -d "${DMG_STAGE}/${VST3_NAME}" || ! -d "${DMG_STAGE}/${AU_NAME}" ]]; then
+        DMG_ENABLED=0
+    fi
+    printf '%s\n' "${APW_FORMATS[@]}" > "${STAGE_DIR}/formats.txt"
 
     # Drag-drop targets. These system directories need admin rights, so Finder authenticates on
     # drop; "Install Plug-Ins.command" stays as the non-interactive path for anyone it refuses.
-    ln -sfn "/Library/Audio/Plug-Ins/VST3" "${DMG_STAGE}/VST3" \
-        || die "could not create the VST3 drop symlink"
-    ln -sfn "/Library/Audio/Plug-Ins/Components" "${DMG_STAGE}/Components" \
-        || die "could not create the Components drop symlink"
+    if [[ "${DMG_ENABLED}" == 1 ]]; then
+        ln -sfn "/Library/Audio/Plug-Ins/VST3" "${DMG_STAGE}/VST3" \
+            || die "could not create the VST3 drop symlink"
+        ln -sfn "/Library/Audio/Plug-Ins/Components" "${DMG_STAGE}/Components" \
+            || die "could not create the Components drop symlink"
+    fi
 
     # REQUIRED: stock macOS ships no /Library/Audio/Plug-Ins/VST3, and a disk image
     # cannot create one, so a drag-and-drop alias to it dangles on every recipient's
@@ -468,14 +548,40 @@ sign_stage() {
     step "Signing inside-out with ${IDENTITY}"
     [[ -f "${DAEMON_ENTITLEMENTS}" ]] \
         || die "missing ${DAEMON_ENTITLEMENTS}; the frozen daemon would be signed without allow-unsigned-executable-memory and livelock on x86_64."
-    sign_bundle_inside_out "${DMG_STAGE}/${VST3_NAME}"
-    sign_bundle_inside_out "${DMG_STAGE}/${AU_NAME}"
+    local fmt staged
+    for fmt in "${APW_FORMATS[@]}"; do
+        staged="$(apw_fmt_staged_path "${fmt}")"
+        if apw_fmt_is_plain_dir "${fmt}"; then
+            sign_plain_dir "${staged}"
+        else
+            sign_bundle_inside_out "${staged}"
+        fi
+    done
+}
+
+# A plain directory (LV2) cannot carry a bundle signature, so each Mach-O in it is signed
+# and verified on its own. It cannot be stapled either; notarization covers it via the pkg.
+sign_plain_dir() {
+    local dir="$1" f count=0
+    echo "Signing Mach-O files in ${dir##*/}"
+    while IFS= read -r f; do
+        sign_one "${f}"
+        codesign --verify --strict "${f}" || die "codesign verification failed for ${f}"
+        count=$((count + 1))
+    done < <(macho_files "${dir}")
+    [[ "${count}" -gt 0 ]] || die "no Mach-O files found in ${dir}; nothing to sign"
+    echo "  signed ${count} Mach-O files"
 }
 
 # --------------------------------------------------------------- run check ---
 check_slices_run() {
     step "Executing both slices of the frozen daemon"
-    local exe="${DMG_STAGE}/${VST3_NAME}/Contents/Resources/${DAEMON_DIR_NAME}/${DAEMON_DIR_NAME}"
+    local exe="" fmt cand
+    for fmt in "${APW_FORMATS[@]}"; do
+        cand="$(apw_fmt_staged_path "${fmt}")/Contents/Resources/${DAEMON_DIR_NAME}/${DAEMON_DIR_NAME}"
+        [[ -x "${cand}" ]] && { exe="${cand}"; break; }
+    done
+    [[ -n "${exe}" ]] || die "no selected format carries the frozen daemon; select a bundle format (vst3, au, clap, ...)"
     exercise_slice arm64 "${exe}" || die "the arm64 slice of the frozen daemon failed its gate"
 
     # IMPORTANT: an absent Rosetta 2 and a broken x86_64 slice are different facts.
@@ -552,11 +658,15 @@ main() {
     stage_bundles
     sign_stage
     check_slices_run
-    build_dmg
-
     step "Result"
-    echo "DMG            : ${DMG_PATH}"
-    echo "Size           : $(du -h "${DMG_PATH}" | cut -f1)"
+    echo "Formats        : ${APW_FORMATS[*]}"
+    if [[ "${DMG_ENABLED}" == 1 ]]; then
+        build_dmg
+        echo "DMG            : ${DMG_PATH}"
+        echo "Size           : $(du -h "${DMG_PATH}" | cut -f1)"
+    else
+        echo "DMG            : skipped (needs both vst3 and au); build the pkg with scripts/package_pkg.sh"
+    fi
     echo "Signed with    : ${IDENTITY}"
     echo "Source revision: ${SOURCE_REVISION}"
     echo "Engine pins    : c2pa-python==${C2PA_PIN}, cbor2==${CBOR2_PIN}"
