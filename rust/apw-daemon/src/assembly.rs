@@ -705,6 +705,11 @@ the host did outside the capture path.";
 /// `derive_host_environment`: recognition and identity are separate, so an
 /// unrecognised host is never read back as a host named "Unknown".
 pub fn derive_host_environment(snapshot: &SessionSnapshot) -> Value {
+    derive_host_environment_for(snapshot, crate::host_identity::current_platform())
+}
+
+/// [`derive_host_environment`] for an explicit platform (`None` matches any).
+pub fn derive_host_environment_for(snapshot: &SessionSnapshot, platform: Option<&str>) -> Value {
     let unknown = |status: &str, basis: String| {
         json!({
             "status": status,
@@ -732,6 +737,34 @@ pub fn derive_host_environment(snapshot: &SessionSnapshot) -> Value {
     }
     let field = |key: &str| observed.get(key).cloned().unwrap_or(Value::Null);
     let recognised = observed.get("host_recognised") == Some(&Value::Bool(true));
+    if !recognised {
+        // IMPORTANT: only here. A wrapper-recognised host is never overridden, and a
+        // table hit is an inference from a process name, never an observation.
+        let executable = observed.get("host_executable_name").and_then(Value::as_str);
+        match crate::host_identity::identify_host(executable, false, None, platform) {
+            Ok(identity) if identity.identification == crate::host_identity::IDENT_INFERRED => {
+                return json!({
+                    "status": "host_inferred",
+                    "host_recognised": false,
+                    "host_name": identity.host_name,
+                    "host_executable_name": field("host_executable_name"),
+                    "wrapper_format": field("wrapper_format"),
+                    "identification": identity.identification,
+                    "host_id": identity.host_id,
+                    "source_url": identity.source_url,
+                    "basis": "The plug-in wrapper did not recognise the host application. Its executable \
+                              file name matched an entry in the host executable table, so the host is \
+                              inferred from that name; any program can carry any file name.",
+                    "scope": HOST_ENVIRONMENT_SCOPE,
+                    PROOF_LEVEL_KEY: identity.proof_level,
+                });
+            }
+            Ok(_) => {}
+            Err(error) => {
+                log::warn!("Host executable table unusable; not identifying the host: {error}");
+            }
+        }
+    }
     json!({
         "status": if recognised { "observed" } else { "host_unrecognised" },
         "host_recognised": recognised,

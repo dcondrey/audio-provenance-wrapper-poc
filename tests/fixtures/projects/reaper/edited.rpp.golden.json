@@ -1,0 +1,136 @@
+{
+  "automation_point_count": 3,
+  "clip_count": 4,
+  "clip_hashes": [
+    "19360b793c1eb60a",
+    "4dadade8cdd968d1",
+    "9f46ac9e8a574a52",
+    "a64a7ec90338f2af"
+  ],
+  "clip_slot_hashes": [
+    [
+      "{11111111-0000-0000-0000-000000000002}",
+      "{22222222-0000-0000-0000-000000000001}",
+      "19360b793c1eb60a"
+    ],
+    [
+      "{11111111-0000-0000-0000-000000000002}",
+      "{22222222-0000-0000-0000-000000000002}",
+      "a64a7ec90338f2af"
+    ],
+    [
+      "{11111111-0000-0000-0000-000000000002}",
+      "{22222222-0000-0000-0000-000000000003}",
+      "4dadade8cdd968d1"
+    ],
+    [
+      "{11111111-0000-0000-0000-000000000002}",
+      "{22222222-0000-0000-0000-000000000009}",
+      "9f46ac9e8a574a52"
+    ]
+  ],
+  "device_chain_hashes": [
+    "89bbb2eb6a3c5f92"
+  ],
+  "file_hash": "e8258594e232a66172a2802f60ed20bcc5748be3ede3c611556e788a36df9301",
+  "file_size_bytes": 1664,
+  "locator_count": 1,
+  "midi_note_count": 2,
+  "project_format": "reaper_rpp",
+  "sample_rate": 48000,
+  "sample_refs": [
+    "/abs/path/snare.flac",
+    "Media/kick loop.wav",
+    "Media/new.wav"
+  ],
+  "track_count": 2,
+  "track_names": [
+    "Drums",
+    "Kick and Snare"
+  ],
+  "tracks": [
+    {
+      "automation_point_count": 3,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "89bbb2eb6a3c5f92"
+      ],
+      "device_presets": [
+        "",
+        ""
+      ],
+      "devices": [
+        "VST3: ReaEQ (Cockos)",
+        "utility/gain"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Drums",
+      "sample_paths": [],
+      "track_id": "{11111111-0000-0000-0000-000000000001}",
+      "track_type": "FolderTrack"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 4,
+      "clips": [
+        {
+          "is_midi": false,
+          "length_beats": 1.6666666666666667,
+          "name": "added",
+          "position_beats": 33.333333333333336,
+          "sample_ref": "Media/new.wav",
+          "warp_on": false
+        },
+        {
+          "is_midi": false,
+          "length_beats": 5.0,
+          "name": "kick loop",
+          "position_beats": 2.5,
+          "sample_ref": "Media/kick loop.wav",
+          "warp_on": false
+        },
+        {
+          "is_midi": true,
+          "length_beats": 2.5,
+          "name": "midi part",
+          "position_beats": 10.0,
+          "sample_ref": "",
+          "warp_on": false
+        },
+        {
+          "is_midi": false,
+          "length_beats": 3.3333333333333335,
+          "name": "section",
+          "position_beats": 15.0,
+          "sample_ref": "/abs/path/snare.flac",
+          "warp_on": false
+        }
+      ],
+      "device_chain_hashes": [],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 2,
+      "name": "Kick and Snare",
+      "sample_paths": [
+        "Media/new.wav",
+        "Media/kick loop.wav",
+        "/abs/path/snare.flac"
+      ],
+      "track_id": "{11111111-0000-0000-0000-000000000002}",
+      "track_type": "Track"
+    }
+  ],
+  "transport_bpm": 100.0,
+  "transport_loop_on": true,
+  "transport_loop_range": [
+    0.0,
+    0.0
+  ],
+  "transport_time_signature": [
+    3,
+    4
+  ]
+}

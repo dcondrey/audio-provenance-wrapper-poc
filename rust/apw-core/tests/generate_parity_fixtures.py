@@ -252,6 +252,21 @@ def schema_cases() -> list[dict[str, object]]:
         "apw:proof_level": "inferred",
     }
 
+    inferred_ok = json.loads(json.dumps(valid))
+    inferred_ok["host_environment"] = {
+        "status": "host_inferred", "host_recognised": False, "host_name": "LMMS",
+        "host_executable_name": "lmms", "wrapper_format": "VST3",
+        "identification": "inferred_from_executable_name", "host_id": "lmms",
+        "source_url": "https://example.org/lmms", "apw:proof_level": "inferred",
+    }
+    inferred_overclaim = json.loads(json.dumps(inferred_ok))
+    inferred_overclaim["host_environment"]["apw:proof_level"] = "directly_observed"
+    inferred_overclaim["host_environment"]["host_recognised"] = True
+    inferred_overclaim["host_environment"]["host_name"] = ""
+    inferred_overclaim["host_environment"]["identification"] = "juce_plugin_host_type"
+    inferred_overclaim["host_environment"]["host_id"] = ""
+    inferred_overclaim["host_environment"].pop("source_url")
+
     not_an_object = ["nope"]
 
     return [
@@ -269,6 +284,8 @@ def schema_cases() -> list[dict[str, object]]:
             ("host_environment_unidentified_violations", host_bad),
             ("host_environment_status_invalid", host_status_bad),
             ("host_environment_unnamed_violations", host_unnamed_bad),
+            ("host_environment_inferred_valid", inferred_ok),
+            ("host_environment_inferred_violations", inferred_overclaim),
             ("nesting_overflow", deep(70)),
             ("not_an_object", not_an_object),
         )

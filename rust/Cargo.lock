@@ -186,6 +186,7 @@ name = "apw-daemon"
 version = "0.9.0"
 dependencies = [
  "apw-core",
+ "flate2",
  "getrandom 0.2.17",
  "log",
  "rcgen",
@@ -195,6 +196,7 @@ dependencies = [
  "tempfile",
  "thiserror 2.0.20",
  "webpki-roots",
+ "zip",
 ]
 
 [[package]]
@@ -3451,6 +3453,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2d04a6b5381502aa6087c94c669499eb1602eb9c5e8198e534de571f7154809b"
 dependencies = [
  "crc32fast",
+ "flate2",
  "indexmap 2.14.1",
  "memchr",
  "typed-path",

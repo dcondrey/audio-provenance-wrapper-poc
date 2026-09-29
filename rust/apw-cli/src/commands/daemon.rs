@@ -42,6 +42,7 @@ pub fn run(args: &DaemonArgs) -> Result<i32> {
         manifest_dir: expand_user(&args.manifest_dir),
         sample_dir: expand_user(&args.sample_dir),
         export_dir: args.export_dir.as_ref().map(|path| expand_user(path)),
+        project: args.project.as_ref().map(|path| expand_user(path)),
         session_id: args.session_id.clone(),
         stem_id: args.stem_id.clone(),
         source_category,
@@ -121,12 +122,6 @@ fn install_termination_handler() {
 /// that silently does nothing is the failure mode this project's charter is
 /// most against.
 fn warn_about_uncompiled_engines(args: &DaemonArgs) {
-    if args.project.is_some() {
-        log::warn!(
-            "--project is accepted but no saved-project watcher is compiled into the native \
-             daemon; the manifest will carry no session_facts and no project sample ingredients"
-        );
-    }
     if args.open_artifacts {
         log::warn!(
             "--open-artifacts is accepted but the native daemon does not render the HTML fight \

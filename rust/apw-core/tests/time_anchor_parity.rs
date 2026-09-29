@@ -341,9 +341,12 @@ fn validate(
     Ok(())
 }
 
-/// Only `^[0-9a-f]{N}$` occurs in the schema. Anything else fails the test so a
-/// new pattern cannot pass unchecked.
+/// Only `^[0-9a-f]{N}$` and `^https://` occur in the schema. Anything else fails
+/// the test so a new pattern cannot pass unchecked.
 fn matches_hex_pattern(pattern: &str, value: &str) -> Result<bool, Box<dyn std::error::Error>> {
+    if let Some(prefix) = pattern.strip_prefix('^').filter(|rest| *rest == "https://") {
+        return Ok(value.starts_with(prefix));
+    }
     let length = pattern
         .strip_prefix("^[0-9a-f]{")
         .and_then(|rest| rest.strip_suffix("}$"))

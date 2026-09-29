@@ -92,8 +92,43 @@ class SessionFixtureTests(unittest.TestCase):
     def test_host_environment_and_regression_cases_cover_each_branch(self):
         cases = json.loads((PARITY / "session_state.json").read_text())
         statuses = {case["host_environment"]["status"] for case in cases}
-        self.assertEqual(statuses, {"unobserved", "observed", "host_unrecognised", "conflicting_observations"})
+        self.assertEqual(statuses, {"unobserved", "observed", "host_inferred", "host_unrecognised", "conflicting_observations"})
         self.assertTrue(any(case["telemetry_regressions"] > 0 for case in cases))
+
+
+class ProjectFixtureTests(unittest.TestCase):
+    """Golden snapshots and parity vectors the Rust project parsers are checked against."""
+
+    def test_vectors_and_goldens_are_current(self):
+        import gzip
+
+        generator = _load("parity_project_generator", PARITY / "generate_project_fixtures.py")
+        self.assertEqual(
+            json.loads(json.dumps(generator.build_payload(), ensure_ascii=False)),
+            json.loads((PARITY / "project_parity.json").read_text()),
+        )
+        projects = PARITY.parent / "projects"
+        for name in ("basic", "edited"):
+            self.assertEqual(gzip.decompress((projects / "als" / f"{name}.als").read_bytes()), generator.als_document(name))
+            self.assertEqual(
+                (projects / "reaper" / f"{name}.rpp").read_bytes(),
+                (PARITY.parent / "reaper" / f"{name}.rpp").read_bytes(),
+            )
+        goldens = sorted(projects.rglob("*.golden.json"))
+        self.assertGreaterEqual(len(goldens), 10)
+        from daemon.project_formats import parse_project
+        from daemon.project_formats._snapshot import golden_json
+
+        for golden in goldens:
+            source = golden.with_name(golden.name[: -len(".golden.json")])
+            self.assertEqual(golden.read_text(), golden_json(parse_project(source)), source.name)
+
+    def test_the_rehearsal_manifest_carries_a_project_and_an_inferred_host(self):
+        manifest = json.loads((PARITY / "manifest_rehearsal.json").read_text())["manifest"]
+        self.assertEqual(manifest["session_facts"]["apw:proof_level"], "inferred")
+        self.assertEqual(manifest["host_environment"]["status"], "host_inferred")
+        self.assertEqual(manifest["host_environment"]["apw:proof_level"], "inferred")
+        self.assertNotIn("layer_project_differ_not_active", manifest["apw:unobserved"])
 
 
 class KeyPathTests(unittest.TestCase):

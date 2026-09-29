@@ -197,3 +197,21 @@ so a port must reproduce that canonicalisation to match them.
 
 `.mod` is also used by unrelated tools; the entry only matters where a project
 path is explicitly watched.
+
+## Rust port
+
+`rust/apw-daemon/src/project/` reads the same formats with the same limits (`safe::Limits` holds every cap so tests can lower one). `apw daemon --project <file>` starts the saved-project watcher: it writes `project_diff` events, marks the `project_differ` layer active, and puts `session_facts` and the project sample references into the manifest, exactly as the Python daemon does.
+
+Verification, all against the Python oracle:
+
+- `rust/apw-daemon/tests/project_parity.rs` compares every `tests/fixtures/projects/**/*.golden.json` byte for byte on the canonical JSON, and also the registry (including every unsupported reason), the `project_format_unsupported` events, the differ, `session_facts`, and 88 XML documents (accepted or refused, canonical form, and the `ET.tostring` serialisation the `.als` hashes depend on).
+- `rust/apw-daemon/tests/project_hardening.rs` covers limit-1, limit and limit+1 for every cap, traversal names, duplicate zip members, decompression bombs, and DTD/entity refusal. These inputs are constructed.
+- The manifest key-path parity test runs a session with `--project tests/fixtures/projects/lmms/basic.mmp`.
+
+The `reaper` and `als` golden fixtures were added for this port: `reaper/*.rpp` are copies of `tests/fixtures/reaper/`, and `als/*.als` are constructed Live sets (`tests/fixtures/parity/generate_project_fixtures.py`), not files saved by Live.
+
+Known differences from the Python readers, none reachable from the committed fixtures:
+
+- XML namespaces and declared encodings other than UTF-8 are unsupported in the `.als` reader (Python's ElementTree honours both); such a file is refused. The `.als` reader also caps depth at 1024, where Python has no cap.
+- Number parsing understands ASCII digits only; Python's `float()` and `int()` also accept other Unicode decimal digits.
+- A ZIP whose central directory cannot be walked (ZIP64) is validated by the zip reader alone, so a repeated member name there is not detected.

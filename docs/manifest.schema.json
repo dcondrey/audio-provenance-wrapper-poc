@@ -101,9 +101,12 @@
           "properties": {
             "status": {
               "enum": [
-                "observed", "host_unrecognised", "conflicting_observations", "unobserved"
+                "observed", "host_inferred", "host_unrecognised", "conflicting_observations", "unobserved"
               ]
             },
+            "identification": { "enum": ["inferred_from_executable_name"] },
+            "host_id": { "type": "string", "minLength": 1 },
+            "source_url": { "type": "string", "pattern": "^https://" },
             "host_recognised": { "type": "boolean" },
             "host_name": { "type": ["string", "null"] },
             "host_executable_name": { "type": ["string", "null"] },

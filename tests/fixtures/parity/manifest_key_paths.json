@@ -24,6 +24,7 @@
         "claim_summary",
         "c2pa_mapping",
         "c2pa_claim",
+        "session_facts",
         "evidence_binding",
         "presentation",
         "downstream_registration_handoff",
@@ -1216,6 +1217,9 @@
         "host_name",
         "host_executable_name",
         "wrapper_format",
+        "identification",
+        "host_id",
+        "source_url",
         "basis",
         "scope",
         "apw:proof_level"
@@ -1235,19 +1239,37 @@
     },
     "/host_environment/host_name": {
       "kinds": [
-        "null"
+        "str"
       ],
       "keys": null
     },
     "/host_environment/host_executable_name": {
       "kinds": [
-        "null"
+        "str"
       ],
       "keys": null
     },
     "/host_environment/wrapper_format": {
       "kinds": [
-        "null"
+        "str"
+      ],
+      "keys": null
+    },
+    "/host_environment/identification": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/host_environment/host_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/host_environment/source_url": {
+      "kinds": [
+        "str"
       ],
       "keys": null
     },
@@ -2129,6 +2151,34 @@
       ],
       "keys": null
     },
+    "/c2pa_claim/unresolved_ingredient_references[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "reference",
+        "reason",
+        "apw:proof_level"
+      ]
+    },
+    "/c2pa_claim/unresolved_ingredient_references[]/reference": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/unresolved_ingredient_references[]/reason": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/c2pa_claim/unresolved_ingredient_references[]/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
     "/c2pa_claim/scope": {
       "kinds": [
         "str"
@@ -2136,6 +2186,261 @@
       "keys": null
     },
     "/c2pa_claim/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "apw:proof_level",
+        "observation_basis",
+        "bpm",
+        "time_signature",
+        "loop_on",
+        "track_count",
+        "clip_count",
+        "sample_refs",
+        "tracks"
+      ]
+    },
+    "/session_facts/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/observation_basis": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/bpm": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/session_facts/time_signature": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/loop_on": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/session_facts/track_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_facts/clip_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_facts/sample_refs": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/session_facts/sample_refs[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "name",
+        "type",
+        "devices",
+        "device_presets",
+        "sample_paths",
+        "clips",
+        "clip_count",
+        "midi_note_count",
+        "automation_point_count",
+        "routing_input",
+        "routing_output",
+        "sends",
+        "group_id",
+        "is_frozen",
+        "color_index"
+      ]
+    },
+    "/session_facts/tracks[]/name": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/type": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/devices": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/devices[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/device_presets": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/device_presets[]": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/sample_paths": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/clips": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/clips[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "name",
+        "position_beats",
+        "length_beats",
+        "sample_ref",
+        "warp_on",
+        "is_midi"
+      ]
+    },
+    "/session_facts/tracks[]/clips[]/name": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/clips[]/position_beats": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/clips[]/length_beats": {
+      "kinds": [
+        "float"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/clips[]/sample_ref": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/clips[]/warp_on": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/clips[]/is_midi": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/clip_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/midi_note_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/automation_point_count": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/routing_input": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/routing_output": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/sends": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/group_id": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/is_frozen": {
+      "kinds": [
+        "bool"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/color_index": {
+      "kinds": [
+        "int"
+      ],
+      "keys": null
+    },
+    "/session_facts/tracks[]/sample_paths[]": {
       "kinds": [
         "str"
       ],

@@ -34,7 +34,7 @@ c2pa = { version = "0.90.16", default-features = false, features = ["rust_native
 serde = { version = "1.0.228", features = ["derive"] }
 # REQUIRED: preserve_order keeps the pretty manifest in Python's insertion order.
 # Canonicalization sorts explicitly and never relies on map iteration order.
-serde_json = { version = "1.0.145", features = ["preserve_order", "float_roundtrip", "arbitrary_precision"] }
+serde_json = { version = "1.0.145", features = ["preserve_order", "float_roundtrip", "arbitrary_precision", "unbounded_depth"] }
 thiserror = "2.0.17"
 sha2 = "0.10.9"
 hmac = "0.12.1"
@@ -47,7 +47,8 @@ rcgen = { version = "0.14.10", features = ["pem", "x509-parser"] }
 x509-parser = "0.18.1"
 p256 = { version = "0.13.2", features = ["ecdsa", "pem"] }
 time = { version = "0.3.44", features = ["formatting", "parsing", "macros"] }
-zip = { version = "2.4.2", default-features = false, features = ["deflate"] }
+zip = { version = "8.6.0", default-features = false, features = ["deflate-flate2"] }
+flate2 = "1"
 clap = { version = "4.5.53", features = ["derive"] }
 log = "0.4.28"
 env_logger = "0.11.8"

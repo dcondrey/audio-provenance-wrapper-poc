@@ -250,6 +250,7 @@ fn run_session(root: &Path, events: &[Value]) -> Value {
         .args(["--source-category", "generator"])
         .args(["--time-anchor", &tsa])
         .args(["--ots-calendar", &calendar])
+        .args(["--project".as_ref(), Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/projects/lmms/basic.mmp").as_os_str()])
         .args(["--signing-key".as_ref(), key("local.key").as_os_str()])
         .args(["--portable-private-key".as_ref(), key("pp.key").as_os_str()])
         .args(["--portable-public-key".as_ref(), key("pub.key").as_os_str()])

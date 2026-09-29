@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -24,6 +25,7 @@ from typing import TYPE_CHECKING
 from daemon.audio_association import associate_export
 from daemon.bundle import create_evidence_bundle
 from daemon.common import sha256_file, sha256_prefix
+from daemon.host_identity import IDENT_INFERRED, HostTableError, identify_host
 from daemon.forgery_analysis.analyzer import (
     AudioStreamAnalyzer,
     ForgeryReport,
@@ -76,7 +78,65 @@ _HOST_ENVIRONMENT_SCOPE = (
 )
 
 
-def derive_host_environment(daemon: "Daemon") -> dict[str, object]:
+def derive_session_facts(snap) -> dict[str, object]:
+    """The `session_facts` manifest section for the latest parsed project snapshot."""
+    return {
+        "apw:proof_level": "inferred",
+        "observation_basis": (
+            "Structural facts inferred by parsing the saved Ableton .als file; "
+            "Ableton does not provide this project with a supported semantic API."
+        ),
+        "bpm": snap.transport_bpm,
+        "time_signature": f"{snap.transport_time_signature[0]}/{snap.transport_time_signature[1]}",
+        "loop_on": snap.transport_loop_on,
+        "track_count": snap.track_count,
+        "clip_count": snap.clip_count,
+        "sample_refs": sorted(snap.sample_refs),
+        "tracks": [
+            {
+                "name": t.name,
+                "type": t.track_type,
+                "devices": list(t.devices),
+                "device_presets": list(t.device_presets),
+                "sample_paths": list(t.sample_paths),
+                "clips": [
+                    {
+                        "name": c.name,
+                        "position_beats": c.position_beats,
+                        "length_beats": c.length_beats,
+                        "sample_ref": c.sample_ref,
+                        "warp_on": c.warp_on,
+                        "is_midi": c.is_midi,
+                    }
+                    for c in t.clips
+                ],
+                "clip_count": t.clip_count,
+                "midi_note_count": t.midi_note_count,
+                "automation_point_count": t.automation_point_count,
+                "routing_input": t.routing_input,
+                "routing_output": t.routing_output,
+                "sends": [{"target": s.target, "level": s.level} for s in t.sends],
+                "group_id": t.group_id,
+                "is_frozen": t.is_frozen,
+                "color_index": t.color_index,
+            }
+            for t in snap.tracks
+        ],
+    }
+
+
+def current_platform() -> str | None:
+    """The daemon's own platform in the host table's vocabulary."""
+    if sys.platform == "win32":
+        return "windows"
+    if sys.platform == "darwin":
+        return "macos"
+    if sys.platform.startswith("linux"):
+        return "linux"
+    return None
+
+
+def derive_host_environment(daemon: "Daemon", platform: str | None = None) -> dict[str, object]:
     """Grade the host identity the plug-in reported for this session.
 
     Recognition and identity are separate: the wrapper reports an unrecognised
@@ -115,6 +175,35 @@ def derive_host_environment(daemon: "Daemon") -> dict[str, object]:
         }
 
     recognised = bool(observed.get("host_recognised"))
+    if not recognised:
+        # IMPORTANT: only here. A wrapper-recognised host is never overridden, and a
+        # table hit is an inference from a process name, never an observation.
+        try:
+            identity = identify_host(
+                observed.get("host_executable_name"), False, observed.get("host_name"),
+                platform=platform if platform is not None else current_platform(),
+            )
+        except HostTableError as exc:
+            log.warning("Host executable table unusable; not identifying the host: %s", exc)
+            identity = None
+        if identity is not None and identity.identification == IDENT_INFERRED:
+            return {
+                "status": "host_inferred",
+                "host_recognised": False,
+                "host_name": identity.host_name,
+                "host_executable_name": observed.get("host_executable_name"),
+                "wrapper_format": observed.get("wrapper_format"),
+                "identification": identity.identification,
+                "host_id": identity.host_id,
+                "source_url": identity.source_url,
+                "basis": (
+                    "The plug-in wrapper did not recognise the host application. Its executable "
+                    "file name matched an entry in the host executable table, so the host is "
+                    "inferred from that name; any program can carry any file name."
+                ),
+                "scope": _HOST_ENVIRONMENT_SCOPE,
+                "apw:proof_level": identity.proof_level,
+            }
     return {
         "status": "observed" if recognised else "host_unrecognised",
         "host_recognised": recognised,
@@ -725,49 +814,7 @@ def generate_manifest(daemon: "Daemon", export_path: Path, export_version: int =
 
     snap = daemon._latest_project_snapshot
     if snap is not None:
-        manifest["session_facts"] = {
-            "apw:proof_level": "inferred",
-            "observation_basis": (
-                "Structural facts inferred by parsing the saved Ableton .als file; "
-                "Ableton does not provide this project with a supported semantic API."
-            ),
-            "bpm": snap.transport_bpm,
-            "time_signature": f"{snap.transport_time_signature[0]}/{snap.transport_time_signature[1]}",
-            "loop_on": snap.transport_loop_on,
-            "track_count": snap.track_count,
-            "clip_count": snap.clip_count,
-            "sample_refs": sorted(snap.sample_refs),
-            "tracks": [
-                {
-                    "name": t.name,
-                    "type": t.track_type,
-                    "devices": list(t.devices),
-                    "device_presets": list(t.device_presets),
-                    "sample_paths": list(t.sample_paths),
-                    "clips": [
-                        {
-                            "name": c.name,
-                            "position_beats": c.position_beats,
-                            "length_beats": c.length_beats,
-                            "sample_ref": c.sample_ref,
-                            "warp_on": c.warp_on,
-                            "is_midi": c.is_midi,
-                        }
-                        for c in t.clips
-                    ],
-                    "clip_count": t.clip_count,
-                    "midi_note_count": t.midi_note_count,
-                    "automation_point_count": t.automation_point_count,
-                    "routing_input": t.routing_input,
-                    "routing_output": t.routing_output,
-                    "sends": [{"target": s.target, "level": s.level} for s in t.sends],
-                    "group_id": t.group_id,
-                    "is_frozen": t.is_frozen,
-                    "color_index": t.color_index,
-                }
-                for t in snap.tracks
-            ],
-        }
+        manifest["session_facts"] = derive_session_facts(snap)
     manifest["evidence_binding"] = {
         "evidence_directory": str(daemon.evidence_dir.resolve()),
         "evidence_file_hashes": evidence_hashes,

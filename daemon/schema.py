@@ -17,6 +17,7 @@ COVERAGE_STATUSES = {
 C2PA_CLAIM_STATUSES = {"embedded", "sidecar", "unavailable"}
 HOST_ENVIRONMENT_STATUSES = {
     "observed",
+    "host_inferred",
     "host_unrecognised",
     "conflicting_observations",
     "unobserved",
@@ -132,6 +133,20 @@ def validate_manifest_invariants(data: object) -> list[str]:
                 errors.append("an observed host_environment records a directly observed host")
             if not host.get("host_name"):
                 errors.append("an observed host_environment must name the host")
+        elif status == "host_inferred":
+            # A host named from its executable file name. The wrapper did not
+            # recognise it, so it is never directly observed: `inferred` is the ceiling.
+            if host.get("apw:proof_level") != "inferred":
+                errors.append("a host inferred from an executable name must be inferred")
+            if not isinstance(host.get("host_name"), str) or not host.get("host_name"):
+                errors.append("an inferred host_environment must name the host")
+            if host.get("host_recognised") is not False:
+                errors.append("an inferred host_environment must not report the wrapper as having recognised the host")
+            if host.get("identification") != "inferred_from_executable_name":
+                errors.append("an inferred host_environment must record how it was identified")
+            for key in ("host_id", "source_url"):
+                if not isinstance(host.get(key), str) or not host.get(key):
+                    errors.append(f"an inferred host_environment must carry {key}")
         else:
             # IMPORTANT: honesty constraint 1. The wrapper reports "Unknown" for any
             # host outside JUCE's table, so a name surviving here would sign an

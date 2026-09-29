@@ -125,11 +125,18 @@ counters produces `unknown_coverage` / `unknown_unobserved`.
 which plug-in format. Statuses are:
 
 - `observed` - the plug-in wrapper named the host; `directly_observed`
-- `host_unrecognised` - the wrapper did not recognise the host; `unknown_unobserved`
+- `host_inferred` - the wrapper did not recognise the host, but its executable file
+  name is in `data/host_executables.json` (exact, case-insensitive; see
+  `docs/HOST_IDENTITY.md`); `inferred`. The record carries `host_name` (the table's
+  display name), `identification: inferred_from_executable_name`, `host_id` and the
+  primary-source `source_url`; `host_recognised` stays `false` because the wrapper
+  did not recognise it. Never `directly_observed`: any program can be named `lmms`.
+- `host_unrecognised` - the wrapper did not recognise the host and the table has no
+  match; `unknown_unobserved`
 - `conflicting_observations` - one session reported disagreeing hosts; `unknown_unobserved`
 - `unobserved` - no host environment was reported; `unknown_unobserved`
 
-Only `observed` may carry a `host_name`. The wrapper reports a literal "Unknown"
+Only `observed` and `host_inferred` may carry a `host_name`. The wrapper reports a literal "Unknown"
 for any host outside its table, so anything else nulls the name rather than
 signing an absence as an observation. `host_executable_name` and
 `wrapper_format` survive a `host_unrecognised` status because they are observed

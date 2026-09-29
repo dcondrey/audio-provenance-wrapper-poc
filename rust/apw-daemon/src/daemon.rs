@@ -10,6 +10,7 @@ use crate::correlation::{CorrelationEngine, LayerEvent};
 use crate::coverage::{derive_coverage, CoverageInputs};
 use crate::error::{DaemonError, Result};
 use crate::probe::{AudioProbe, UnavailableAudioProbe};
+use crate::project::{compute_diff, detect_format, diff_to_event, parse_project, session_facts, unsupported_format_event, unsupported_message, Limits, ProjectSnapshot};
 use crate::receiver::{EvidenceReceiver, MAX_DATAGRAM_BYTES};
 use crate::services::{
     ClaimIssuer, ExportAssociator, ForgeryAnalyzer, LocalSealer, TimeAnchor, UnavailableAssociator,
@@ -80,6 +81,8 @@ pub struct DaemonConfig {
     pub manifest_dir: PathBuf,
     pub sample_dir: PathBuf,
     pub export_dir: Option<PathBuf>,
+    /// Saved project to watch (`--project`). Its format decides the parser.
+    pub project: Option<PathBuf>,
     pub session_id: Option<String>,
     pub stem_id: String,
     pub source_category: SourceCategory,
@@ -98,6 +101,7 @@ impl Default for DaemonConfig {
             manifest_dir: PathBuf::from("manifests"),
             sample_dir: PathBuf::from("samples"),
             export_dir: None,
+            project: None,
             session_id: None,
             stem_id: "stem-1".to_owned(),
             source_category: SourceCategory::Unknown,
@@ -195,6 +199,8 @@ pub struct Daemon {
     receiver: EvidenceReceiver,
     correlation: CorrelationEngine,
     session: Mutex<SessionState>,
+    /// The latest parsed saved project; read when a manifest is sealed.
+    project_snapshot: Mutex<Option<ProjectSnapshot>>,
     sealed: Mutex<SealedState>,
     stop: Arc<StopSignal>,
 }
@@ -229,6 +235,7 @@ impl Daemon {
             receiver,
             correlation,
             session: Mutex::new(SessionState::new()),
+            project_snapshot: Mutex::new(None),
             sealed: Mutex::new(SealedState {
                 // Cosignature chain across this session's manifests: each
                 // manifest_signature entangles the previous one.
@@ -303,6 +310,16 @@ impl Daemon {
             scope.spawn(|| self.run_sample_watcher());
             if self.config.export_dir.is_some() {
                 scope.spawn(|| self.run_export_watcher());
+            }
+            match &self.config.project {
+                Some(path) if path.exists() => {
+                    scope.spawn(move || self.run_project_watcher(path));
+                }
+                Some(path) => log::warn!(
+                    "Project watcher disabled because the file does not exist: {}",
+                    path.display()
+                ),
+                None => {}
             }
             while !self.stop.wait(Duration::from_secs(1)) {}
             Ok(())
@@ -470,6 +487,85 @@ impl Daemon {
         }
     }
 
+    /// Poll the saved project and write a `project_diff` event on each save; the
+    /// counterpart of `Daemon._run_project_watcher`.
+    fn run_project_watcher(&self, path: &Path) {
+        if let Some(format) = detect_format(path) {
+            if !format.supported() {
+                log::warn!("{}", unsupported_message(format));
+                let timestamp_ms = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map_or(0, |elapsed| i64::try_from(elapsed.as_millis()).unwrap_or(i64::MAX));
+                self.write_evidence(
+                    "project_diff_events.jsonl",
+                    &unsupported_format_event(format, path, timestamp_ms, crate::util::monotonic_millis()),
+                );
+                return;
+            }
+        }
+        log::info!("Project watcher on {}", path.display());
+        let limits = Limits::default();
+        let mut previous: Option<ProjectSnapshot> = None;
+        let mut previous_mtime: Option<std::time::SystemTime> = None;
+        while !self.stop.is_stopped() {
+            let modified = std::fs::metadata(path).and_then(|metadata| metadata.modified());
+            let Ok(modified) = modified else {
+                if self.stop.wait(self.config.poll_interval) {
+                    return;
+                }
+                continue;
+            };
+            if previous_mtime != Some(modified) {
+                previous_mtime = Some(modified);
+                let snapshot = match parse_project(path, &limits) {
+                    Ok(snapshot) => snapshot,
+                    Err(error) => {
+                        log::error!("Failed to parse {}: {error}", path.display());
+                        if self.stop.wait(self.config.poll_interval) {
+                            return;
+                        }
+                        continue;
+                    }
+                };
+                if let Ok(mut session) = self.session.lock() {
+                    session.mark_layer_active("project_differ");
+                }
+                if let Some(earlier) = &previous {
+                    let now_ms = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .map_or(0, |elapsed| i64::try_from(elapsed.as_millis()).unwrap_or(i64::MAX));
+                    let diff = compute_diff(earlier, &snapshot, now_ms);
+                    if diff.has_changes() {
+                        let monotonic = crate::util::monotonic_millis();
+                        let mut event = diff_to_event(&diff, monotonic);
+                        if snapshot.project_format != "ableton_als" {
+                            event.insert("project_format".to_owned(), json!(snapshot.project_format));
+                        }
+                        let event = Value::Object(event);
+                        self.write_evidence("project_diff_events.jsonl", &event);
+                        if let Ok(mut session) = self.session.lock() {
+                            session.append_event(event.clone());
+                        }
+                        self.correlate(LayerEvent::new("project_differ", "project_diff", monotonic, event));
+                        log::info!(
+                            "Project diff: +{}/-{}/~{} clips",
+                            diff.clips_added,
+                            diff.clips_removed,
+                            diff.clips_modified
+                        );
+                    }
+                }
+                if let Ok(mut latest) = self.project_snapshot.lock() {
+                    *latest = Some(snapshot.clone());
+                }
+                previous = Some(snapshot);
+            }
+            if self.stop.wait(self.config.poll_interval) {
+                return;
+            }
+        }
+    }
+
     fn run_export_watcher(&self) {
         let Some(export_dir) = &self.config.export_dir else {
             return;
@@ -558,13 +654,17 @@ impl Daemon {
             time_anchor: self.services.time_anchor.as_deref(),
             ots_anchor: self.services.ots_anchor.as_deref(),
         };
+        let project = self.project_snapshot.lock().ok().and_then(|latest| latest.clone());
         let inputs = AssemblyInputs {
             snapshot: &snapshot,
             coverage,
             session_diagnostics: diagnostics,
             receipt_summary,
-            session_facts: None,
-            project_sample_refs: Vec::new(),
+            session_facts: project.as_ref().map(session_facts),
+            project_sample_refs: project
+                .as_ref()
+                .map(|snapshot| snapshot.sample_refs.iter().cloned().collect())
+                .unwrap_or_default(),
         };
         let generated = generate_manifest(
             &context,

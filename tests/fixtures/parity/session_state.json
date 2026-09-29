@@ -4,6 +4,7 @@
     "events": [],
     "telemetry": [],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "unobserved",
       "host_recognised": false,
@@ -57,6 +58,7 @@
       ]
     ],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "unobserved",
       "host_recognised": false,
@@ -106,6 +108,7 @@
       ]
     ],
     "telemetry_regressions": 2,
+    "platform": "linux",
     "host_environment": {
       "status": "unobserved",
       "host_recognised": false,
@@ -142,6 +145,7 @@
       ]
     ],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "unobserved",
       "host_recognised": false,
@@ -175,6 +179,7 @@
       ]
     ],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "unobserved",
       "host_recognised": false,
@@ -549,6 +554,7 @@
       ]
     ],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "unobserved",
       "host_recognised": false,
@@ -578,6 +584,7 @@
       ]
     ],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "unobserved",
       "host_recognised": false,
@@ -602,6 +609,7 @@
     ],
     "telemetry": [],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "observed",
       "host_recognised": true,
@@ -626,6 +634,7 @@
     ],
     "telemetry": [],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "host_unrecognised",
       "host_recognised": false,
@@ -657,6 +666,7 @@
     ],
     "telemetry": [],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "observed",
       "host_recognised": true,
@@ -688,6 +698,7 @@
     ],
     "telemetry": [],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "conflicting_observations",
       "host_recognised": false,
@@ -719,6 +730,7 @@
     ],
     "telemetry": [],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "conflicting_observations",
       "host_recognised": false,
@@ -764,6 +776,7 @@
     ],
     "telemetry": [],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "conflicting_observations",
       "host_recognised": false,
@@ -795,6 +808,7 @@
     ],
     "telemetry": [],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "host_unrecognised",
       "host_recognised": false,
@@ -819,6 +833,7 @@
     ],
     "telemetry": [],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "host_unrecognised",
       "host_recognised": false,
@@ -843,6 +858,7 @@
     ],
     "telemetry": [],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "observed",
       "host_recognised": true,
@@ -867,6 +883,7 @@
     ],
     "telemetry": [],
     "telemetry_regressions": 0,
+    "platform": "linux",
     "host_environment": {
       "status": "host_unrecognised",
       "host_recognised": false,
@@ -876,6 +893,413 @@
       "basis": "The plug-in wrapper did not recognise the host application, so the host is not identified. Its executable name and the plug-in format remain as observed.",
       "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
       "apw:proof_level": "unknown_unobserved"
+    }
+  },
+  {
+    "name": "host_inferred_lmms",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "lmms",
+        "wrapper_format": "VST3"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "host_inferred",
+      "host_recognised": false,
+      "host_name": "LMMS",
+      "host_executable_name": "lmms",
+      "wrapper_format": "VST3",
+      "identification": "inferred_from_executable_name",
+      "host_id": "lmms",
+      "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt",
+      "basis": "The plug-in wrapper did not recognise the host application. Its executable file name matched an entry in the host executable table, so the host is inferred from that name; any program can carry any file name.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "inferred"
+    }
+  },
+  {
+    "name": "host_inferred_case_and_exe_suffix",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "LMMS.EXE",
+        "wrapper_format": "VST3"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "host_inferred",
+      "host_recognised": false,
+      "host_name": "LMMS",
+      "host_executable_name": "LMMS.EXE",
+      "wrapper_format": "VST3",
+      "identification": "inferred_from_executable_name",
+      "host_id": "lmms",
+      "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt",
+      "basis": "The plug-in wrapper did not recognise the host application. Its executable file name matched an entry in the host executable table, so the host is inferred from that name; any program can carry any file name.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "inferred"
+    }
+  },
+  {
+    "name": "host_inferred_zrythm_windows_only_name",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "Audacity4",
+        "wrapper_format": "VST3"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "windows",
+    "host_environment": {
+      "status": "host_inferred",
+      "host_recognised": false,
+      "host_name": "Audacity",
+      "host_executable_name": "Audacity4",
+      "wrapper_format": "VST3",
+      "identification": "inferred_from_executable_name",
+      "host_id": "audacity",
+      "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt",
+      "basis": "The plug-in wrapper did not recognise the host application. Its executable file name matched an entry in the host executable table, so the host is inferred from that name; any program can carry any file name.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "inferred"
+    }
+  },
+  {
+    "name": "host_windows_only_name_on_linux_is_unmatched",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "Audacity4",
+        "wrapper_format": "VST3"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "host_unrecognised",
+      "host_recognised": false,
+      "host_name": null,
+      "host_executable_name": "Audacity4",
+      "wrapper_format": "VST3",
+      "basis": "The plug-in wrapper did not recognise the host application, so the host is not identified. Its executable name and the plug-in format remain as observed.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "unknown_unobserved"
+    }
+  },
+  {
+    "name": "host_inferred_pd_macos",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "pd",
+        "wrapper_format": "AU"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "macos",
+    "host_environment": {
+      "status": "host_inferred",
+      "host_recognised": false,
+      "host_name": "Pure Data",
+      "host_executable_name": "pd",
+      "wrapper_format": "AU",
+      "identification": "inferred_from_executable_name",
+      "host_id": "pure_data",
+      "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am",
+      "basis": "The plug-in wrapper did not recognise the host application. Its executable file name matched an entry in the host executable table, so the host is inferred from that name; any program can carry any file name.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "inferred"
+    }
+  },
+  {
+    "name": "host_recognised_never_overridden",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": true,
+        "host_name": "Ableton Live",
+        "host_executable_name": "lmms",
+        "wrapper_format": "AU"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "observed",
+      "host_recognised": true,
+      "host_name": "Ableton Live",
+      "host_executable_name": "lmms",
+      "wrapper_format": "AU",
+      "basis": "The plug-in wrapper named the host application that loaded it.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "directly_observed"
+    }
+  },
+  {
+    "name": "host_recognised_but_unnamed_is_not_inferred",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": true,
+        "host_name": null,
+        "host_executable_name": "lmms",
+        "wrapper_format": "AU"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "observed",
+      "host_recognised": true,
+      "host_name": null,
+      "host_executable_name": "lmms",
+      "wrapper_format": "AU",
+      "basis": "The plug-in wrapper named the host application that loaded it.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "directly_observed"
+    }
+  },
+  {
+    "name": "host_inferred_then_conflict_withdraws",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "lmms",
+        "wrapper_format": "VST3"
+      },
+      {
+        "event_type": "host_environment",
+        "host_recognised": true,
+        "host_name": "Cubase",
+        "host_executable_name": "lmms",
+        "wrapper_format": "VST3"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "conflicting_observations",
+      "host_recognised": false,
+      "host_name": null,
+      "host_executable_name": null,
+      "wrapper_format": null,
+      "basis": "1 later host environment report(s) disagreed with the first, so no single host is established.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "unknown_unobserved"
+    }
+  },
+  {
+    "name": "host_exact_match_only_prefix",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "lmms-nightly",
+        "wrapper_format": "VST3"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "host_unrecognised",
+      "host_recognised": false,
+      "host_name": null,
+      "host_executable_name": "lmms-nightly",
+      "wrapper_format": "VST3",
+      "basis": "The plug-in wrapper did not recognise the host application, so the host is not identified. Its executable name and the plug-in format remain as observed.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "unknown_unobserved"
+    }
+  },
+  {
+    "name": "host_exact_match_only_path",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "/usr/bin/lmms",
+        "wrapper_format": "VST3"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "host_unrecognised",
+      "host_recognised": false,
+      "host_name": null,
+      "host_executable_name": "/usr/bin/lmms",
+      "wrapper_format": "VST3",
+      "basis": "The plug-in wrapper did not recognise the host application, so the host is not identified. Its executable name and the plug-in format remain as observed.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "unknown_unobserved"
+    }
+  },
+  {
+    "name": "host_app_bundle_not_matched",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "LMMS.app",
+        "wrapper_format": "AU"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "host_unrecognised",
+      "host_recognised": false,
+      "host_name": null,
+      "host_executable_name": "LMMS.app",
+      "wrapper_format": "AU",
+      "basis": "The plug-in wrapper did not recognise the host application, so the host is not identified. Its executable name and the plug-in format remain as observed.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "unknown_unobserved"
+    }
+  },
+  {
+    "name": "host_executable_not_a_string",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": 7,
+        "wrapper_format": "VST3"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "host_unrecognised",
+      "host_recognised": false,
+      "host_name": null,
+      "host_executable_name": 7,
+      "wrapper_format": "VST3",
+      "basis": "The plug-in wrapper did not recognise the host application, so the host is not identified. Its executable name and the plug-in format remain as observed.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "unknown_unobserved"
+    }
+  },
+  {
+    "name": "host_executable_empty_is_none",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "",
+        "wrapper_format": "VST3"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "host_unrecognised",
+      "host_recognised": false,
+      "host_name": null,
+      "host_executable_name": null,
+      "wrapper_format": "VST3",
+      "basis": "The plug-in wrapper did not recognise the host application, so the host is not identified. Its executable name and the plug-in format remain as observed.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "unknown_unobserved"
+    }
+  },
+  {
+    "name": "host_first_report_wins_for_executable",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "lmms",
+        "wrapper_format": "VST3"
+      },
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "Rack",
+        "wrapper_format": "AU"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "linux",
+    "host_environment": {
+      "status": "host_inferred",
+      "host_recognised": false,
+      "host_name": "LMMS",
+      "host_executable_name": "lmms",
+      "wrapper_format": "VST3",
+      "identification": "inferred_from_executable_name",
+      "host_id": "lmms",
+      "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt",
+      "basis": "The plug-in wrapper did not recognise the host application. Its executable file name matched an entry in the host executable table, so the host is inferred from that name; any program can carry any file name.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "inferred"
+    }
+  },
+  {
+    "name": "host_inferred_vcv_rack",
+    "events": [
+      {
+        "event_type": "host_environment",
+        "host_recognised": false,
+        "host_name": "Unknown",
+        "host_executable_name": "rack.exe",
+        "wrapper_format": "VST3"
+      }
+    ],
+    "telemetry": [],
+    "telemetry_regressions": 0,
+    "platform": "windows",
+    "host_environment": {
+      "status": "host_inferred",
+      "host_recognised": false,
+      "host_name": "VCV Rack",
+      "host_executable_name": "rack.exe",
+      "wrapper_format": "VST3",
+      "identification": "inferred_from_executable_name",
+      "host_id": "vcv_rack",
+      "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile",
+      "basis": "The plug-in wrapper did not recognise the host application. Its executable file name matched an entry in the host executable table, so the host is inferred from that name; any program can carry any file name.",
+      "scope": "The host application that loaded the capture plug-in, as reported by the plug-in wrapper. Naming the host does not extend observation to anything the host did outside the capture path.",
+      "apw:proof_level": "inferred"
     }
   }
 ]

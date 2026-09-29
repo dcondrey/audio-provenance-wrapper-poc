@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "matching": "Exact, case-insensitive equality of the host process file name. A single trailing '.exe' on the observed name is ignored; table names never carry '.exe' or '.app'. A macOS name is the CFBundleExecutable file, not the bundle folder. No substring, prefix or path matching.",
+  "hosts": [
+    {
+      "host_id": "audacity",
+      "display_name": "Audacity",
+      "match": [
+        {"platform": "windows", "executable_name": "Audacity", "note": "3.x: RUNTIME_OUTPUT_NAME is 'Audacity' on Windows and Darwin, 'audacity' elsewhere"},
+        {"platform": "windows", "executable_name": "Audacity4", "note": "4.x: APP_OUTPUT_NAME is MUSE_APP_NAME ('Audacity') plus MUSE_APP_VERSION_MAJOR on Windows"},
+        {"platform": "macos", "executable_name": "Audacity", "note": "3.x bundle executable; 4.x target is 'audacity' (case-insensitive equal)"},
+        {"platform": "linux", "executable_name": "audacity"}
+      ],
+      "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+    },
+    {
+      "host_id": "lmms",
+      "display_name": "LMMS",
+      "match": [
+        {"platform": "windows", "executable_name": "lmms"},
+        {"platform": "macos", "executable_name": "lmms"},
+        {"platform": "linux", "executable_name": "lmms"}
+      ],
+      "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+    },
+    {
+      "host_id": "vcv_rack",
+      "display_name": "VCV Rack",
+      "match": [
+        {"platform": "windows", "executable_name": "Rack"},
+        {"platform": "macos", "executable_name": "Rack"},
+        {"platform": "linux", "executable_name": "Rack"}
+      ],
+      "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+    },
+    {
+      "host_id": "milkytracker",
+      "display_name": "MilkyTracker",
+      "match": [
+        {"platform": "windows", "executable_name": "MilkyTracker"},
+        {"platform": "macos", "executable_name": "MilkyTracker"},
+        {"platform": "linux", "executable_name": "milkytracker"}
+      ],
+      "source_url": "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+    },
+    {
+      "host_id": "pure_data",
+      "display_name": "Pure Data",
+      "match": [
+        {"platform": "windows", "executable_name": "pd", "note": "core process bin/pd.exe, per the Windows installer script"},
+        {"platform": "macos", "executable_name": "pd", "note": "the audio core built from src/Makefile.am; the Pd GUI process is a separate Tk wrapper"},
+        {"platform": "linux", "executable_name": "pd"}
+      ],
+      "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+    },
+    {
+      "host_id": "zrythm",
+      "display_name": "Zrythm",
+      "match": [
+        {"platform": "windows", "executable_name": "zrythm"},
+        {"platform": "macos", "executable_name": "zrythm"},
+        {"platform": "linux", "executable_name": "zrythm"}
+      ],
+      "source_url": "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+    }
+  ],
+  "unmapped": [
+    {"host_id": "finale", "display_name": "Finale", "reason": "Closed source; no primary installed-file listing or manual naming the process was confirmed."},
+    {"host_id": "acid_pro", "display_name": "ACID Pro", "reason": "Closed source; process name not confirmed from a primary source."},
+    {"host_id": "vegas_pro", "display_name": "Vegas Pro", "reason": "Closed source; process name not confirmed from a primary source."},
+    {"host_id": "dorico", "display_name": "Dorico", "reason": "Closed source; process name not confirmed from a primary source."},
+    {"host_id": "sibelius", "display_name": "Sibelius", "reason": "Closed source; process name not confirmed from a primary source."},
+    {"host_id": "max", "display_name": "Max", "reason": "Closed source; process name differs by edition and version and was not confirmed from a primary source."},
+    {"host_id": "reaktor", "display_name": "Reaktor", "reason": "Closed source; standalone process name not confirmed from a primary source."},
+    {"host_id": "audiomulch", "display_name": "AudioMulch", "reason": "Closed source; process name not confirmed from a primary source."},
+    {"host_id": "sonic_pi", "display_name": "Sonic Pi", "reason": "Not a plug-in host in the sense that loads this plug-in; its audio engine is scsynth, so no executable name would identify a plug-in host."}
+  ]
+}

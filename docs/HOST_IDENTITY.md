@@ -30,16 +30,14 @@ Unmapped, not guessed: Finale, ACID Pro, Vegas Pro, Dorico, Sibelius, Max, Reakt
 
 Residual risk: the names are build-time names. Packagers can rename binaries (for example a distribution suffix), which then simply fails to match. A different program with an identical name would be mislabelled, which is why the result is `inferred`.
 
-## Integration points (not wired here)
+## Integration
 
-Python: `daemon/manifest_builder/generator.py`, `derive_host_environment`. In the `host_unrecognised` branch (and only there), call
+Wired in both daemons, reading the same table.
 
-```python
-from daemon.host_identity import identify_host
-ident = identify_host(observed.get("host_executable_name"), recognised,
-                      observed.get("host_name"), platform=<windows|macos|linux>)
-```
+Python: `daemon/manifest_builder/generator.py`, `derive_host_environment(daemon, platform=None)`. In the `host_unrecognised` branch only, it calls `identify_host(executable, False, name, platform=...)`, the platform coming from `sys.platform` (`win32` windows, `darwin` macos, `linux*` linux). A table hit emits `status: host_inferred`, `host_recognised: false`, `host_name` = the display name, `identification`, `host_id`, `source_url`, a basis saying the name was matched against the table, and `apw:proof_level: inferred`. The recognised branch, the conflict branch and the unobserved branch are unchanged. An unusable table logs a warning and leaves the host unidentified.
 
-If `ident.identification == "inferred_from_executable_name"`, emit `host_name = ident.host_name`, `host_recognised` stays as observed (False) or a new `host_identified` flag is added, `status` a distinct value such as `host_inferred`, `apw:proof_level = ident.proof_level` (`inferred`), and add `identification`, `host_id`, `source_url` and a basis stating the name was matched against the table. Keep the recognised branch as is. Derive `platform` from `sys.platform` (`win32` -> windows, `darwin` -> macos, `linux*` -> linux) at the daemon, or from the event if the plug-in adds it. `schema.py` `_require_proof` accepts `inferred` already for other blocks; confirm it for `host_environment`.
+Rust: `rust/apw-daemon/src/host_identity.rs`, called from `derive_host_environment` in `assembly.rs` with `cfg!(target_os)`. The table is embedded from `rust/apw-daemon/data/host_executables.json`; `tests/host_identity_parity.rs` asserts that copy is byte-identical to `data/host_executables.json`, so update both together. Casefolding follows Python's `str.casefold` for every character that can fold to ASCII (sharp s, long s, f-ligatures; the Kelvin sign lowercases to `k`), and `strip` follows Python's `isspace` (which includes U+001C to U+001F).
 
-Rust: the session code that records `host_environment` and builds the equivalent grade should read the same `data/host_executables.json` (embed with `include_str!` or load at the same path), apply the identical rules (casefold, strip one trailing `.exe`, exact match per platform, platform from `cfg!(target_os)`, JUCE precedence, ambiguity gives unmatched), enforce the same size cap and validation, and produce the same field values as the Python function. A shared conformance test should run both against the table's names and the near-miss cases in `tests/test_host_identity.py`.
+Schema: `daemon/schema.py` (`_require_proof` already accepted `inferred`, but the generic else-branch demanded `unknown_unobserved` and a null name). `host_inferred` now has its own branch: `inferred`, a non-empty `host_name`, `host_recognised: false`, `identification: inferred_from_executable_name`, and non-empty `host_id` and `source_url`. `rust/apw-core/src/schema.rs` mirrors it, with cases in `rust/apw-core/tests/fixtures/schema_cases.json`.
+
+Conformance: `tests/fixtures/parity/host_identity.json` (table validation, every table name and near-miss on every platform, ambiguity) and `session_state.json` are generated from the Python oracle and checked by `tests/test_host_identity.py`, `tests/test_parity_fixtures.py` and the Rust tests. The manifest key-path test runs a session whose host executable is `lmms`, exercising the `host_inferred` branch end to end.

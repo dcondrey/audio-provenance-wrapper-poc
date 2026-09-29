@@ -1,0 +1,151 @@
+{
+  "automation_point_count": 2,
+  "clip_count": 3,
+  "clip_hashes": [
+    "805e22d372b0b147",
+    "e15f37e40f45212d",
+    "ea2dfc83d4e3ec6f"
+  ],
+  "clip_slot_hashes": [
+    [
+      "10",
+      "0",
+      "805e22d372b0b147"
+    ],
+    [
+      "10",
+      "2",
+      "e15f37e40f45212d"
+    ],
+    [
+      "10",
+      "pos-1",
+      "ea2dfc83d4e3ec6f"
+    ]
+  ],
+  "device_chain_hashes": [
+    "2088f267a4a9078b",
+    "6b248bfeee94c397",
+    "912d09dcfde7dbab"
+  ],
+  "file_hash": "2bdd4bb2c24bb7fcfda167a531f98ab8c65f551755880cedeb57ca05d4feb6c9",
+  "file_size_bytes": 1051,
+  "locator_count": 2,
+  "midi_note_count": 3,
+  "project_format": "ableton_als",
+  "sample_rate": null,
+  "sample_refs": [
+    "/Users/example/Samples/loop 1.wav",
+    "Samples/loop 1.wav"
+  ],
+  "track_count": 3,
+  "track_names": [
+    "Drums & Bass \"é\" café",
+    "Untitled",
+    "Reverb Return"
+  ],
+  "tracks": [
+    {
+      "automation_point_count": 2,
+      "clip_count": 3,
+      "clips": [
+        {
+          "is_midi": false,
+          "length_beats": 8.5,
+          "name": "Loop 1",
+          "position_beats": 0.0,
+          "sample_ref": "/Users/example/Samples/loop 1.wav",
+          "warp_on": true
+        },
+        {
+          "is_midi": true,
+          "length_beats": 8.0,
+          "name": "Riff",
+          "position_beats": 4.0,
+          "sample_ref": "",
+          "warp_on": false
+        },
+        {
+          "is_midi": false,
+          "length_beats": 4.0,
+          "name": "Added clip",
+          "position_beats": 16.0,
+          "sample_ref": "",
+          "warp_on": false
+        }
+      ],
+      "device_chain_hashes": [
+        "912d09dcfde7dbab"
+      ],
+      "device_presets": [
+        "Preset A",
+        ""
+      ],
+      "devices": [
+        "My Synth",
+        "Compressor2"
+      ],
+      "group_id": "-1",
+      "midi_note_count": 3,
+      "name": "Drums & Bass \"é\" café",
+      "sample_paths": [
+        "Samples/loop 1.wav",
+        "/Users/example/Samples/loop 1.wav"
+      ],
+      "track_id": "10",
+      "track_type": "AudioTrack"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "6b248bfeee94c397"
+      ],
+      "device_presets": [
+        "",
+        ""
+      ],
+      "devices": [
+        "Operator",
+        "Simpler"
+      ],
+      "group_id": "10",
+      "midi_note_count": 0,
+      "name": "Untitled",
+      "sample_paths": [],
+      "track_id": "pos-1",
+      "track_type": "MidiTrack"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "2088f267a4a9078b"
+      ],
+      "device_presets": [
+        ""
+      ],
+      "devices": [
+        "Reverb"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Reverb Return",
+      "sample_paths": [],
+      "track_id": "30",
+      "track_type": "ReturnTrack"
+    }
+  ],
+  "transport_bpm": 128.0,
+  "transport_loop_on": true,
+  "transport_loop_range": [
+    4.0,
+    16.0
+  ],
+  "transport_time_signature": [
+    4,
+    4
+  ]
+}

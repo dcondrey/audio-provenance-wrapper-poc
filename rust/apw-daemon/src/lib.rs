@@ -15,8 +15,10 @@ mod coverage;
 mod daemon;
 mod error;
 mod forgery;
+mod host_identity;
 mod http;
 mod ots;
+pub mod project;
 mod probe;
 mod receiver;
 mod services;
@@ -30,9 +32,14 @@ pub use ots::{
     calendar_get, calendar_submit, summarize, upgrade, verify_proof_bytes, CalendarTransport,
     ExplorerHeaderSource, HttpCalendarTransport, OtsAnchor,
 };
+pub use host_identity::{
+    current_platform, identify_host, identify_host_in, normalise_executable_name, parse_table as parse_host_table,
+    HostIdentity, HostRecord, HostTable, HostTableError, IDENT_INFERRED, IDENT_JUCE, IDENT_NONE,
+    MAX_TABLE_BYTES as MAX_HOST_TABLE_BYTES,
+};
 pub use http::{HttpClient, HttpRequest, HttpResponse, Method};
 pub use assembly::{
-    derive_host_environment,
+    derive_host_environment, derive_host_environment_for,
     generate_manifest, AssemblyContext, AssemblyInputs, GeneratedManifest, ManifestServices,
     ALL_LAYERS,
 };

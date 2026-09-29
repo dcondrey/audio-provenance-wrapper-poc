@@ -1,0 +1,4837 @@
+{
+  "parse": [
+    {
+      "name": "shipped",
+      "raw_hex": "7b0a202022736368656d615f76657273696f6e223a20312c0a2020226d61746368696e67223a202245786163742c20636173652d696e73656e73697469766520657175616c697479206f662074686520686f73742070726f636573732066696c65206e616d652e20412073696e676c6520747261696c696e6720272e65786527206f6e20746865206f62736572766564206e616d652069732069676e6f7265643b207461626c65206e616d6573206e6576657220636172727920272e65786527206f7220272e617070272e2041206d61634f53206e616d652069732074686520434642756e646c6545786563757461626c652066696c652c206e6f74207468652062756e646c6520666f6c6465722e204e6f20737562737472696e672c20707265666978206f722070617468206d61746368696e672e222c0a202022686f737473223a205b0a202020207b0a20202020202022686f73745f6964223a20226175646163697479222c0a20202020202022646973706c61795f6e616d65223a20224175646163697479222c0a202020202020226d61746368223a205b0a20202020202020207b22706c6174666f726d223a202277696e646f7773222c202265786563757461626c655f6e616d65223a20224175646163697479222c20226e6f7465223a2022332e783a2052554e54494d455f4f55545055545f4e414d452069732027417564616369747927206f6e2057696e646f777320616e642044617277696e2c202761756461636974792720656c73657768657265227d2c0a20202020202020207b22706c6174666f726d223a202277696e646f7773222c202265786563757461626c655f6e616d65223a2022417564616369747934222c20226e6f7465223a2022342e783a204150505f4f55545055545f4e414d45206973204d5553455f4150505f4e414d452028274175646163697479272920706c7573204d5553455f4150505f56455253494f4e5f4d414a4f52206f6e2057696e646f7773227d2c0a20202020202020207b22706c6174666f726d223a20226d61636f73222c202265786563757461626c655f6e616d65223a20224175646163697479222c20226e6f7465223a2022332e782062756e646c652065786563757461626c653b20342e782074617267657420697320276175646163697479272028636173652d696e73656e73697469766520657175616c29227d2c0a20202020202020207b22706c6174666f726d223a20226c696e7578222c202265786563757461626c655f6e616d65223a20226175646163697479227d0a2020202020205d2c0a20202020202022736f757263655f75726c223a202268747470733a2f2f6769746875622e636f6d2f61756461636974792f61756461636974792f626c6f622f41756461636974792d332e372e392f434d616b654c697374732e747874220a202020207d2c0a202020207b0a20202020202022686f73745f6964223a20226c6d6d73222c0a20202020202022646973706c61795f6e616d65223a20224c4d4d53222c0a202020202020226d61746368223a205b0a20202020202020207b22706c6174666f726d223a202277696e646f7773222c202265786563757461626c655f6e616d65223a20226c6d6d73227d2c0a20202020202020207b22706c6174666f726d223a20226d61636f73222c202265786563757461626c655f6e616d65223a20226c6d6d73227d2c0a20202020202020207b22706c6174666f726d223a20226c696e7578222c202265786563757461626c655f6e616d65223a20226c6d6d73227d0a2020202020205d2c0a20202020202022736f757263655f75726c223a202268747470733a2f2f6769746875622e636f6d2f4c4d4d532f6c6d6d732f626c6f622f6d61737465722f7372632f434d616b654c697374732e747874220a202020207d2c0a202020207b0a20202020202022686f73745f6964223a20227663765f7261636b222c0a20202020202022646973706c61795f6e616d65223a2022564356205261636b222c0a202020202020226d61746368223a205b0a20202020202020207b22706c6174666f726d223a202277696e646f7773222c202265786563757461626c655f6e616d65223a20225261636b227d2c0a20202020202020207b22706c6174666f726d223a20226d61636f73222c202265786563757461626c655f6e616d65223a20225261636b227d2c0a20202020202020207b22706c6174666f726d223a20226c696e7578222c202265786563757461626c655f6e616d65223a20225261636b227d0a2020202020205d2c0a20202020202022736f757263655f75726c223a202268747470733a2f2f6769746875622e636f6d2f5643565261636b2f5261636b2f626c6f622f76322f4d616b6566696c65220a202020207d2c0a202020207b0a20202020202022686f73745f6964223a20226d696c6b79747261636b6572222c0a20202020202022646973706c61795f6e616d65223a20224d696c6b79547261636b6572222c0a202020202020226d61746368223a205b0a20202020202020207b22706c6174666f726d223a202277696e646f7773222c202265786563757461626c655f6e616d65223a20224d696c6b79547261636b6572227d2c0a20202020202020207b22706c6174666f726d223a20226d61636f73222c202265786563757461626c655f6e616d65223a20224d696c6b79547261636b6572227d2c0a20202020202020207b22706c6174666f726d223a20226c696e7578222c202265786563757461626c655f6e616d65223a20226d696c6b79747261636b6572227d0a2020202020205d2c0a20202020202022736f757263655f75726c223a202268747470733a2f2f6769746875622e636f6d2f6d696c6b79747261636b65722f4d696c6b79547261636b65722f626c6f622f6d61737465722f7372632f747261636b65722f434d616b654c697374732e747874220a202020207d2c0a202020207b0a20202020202022686f73745f6964223a2022707572655f64617461222c0a20202020202022646973706c61795f6e616d65223a2022507572652044617461222c0a202020202020226d61746368223a205b0a20202020202020207b22706c6174666f726d223a202277696e646f7773222c202265786563757461626c655f6e616d65223a20227064222c20226e6f7465223a2022636f72652070726f636573732062696e2f70642e6578652c20706572207468652057696e646f777320696e7374616c6c657220736372697074227d2c0a20202020202020207b22706c6174666f726d223a20226d61636f73222c202265786563757461626c655f6e616d65223a20227064222c20226e6f7465223a202274686520617564696f20636f7265206275696c742066726f6d207372632f4d616b6566696c652e616d3b20746865205064204755492070726f63657373206973206120736570617261746520546b2077726170706572227d2c0a20202020202020207b22706c6174666f726d223a20226c696e7578222c202265786563757461626c655f6e616d65223a20227064227d0a2020202020205d2c0a20202020202022736f757263655f75726c223a202268747470733a2f2f6769746875622e636f6d2f707572652d646174612f707572652d646174612f626c6f622f6d61737465722f7372632f4d616b6566696c652e616d220a202020207d2c0a202020207b0a20202020202022686f73745f6964223a20227a727974686d222c0a20202020202022646973706c61795f6e616d65223a20225a727974686d222c0a202020202020226d61746368223a205b0a20202020202020207b22706c6174666f726d223a202277696e646f7773222c202265786563757461626c655f6e616d65223a20227a727974686d227d2c0a20202020202020207b22706c6174666f726d223a20226d61636f73222c202265786563757461626c655f6e616d65223a20227a727974686d227d2c0a20202020202020207b22706c6174666f726d223a20226c696e7578222c202265786563757461626c655f6e616d65223a20227a727974686d227d0a2020202020205d2c0a20202020202022736f757263655f75726c223a202268747470733a2f2f6769746875622e636f6d2f7a727974686d2f7a727974686d2f626c6f622f6d61737465722f7372632f6775692f434d616b654c697374732e747874220a202020207d0a20205d2c0a202022756e6d6170706564223a205b0a202020207b22686f73745f6964223a202266696e616c65222c2022646973706c61795f6e616d65223a202246696e616c65222c2022726561736f6e223a2022436c6f73656420736f757263653b206e6f207072696d61727920696e7374616c6c65642d66696c65206c697374696e67206f72206d616e75616c206e616d696e67207468652070726f636573732077617320636f6e6669726d65642e227d2c0a202020207b22686f73745f6964223a2022616369645f70726f222c2022646973706c61795f6e616d65223a2022414349442050726f222c2022726561736f6e223a2022436c6f73656420736f757263653b2070726f63657373206e616d65206e6f7420636f6e6669726d65642066726f6d2061207072696d61727920736f757263652e227d2c0a202020207b22686f73745f6964223a202276656761735f70726f222c2022646973706c61795f6e616d65223a202256656761732050726f222c2022726561736f6e223a2022436c6f73656420736f757263653b2070726f63657373206e616d65206e6f7420636f6e6669726d65642066726f6d2061207072696d61727920736f757263652e227d2c0a202020207b22686f73745f6964223a2022646f7269636f222c2022646973706c61795f6e616d65223a2022446f7269636f222c2022726561736f6e223a2022436c6f73656420736f757263653b2070726f63657373206e616d65206e6f7420636f6e6669726d65642066726f6d2061207072696d61727920736f757263652e227d2c0a202020207b22686f73745f6964223a2022736962656c697573222c2022646973706c61795f6e616d65223a2022536962656c697573222c2022726561736f6e223a2022436c6f73656420736f757263653b2070726f63657373206e616d65206e6f7420636f6e6669726d65642066726f6d2061207072696d61727920736f757263652e227d2c0a202020207b22686f73745f6964223a20226d6178222c2022646973706c61795f6e616d65223a20224d6178222c2022726561736f6e223a2022436c6f73656420736f757263653b2070726f63657373206e616d6520646966666572732062792065646974696f6e20616e642076657273696f6e20616e6420776173206e6f7420636f6e6669726d65642066726f6d2061207072696d61727920736f757263652e227d2c0a202020207b22686f73745f6964223a20227265616b746f72222c2022646973706c61795f6e616d65223a20225265616b746f72222c2022726561736f6e223a2022436c6f73656420736f757263653b207374616e64616c6f6e652070726f63657373206e616d65206e6f7420636f6e6669726d65642066726f6d2061207072696d61727920736f757263652e227d2c0a202020207b22686f73745f6964223a2022617564696f6d756c6368222c2022646973706c61795f6e616d65223a2022417564696f4d756c6368222c2022726561736f6e223a2022436c6f73656420736f757263653b2070726f63657373206e616d65206e6f7420636f6e6669726d65642066726f6d2061207072696d61727920736f757263652e227d2c0a202020207b22686f73745f6964223a2022736f6e69635f7069222c2022646973706c61795f6e616d65223a2022536f6e6963205069222c2022726561736f6e223a20224e6f74206120706c75672d696e20686f737420696e207468652073656e73652074686174206c6f616473207468697320706c75672d696e3b2069747320617564696f20656e67696e6520697320736373796e74682c20736f206e6f2065786563757461626c65206e616d6520776f756c64206964656e74696679206120706c75672d696e20686f73742e227d0a20205d0a7d0a",
+      "raw": null,
+      "ok": [
+        [
+          "linux",
+          "audacity",
+          "audacity",
+          "Audacity",
+          "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+        ],
+        [
+          "linux",
+          "lmms",
+          "lmms",
+          "LMMS",
+          "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+        ],
+        [
+          "linux",
+          "milkytracker",
+          "milkytracker",
+          "MilkyTracker",
+          "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+        ],
+        [
+          "linux",
+          "pd",
+          "pure_data",
+          "Pure Data",
+          "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+        ],
+        [
+          "linux",
+          "rack",
+          "vcv_rack",
+          "VCV Rack",
+          "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+        ],
+        [
+          "linux",
+          "zrythm",
+          "zrythm",
+          "Zrythm",
+          "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+        ],
+        [
+          "macos",
+          "audacity",
+          "audacity",
+          "Audacity",
+          "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+        ],
+        [
+          "macos",
+          "lmms",
+          "lmms",
+          "LMMS",
+          "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+        ],
+        [
+          "macos",
+          "milkytracker",
+          "milkytracker",
+          "MilkyTracker",
+          "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+        ],
+        [
+          "macos",
+          "pd",
+          "pure_data",
+          "Pure Data",
+          "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+        ],
+        [
+          "macos",
+          "rack",
+          "vcv_rack",
+          "VCV Rack",
+          "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+        ],
+        [
+          "macos",
+          "zrythm",
+          "zrythm",
+          "Zrythm",
+          "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+        ],
+        [
+          "windows",
+          "audacity",
+          "audacity",
+          "Audacity",
+          "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+        ],
+        [
+          "windows",
+          "audacity4",
+          "audacity",
+          "Audacity",
+          "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+        ],
+        [
+          "windows",
+          "lmms",
+          "lmms",
+          "LMMS",
+          "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+        ],
+        [
+          "windows",
+          "milkytracker",
+          "milkytracker",
+          "MilkyTracker",
+          "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+        ],
+        [
+          "windows",
+          "pd",
+          "pure_data",
+          "Pure Data",
+          "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+        ],
+        [
+          "windows",
+          "rack",
+          "vcv_rack",
+          "VCV Rack",
+          "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+        ],
+        [
+          "windows",
+          "zrythm",
+          "zrythm",
+          "Zrythm",
+          "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+        ]
+      ]
+    },
+    {
+      "name": "minimal_valid",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"aprog\"}]}]}",
+      "ok": [
+        [
+          "linux",
+          "aprog",
+          "a",
+          "A",
+          "https://e.example/a"
+        ]
+      ]
+    },
+    {
+      "name": "schema_version_float_one_is_accepted",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1.0, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}]}",
+      "ok": [
+        [
+          "linux",
+          "x",
+          "a",
+          "A",
+          "https://e.example/a"
+        ]
+      ]
+    },
+    {
+      "name": "schema_version_true_rejected",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": true, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}]}",
+      "error": "unsupported schema_version, expected 1",
+      "message_exact": true
+    },
+    {
+      "name": "schema_version_2",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 2, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}]}",
+      "error": "unsupported schema_version, expected 1",
+      "message_exact": true
+    },
+    {
+      "name": "schema_version_missing",
+      "raw_hex": null,
+      "raw": "{\"hosts\": []}",
+      "error": "unsupported schema_version, expected 1",
+      "message_exact": true
+    },
+    {
+      "name": "root_not_object",
+      "raw_hex": null,
+      "raw": "[]",
+      "error": "table root must be an object",
+      "message_exact": true
+    },
+    {
+      "name": "not_json",
+      "raw_hex": null,
+      "raw": "not json",
+      "error": "table is not valid UTF-8 JSON: Expecting value: line 1 column 1 (char 0)",
+      "message_exact": false
+    },
+    {
+      "name": "hosts_not_list",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": \"x\"}",
+      "error": "hosts must be a list within bounds",
+      "message_exact": true
+    },
+    {
+      "name": "hosts_empty_list_ok",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": []}",
+      "ok": []
+    },
+    {
+      "name": "host_not_object",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [\"x\"]}",
+      "error": "hosts[0]: must be an object",
+      "message_exact": true
+    },
+    {
+      "name": "host_id_empty",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}]}",
+      "error": "hosts[0].host_id: expected a non-empty string of at most 512 characters",
+      "message_exact": true
+    },
+    {
+      "name": "host_id_too_long",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}]}",
+      "error": "hosts[0].host_id: expected a non-empty string of at most 512 characters",
+      "message_exact": true
+    },
+    {
+      "name": "host_id_at_limit",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}]}",
+      "ok": [
+        [
+          "linux",
+          "x",
+          "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+          "A",
+          "https://e.example/a"
+        ]
+      ]
+    },
+    {
+      "name": "host_id_multibyte_at_limit",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}]}",
+      "ok": [
+        [
+          "linux",
+          "x",
+          "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+          "A",
+          "https://e.example/a"
+        ]
+      ]
+    },
+    {
+      "name": "duplicate_host_id",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}, {\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"y\"}]}]}",
+      "error": "hosts[1]: duplicate host_id 'a'",
+      "message_exact": true
+    },
+    {
+      "name": "source_url_http",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"http://x\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}]}",
+      "error": "hosts[0].source_url must be https",
+      "message_exact": true
+    },
+    {
+      "name": "source_url_missing",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}]}",
+      "error": "hosts[0].source_url: expected a non-empty string of at most 512 characters",
+      "message_exact": true
+    },
+    {
+      "name": "match_empty",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": []}]}",
+      "error": "hosts[0].match must be a non-empty list within bounds",
+      "message_exact": true
+    },
+    {
+      "name": "match_not_list",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": {}}]}",
+      "error": "hosts[0].match must be a non-empty list within bounds",
+      "message_exact": true
+    },
+    {
+      "name": "match_entry_not_object",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [\"x\"]}]}",
+      "error": "hosts[0].match[0]: must be an object",
+      "message_exact": true
+    },
+    {
+      "name": "match_33_entries",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"n0\"}, {\"platform\": \"linux\", \"executable_name\": \"n1\"}, {\"platform\": \"linux\", \"executable_name\": \"n2\"}, {\"platform\": \"linux\", \"executable_name\": \"n3\"}, {\"platform\": \"linux\", \"executable_name\": \"n4\"}, {\"platform\": \"linux\", \"executable_name\": \"n5\"}, {\"platform\": \"linux\", \"executable_name\": \"n6\"}, {\"platform\": \"linux\", \"executable_name\": \"n7\"}, {\"platform\": \"linux\", \"executable_name\": \"n8\"}, {\"platform\": \"linux\", \"executable_name\": \"n9\"}, {\"platform\": \"linux\", \"executable_name\": \"n10\"}, {\"platform\": \"linux\", \"executable_name\": \"n11\"}, {\"platform\": \"linux\", \"executable_name\": \"n12\"}, {\"platform\": \"linux\", \"executable_name\": \"n13\"}, {\"platform\": \"linux\", \"executable_name\": \"n14\"}, {\"platform\": \"linux\", \"executable_name\": \"n15\"}, {\"platform\": \"linux\", \"executable_name\": \"n16\"}, {\"platform\": \"linux\", \"executable_name\": \"n17\"}, {\"platform\": \"linux\", \"executable_name\": \"n18\"}, {\"platform\": \"linux\", \"executable_name\": \"n19\"}, {\"platform\": \"linux\", \"executable_name\": \"n20\"}, {\"platform\": \"linux\", \"executable_name\": \"n21\"}, {\"platform\": \"linux\", \"executable_name\": \"n22\"}, {\"platform\": \"linux\", \"executable_name\": \"n23\"}, {\"platform\": \"linux\", \"executable_name\": \"n24\"}, {\"platform\": \"linux\", \"executable_name\": \"n25\"}, {\"platform\": \"linux\", \"executable_name\": \"n26\"}, {\"platform\": \"linux\", \"executable_name\": \"n27\"}, {\"platform\": \"linux\", \"executable_name\": \"n28\"}, {\"platform\": \"linux\", \"executable_name\": \"n29\"}, {\"platform\": \"linux\", \"executable_name\": \"n30\"}, {\"platform\": \"linux\", \"executable_name\": \"n31\"}, {\"platform\": \"linux\", \"executable_name\": \"n32\"}]}]}",
+      "error": "hosts[0].match must be a non-empty list within bounds",
+      "message_exact": true
+    },
+    {
+      "name": "match_32_entries",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"n0\"}, {\"platform\": \"linux\", \"executable_name\": \"n1\"}, {\"platform\": \"linux\", \"executable_name\": \"n2\"}, {\"platform\": \"linux\", \"executable_name\": \"n3\"}, {\"platform\": \"linux\", \"executable_name\": \"n4\"}, {\"platform\": \"linux\", \"executable_name\": \"n5\"}, {\"platform\": \"linux\", \"executable_name\": \"n6\"}, {\"platform\": \"linux\", \"executable_name\": \"n7\"}, {\"platform\": \"linux\", \"executable_name\": \"n8\"}, {\"platform\": \"linux\", \"executable_name\": \"n9\"}, {\"platform\": \"linux\", \"executable_name\": \"n10\"}, {\"platform\": \"linux\", \"executable_name\": \"n11\"}, {\"platform\": \"linux\", \"executable_name\": \"n12\"}, {\"platform\": \"linux\", \"executable_name\": \"n13\"}, {\"platform\": \"linux\", \"executable_name\": \"n14\"}, {\"platform\": \"linux\", \"executable_name\": \"n15\"}, {\"platform\": \"linux\", \"executable_name\": \"n16\"}, {\"platform\": \"linux\", \"executable_name\": \"n17\"}, {\"platform\": \"linux\", \"executable_name\": \"n18\"}, {\"platform\": \"linux\", \"executable_name\": \"n19\"}, {\"platform\": \"linux\", \"executable_name\": \"n20\"}, {\"platform\": \"linux\", \"executable_name\": \"n21\"}, {\"platform\": \"linux\", \"executable_name\": \"n22\"}, {\"platform\": \"linux\", \"executable_name\": \"n23\"}, {\"platform\": \"linux\", \"executable_name\": \"n24\"}, {\"platform\": \"linux\", \"executable_name\": \"n25\"}, {\"platform\": \"linux\", \"executable_name\": \"n26\"}, {\"platform\": \"linux\", \"executable_name\": \"n27\"}, {\"platform\": \"linux\", \"executable_name\": \"n28\"}, {\"platform\": \"linux\", \"executable_name\": \"n29\"}, {\"platform\": \"linux\", \"executable_name\": \"n30\"}, {\"platform\": \"linux\", \"executable_name\": \"n31\"}]}]}",
+      "ok": [
+        [
+          "linux",
+          "n0",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n1",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n10",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n11",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n12",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n13",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n14",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n15",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n16",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n17",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n18",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n19",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n2",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n20",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n21",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n22",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n23",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n24",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n25",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n26",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n27",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n28",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n29",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n3",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n30",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n31",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n4",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n5",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n6",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n7",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n8",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "linux",
+          "n9",
+          "a",
+          "A",
+          "https://e.example/a"
+        ]
+      ]
+    },
+    {
+      "name": "platform_unknown",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"beos\", \"executable_name\": \"x\"}]}]}",
+      "error": "hosts[0].match[0].platform must be one of ('windows', 'macos', 'linux')",
+      "message_exact": true
+    },
+    {
+      "name": "platform_not_string",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": [\"linux\"], \"executable_name\": \"x\"}]}]}",
+      "error": "hosts[0].match[0].platform must be one of ('windows', 'macos', 'linux')",
+      "message_exact": true
+    },
+    {
+      "name": "exe_with_exe_suffix",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x.exe\"}]}]}",
+      "error": "hosts[0].match[0].executable_name must be a bare name without path, .exe or .app",
+      "message_exact": true
+    },
+    {
+      "name": "exe_with_uppercase_exe_suffix",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"X.EXE\"}]}]}",
+      "error": "hosts[0].match[0].executable_name must be a bare name without path, .exe or .app",
+      "message_exact": true
+    },
+    {
+      "name": "exe_with_app_suffix",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"macos\", \"executable_name\": \"X.app\"}]}]}",
+      "error": "hosts[0].match[0].executable_name must be a bare name without path, .exe or .app",
+      "message_exact": true
+    },
+    {
+      "name": "exe_with_slash",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"/usr/bin/x\"}]}]}",
+      "error": "hosts[0].match[0].executable_name must be a bare name without path, .exe or .app",
+      "message_exact": true
+    },
+    {
+      "name": "exe_with_backslash",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"bin\\\\x\"}]}]}",
+      "error": "hosts[0].match[0].executable_name must be a bare name without path, .exe or .app",
+      "message_exact": true
+    },
+    {
+      "name": "exe_empty",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"\"}]}]}",
+      "error": "hosts[0].match[0].executable_name: expected a non-empty string of at most 512 characters",
+      "message_exact": true
+    },
+    {
+      "name": "same_match_twice_in_one_host",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}, {\"platform\": \"linux\", \"executable_name\": \"X\"}]}]}",
+      "error": "hosts[0].match[1]: ('linux', 'x') is already claimed by 'a'",
+      "message_exact": true
+    },
+    {
+      "name": "same_match_across_hosts",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}, {\"host_id\": \"b\", \"display_name\": \"B\", \"source_url\": \"https://e.example/b\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"X\"}]}]}",
+      "error": "hosts[1].match[0]: ('linux', 'x') is already claimed by 'a'",
+      "message_exact": true
+    },
+    {
+      "name": "same_name_other_platform_ok",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"a\", \"display_name\": \"A\", \"source_url\": \"https://e.example/a\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"x\"}]}, {\"host_id\": \"b\", \"display_name\": \"B\", \"source_url\": \"https://e.example/b\", \"match\": [{\"platform\": \"windows\", \"executable_name\": \"x\"}]}]}",
+      "ok": [
+        [
+          "linux",
+          "x",
+          "a",
+          "A",
+          "https://e.example/a"
+        ],
+        [
+          "windows",
+          "x",
+          "b",
+          "B",
+          "https://e.example/b"
+        ]
+      ]
+    },
+    {
+      "name": "not_utf8",
+      "raw_hex": "fffe7b7d",
+      "raw": null,
+      "error": "table is not valid UTF-8 JSON: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte",
+      "message_exact": false
+    },
+    {
+      "name": "duplicate_json_keys_last_wins",
+      "raw_hex": null,
+      "raw": "{\"schema_version\": 2, \"schema_version\": 1, \"hosts\": []}",
+      "ok": []
+    },
+    {
+      "name": "size_limit_minus_1",
+      "raw": null,
+      "raw_hex": null,
+      "size": 262143,
+      "ok": "valid"
+    },
+    {
+      "name": "size_limit",
+      "raw": null,
+      "raw_hex": null,
+      "size": 262144,
+      "ok": "valid"
+    },
+    {
+      "name": "size_limit_plus_1",
+      "raw": null,
+      "raw_hex": null,
+      "size": 262145,
+      "error": "table exceeds 262144 bytes",
+      "message_exact": true
+    }
+  ],
+  "identify": [
+    {
+      "executable_name": "Audacity",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "Audacity",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "Audacity",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "Audacity",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "Audacity",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "audacity",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "audacity",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "audacity",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "audacity",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "audacity",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "AUDACITY",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "AUDACITY",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "AUDACITY",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "AUDACITY",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "AUDACITY",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Audacity4",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "Audacity4",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "Audacity4",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Audacity4",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Audacity4",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "audacity4.exe",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "audacity4.exe",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Audacity",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "audacity",
+        "display_name": "Audacity",
+        "source_url": "https://github.com/audacity/audacity/blob/Audacity-3.7.9/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "audacity4.exe",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "audacity4.exe",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "audacity4.exe",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LMMS",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "LMMS",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "LMMS",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "LMMS",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "LMMS",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms.exe",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms.exe",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms.exe",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms.exe",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms.exe",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LMMS.EXE",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "LMMS.EXE",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "LMMS.EXE",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "LMMS.EXE",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "LMMS.EXE",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Rack",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "rack",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "rack",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "rack",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "rack",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "rack",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Rack.exe",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack.exe",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack.exe",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack.exe",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack.exe",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "MilkyTracker",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "MilkyTracker",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "milkytracker",
+        "display_name": "MilkyTracker",
+        "source_url": "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "MilkyTracker",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "MilkyTracker",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "milkytracker",
+        "display_name": "MilkyTracker",
+        "source_url": "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "MilkyTracker",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "MilkyTracker",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "milkytracker",
+        "display_name": "MilkyTracker",
+        "source_url": "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "MilkyTracker",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "MilkyTracker",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "milkytracker",
+        "display_name": "MilkyTracker",
+        "source_url": "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "MilkyTracker",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "milkytracker",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "MilkyTracker",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "milkytracker",
+        "display_name": "MilkyTracker",
+        "source_url": "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "milkytracker",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "MilkyTracker",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "milkytracker",
+        "display_name": "MilkyTracker",
+        "source_url": "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "milkytracker",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "MilkyTracker",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "milkytracker",
+        "display_name": "MilkyTracker",
+        "source_url": "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "milkytracker",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "MilkyTracker",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "milkytracker",
+        "display_name": "MilkyTracker",
+        "source_url": "https://github.com/milkytracker/MilkyTracker/blob/master/src/tracker/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "milkytracker",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "pd",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "pd",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "pd",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "pd",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "pd",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "PD.EXE",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "PD.EXE",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "PD.EXE",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "PD.EXE",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "PD.EXE",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "zrythm",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Zrythm",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "zrythm",
+        "display_name": "Zrythm",
+        "source_url": "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "zrythm",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Zrythm",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "zrythm",
+        "display_name": "Zrythm",
+        "source_url": "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "zrythm",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Zrythm",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "zrythm",
+        "display_name": "Zrythm",
+        "source_url": "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "zrythm",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Zrythm",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "zrythm",
+        "display_name": "Zrythm",
+        "source_url": "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "zrythm",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Zrythm.exe",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Zrythm",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "zrythm",
+        "display_name": "Zrythm",
+        "source_url": "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "Zrythm.exe",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Zrythm",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "zrythm",
+        "display_name": "Zrythm",
+        "source_url": "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "Zrythm.exe",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Zrythm",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "zrythm",
+        "display_name": "Zrythm",
+        "source_url": "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "Zrythm.exe",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Zrythm",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "zrythm",
+        "display_name": "Zrythm",
+        "source_url": "https://github.com/zrythm/zrythm/blob/master/src/gui/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "Zrythm.exe",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms.exe.exe",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms.exe.exe",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms.exe.exe",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms.exe.exe",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms.exe.exe",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms.app",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms.app",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms.app",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms.app",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms.app",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LMMS.app",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LMMS.app",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LMMS.app",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LMMS.app",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LMMS.app",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "/usr/bin/lmms",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "/usr/bin/lmms",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "/usr/bin/lmms",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "/usr/bin/lmms",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "/usr/bin/lmms",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "C:\\lmms.exe",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "C:\\lmms.exe",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "C:\\lmms.exe",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "C:\\lmms.exe",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "C:\\lmms.exe",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms ",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms ",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms ",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms ",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms ",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": " lmms",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": " lmms",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": " lmms",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": " lmms",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": " lmms",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "\tlmms\n",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "\tlmms\n",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "\tlmms\n",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "\tlmms\n",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "\tlmms\n",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "\u001clmms\u001f",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "\u001clmms\u001f",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "\u001clmms\u001f",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "\u001clmms\u001f",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "\u001clmms\u001f",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": " lmms ",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": " lmms ",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": " lmms ",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": " lmms ",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": " lmms ",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms2",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms2",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms2",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms2",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms2",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "xlmms",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "xlmms",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "xlmms",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "xlmms",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "xlmms",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmm",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmm",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmm",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmm",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmm",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmmss",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmmss",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmmss",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmmss",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmmss",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "l mms",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "l mms",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "l mms",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "l mms",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "l mms",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms\u0000",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms\u0000",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms\u0000",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms\u0000",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms\u0000",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": " ",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": " ",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": " ",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": " ",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": " ",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": ".exe",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": ".exe",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": ".exe",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": ".exe",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": ".exe",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "exe",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "exe",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "exe",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "exe",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "exe",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ｌｍｍｓ",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ｌｍｍｓ",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ｌｍｍｓ",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ｌｍｍｓ",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ｌｍｍｓ",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LKM",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LKM",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LKM",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LKM",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "LKM",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "audacity 3",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "audacity 3",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "audacity 3",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "audacity 3",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "audacity 3",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Audacity4.app",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Audacity4.app",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Audacity4.app",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Audacity4.app",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Audacity4.app",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ſ",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ſ",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ſ",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ſ",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ſ",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "pd.exe ",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "pd.exe ",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "pd.exe ",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "pd.exe ",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "pd.exe ",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "PD.Exe",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "PD.Exe",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "PD.Exe",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "PD.Exe",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Pure Data",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "pure_data",
+        "display_name": "Pure Data",
+        "source_url": "https://github.com/pure-data/pure-data/blob/master/src/Makefile.am"
+      }
+    },
+    {
+      "executable_name": "PD.Exe",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "Rack.EXE ",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack.EXE ",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack.EXE ",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack.EXE ",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "VCV Rack",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "vcv_rack",
+        "display_name": "VCV Rack",
+        "source_url": "https://github.com/VCVRack/Rack/blob/v2/Makefile"
+      }
+    },
+    {
+      "executable_name": "Rack.EXE ",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "milıkytracker",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "milıkytracker",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "milıkytracker",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "milıkytracker",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "milıkytracker",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "milkytracker.EXE.exe",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "milkytracker.EXE.exe",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "milkytracker.EXE.exe",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "milkytracker.EXE.exe",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "milkytracker.EXE.exe",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "å",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "å",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "å",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "å",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "å",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "café",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "café",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "café",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "café",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "café",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "STRAße",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "STRAße",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "STRAße",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "STRAße",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "STRAße",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ﬁ",
+      "platform": null,
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ﬁ",
+      "platform": "windows",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ﬁ",
+      "platform": "macos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ﬁ",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "ﬁ",
+      "platform": "beos",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": null,
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": 7,
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms",
+      "platform": "linux",
+      "juce_recognised": true,
+      "juce_name": "Ableton Live",
+      "expected": {
+        "recognised": true,
+        "host_name": "Ableton Live",
+        "identification": "juce_plugin_host_type",
+        "proof_level": "directly_observed",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "lmms",
+      "platform": "linux",
+      "juce_recognised": true,
+      "juce_name": "",
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms",
+      "platform": "linux",
+      "juce_recognised": true,
+      "juce_name": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "lmms",
+      "platform": "linux",
+      "juce_recognised": false,
+      "juce_name": "Ableton Live",
+      "expected": {
+        "recognised": true,
+        "host_name": "LMMS",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "lmms",
+        "display_name": "LMMS",
+        "source_url": "https://github.com/LMMS/lmms/blob/master/src/CMakeLists.txt"
+      }
+    },
+    {
+      "executable_name": "",
+      "platform": null,
+      "juce_recognised": true,
+      "juce_name": "Reaper",
+      "expected": {
+        "recognised": true,
+        "host_name": "Reaper",
+        "identification": "juce_plugin_host_type",
+        "proof_level": "directly_observed",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": null,
+      "platform": null,
+      "juce_recognised": true,
+      "juce_name": "Reaper",
+      "expected": {
+        "recognised": true,
+        "host_name": "Reaper",
+        "identification": "juce_plugin_host_type",
+        "proof_level": "directly_observed",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    }
+  ],
+  "custom_table": "{\"schema_version\": 1, \"hosts\": [{\"host_id\": \"one\", \"display_name\": \"One\", \"source_url\": \"https://e.example/one\", \"match\": [{\"platform\": \"linux\", \"executable_name\": \"shared\"}, {\"platform\": \"windows\", \"executable_name\": \"solo\"}]}, {\"host_id\": \"two\", \"display_name\": \"Two\", \"source_url\": \"https://e.example/two\", \"match\": [{\"platform\": \"macos\", \"executable_name\": \"shared\"}]}, {\"host_id\": \"three\", \"display_name\": \"Three\", \"source_url\": \"https://e.example/three\", \"match\": [{\"platform\": \"windows\", \"executable_name\": \"same\"}, {\"platform\": \"linux\", \"executable_name\": \"same\"}]}]}",
+  "custom": [
+    {
+      "executable_name": "shared",
+      "platform": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "shared",
+      "platform": "linux",
+      "expected": {
+        "recognised": true,
+        "host_name": "One",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "one",
+        "display_name": "One",
+        "source_url": "https://e.example/one"
+      }
+    },
+    {
+      "executable_name": "shared",
+      "platform": "macos",
+      "expected": {
+        "recognised": true,
+        "host_name": "Two",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "two",
+        "display_name": "Two",
+        "source_url": "https://e.example/two"
+      }
+    },
+    {
+      "executable_name": "shared",
+      "platform": "windows",
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "SHARED.exe",
+      "platform": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    },
+    {
+      "executable_name": "solo",
+      "platform": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "One",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "one",
+        "display_name": "One",
+        "source_url": "https://e.example/one"
+      }
+    },
+    {
+      "executable_name": "same",
+      "platform": null,
+      "expected": {
+        "recognised": true,
+        "host_name": "Three",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "three",
+        "display_name": "Three",
+        "source_url": "https://e.example/three"
+      }
+    },
+    {
+      "executable_name": "same",
+      "platform": "windows",
+      "expected": {
+        "recognised": true,
+        "host_name": "Three",
+        "identification": "inferred_from_executable_name",
+        "proof_level": "inferred",
+        "host_id": "three",
+        "display_name": "Three",
+        "source_url": "https://e.example/three"
+      }
+    },
+    {
+      "executable_name": "nothing",
+      "platform": null,
+      "expected": {
+        "recognised": false,
+        "host_name": null,
+        "identification": "unrecognised",
+        "proof_level": "unknown_unobserved",
+        "host_id": null,
+        "display_name": null,
+        "source_url": null
+      }
+    }
+  ],
+  "shipped_names": [
+    "Audacity",
+    "audacity",
+    "AUDACITY",
+    "Audacity4",
+    "audacity4.exe",
+    "lmms",
+    "LMMS",
+    "lmms.exe",
+    "LMMS.EXE",
+    "Rack",
+    "rack",
+    "Rack.exe",
+    "MilkyTracker",
+    "milkytracker",
+    "pd",
+    "PD.EXE",
+    "zrythm",
+    "Zrythm.exe"
+  ]
+}

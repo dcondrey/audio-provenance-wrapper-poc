@@ -1,0 +1,115 @@
+{
+  "automation_point_count": 2,
+  "clip_count": 2,
+  "clip_hashes": [
+    "805e22d372b0b147",
+    "91fb9f523030d7b2"
+  ],
+  "clip_slot_hashes": [
+    [
+      "10",
+      "0",
+      "805e22d372b0b147"
+    ],
+    [
+      "10",
+      "pos-1",
+      "91fb9f523030d7b2"
+    ]
+  ],
+  "device_chain_hashes": [
+    "6b248bfeee94c397",
+    "912d09dcfde7dbab"
+  ],
+  "file_hash": "ec6988e3d632840e33eb7c44889a3863727cc46cfacf7af26d25c1e518561849",
+  "file_size_bytes": 989,
+  "locator_count": 2,
+  "midi_note_count": 3,
+  "project_format": "ableton_als",
+  "sample_rate": null,
+  "sample_refs": [
+    "/Users/example/Samples/loop 1.wav",
+    "Samples/loop 1.wav"
+  ],
+  "track_count": 2,
+  "track_names": [
+    "Drums & Bass \"é\" café",
+    "Untitled"
+  ],
+  "tracks": [
+    {
+      "automation_point_count": 2,
+      "clip_count": 2,
+      "clips": [
+        {
+          "is_midi": false,
+          "length_beats": 8.5,
+          "name": "Loop 1",
+          "position_beats": 0.0,
+          "sample_ref": "/Users/example/Samples/loop 1.wav",
+          "warp_on": true
+        },
+        {
+          "is_midi": true,
+          "length_beats": 4.0,
+          "name": "Riff",
+          "position_beats": 4.0,
+          "sample_ref": "",
+          "warp_on": false
+        }
+      ],
+      "device_chain_hashes": [
+        "912d09dcfde7dbab"
+      ],
+      "device_presets": [
+        "Preset A",
+        ""
+      ],
+      "devices": [
+        "My Synth",
+        "Compressor2"
+      ],
+      "group_id": "-1",
+      "midi_note_count": 3,
+      "name": "Drums & Bass \"é\" café",
+      "sample_paths": [
+        "Samples/loop 1.wav",
+        "/Users/example/Samples/loop 1.wav"
+      ],
+      "track_id": "10",
+      "track_type": "AudioTrack"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "6b248bfeee94c397"
+      ],
+      "device_presets": [
+        "",
+        ""
+      ],
+      "devices": [
+        "Operator",
+        "Simpler"
+      ],
+      "group_id": "10",
+      "midi_note_count": 0,
+      "name": "Untitled",
+      "sample_paths": [],
+      "track_id": "pos-1",
+      "track_type": "MidiTrack"
+    }
+  ],
+  "transport_bpm": 120.0,
+  "transport_loop_on": true,
+  "transport_loop_range": [
+    4.0,
+    16.0
+  ],
+  "transport_time_signature": [
+    4,
+    4
+  ]
+}

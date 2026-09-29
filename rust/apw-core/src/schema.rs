@@ -29,8 +29,9 @@ const COVERAGE_STATUSES: [&str; 3] = [
     "unknown_coverage",
 ];
 const C2PA_CLAIM_STATUSES: [&str; 3] = ["embedded", "sidecar", "unavailable"];
-const HOST_ENVIRONMENT_STATUSES: [&str; 4] = [
+const HOST_ENVIRONMENT_STATUSES: [&str; 5] = [
     "observed",
+    "host_inferred",
     "host_unrecognised",
     "conflicting_observations",
     "unobserved",
@@ -202,6 +203,31 @@ fn validate_host_environment(host: &Map<String, Value>, errors: &mut Vec<String>
         }
         if !is_truthy(get(host, "host_name")) {
             errors.push("an observed host_environment must name the host".to_owned());
+        }
+        return;
+    }
+    if is_string_equal(get(host, "status"), "host_inferred") {
+        // A host named from its executable file name. The wrapper did not recognise
+        // it, so it is never directly observed: `inferred` is the ceiling.
+        if !is_string_equal(get(host, PROOF_LEVEL_KEY), ProofLevel::Inferred.as_str()) {
+            errors.push("a host inferred from an executable name must be inferred".to_owned());
+        }
+        if !matches!(get(host, "host_name"), Value::String(name) if !name.is_empty()) {
+            errors.push("an inferred host_environment must name the host".to_owned());
+        }
+        if !matches!(get(host, "host_recognised"), Value::Bool(false)) {
+            errors.push(
+                "an inferred host_environment must not report the wrapper as having recognised the host"
+                    .to_owned(),
+            );
+        }
+        if !is_string_equal(get(host, "identification"), "inferred_from_executable_name") {
+            errors.push("an inferred host_environment must record how it was identified".to_owned());
+        }
+        for key in ["host_id", "source_url"] {
+            if !matches!(get(host, key), Value::String(text) if !text.is_empty()) {
+                errors.push(format!("an inferred host_environment must carry {key}"));
+            }
         }
         return;
     }

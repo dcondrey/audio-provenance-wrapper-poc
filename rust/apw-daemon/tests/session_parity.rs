@@ -6,7 +6,7 @@
 #![allow(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::indexing_slicing)]
 
 use apw_core::canonical_json_utf8;
-use apw_daemon::{derive_host_environment, event_type_to_layer, SessionState};
+use apw_daemon::{derive_host_environment_for, event_type_to_layer, SessionState};
 use serde_json::Value;
 
 #[test]
@@ -33,7 +33,8 @@ fn every_session_case_matches_the_oracle() {
             case["telemetry_regressions"].as_u64(),
             "{name}: regressions"
         );
-        let produced = derive_host_environment(&session.snapshot());
+        let platform = case["platform"].as_str().unwrap();
+        let produced = derive_host_environment_for(&session.snapshot(), Some(platform));
         assert_eq!(
             serde_json::to_string(&produced).unwrap(),
             serde_json::to_string(&case["host_environment"]).unwrap(),

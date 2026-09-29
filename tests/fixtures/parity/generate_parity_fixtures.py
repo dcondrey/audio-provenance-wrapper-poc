@@ -578,9 +578,26 @@ def session_cases() -> list[dict]:
         ("host_falsy_fields_normalised", [host(0, "", "", "")]),
         ("host_truthy_non_bool_recognised", [host(1, "Reaper", "reaper", "CLAP")]),
         ("host_name_ignored_when_unrecognised", [host(False, "Ghost", "g", "VST3")]),
+        ("host_inferred_lmms", [host(False, "Unknown", "lmms", "VST3")]),
+        ("host_inferred_case_and_exe_suffix", [host(False, "Unknown", "LMMS.EXE", "VST3")]),
+        ("host_inferred_zrythm_windows_only_name", [host(False, "Unknown", "Audacity4", "VST3")], "windows"),
+        ("host_windows_only_name_on_linux_is_unmatched", [host(False, "Unknown", "Audacity4", "VST3")], "linux"),
+        ("host_inferred_pd_macos", [host(False, "Unknown", "pd", "AU")], "macos"),
+        ("host_recognised_never_overridden", [host(True, "Ableton Live", "lmms", "AU")]),
+        ("host_recognised_but_unnamed_is_not_inferred", [host(True, None, "lmms", "AU")]),
+        ("host_inferred_then_conflict_withdraws", [host(False, "Unknown", "lmms"), host(True, "Cubase", "lmms")]),
+        ("host_exact_match_only_prefix", [host(False, "Unknown", "lmms-nightly", "VST3")]),
+        ("host_exact_match_only_path", [host(False, "Unknown", "/usr/bin/lmms", "VST3")]),
+        ("host_app_bundle_not_matched", [host(False, "Unknown", "LMMS.app", "AU")]),
+        ("host_executable_not_a_string", [host(False, "Unknown", 7, "VST3")]),
+        ("host_executable_empty_is_none", [host(False, "Unknown", "", "VST3")]),
+        ("host_first_report_wins_for_executable", [host(False, "Unknown", "lmms", "VST3"), host(False, "Unknown", "Rack", "AU")]),
+        ("host_inferred_vcv_rack", [host(False, "Unknown", "rack.exe", "VST3")], "windows"),
     ]
     out = []
-    for name, events in cases:
+    for entry in cases:
+        name, events = entry[0], entry[1]
+        platform = entry[2] if len(entry) > 2 else "linux"
         fake, daemon_cls = _fake_daemon()
         for event in events:
             daemon_cls._record_plugin_event(fake, event, "session")
@@ -589,9 +606,126 @@ def session_cases() -> list[dict]:
             "events": events,
             "telemetry": [[key, value] for key, value in fake._latest_plugin_telemetry.items()],
             "telemetry_regressions": fake._telemetry_regressions,
-            "host_environment": derive_host_environment(fake),
+            "platform": platform,
+            "host_environment": derive_host_environment(fake, platform),
         })
     return out
+
+
+def host_identity_cases() -> dict:
+    from daemon import host_identity as hi
+
+    shipped_raw = hi.DEFAULT_TABLE_PATH.read_bytes()
+
+    def table_doc(hosts: list[dict], **over: object) -> str:
+        doc = {"schema_version": 1, "hosts": hosts}
+        doc.update(over)
+        return json.dumps(doc)
+
+    def host(host_id: str, matches: list[tuple[str, str]], display: str | None = None) -> dict:
+        return {"host_id": host_id, "display_name": display or host_id.title(), "source_url": "https://e.example/" + host_id,
+                "match": [{"platform": p, "executable_name": n} for p, n in matches]}
+
+    parse_inputs: list[tuple[str, str | bytes]] = [
+        ("shipped", shipped_raw),
+        ("minimal_valid", table_doc([host("a", [("linux", "aprog")])])),
+        ("schema_version_float_one_is_accepted", table_doc([host("a", [("linux", "x")])], schema_version=1.0)),
+        ("schema_version_true_rejected", table_doc([host("a", [("linux", "x")])], schema_version=True)),
+        ("schema_version_2", table_doc([host("a", [("linux", "x")])], schema_version=2)),
+        ("schema_version_missing", json.dumps({"hosts": []})),
+        ("root_not_object", "[]"),
+        ("not_json", "not json"),
+        ("hosts_not_list", table_doc("x")),  # type: ignore[arg-type]
+        ("hosts_empty_list_ok", table_doc([])),
+        ("host_not_object", table_doc(["x"])),  # type: ignore[list-item]
+        ("host_id_empty", table_doc([{**host("a", [("linux", "x")]), "host_id": ""}])),
+        ("host_id_too_long", table_doc([{**host("a", [("linux", "x")]), "host_id": "h" * 513}])),
+        ("host_id_at_limit", table_doc([{**host("a", [("linux", "x")]), "host_id": "h" * 512}])),
+        ("host_id_multibyte_at_limit", table_doc([{**host("a", [("linux", "x")]), "host_id": "\u00e9" * 512}])),
+        ("duplicate_host_id", table_doc([host("a", [("linux", "x")]), host("a", [("linux", "y")])])),
+        ("source_url_http", table_doc([{**host("a", [("linux", "x")]), "source_url": "http://x"}])),
+        ("source_url_missing", table_doc([{k: v for k, v in host("a", [("linux", "x")]).items() if k != "source_url"}])),
+        ("match_empty", table_doc([{**host("a", [("linux", "x")]), "match": []}])),
+        ("match_not_list", table_doc([{**host("a", [("linux", "x")]), "match": {}}])),
+        ("match_entry_not_object", table_doc([{**host("a", [("linux", "x")]), "match": ["x"]}])),
+        ("match_33_entries", table_doc([host("a", [("linux", f"n{i}") for i in range(33)])])),
+        ("match_32_entries", table_doc([host("a", [("linux", f"n{i}") for i in range(32)])])),
+        ("platform_unknown", table_doc([host("a", [("beos", "x")])])),
+        ("platform_not_string", table_doc([{**host("a", [("linux", "x")]), "match": [{"platform": ["linux"], "executable_name": "x"}]}])),
+        ("exe_with_exe_suffix", table_doc([host("a", [("linux", "x.exe")])])),
+        ("exe_with_uppercase_exe_suffix", table_doc([host("a", [("linux", "X.EXE")])])),
+        ("exe_with_app_suffix", table_doc([host("a", [("macos", "X.app")])])),
+        ("exe_with_slash", table_doc([host("a", [("linux", "/usr/bin/x")])])),
+        ("exe_with_backslash", table_doc([host("a", [("linux", "bin\\x")])])),
+        ("exe_empty", table_doc([host("a", [("linux", "")])])),
+        ("same_match_twice_in_one_host", table_doc([host("a", [("linux", "x"), ("linux", "X")])])),
+        ("same_match_across_hosts", table_doc([host("a", [("linux", "x")]), host("b", [("linux", "X")])])),
+        ("same_name_other_platform_ok", table_doc([host("a", [("linux", "x")]), host("b", [("windows", "x")])])),
+        ("not_utf8", b"\xff\xfe{}"),
+        ("duplicate_json_keys_last_wins", '{"schema_version": 2, "schema_version": 1, "hosts": []}'),
+    ]
+    parse_cases = []
+    for name, raw in parse_inputs:
+        data = raw if isinstance(raw, bytes) else raw.encode()
+        try:
+            table = hi.parse_table(data)
+            outcome = {"ok": sorted([[p, n, r["host_id"], r["display_name"], r["source_url"]] for (p, n), r in table.items()])}
+        except hi.HostTableError as error:
+            message = str(error)
+            outcome = {"error": message, "message_exact": not message.startswith("table is not valid UTF-8 JSON")}
+        parse_cases.append({"name": name, "raw_hex": data.hex() if name in ("shipped", "not_utf8") else None,
+                            "raw": None if name in ("shipped", "not_utf8") else data.decode(), **outcome})
+    # size boundary: limit-1, limit, limit+1 (built by padding a valid table)
+    base = table_doc([host("a", [("linux", "x")])]).encode()
+    for label, size in (("size_limit_minus_1", hi.MAX_TABLE_BYTES - 1), ("size_limit", hi.MAX_TABLE_BYTES),
+                        ("size_limit_plus_1", hi.MAX_TABLE_BYTES + 1)):
+        data = base[:-1] + b" " * (size - len(base)) + b"}"
+        try:
+            hi.parse_table(data)
+            outcome = {"ok": "valid"}
+        except hi.HostTableError as error:
+            outcome = {"error": str(error), "message_exact": True}
+        parse_cases.append({"name": label, "raw": None, "raw_hex": None, "size": len(data), **outcome})
+
+    shipped_names = ["Audacity", "audacity", "AUDACITY", "Audacity4", "audacity4.exe", "lmms", "LMMS", "lmms.exe",
+                     "LMMS.EXE", "Rack", "rack", "Rack.exe", "MilkyTracker", "milkytracker", "pd", "PD.EXE", "zrythm",
+                     "Zrythm.exe"]
+    near_misses = ["lmms.exe.exe", "lmms.app", "LMMS.app", "/usr/bin/lmms", "C:\\lmms.exe", "lmms ", " lmms", "\tlmms\n",
+                   "\x1clmms\x1f", "\u00a0lmms\u00a0", "lmms2", "xlmms", "lmm", "lmmss", "l mms", "lmms\x00", "",
+                   " ", ".exe", "exe", "\uff4c\uff4d\uff4d\uff53", "L\u212aM", "audacity 3", "Audacity4.app",
+                   "\u017f", "pd.exe ", "PD.Exe", "Rack.EXE ", "mil\u0131kytracker", "milkytracker.EXE.exe",
+                   "\u00e5", "caf\u00e9", "STRA\u00dfe", "\ufb01"]
+    identify_cases = []
+    for name in shipped_names + near_misses:
+        for platform in (None, "windows", "macos", "linux", "beos"):
+            r = hi.identify_host(name, False, None, platform)
+            identify_cases.append({"executable_name": name, "platform": platform, "juce_recognised": False, "juce_name": None,
+                                   "expected": _identity_dict(r)})
+    for args in [(None, False, None, "linux"), (7, False, None, "linux"), ("lmms", True, "Ableton Live", "linux"),
+                 ("lmms", True, "", "linux"), ("lmms", True, None, "linux"), ("lmms", False, "Ableton Live", "linux"),
+                 ("", True, "Reaper", None), (None, True, "Reaper", None)]:
+        r = hi.identify_host(*args[:3], args[3])
+        identify_cases.append({"executable_name": args[0], "platform": args[3], "juce_recognised": args[1], "juce_name": args[2],
+                               "expected": _identity_dict(r)})
+
+    # custom tables: ambiguity and precedence
+    custom = table_doc([host("one", [("linux", "shared"), ("windows", "solo")]),
+                        host("two", [("macos", "shared")]),
+                        host("three", [("windows", "same"), ("linux", "same")])])
+    table = hi.parse_table(custom.encode())
+    custom_cases = []
+    for name, platform in [("shared", None), ("shared", "linux"), ("shared", "macos"), ("shared", "windows"),
+                           ("SHARED.exe", None), ("solo", None), ("same", None), ("same", "windows"), ("nothing", None)]:
+        r = hi.identify_host(name, False, None, platform, table)
+        custom_cases.append({"executable_name": name, "platform": platform, "expected": _identity_dict(r)})
+    return {"parse": parse_cases, "identify": identify_cases, "custom_table": custom, "custom": custom_cases,
+            "shipped_names": shipped_names}
+
+
+def _identity_dict(identity) -> dict:
+    return {"recognised": identity.recognised, "host_name": identity.host_name, "identification": identity.identification,
+            "proof_level": identity.proof_level, "host_id": identity.host_id, "display_name": identity.display_name,
+            "source_url": identity.source_url}
 
 
 def network_validation_cases() -> list[dict]:
@@ -711,15 +845,36 @@ def rehearsal_capture() -> dict:
         body = b"\xf0\x08" + b"\x07" * 8 + b"\x08\x00" + ots_module.TAG_PENDING + bytes([len(uri) + 1, len(uri)]) + uri
         return HttpResult(200, "HTTP/1.1 200 OK", body)
 
+    original_events = synthetic_rehearsal._events
+
+    def events_with_host(samples, instance_id, plugin_session_id):
+        """An unrecognised-by-JUCE host whose executable is in the host table (lmms)."""
+        events = original_events(samples, instance_id, plugin_session_id)
+        host_event = {
+            "event_type": "host_environment", "proof_level": "directly_observed", "timestamp_ms": 9_000,
+            "plugin_instance_id": instance_id, "plugin_capture_session_id": plugin_session_id,
+            "host_recognised": False, "host_name": "Unknown", "host_executable_name": "lmms", "wrapper_format": "VST3",
+        }
+        events.insert(0, host_event)
+        for index, event in enumerate(events, start=1):
+            event["event_sequence"] = index
+            if isinstance(event.get("telemetry"), dict):
+                event["telemetry"]["events_prepared"] = index
+        return events
+
     real_daemon = synthetic_rehearsal.Daemon
 
     class OtsDaemon(real_daemon):
         def __init__(self, *args, **kwargs):
-            super().__init__(*args, ots_calendars=["http://calendar.parity.example/cal"], **kwargs)
+            super().__init__(
+                *args, ots_calendars=["http://calendar.parity.example/cal"],
+                project_path=REPO / "tests" / "fixtures" / "projects" / "lmms" / "basic.mmp", **kwargs,
+            )
 
     with tempfile.TemporaryDirectory() as directory, \
             unittest.mock.patch.object(synthetic_rehearsal, "_send_with_acknowledgements", capture), \
             unittest.mock.patch.object(synthetic_rehearsal, "Daemon", OtsDaemon), \
+            unittest.mock.patch.object(synthetic_rehearsal, "_events", events_with_host), \
             unittest.mock.patch.object(anchor_module, "http_fetch", side_effect=fake_tsa), \
             unittest.mock.patch.object(ots_module, "http_fetch", side_effect=fake_calendar), \
             contextlib.redirect_stdout(io.StringIO()):
@@ -1070,6 +1225,7 @@ def main() -> None:
     dump("synthetic_events.json", capture["events"])
     dump("manifest_key_paths.json", {"note": RUN_SPECIFIC_NOTE, "paths": key_paths(capture["manifest"])})
     dump("session_state.json", session_cases())
+    dump("host_identity.json", host_identity_cases())
     dump("network_validation.json", network_validation_cases())
     dump("ots_vectors.json", ots_fixture())
 
