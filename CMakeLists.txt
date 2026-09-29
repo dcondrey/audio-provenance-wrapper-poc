@@ -45,19 +45,51 @@ endif()
 
 # Plug-in formats are per platform. AU is Apple-only (JUCE also disables it
 # elsewhere). VST3 builds everywhere. LV2 is enabled by default off Apple and
-# can be requested on Apple with -DAPW_BUILD_LV2=ON. AAX needs Avid's SDK and
-# PACE signing and is deliberately not built. Standalone is not built: the
-# plug-in observes a host and a standalone shell has none.
+# can be requested on Apple with -DAPW_BUILD_LV2=ON. The formats below are
+# opt-in because each needs something this repository cannot ship:
+#   VST2   -DAPW_VST2_SDK_PATH=<legacy Steinberg SDK> (Steinberg stopped
+#          licensing it in 2018, so only holders of the old agreement have it)
+#   AAX    -DAPW_AAX_SDK_PATH=<Avid AAX SDK>; a loadable Pro Tools build also
+#          needs PACE/iLok signing, which is outside this build
+#   AUv3   -DAPW_BUILD_AUV3=ON on Apple with -G Xcode (JUCE's own restriction)
+#   CLAP   -DAPW_BUILD_CLAP=ON fetches free-audio/clap-juce-extensions
+# Standalone is not built: the plug-in observes a host and a standalone shell
+# has none.
 set(APW_PLUGIN_FORMATS VST3)
 if(APPLE)
     list(APPEND APW_PLUGIN_FORMATS AU)
     option(APW_BUILD_LV2 "Also build the LV2 format" OFF)
+    option(APW_BUILD_AUV3 "Also build AUv3 (requires the Xcode generator)" OFF)
 else()
     option(APW_BUILD_LV2 "Also build the LV2 format" ON)
 endif()
 if(APW_BUILD_LV2)
     list(APPEND APW_PLUGIN_FORMATS LV2)
 endif()
+if(APW_BUILD_AUV3)
+    if(NOT APPLE OR NOT CMAKE_GENERATOR STREQUAL "Xcode")
+        message(FATAL_ERROR "APW_BUILD_AUV3 needs macOS and -G Xcode")
+    endif()
+    list(APPEND APW_PLUGIN_FORMATS AUv3)
+endif()
+set(APW_VST2_SDK_PATH "" CACHE PATH "Legacy Steinberg VST2 SDK; enables the VST2 format")
+if(APW_VST2_SDK_PATH)
+    if(NOT EXISTS "${APW_VST2_SDK_PATH}")
+        message(FATAL_ERROR "APW_VST2_SDK_PATH does not exist: ${APW_VST2_SDK_PATH}")
+    endif()
+    juce_set_vst2_sdk_path("${APW_VST2_SDK_PATH}")
+    list(APPEND APW_PLUGIN_FORMATS VST)
+endif()
+set(APW_AAX_SDK_PATH "" CACHE PATH "Avid AAX SDK; enables the AAX format (unsigned)")
+if(APW_AAX_SDK_PATH)
+    if(NOT EXISTS "${APW_AAX_SDK_PATH}")
+        message(FATAL_ERROR "APW_AAX_SDK_PATH does not exist: ${APW_AAX_SDK_PATH}")
+    endif()
+    juce_set_aax_sdk_path("${APW_AAX_SDK_PATH}")
+    list(APPEND APW_PLUGIN_FORMATS AAX)
+endif()
+option(APW_BUILD_CLAP "Also build a CLAP plug-in via clap-juce-extensions" OFF)
+set(APW_CLAP_EXTENSIONS_TAG "55525c9858d4b25687be7759a5e0f70eccef218e" CACHE STRING "clap-juce-extensions revision used for CLAP")
 message(STATUS "AudioProvenanceCapture plug-in formats: ${APW_PLUGIN_FORMATS}")
 
 juce_add_plugin(AudioProvenanceCapture
@@ -103,6 +135,20 @@ target_link_libraries(AudioProvenanceCapture
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
+
+if(APW_BUILD_CLAP)
+    include(FetchContent)
+    FetchContent_Declare(
+        clap-juce-extensions
+        GIT_REPOSITORY https://github.com/free-audio/clap-juce-extensions.git
+        GIT_TAG ${APW_CLAP_EXTENSIONS_TAG}
+        GIT_SHALLOW FALSE)
+    FetchContent_MakeAvailable(clap-juce-extensions)
+    clap_juce_extensions_plugin(
+        TARGET AudioProvenanceCapture
+        CLAP_ID "com.audioprovenance.capture"
+        CLAP_FEATURES audio-effect analyzer utility)
+endif()
 
 include(CTest)
 
