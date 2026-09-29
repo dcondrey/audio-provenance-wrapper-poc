@@ -33,6 +33,20 @@ SURFACE: dict[Path, tuple[str, ...]] = {
         "AudioObserver::setBypassActive",
         "AudioObserver::markLifecycleDiscontinuity",
     ),
+    # LADSPA/DSSI shims: run() is the host's audio callback for these formats.
+    ROOT / "src" / "ladspa" / "CaptureInstance.cpp": (
+        "CaptureInstance::connectPort",
+        "CaptureInstance::run",
+        "CaptureInstance::processChunk",
+    ),
+    ROOT / "src" / "ladspa" / "LadspaCallbacks.h": (
+        "connectPort",
+        "run",
+    ),
+    ROOT / "src" / "dssi" / "DssiEntry.cpp": (
+        "runSynth",
+        "runMultipleSynths",
+    ),
 }
 
 FORBIDDEN: tuple[tuple[str, re.Pattern[str]], ...] = (

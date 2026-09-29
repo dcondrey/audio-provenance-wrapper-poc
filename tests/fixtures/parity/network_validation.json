@@ -150,7 +150,7 @@
       "wrapper_format": "AU"
     },
     "ok": false,
-    "message": "Proof level 'externally_verified' exceeds network cap 'ProofLevel.DIRECTLY_OBSERVED' for host_environment"
+    "message": "Proof level 'externally_verified' exceeds network cap 'directly_observed' for host_environment"
   },
   {
     "name": "telemetry_valid",

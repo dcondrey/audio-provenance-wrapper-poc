@@ -217,7 +217,7 @@ def validate_network_event(event: Mapping[str, object]) -> tuple[bool, str]:
     proof_level = str(event.get("proof_level"))
     if _PROOF_LEVEL_RANK[proof_level] > _PROOF_LEVEL_RANK[cap]:
         return False, (
-            f"Proof level '{proof_level}' exceeds network cap '{cap}' for {event_type}"
+            f"Proof level '{proof_level}' exceeds network cap '{cap.value}' for {event_type}"
         )
 
     if not _is_serialisable(event):

@@ -483,3 +483,14 @@ class CorrelationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NetworkCapMessageTests(unittest.TestCase):
+    def test_cap_is_named_by_value_not_enum_repr(self):
+        from daemon.evidence_receiver.taxonomy import validate_network_event
+
+        ok, message = validate_network_event(
+            {"event_type": "host_environment", "proof_level": "externally_verified"}
+        )
+        self.assertFalse(ok)
+        self.assertNotIn("ProofLevel.", message)
