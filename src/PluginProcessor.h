@@ -24,7 +24,10 @@ public:
         bool lastCallbackWasBypassed = false;
     };
 
-    explicit AudioProvenanceCaptureAudioProcessor (int daemonPort = 9876);
+    // wrapperFormatOverride names formats JUCE has no WrapperType for (the
+    // LADSPA/DSSI shims); null keeps the wrapper JUCE detected.
+    explicit AudioProvenanceCaptureAudioProcessor (int daemonPort = 9876,
+                                                   const char* wrapperFormatOverride = nullptr);
     ~AudioProvenanceCaptureAudioProcessor() override;
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -103,7 +106,7 @@ private:
         juce::String wrapperFormat;
     };
 
-    static HostObservation observeHost (WrapperType wrapper);
+    static HostObservation observeHost (WrapperType wrapper, const char* wrapperFormatOverride);
 
     // IMPORTANT: every event reaching the daemon must pass through here. The
     // daemon tracks stream continuity by event_sequence, so an event emitted

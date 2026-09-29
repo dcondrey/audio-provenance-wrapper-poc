@@ -42,11 +42,12 @@ juce::var reportableText (const juce::String& text)
 }
 }
 
-AudioProvenanceCaptureAudioProcessor::AudioProvenanceCaptureAudioProcessor (int daemonPort)
+AudioProvenanceCaptureAudioProcessor::AudioProvenanceCaptureAudioProcessor (int daemonPort,
+                                                                            const char* wrapperFormatOverride)
     : AudioProcessor (BusesProperties()
                           .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                           .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
-      observedHost (observeHost (wrapperType)),
+      observedHost (observeHost (wrapperType, wrapperFormatOverride)),
       pluginInstanceId ("plugin-" + juce::Uuid().toString().substring (0, 12)),
       pluginCaptureSessionId ("plugin-session-" + juce::Uuid().toString().substring (0, 12)),
       eventEmitter (pluginInstanceId, pluginCaptureSessionId, "127.0.0.1", daemonPort),
@@ -109,7 +110,8 @@ void AudioProvenanceCaptureAudioProcessor::emitEnrichedEvent (const juce::String
 }
 
 AudioProvenanceCaptureAudioProcessor::HostObservation
-AudioProvenanceCaptureAudioProcessor::observeHost (WrapperType wrapper)
+AudioProvenanceCaptureAudioProcessor::observeHost (WrapperType wrapper,
+                                                   const char* wrapperFormatOverride)
 {
     const juce::PluginHostType host;
     HostObservation observation;
@@ -123,7 +125,9 @@ AudioProvenanceCaptureAudioProcessor::observeHost (WrapperType wrapper)
 
     observation.executableName =
         juce::File::getSpecialLocation (juce::File::hostApplicationPath).getFileName();
-    observation.wrapperFormat = juce::String (getWrapperTypeDescription (wrapper));
+    observation.wrapperFormat = juce::String (wrapperFormatOverride != nullptr
+                                                  ? wrapperFormatOverride
+                                                  : getWrapperTypeDescription (wrapper));
     return observation;
 }
 
