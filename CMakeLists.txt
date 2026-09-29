@@ -9,7 +9,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(APPLE AND (NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET OR CMAKE_OSX_DEPLOYMENT_TARGET STREQUAL ""))
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS deployment target" FORCE)
+    # Xcode 27's build system rejects a deployment target below 12.0, which fails the
+    # compiler-identification project the Xcode generator runs (and JUCE's juceaide
+    # sub-configure) with "No CMAKE_C_COMPILER could be found".
+    if(CMAKE_GENERATOR STREQUAL "Xcode")
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS deployment target" FORCE)
+    else()
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS deployment target" FORCE)
+    endif()
 endif()
 
 # REQUIRED: redistributable builds must load in Intel and Rosetta hosts, not just arm64.
@@ -70,7 +77,9 @@ if(APW_BUILD_AUV3)
     if(NOT APPLE OR NOT CMAKE_GENERATOR STREQUAL "Xcode")
         message(FATAL_ERROR "APW_BUILD_AUV3 needs macOS and -G Xcode")
     endif()
-    list(APPEND APW_PLUGIN_FORMATS AUv3)
+    # JUCE embeds the AUv3 app extension in a container app, which is its Standalone
+    # target; without it macOS never registers the extension. Built only under this option.
+    list(APPEND APW_PLUGIN_FORMATS AUv3 Standalone)
 endif()
 set(APW_VST2_SDK_PATH "" CACHE PATH "Legacy Steinberg VST2 SDK; enables the VST2 format")
 if(APW_VST2_SDK_PATH)
@@ -135,6 +144,15 @@ target_link_libraries(AudioProvenanceCapture
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
+
+if(APW_BUILD_AUV3)
+    # JUCE's AUv3 wrapper and its Standalone container need these modules; the AUv3
+    # wrapper also gets CoreAudioKit (AUViewController) only through juce_audio_utils.
+    target_link_libraries(AudioProvenanceCapture
+        PRIVATE
+            juce::juce_audio_utils
+            juce::juce_audio_devices)
+endif()
 
 if(APW_BUILD_CLAP)
     include(FetchContent)

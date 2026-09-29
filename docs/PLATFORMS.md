@@ -38,11 +38,11 @@ free-audio/clap-juce-extensions; LADSPA and DSSI are separate shims
 
 | Format | Status | How | Verified here |
 | --- | --- | --- | --- |
-| VST3 | built by default, all OS | | macOS build and ctest |
-| AU (`aumf`) | built by default, Apple only | JUCE emits `aumf` (MusicEffect) because the plug-in takes MIDI input | macOS build; type read from JUCE's `JUCEUtils.cmake` |
-| CLAP | opt-in `-DAPW_BUILD_CLAP=ON` | clap-juce-extensions, pinned commit | macOS build produces `Audio Provenance Capture.clap`; never loaded in a CLAP host |
+| VST3 | built by default, all OS | | macOS build and ctest; pluginval 1.0.4 passes strictness 10 (`docs/VALIDATION_PLUGIN_FORMATS.md`) |
+| AU (`aumf`) | built by default, Apple only | JUCE emits `aumf` (MusicEffect) because the plug-in takes MIDI input | macOS build; `auval -v aumf ApCa ApPr` passes and pluginval 1.0.4 passes strictness 10 (`docs/VALIDATION_PLUGIN_FORMATS.md`) |
+| CLAP | opt-in `-DAPW_BUILD_CLAP=ON` | clap-juce-extensions, pinned commit | macOS build; clap-validator 0.4.1: 31 passed, 1 validator crash (zero parameters), 1 warning, 11 skipped; never loaded in a CLAP host (`docs/VALIDATION_PLUGIN_FORMATS.md`) |
 | LV2 | default off Apple, opt-in on Apple | JUCE | macOS build only |
-| AUv3 | opt-in `-DAPW_BUILD_AUV3=ON`, Apple, Xcode generator | JUCE | not built: `juceaide` failed to configure under Xcode 27 with the Xcode generator on this machine |
+| AUv3 | opt-in `-DAPW_BUILD_AUV3=ON`, Apple, Xcode generator | JUCE | builds under Xcode 27 (arm64 slice checked) together with its Standalone container app, which the option now also builds; registers with `pluginkit` and `auval -v aumf ApCa ApPr` passes out-of-process. Earlier failure was the 11.0 default deployment target, which Xcode 27 rejects (minimum 12.0); the Xcode generator now defaults to 12.0. Never loaded in a host |
 | VST2 | opt-in `-DAPW_VST2_SDK_PATH=` | needs the legacy Steinberg SDK, which Steinberg stopped licensing in 2018 | only the missing-path guard |
 | AAX | opt-in `-DAPW_AAX_SDK_PATH=` | needs Avid's SDK; a loadable Pro Tools build also needs PACE/iLok signing | only the missing-path guard |
 | LADSPA, DSSI | opt-in shims | see `docs/LADSPA_DSSI.md` | see that document |
