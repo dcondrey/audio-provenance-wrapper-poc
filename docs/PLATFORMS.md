@@ -159,6 +159,9 @@ that host; only the following have any evidence in this repository:
 
 Every other host, and every host on Windows and Linux, is untested.
 
+Per-application capture, identification and project-parsing status is in
+`docs/HOST_SUPPORT.md`.
+
 ## Unverified on Windows and Linux
 
 - That the plug-in configures, compiles, links or loads (VST3 or LV2).
