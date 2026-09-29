@@ -32,20 +32,43 @@ each OS; they have not run on a real Windows or Linux interpreter.
 ## Plug-in formats
 
 Formats are chosen in `CMakeLists.txt` (`APW_PLUGIN_FORMATS`). JUCE 8.0.15's
-`FORMATS` accepts `Standalone Unity VST3 AU AUv3 AAX VST LV2`, and its CMake
-API documents that AU is only built on macOS.
+`FORMATS` accepts `Standalone Unity VST3 AU AUv3 AAX VST LV2`; CLAP comes from
+free-audio/clap-juce-extensions; LADSPA and DSSI are separate shims
+(`docs/LADSPA_DSSI.md`).
 
-- **VST3**: every platform.
-- **AU**: Apple only.
-- **LV2**: on by default off Apple (`-DAPW_BUILD_LV2=OFF` to disable). The URI is
-  the fixed `urn:audioprovenance:capture`. JUCE builds and runs a manifest
-  helper on the build host, so LV2 cannot be cross-compiled.
-- **AAX**: out of scope. It needs Avid's AAX SDK and PACE/iLok signing, neither
-  of which this repository has. No stub is provided.
-- **Standalone**: deliberately not built. The plug-in observes a hosting
-  application; a standalone shell has no DAW to observe and would add the
-  `juce_audio_utils` dependency.
-- **VST2**: not built (requires Steinberg's SDK).
+| Format | Status | How | Verified here |
+| --- | --- | --- | --- |
+| VST3 | built by default, all OS | | macOS build and ctest |
+| AU (`aumf`) | built by default, Apple only | JUCE emits `aumf` (MusicEffect) because the plug-in takes MIDI input | macOS build; type read from JUCE's `JUCEUtils.cmake` |
+| CLAP | opt-in `-DAPW_BUILD_CLAP=ON` | clap-juce-extensions, pinned commit | macOS build produces `Audio Provenance Capture.clap`; never loaded in a CLAP host |
+| LV2 | default off Apple, opt-in on Apple | JUCE | macOS build only |
+| AUv3 | opt-in `-DAPW_BUILD_AUV3=ON`, Apple, Xcode generator | JUCE | not built: `juceaide` failed to configure under Xcode 27 with the Xcode generator on this machine |
+| VST2 | opt-in `-DAPW_VST2_SDK_PATH=` | needs the legacy Steinberg SDK, which Steinberg stopped licensing in 2018 | only the missing-path guard |
+| AAX | opt-in `-DAPW_AAX_SDK_PATH=` | needs Avid's SDK; a loadable Pro Tools build also needs PACE/iLok signing | only the missing-path guard |
+| LADSPA, DSSI | opt-in shims | see `docs/LADSPA_DSSI.md` | see that document |
+
+Not buildable, and no stub is provided:
+
+- **RTAS, AudioSuite, TDM**: Avid retired them with Pro Tools 10 (32-bit) and
+  no SDK is available; TDM also targets DSP hardware. AAX is the successor.
+- **MAS (MOTU Audio System), MOTU FreeForm, Sound Designer II**: MAS and
+  FreeForm are discontinued Mac OS 9-era formats with no available SDK; SDII
+  is an audio file format, not a plug-in interface.
+- **MASH/ProPlugin**: no public SDK exists that this repository can build
+  against.
+- **DirectX / DXi**: legacy 32-bit DirectShow-era interfaces; current Windows
+  hosts load VST3 or CLAP.
+- **LADSPA v2**: there is no such standard. LV2 is LADSPA's successor and is
+  built.
+- **Rack Extension (Reason)**: needs Reason Studios' SDK and runs sandboxed
+  without network or file access, so it cannot emit events to the daemon.
+- **Max for Live devices (`.amxd`)**: a Max patcher, not a native plug-in;
+  Max loads the VST3/AU directly, and an `.amxd` would need Max to author and
+  verify. The `ableton_bridge/` Live API probe is a separate observation path.
+- **JSFX**: the runtime has no sockets, so a JSFX cannot send events to the
+  daemon. REAPER, its only host, loads VST3 and CLAP.
+
+Installers let users pick which formats to install: see `docs/INSTALL.md`.
 
 ### Building on Linux
 
