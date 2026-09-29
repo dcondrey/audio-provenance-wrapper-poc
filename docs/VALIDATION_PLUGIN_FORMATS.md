@@ -80,15 +80,21 @@ clap-validator validate "<build>/AudioProvenanceCapture_artefacts/Release/CLAP/A
 
 ## `pkgbuild` "write: Permission denied"
 
-`pkgbuild` on this OS prints four `write: Permission denied` lines per invocation and still exits
-0 and writes the package. It reproduces with no scripts, no component plist, and a one-file payload
-(`pkgbuild --root <dir with one file> --identifier x.t out.pkg`), with the sandbox disabled, with
-stdin closed, and under a pty. No child process is spawned (polled during a 1 GB payload) and a
-`write` shim on `PATH` was never called, so the message comes from inside Apple's `/usr/bin/pkgbuild`
-(a `perror("write")`-style EACCES; debugger attach is refused for the platform binary, so the
-exact call was not traced). The resulting component's payload list matches the source root exactly
-(`pkgutil --payload-files`). It is not caused by `scripts/package_pkg.sh`, which was left unchanged
-so real pkgbuild errors are not filtered out.
+`pkgbuild` on macOS 27.0 prints four `write: Permission denied` lines per invocation and still
+exits 0 and writes the package. Cause, traced by interposing `write(2)` in a re-signed copy of
+`/usr/bin/pkgbuild` (`DYLD_INSERT_LIBRARIES`, arm64e): while pkgbuild frees the BOM it built
+(`-[PKBOMDirectoryEnumerator dealloc]` -> `BOMStorageCommit` -> `BOMStreamFlush`), Apple's
+PackageKit writes the temporary `NSIRD_*/package.bom` through a descriptor opened `O_RDWR` and
+`write` returns EACCES. It does not depend on the environment, `TMPDIR`, stdin, the sandbox or
+the payload. The finished package is complete (`lsbom` and `pkgutil --payload-files` list every
+entry, including a 60-file payload).
+
+The defect is inside Apple's binary, so it cannot be prevented. `scripts/package_pkg.sh` now runs
+every pkgbuild through `pkgbuild_checked`, which drops only the exact line `write: Permission
+denied`, and only when pkgbuild exited 0 and the output package reads back with
+`pkgutil --payload-files`. Every other pkgbuild message and any nonzero exit still surface (a
+missing root still fails with pkgbuild's own error and exit 1). A dev-mode build now shows no
+such lines and prints one `note:` per component saying how many were suppressed.
 
 ## Not validated
 

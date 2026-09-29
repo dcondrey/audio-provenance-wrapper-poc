@@ -113,6 +113,30 @@ find_staged_daemon() {
     return 1
 }
 
+# Root cause, traced with an interposer on write(2): while pkgbuild frees the BOM it built
+# (PKBOMDirectoryEnumerator dealloc -> BOMStorageCommit), Apple's PackageKit flushes the
+# temporary NSIRD_*/package.bom through a descriptor whose write returns EACCES. That
+# prints "write: Permission denied" four times per call. The BOM in the finished package is
+# complete (lsbom lists every payload entry), so the line is noise, but only that exact line
+# is dropped and only after the output package reads back cleanly; every other pkgbuild
+# message and any nonzero exit still surface.
+pkgbuild_checked() {
+    local errfile status noise out
+    out="${!#}"
+    errfile="$(mktemp "${TMPDIR:-/tmp}/pkgbuild-err.XXXXXX")" || die "could not create a pkgbuild log"
+    status=0
+    pkgbuild "$@" 2>"${errfile}" || status=$?
+    noise="$(grep -c -x 'write: Permission denied' "${errfile}" || true)"
+    grep -v -x 'write: Permission denied' "${errfile}" >&2 || true
+    command rm -f -- "${errfile}"
+    if [[ ${status} -eq 0 && "${noise}" -gt 0 && "$1" != "--analyze" ]]; then
+        pkgutil --payload-files "${out}" >/dev/null 2>&1 \
+            || die "pkgbuild reported success but ${out##*/} does not read back"
+        echo "note: ${noise} PackageKit BOM-flush warnings suppressed for ${out##*/} (package verified readable)"
+    fi
+    return ${status}
+}
+
 # pkgbuild --analyze omits BundleIsRelocatable entirely, and its absence leaves the
 # relocatable default in force: Installer then redirects the payload onto an older copy found
 # anywhere on disk, so the install reports success while the stale bundle keeps loading. The
@@ -121,7 +145,7 @@ find_staged_daemon() {
 # Prints the number of bundles pinned.
 pin_bundles() {
     local root="$1" plist="$2" i=0
-    pkgbuild --analyze --root "${root}" "${plist}" >/dev/null || die "pkgbuild --analyze failed"
+    pkgbuild_checked --analyze --root "${root}" "${plist}" >/dev/null || die "pkgbuild --analyze failed"
     while /usr/libexec/PlistBuddy -c "Print :${i}:RootRelativeBundlePath" "${plist}" >/dev/null 2>&1; do
         /usr/libexec/PlistBuddy -c "Add :${i}:BundleIsRelocatable bool false" "${plist}" >/dev/null 2>&1 \
             || /usr/libexec/PlistBuddy -c "Set :${i}:BundleIsRelocatable false" "${plist}" \
@@ -150,7 +174,7 @@ build_component() {
     elif [[ "${bundles}" == yes ]]; then
         die "pkgbuild --analyze found no bundles in the ${id} payload; the payload root is wrong."
     fi
-    pkgbuild "${args[@]}" "${out}" || die "pkgbuild failed for ${id}"
+    pkgbuild_checked "${args[@]}" "${out}" || die "pkgbuild failed for ${id}"
     COMPONENT_IDS+=("${id}")
 }
 
@@ -280,7 +304,7 @@ POSTINSTALL
     chmod +x "${scripts}/postinstall"
     # The agent IDENTIFIER keeps its historical value so upgrades match the old receipt.
     local out="${COMP_DIR}/${AGENT_IDENTIFIER}.pkg"
-    pkgbuild --root "${root}" --scripts "${scripts}" --identifier "${AGENT_IDENTIFIER}" \
+    pkgbuild_checked --root "${root}" --scripts "${scripts}" --identifier "${AGENT_IDENTIFIER}" \
              --version "${VERSION}" --install-location "/" "${out}" \
         || die "pkgbuild failed for the login agent"
     COMPONENT_IDS+=(loginagent)
