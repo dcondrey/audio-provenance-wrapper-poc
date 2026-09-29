@@ -150,6 +150,10 @@ if(APW_BUILD_CLAP)
         CLAP_FEATURES audio-effect analyzer utility)
 endif()
 
+# Owned by separate work streams so they never edit this file concurrently.
+include(cmake/ladspa_dssi.cmake OPTIONAL)
+include(cmake/install.cmake OPTIONAL)
+
 include(CTest)
 
 if(BUILD_TESTING)
