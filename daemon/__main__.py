@@ -23,6 +23,7 @@ from daemon.provenance import detect_provider as detect_provenance_provider
 from daemon.sample_watcher.watcher import SampleWatcher
 from daemon.signing import DEFAULT_PRIVATE_KEY, DEFAULT_PUBLIC_KEY, Ed25519Signer
 from daemon.time_anchor.anchor import DEFAULT_TSA_URL, RFC3161Provider, TimeAnchorService
+from daemon.time_anchor.ots import DEFAULT_CALENDARS, OtsAnchorService
 
 log = logging.getLogger(__name__)
 
@@ -106,6 +107,7 @@ class Daemon:
         generate_html_report: bool = True,
         open_artifacts: bool = False,
         time_anchor_url: str | None = None,
+        ots_calendars: list[str] | None = None,
         sdk_adapter_enabled: bool = False,
         sdk_cli: str = "audio-provenance",
         sdk_development_key: Path = Path("~/.apw/sdk_development.key"),
@@ -135,6 +137,8 @@ class Daemon:
         self._time_anchor = (
             TimeAnchorService(RFC3161Provider(time_anchor_url)) if time_anchor_url else None
         )
+        # None disables OpenTimestamps; an empty list selects the default calendars.
+        self._ots_anchor = OtsAnchorService(ots_calendars) if ots_calendars is not None else None
 
         self.receiver = EvidenceReceiver(
             host="127.0.0.1",
@@ -791,6 +795,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--ots",
+        action="store_true",
+        help=(
+            "Also submit each export hash to OpenTimestamps calendars (default: "
+            + ", ".join(DEFAULT_CALENDARS)
+            + "). The record is 'pending': it asserts no time until the proof is upgraded."
+        ),
+    )
+    parser.add_argument(
+        "--ots-calendar",
+        action="append",
+        default=None,
+        metavar="URL",
+        help="An OpenTimestamps calendar URL (repeatable); implies --ots and replaces the defaults.",
+    )
+    parser.add_argument(
         "--source-category",
         choices=SOURCE_CATEGORIES,
         default="unknown",
@@ -895,6 +915,7 @@ def _build_daemon(args: argparse.Namespace) -> Daemon:
         generate_html_report=not args.no_html_report,
         open_artifacts=args.open_artifacts,
         time_anchor_url=args.time_anchor,
+        ots_calendars=(args.ots_calendar or []) if (args.ots or args.ots_calendar) else None,
         sdk_adapter_enabled=args.sdk_adapter,
         sdk_cli=args.sdk_cli,
         sdk_development_key=args.sdk_development_key,

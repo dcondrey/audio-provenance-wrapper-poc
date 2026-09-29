@@ -16,6 +16,7 @@ Read this file before copying, publishing, or distributing anything here.
 | `src/` | **All rights reserved.** Not licensed. | Jointly authored, and links JUCE, which is AGPLv3-or-commercial. |
 | `daemon/` | **All rights reserved.** Not licensed. | Jointly authored. |
 | `src/ladspa/ladspa.h`, `src/dssi/dssi.h`, `src/dssi/compat/` | **LGPL-2.1-or-later** (`src/ladspa/LICENSE.LGPL-2.1`) | Vendored unmodified from the LADSPA 1.17 and DSSI 1.1.1 SDKs; declarations only. Sources and checksums in `docs/LADSPA_DSSI.md`. |
+| `tests/fixtures/parity/ots/` (except `SOURCES.json`) | **LGPL-3.0-or-later** (`LICENSE.third-party` there) | Unmodified OpenTimestamps client example proofs used as test inputs; not linked into any binary. |
 | `requirements/`, `docs/`, `tests/`, `CMakeLists.txt`, `AGENTS.md`, `README.md` | **All rights reserved.** Not licensed. | Jointly authored. |
 
 ## The Apache-2.0 parts

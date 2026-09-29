@@ -44,6 +44,44 @@ pub enum Command {
     Verify(VerifyArgs),
     /// Assemble, sign and write the provenance manifest for one export.
     Manifest(ManifestArgs),
+    /// Upgrade or check an OpenTimestamps detached proof.
+    Ots(OtsArgs),
+}
+
+#[derive(Debug, clap::Args)]
+pub struct OtsArgs {
+    #[command(subcommand)]
+    pub action: OtsAction,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum OtsAction {
+    /// Ask the proof's calendars for completed attestations.
+    Upgrade {
+        proof: PathBuf,
+        /// An extra calendar allowed to be contacted (repeatable).
+        #[arg(long = "calendar", value_name = "URL")]
+        calendars: Vec<String>,
+        /// Where to write the upgraded proof (default: PROOF.upgraded).
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
+    /// Check a proof's Bitcoin attestations against block headers.
+    Verify {
+        proof: PathBuf,
+        /// The timestamped file.
+        #[arg(long, conflicts_with = "digest")]
+        file: Option<PathBuf>,
+        /// SHA-256 of the timestamped file, hex.
+        #[arg(long)]
+        digest: Option<String>,
+        /// Esplora-compatible explorer, trusted to serve the best chain.
+        #[arg(long, value_name = "URL", conflicts_with = "header")]
+        explorer: Option<String>,
+        /// An 80-byte header from your own node, HEIGHT:HEX (repeatable).
+        #[arg(long, value_name = "HEIGHT:HEX")]
+        header: Vec<String>,
+    },
 }
 
 /// Flag spellings are the ones `daemon/__main__.py::parse_args` accepts, so the
@@ -85,6 +123,16 @@ pub struct DaemonArgs {
     /// Anchor each export hash at an RFC 3161 TSA (default server if no URL given).
     #[arg(long, num_args = 0..=1, default_missing_value = DEFAULT_TSA_URL, value_name = "TSA_URL")]
     pub time_anchor: Option<String>,
+
+    /// Also submit each export hash to OpenTimestamps calendars (the default
+    /// calendars unless --ots-calendar is given). The record is `pending`: it
+    /// asserts no time until the proof is upgraded.
+    #[arg(long)]
+    pub ots: bool,
+
+    /// An OpenTimestamps calendar URL (repeatable); implies --ots and replaces the defaults.
+    #[arg(long = "ots-calendar", value_name = "URL")]
+    pub ots_calendar: Vec<String>,
 
     /// Producer-declared source category. Defaults to unknown.
     #[arg(long, default_value = "unknown")]

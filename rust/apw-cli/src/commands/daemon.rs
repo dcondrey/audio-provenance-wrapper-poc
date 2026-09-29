@@ -49,7 +49,10 @@ pub fn run(args: &DaemonArgs) -> Result<i32> {
         ..DaemonConfig::default()
     };
 
-    let daemon = Daemon::new(config, engines.daemon_services(args.time_anchor.as_deref()))?;
+    let daemon = Daemon::new(config, engines.daemon_services(
+            args.time_anchor.as_deref(),
+            (args.ots || !args.ots_calendar.is_empty()).then(|| args.ots_calendar.clone()),
+        ))?;
     log::info!("Capture session: {}", daemon.session_id());
     log::info!(
         "Declared source category: {} ({})",

@@ -201,6 +201,21 @@
         }
       ]
     },
+    "time_anchor_opentimestamps": {
+      "description": "OpenTimestamps calendar receipt for the export hash. 'pending' asserts no external time; a completed proof is a sidecar .ots, never a rewrite of this signed record.",
+      "allOf": [
+        { "$ref": "#/$defs/proofObject" },
+        {
+          "required": ["status", "data_hash", "scope", "calendars"],
+          "properties": {
+            "status": { "enum": ["pending", "unavailable"] },
+            "data_hash": { "pattern": "^[0-9a-f]{64}$" },
+            "apw:proof_level": { "enum": ["inferred", "unknown_unobserved"] },
+            "calendars": { "type": "array" }
+          }
+        }
+      ]
+    },
     "downstream_registration_handoff": { "type": "object" },
     "c2pa_mapping": { "type": "object" },
     "c2pa_claim": {

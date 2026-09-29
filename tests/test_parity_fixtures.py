@@ -116,7 +116,8 @@ class KeyPathTests(unittest.TestCase):
         for path in ("/host_environment/status", "/observation_coverage/counters/plugin_telemetry_regressions",
                      "/manifest_signature/hardware_cosignature/counter_scope",
                      "/manifest_signature/hardware_cosignature/apw:proof_level", "/time_anchor/status",
-                     "/forgery_analysis/analyzers/hash_chain/flags"):
+                     "/forgery_analysis/analyzers/hash_chain/flags", "/time_anchor_opentimestamps/status",
+                     "/time_anchor_opentimestamps/proof_hex", "/time_anchor_opentimestamps/calendars[]/url"):
             self.assertIn(path, fixture["paths"])
 
 

@@ -53,6 +53,13 @@ log = "0.4.28"
 env_logger = "0.11.8"
 tempfile = "3.24.0"
 libc = "0.2.189"
+# TLS for https time-anchor endpoints. The `ring` provider is REQUIRED: rustls'
+# default `aws-lc-rs` needs a per-slice C toolchain and breaks the lipo build, the
+# same reason c2pa uses rust_native_crypto. ring is already in the tree via c2pa.
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+webpki-roots = "1"
+sha1 = "0.11.0"
+ripemd = "0.1"
 
 [profile.release]
 opt-level = 3

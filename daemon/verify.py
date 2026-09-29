@@ -14,6 +14,7 @@ from daemon.forgery_analysis.analyzer import HashChainAnalyzer
 from daemon.hardware_attestation.provider import SoftwareProvider
 from daemon.schema import validate_manifest_invariants
 from daemon.signing import pinned_public_key, verify_ed25519_signature
+from daemon.time_anchor import ots as ots_module
 from daemon.time_anchor.anchor import RFC3161Provider, TimeProof
 
 log = logging.getLogger(__name__)
@@ -513,7 +514,7 @@ def _check_time_anchor(data: dict[str, object], result: VerificationResult) -> N
     if status != "anchored":
         result.error("time_anchor_invalid", "time_anchor status must be anchored or unavailable")
         return
-    if anchor.get("apw:proof_level") not in _TIME_ANCHOR_LABELS or anchor.get("cms_signature_verified") is not False:
+    if not isinstance(anchor.get("apw:proof_level"), str) or anchor.get("apw:proof_level") not in _TIME_ANCHOR_LABELS or anchor.get("cms_signature_verified") is not False:
         result.error(
             "time_anchor_invalid",
             "time_anchor claims stronger evidence than a relayed, unauthenticated TSA token",
@@ -550,6 +551,16 @@ def _check_time_anchor(data: dict[str, object], result: VerificationResult) -> N
     )
 
 
+def _check_time_anchor_opentimestamps(
+    data: dict[str, object],
+    result: VerificationResult,
+    header_source: "ots_module.HeaderSource | None" = None,
+    proof_override: bytes | None = None,
+) -> None:
+    for severity, code, message in ots_module.evaluate_record(data, header_source, proof_override):
+        {"error": result.error, "warning": result.warn, "info": result.info}[severity](code, message)
+
+
 def verify_manifest(
     manifest_path: Path,
     signing_key_path: Path | None = DEFAULT_SIGNING_KEY,
@@ -557,6 +568,8 @@ def verify_manifest(
     export_path_override: Path | None = None,
     trust_anchor_path: Path | None = DEFAULT_TRUST_ANCHOR,
     c2pa_asset_override: Path | None = None,
+    ots_header_source: "ots_module.HeaderSource | None" = None,
+    ots_proof_override: bytes | None = None,
 ) -> VerificationResult:
     result = VerificationResult()
     if not manifest_path.is_file():
@@ -865,6 +878,7 @@ def verify_manifest(
     )
 
     _check_time_anchor(data, result)
+    _check_time_anchor_opentimestamps(data, result, ots_header_source, ots_proof_override)
 
     facts = data.get("session_facts")
     if isinstance(facts, dict):
@@ -935,6 +949,18 @@ def verify_hash_chain(evidence_path: Path) -> VerificationResult:
     return result
 
 
+def _ots_header_source(args: argparse.Namespace) -> "ots_module.HeaderSource | None":
+    if args.ots_header:
+        headers = {}
+        for item in args.ots_header:
+            height, _, raw = item.partition(":")
+            headers[int(height)] = bytes.fromhex(raw)
+        return ots_module.LocalHeaderSource(headers)
+    if args.ots_explorer:
+        return ots_module.ExplorerHeaderSource(args.ots_explorer)
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     parser = argparse.ArgumentParser(description="Verify audio provenance manifest and hash chain integrity.")
@@ -977,6 +1003,31 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Re-read the C2PA claim from this file instead of the recorded signed asset.",
     )
+    parser.add_argument(
+        "--ots-explorer",
+        default=None,
+        metavar="URL",
+        help=(
+            "Esplora-compatible explorer (e.g. https://blockstream.info/api) used to fetch the block "
+            "header for an OpenTimestamps Bitcoin attestation. The explorer is trusted to serve the best chain."
+        ),
+    )
+    parser.add_argument(
+        "--ots-header",
+        action="append",
+        default=[],
+        metavar="HEIGHT:HEX",
+        help=(
+            "An 80-byte block header (hex) you took from your own node, for the given height (repeatable). "
+            "The merkle root and the header's own proof-of-work are checked; chain membership is not."
+        ),
+    )
+    parser.add_argument(
+        "--ots-proof",
+        type=Path,
+        default=None,
+        help="An upgraded .ots sidecar for the manifest's OpenTimestamps record (the signed manifest is never rewritten).",
+    )
     args = parser.parse_args(argv)
 
     path = args.target
@@ -996,6 +1047,8 @@ def main(argv: list[str] | None = None) -> int:
                 args.export,
                 args.trust_anchor,
                 args.c2pa_asset,
+                _ots_header_source(args),
+                args.ots_proof.read_bytes() if args.ots_proof else None,
             )
         elif path.suffix == ".jsonl":
             log.info("Verifying hash chain: %s", path)

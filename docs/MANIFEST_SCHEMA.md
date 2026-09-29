@@ -224,6 +224,40 @@ checks the token's message imprint and nonce but does not verify the TSA's CMS
 signature, so the time is a relayed third-party assertion. Verify that
 signature against the TSA certificate chain downstream before relying on it,
 and prefer an `https` TSA URL so an on-path attacker cannot substitute a token.
+Both daemons validate the TSA's TLS certificate against the bundled Mozilla
+roots, never follow redirects, cap the response at 64 KiB and bound the whole
+exchange to ten seconds.
+
+`time_anchor_opentimestamps` appears only when the daemon runs with `--ots` or
+`--ots-calendar URL`. It records an [OpenTimestamps](https://opentimestamps.org)
+calendar receipt for the export hash. The calendars are sent
+`sha256(export_hash || 16 random bytes)`, never the export hash itself. The
+record has status `pending` (a calendar promised to anchor the commitment in
+Bitcoin) or `unavailable`; both carry `apw:proof_level: unknown_unobserved`,
+because a pending receipt asserts no time at all. `proof_hex` is the detached
+`.ots` proof; `attestations` and `calendars` summarise it and are re-derived by
+the verifier.
+
+A signed manifest is never rewritten, so an upgraded (completed) proof lives in
+a sidecar: `python -m daemon.time_anchor.ots upgrade proof.ots` (or `apw ots
+upgrade`) fetches the Bitcoin attestation from the calendars, and the verifier
+accepts it with `--ots-proof`. A Bitcoin attestation is checked by computing the
+attested digest and comparing it to the merkle root of the block header at the
+attested height. Where the header comes from decides what may be claimed:
+
+- `--ots-explorer URL` (an Esplora-compatible API): the explorer is trusted to
+  serve the best chain, so the result is `time_anchor_ots_block_verified` with
+  that trust assumption named, and is not an independent check.
+- `--ots-header HEIGHT:HEX` (an 80-byte header from the caller's own node): the
+  merkle root and the header's own proof-of-work target are checked. Chain
+  membership at that height is not checked by this tool.
+
+The verified time is an upper bound (the data existed no later than the block's
+miner-set timestamp, which is only roughly accurate) and is never reported as an
+earlier time. Finding codes: `time_anchor_ots_pending`,
+`time_anchor_ots_unavailable`, `time_anchor_ots_bitcoin_unchecked`,
+`time_anchor_ots_block_verified`, `time_anchor_ots_header_unavailable`
+(warning) and `time_anchor_ots_invalid` (error).
 
 ## Local verifier outcomes
 

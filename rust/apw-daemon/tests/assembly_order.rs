@@ -145,6 +145,7 @@ fn both_signatures_cover_everything_assembled_before_them() {
         sealer: &sealer,
         portable_signer: Some(&signer),
         time_anchor: None,
+        ots_anchor: None,
     };
     let inputs = AssemblyInputs {
         snapshot: &snapshot,

@@ -822,6 +822,8 @@ def generate_manifest(daemon: "Daemon", export_path: Path, export_version: int =
 
     if daemon._time_anchor is not None:
         manifest["time_anchor"] = daemon._time_anchor.anchor_record(export_hash)
+    if getattr(daemon, "_ots_anchor", None) is not None:
+        manifest["time_anchor_opentimestamps"] = daemon._ots_anchor.anchor_record(export_hash)
 
     if chain_length > 0 and last_window_hash:
         # Added before signing so both manifest signatures cover the binding.

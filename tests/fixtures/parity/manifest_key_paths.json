@@ -28,6 +28,7 @@
         "presentation",
         "downstream_registration_handoff",
         "time_anchor",
+        "time_anchor_opentimestamps",
         "hardware_binding",
         "portable_signature",
         "manifest_signature"
@@ -3392,6 +3393,118 @@
       "keys": null
     },
     "/time_anchor/apw:proof_level": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "status",
+        "data_hash",
+        "file_hash_op",
+        "commitment_hex",
+        "calendars",
+        "attestations",
+        "proof_hex",
+        "scope",
+        "apw:proof_level"
+      ]
+    },
+    "/time_anchor_opentimestamps/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/data_hash": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/file_hash_op": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/commitment_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/calendars": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/calendars[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "url",
+        "status"
+      ]
+    },
+    "/time_anchor_opentimestamps/calendars[]/url": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/calendars[]/status": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/attestations": {
+      "kinds": [
+        "list"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/attestations[]": {
+      "kinds": [
+        "object"
+      ],
+      "keys": [
+        "type",
+        "uri"
+      ]
+    },
+    "/time_anchor_opentimestamps/attestations[]/type": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/attestations[]/uri": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/proof_hex": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/scope": {
+      "kinds": [
+        "str"
+      ],
+      "keys": null
+    },
+    "/time_anchor_opentimestamps/apw:proof_level": {
       "kinds": [
         "str"
       ],

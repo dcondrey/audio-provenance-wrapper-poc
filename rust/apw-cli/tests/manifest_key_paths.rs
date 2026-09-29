@@ -188,6 +188,45 @@ fn spawn_tsa() -> u16 {
     port
 }
 
+/// A loopback OpenTimestamps calendar: answers POST /cal/digest with a pending receipt.
+fn spawn_calendar() -> u16 {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    std::thread::spawn(move || {
+        for stream in listener.incoming() {
+            let Ok(mut stream) = stream else { continue };
+            let mut received = Vec::new();
+            let mut chunk = [0_u8; 1024];
+            while let Ok(read) = stream.read(&mut chunk) {
+                if read == 0 {
+                    break;
+                }
+                received.extend_from_slice(&chunk[..read]);
+                let Some(split) = received.windows(4).position(|w| w == b"\r\n\r\n") else { continue };
+                let head = String::from_utf8_lossy(&received[..split]).to_ascii_lowercase();
+                let length: usize = head
+                    .lines()
+                    .find_map(|line| line.strip_prefix("content-length: "))
+                    .and_then(|value| value.trim().parse().ok())
+                    .unwrap_or(0);
+                if received.len() >= split + 4 + length {
+                    let uri = format!("http://127.0.0.1:{port}/cal");
+                    let mut body = vec![0xf0, 0x08];
+                    body.extend([7_u8; 8]);
+                    body.extend([0x08, 0x00, 0x83, 0xdf, 0xe3, 0x0d, 0x2e, 0xf9, 0x0c, 0x8e]);
+                    body.extend([(uri.len() + 1) as u8, uri.len() as u8]);
+                    body.extend(uri.as_bytes());
+                    let head = format!("HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", body.len());
+                    let _ = stream.write_all(head.as_bytes());
+                    let _ = stream.write_all(&body);
+                    break;
+                }
+            }
+        }
+    });
+    port
+}
+
 fn free_udp_port() -> u16 {
     UdpSocket::bind("127.0.0.1:0").unwrap().local_addr().unwrap().port()
 }
@@ -198,6 +237,7 @@ fn run_session(root: &Path, events: &[Value]) -> Value {
     }
     let port = free_udp_port();
     let tsa = format!("http://127.0.0.1:{}/tsa", spawn_tsa());
+    let calendar = format!("http://127.0.0.1:{}/cal", spawn_calendar());
     let key = |name: &str| root.join(name);
     let mut child = Command::new(env!("CARGO_BIN_EXE_apw"))
         .arg("daemon")
@@ -209,6 +249,7 @@ fn run_session(root: &Path, events: &[Value]) -> Value {
         .args(["--session-id", "parity-session", "--stem-id", "synthetic-stem"])
         .args(["--source-category", "generator"])
         .args(["--time-anchor", &tsa])
+        .args(["--ots-calendar", &calendar])
         .args(["--signing-key".as_ref(), key("local.key").as_os_str()])
         .args(["--portable-private-key".as_ref(), key("pp.key").as_os_str()])
         .args(["--portable-public-key".as_ref(), key("pub.key").as_os_str()])

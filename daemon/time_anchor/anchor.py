@@ -3,9 +3,10 @@ from __future__ import annotations
 import abc
 import logging
 import secrets
-import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
+
+from daemon.time_anchor.http import fetch as http_fetch
 
 log = logging.getLogger(__name__)
 
@@ -213,14 +214,18 @@ class RFC3161Provider(TimeAnchorProvider):
 
     def anchor(self, data_hash: str, nonce: bytes) -> TimeProof:
         request_der = encode_timestamp_request(data_hash, nonce)
-        request = urllib.request.Request(
+        response = http_fetch(
             self.tsa_url,
-            data=request_der,
-            headers={"Content-Type": "application/timestamp-query"},
             method="POST",
+            data=request_der,
+            headers={"Content-Type": "application/timestamp-query", "Accept": "application/timestamp-reply"},
+            timeout=TSA_TIMEOUT_SECONDS,
+            max_bytes=MAX_TSA_RESPONSE_BYTES,
         )
-        with urllib.request.urlopen(request, timeout=TSA_TIMEOUT_SECONDS) as response:
-            body = response.read(MAX_TSA_RESPONSE_BYTES + 1)
+        # Redirects are refused, not followed: a 3xx lands here as an error.
+        if response.status != 200:
+            raise ValueError(f"the TSA answered with HTTP status line {response.status_line!r}")
+        body = response.body
         if len(body) > MAX_TSA_RESPONSE_BYTES:
             raise ValueError("TSA response exceeds the size bound")
         parsed = parse_timestamp_response(body)

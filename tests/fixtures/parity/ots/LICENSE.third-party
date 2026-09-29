@@ -1,0 +1,8 @@
+The proof (.ots) and source files in this directory, other than SOURCES.json,
+are unmodified copies of opentimestamps-client/examples at commit cd71c76
+(https://github.com/opentimestamps/opentimestamps-client).
+
+That project is licensed under the GNU Lesser General Public License,
+version 3 or (at your option) any later version. The license text is at
+https://raw.githubusercontent.com/opentimestamps/opentimestamps-client/master/LICENSE
+They are test inputs only and are not linked into any binary.

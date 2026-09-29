@@ -43,6 +43,7 @@ where
         Command::Sign(args) => commands::sign::run(args),
         Command::Verify(args) => commands::verify::run(args),
         Command::Manifest(args) => commands::manifest::run(args),
+        Command::Ots(args) => commands::ots::run(args),
     };
 
     match outcome {

@@ -1,0 +1,25 @@
+{
+  "note": "Real vectors are unmodified files from the reference client's examples directory. The invalid/ files are renamed with the .ots names kept; sha1-a-or-b.ots and sha1-a come from examples/sha1/. Every other vector in ots_vectors.json is CONSTRUCTED by tests/fixtures/parity/generate_parity_fixtures.py and labelled so.",
+  "repository": "https://github.com/opentimestamps/opentimestamps-client",
+  "commit": "cd71c7609421bed2a07b9642a3c02a58c9fd2cdf",
+  "path": "examples/",
+  "files": [
+    "hello-world.txt", "hello-world.txt.ots", "incomplete.txt", "incomplete.txt.ots",
+    "two-calendars.txt", "two-calendars.txt.ots", "merkle3.txt", "merkle3.txt.ots",
+    "known-and-unknown-notary.txt", "known-and-unknown-notary.txt.ots",
+    "unknown-notary.txt", "unknown-notary.txt.ots",
+    "different-blockchains.txt", "different-blockchains.txt.ots",
+    "empty", "empty.ots", "bad-stamp.txt", "bad-stamp.txt.ots",
+    "bad-major-version.ots", "exceeds-max-msg-length.ots", "invalid-file-digest-type.ots",
+    "sha1-a", "sha1-a-or-b.ots"
+  ],
+  "reference_implementation": {
+    "repository": "https://github.com/opentimestamps/python-opentimestamps",
+    "commit": "3af46432efc4a4c4e7bba439c1f49bce808eb3e5",
+    "release_used_for_ots_upstream.json": "opentimestamps 0.4.5"
+  },
+  "bitcoin_header_358391": {
+    "note": "80-byte header of block 358391, fetched from an Esplora explorer (https://blockstream.info/api/block/<hash>/header). It is self-authenticating: it hashes to the block id the explorer named and meets its own nBits target; both are asserted by tests.",
+    "block_hash": "000000000000000003e892881a8cdcdc117c06d444057c98b6f04a9ee75a2319"
+  }
+}

@@ -15,6 +15,8 @@ mod coverage;
 mod daemon;
 mod error;
 mod forgery;
+mod http;
+mod ots;
 mod probe;
 mod receiver;
 mod services;
@@ -24,6 +26,11 @@ mod util;
 mod watcher;
 
 pub use anchor::{HttpTransport, Rfc3161Anchor, TsaTransport};
+pub use ots::{
+    calendar_get, calendar_submit, summarize, upgrade, verify_proof_bytes, CalendarTransport,
+    ExplorerHeaderSource, HttpCalendarTransport, OtsAnchor,
+};
+pub use http::{HttpClient, HttpRequest, HttpResponse, Method};
 pub use assembly::{
     derive_host_environment,
     generate_manifest, AssemblyContext, AssemblyInputs, GeneratedManifest, ManifestServices,

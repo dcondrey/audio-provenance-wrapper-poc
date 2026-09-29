@@ -121,6 +121,9 @@ pub struct DaemonServices {
     pub sealer: Arc<dyn LocalSealer>,
     pub portable_signer: Option<Arc<Ed25519Signer>>,
     pub time_anchor: Option<Arc<dyn TimeAnchor>>,
+    /// The OpenTimestamps calendar seam. Absent, the manifest carries no
+    /// `time_anchor_opentimestamps`.
+    pub ots_anchor: Option<Arc<dyn TimeAnchor>>,
 }
 
 impl Default for DaemonServices {
@@ -133,6 +136,7 @@ impl Default for DaemonServices {
             sealer: Arc::new(UnsealedManifest),
             portable_signer: None,
             time_anchor: None,
+            ots_anchor: None,
         }
     }
 }
@@ -552,6 +556,7 @@ impl Daemon {
             sealer: self.services.sealer.as_ref(),
             portable_signer: self.services.portable_signer.as_deref(),
             time_anchor: self.services.time_anchor.as_deref(),
+            ots_anchor: self.services.ots_anchor.as_deref(),
         };
         let inputs = AssemblyInputs {
             snapshot: &snapshot,

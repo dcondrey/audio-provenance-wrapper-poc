@@ -7,7 +7,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use apw_core::Ed25519Signer;
-use apw_daemon::{DaemonServices, Rfc3161Anchor, StatisticalForgeryScreen};
+use apw_daemon::{DaemonServices, OtsAnchor, Rfc3161Anchor, StatisticalForgeryScreen};
 use apw_provenance::{
     detect_hardware_provider, detect_provider, expand_user, HardwareProvider, ProvenanceProvider,
 };
@@ -75,7 +75,7 @@ impl Engines {
 
     /// `time_anchor_url` is the `--time-anchor` TSA; absent, the manifest carries
     /// no `time_anchor` record, as in the Python daemon.
-    pub fn daemon_services(&self, time_anchor_url: Option<&str>) -> DaemonServices {
+    pub fn daemon_services(&self, time_anchor_url: Option<&str>, ots_calendars: Option<Vec<String>>) -> DaemonServices {
         DaemonServices {
             audio: Arc::new(PcmAudioProbe),
             associator: Arc::new(FeatureAssociator),
@@ -89,6 +89,8 @@ impl Engines {
             time_anchor: time_anchor_url.map(|url| {
                 Arc::new(Rfc3161Anchor::new(url)) as Arc<dyn apw_daemon::TimeAnchor>
             }),
+            ots_anchor: ots_calendars
+                .map(|calendars| Arc::new(OtsAnchor::new(calendars)) as Arc<dyn apw_daemon::TimeAnchor>),
         }
     }
 }

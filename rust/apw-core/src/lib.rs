@@ -13,6 +13,7 @@ mod finding;
 mod guard;
 mod hash;
 mod manifest;
+mod ots;
 mod proof;
 mod pyvalue;
 mod schema;
@@ -44,6 +45,15 @@ pub use manifest::{
     APW_VERSION, C2PA_CLAIM_SCOPE, CORE_PRINCIPLE, DEFAULT_UNOBSERVED, MANIFEST_SCHEMA,
 };
 pub use proof::{ProofLevel, PROOF_LEVEL_KEY};
+pub use ots::{
+    attestation_summary as ots_attestation_summary, check_bitcoin_attestations, double_sha256,
+    evaluate_record as evaluate_ots_record, file_hash_op_name, hex as ots_hex, parse_detached,
+    parse_timestamp as parse_ots_timestamp, pending_record as ots_pending_record,
+    unavailable_record as ots_unavailable_record, Attestation, AttestationKind, BitcoinCheck,
+    BlockHeader, CheckStatus, DetachedProof, HeaderSource, LocalHeaderSource, Op, OtsError,
+    OtsFinding, Timestamp as OtsTimestamp, CALENDAR_TIMEOUT_SECONDS, DEFAULT_CALENDARS,
+    MAX_CALENDAR_RESPONSE_BYTES, OP_SHA256,
+};
 pub use pyvalue::{is_truthy, python_eq, python_repr, python_str};
 pub use schema::{validate_manifest_invariants, REQUIRED_MANIFEST_KEYS};
 pub use signature::{

@@ -74,6 +74,7 @@ pub struct ManifestServices<'a> {
     pub sealer: &'a dyn LocalSealer,
     pub portable_signer: Option<&'a Ed25519Signer>,
     pub time_anchor: Option<&'a dyn TimeAnchor>,
+    pub ots_anchor: Option<&'a dyn TimeAnchor>,
 }
 
 pub struct AssemblyInputs<'a> {
@@ -401,6 +402,9 @@ pub fn generate_manifest(
 
     if let Some(anchor) = services.time_anchor {
         manifest.insert("time_anchor", anchor.anchor_record(&export_hash));
+    }
+    if let Some(anchor) = services.ots_anchor {
+        manifest.insert("time_anchor_opentimestamps", anchor.anchor_record(&export_hash));
     }
 
     if snapshot.chain_length > 0 && !last_window_hash.is_empty() {

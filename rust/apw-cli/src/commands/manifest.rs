@@ -44,7 +44,7 @@ pub fn run(args: &ManifestArgs) -> Result<i32> {
         generate_html_report: !args.no_html_report,
         ..DaemonConfig::default()
     };
-    let daemon = Daemon::new(config, engines.daemon_services(None))?;
+    let daemon = Daemon::new(config, engines.daemon_services(None, None))?;
 
     // IMPORTANT: no routed audio was observed in this process, so the manifest
     // records an empty hash chain and an unavailable export association. That is

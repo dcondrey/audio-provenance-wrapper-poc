@@ -38,6 +38,8 @@ from daemon import verify as verify_module  # noqa: E402
 from daemon.common import canonical_json_bytes  # noqa: E402
 from daemon.manifest_builder.generator import derive_forgery_analysis  # noqa: E402
 from daemon.time_anchor import anchor as anchor_module  # noqa: E402
+from daemon.time_anchor import ots as ots_module  # noqa: E402
+from daemon.time_anchor.http import HttpResult  # noqa: E402
 from daemon.time_anchor.anchor import (  # noqa: E402
     MAX_TSA_RESPONSE_BYTES,
     RFC3161Provider,
@@ -356,9 +358,8 @@ def time_anchor_fixture() -> dict:
     record_vectors = []
     for name, data_hash, nonce, body in record_cases:
         service = TimeAnchorService(RFC3161Provider(url))
-        fake = unittest.mock.MagicMock()
-        fake.__enter__.return_value.read = lambda limit, body=body: body[:limit]
-        with unittest.mock.patch.object(anchor_module.urllib.request, "urlopen", return_value=fake), \
+        result = HttpResult(200, "HTTP/1.1 200 OK", body[: MAX_TSA_RESPONSE_BYTES + 1])
+        with unittest.mock.patch.object(anchor_module, "http_fetch", return_value=result), \
                 unittest.mock.patch.object(anchor_module.secrets, "token_bytes", return_value=nonce):
             record = service.anchor_record(data_hash)
         record_vectors.append({
@@ -698,21 +699,367 @@ def rehearsal_capture() -> dict:
         sent.extend(json.loads(json.dumps(events)))
         return result
 
-    def fake_tsa(request, timeout=None):
-        _tag, content, _ = _der_read(request.data, 0)
+    def fake_tsa(url, *, data=None, **_kwargs):
+        _tag, content, _ = _der_read(data, 0)
         children = _der_children(content)
         body = synthetic_token(_der_children(children[1][1])[1][1].hex(), children[2][1])
-        fake = unittest.mock.MagicMock()
-        fake.__enter__.return_value.read = lambda limit: body[:limit]
-        return fake
+        return HttpResult(200, "HTTP/1.1 200 OK", body)
+
+    def fake_calendar(url, *, method="GET", data=None, **_kwargs):
+        assert method == "POST" and url.endswith("/digest")
+        uri = url[: -len("/digest")].encode()
+        body = b"\xf0\x08" + b"\x07" * 8 + b"\x08\x00" + ots_module.TAG_PENDING + bytes([len(uri) + 1, len(uri)]) + uri
+        return HttpResult(200, "HTTP/1.1 200 OK", body)
+
+    real_daemon = synthetic_rehearsal.Daemon
+
+    class OtsDaemon(real_daemon):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, ots_calendars=["http://calendar.parity.example/cal"], **kwargs)
 
     with tempfile.TemporaryDirectory() as directory, \
             unittest.mock.patch.object(synthetic_rehearsal, "_send_with_acknowledgements", capture), \
-            unittest.mock.patch.object(anchor_module.urllib.request, "urlopen", side_effect=fake_tsa), \
+            unittest.mock.patch.object(synthetic_rehearsal, "Daemon", OtsDaemon), \
+            unittest.mock.patch.object(anchor_module, "http_fetch", side_effect=fake_tsa), \
+            unittest.mock.patch.object(ots_module, "http_fetch", side_effect=fake_calendar), \
             contextlib.redirect_stdout(io.StringIO()):
         manifest_path = synthetic_rehearsal.run(Path(directory), time_anchor_url="http://tsa.parity.example/ts")
         manifest = json.loads(manifest_path.read_text())
     return {"manifest": manifest, "events": sent}
+
+
+# ------------------------------------ OpenTimestamps ------------------------------------
+OTS_DIR = HERE / "ots"
+REAL_HEADER_358391 = bytes.fromhex(
+    "02000000b96394585a281b7e5f438fd1c9ed492645a1fd61cb3802040000000000000000007ee445d23ad0"
+    "61af4a36b809501fab1ac4f2d7e7a739817dd0cbb7ec661b8a1e376755f58616186272def6"
+)
+
+
+def _v(number: int) -> bytes:
+    out = bytearray()
+    while True:
+        byte, number = number & 0x7F, number >> 7
+        out.append(byte | (0x80 if number else 0))
+        if not number:
+            return bytes(out)
+
+
+def _vb(data: bytes) -> bytes:
+    return _v(len(data)) + data
+
+
+def _att_pending(uri: str) -> bytes:
+    return ots_module.TAG_PENDING + _vb(_vb(uri.encode()))
+
+
+def _att_height(tag: bytes, height: int) -> bytes:
+    return tag + _vb(_v(height))
+
+
+def _leaf(attestation: bytes) -> bytes:
+    return b"\x00" + attestation
+
+
+def _detached(op: int, digest: bytes, body: bytes, *, version: int = 1) -> bytes:
+    return ots_module.HEADER_MAGIC + bytes([version, op]) + digest + body
+
+
+def _make_header(merkle_root: bytes, time_: int, *, mined: bool = True) -> bytes:
+    """A CONSTRUCTED header. With mined=True the nonce is ground until the hash meets an
+    easy (regtest-style) target, so it passes the proof-of-work check without real work."""
+    bits = 0x207FFFFF if mined else 0x1D00FFFF
+    for nonce in range(1_000_000):
+        raw = (1).to_bytes(4, "little") + b"\x00" * 32 + merkle_root + time_.to_bytes(4, "little") \
+            + bits.to_bytes(4, "little") + nonce.to_bytes(4, "little")
+        if ots_module.BlockHeader(raw).meets_own_target() == mined:
+            return raw
+    raise SystemExit("could not construct a header")
+
+
+def _parse_outcome(data: bytes) -> dict:
+    try:
+        proof = ots_module.parse_detached(data)
+    except ots_module.DeserializationError as error:
+        return {"error": str(error)}
+    return {"ok": {
+        "file_hash_op": ots_module._OP_NAMES[proof.file_hash_op],
+        "digest": proof.file_digest.hex(),
+        "attestations": ots_module.attestation_summary(proof.timestamp),
+        "messages": sorted({m.hex() for m in proof.timestamp.messages()}),
+        "reserialized_sha256": hashlib.sha256(proof.serialize()).hexdigest(),
+        "reserialized_equals_input": proof.serialize() == data,
+    }}
+
+
+class TableSource:
+    def __init__(self, kind: str, headers: dict[int, bytes]) -> None:
+        self.kind = kind
+        self.headers = {h: ots_module.BlockHeader(raw) for h, raw in headers.items()}
+
+    def header_at(self, height: int):
+        if height not in self.headers:
+            raise LookupError(f"no header for height {height}")
+        return self.headers[height]
+
+
+def ots_fixture() -> dict:
+    sources = json.loads((OTS_DIR / "SOURCES.json").read_text())
+    real_names = [n for n in sources["files"] if n.endswith(".ots")]
+    parse_vectors: list[dict] = [
+        {"name": f"real:{name}", "origin": "real", "proof_hex": (OTS_DIR / name).read_bytes().hex(),
+         **_parse_outcome((OTS_DIR / name).read_bytes())}
+        for name in real_names
+    ]
+
+    digest = hashlib.sha256(b"ots parity constructed").digest()
+    sha = lambda b: hashlib.sha256(b).digest()  # noqa: E731
+    pend = _att_pending("https://calendar.example/a")
+    btc = _att_height(ots_module.TAG_BITCOIN, 700_000)
+    ltc = _att_height(ots_module.TAG_LITECOIN, 5)
+    eth = _att_height(ots_module.TAG_ETHEREUM, 9)
+    unknown = bytes.fromhex("0102030405060708") + _vb(b"opaque")
+    sha256op = b"\x08"
+
+    def with_ops(*pieces: bytes) -> bytes:
+        return b"".join(pieces)
+
+    constructed: list[tuple[str, bytes]] = [
+        ("pending_leaf_only", _detached(0x08, digest, _leaf(pend))),
+        ("bitcoin_leaf_only", _detached(0x08, digest, _leaf(btc))),
+        ("append_sha256_pending", _detached(0x08, digest, b"\xf0" + _vb(b"\x01" * 8) + sha256op + _leaf(pend))),
+        ("prepend_then_bitcoin", _detached(0x08, digest, b"\xf1" + _vb(b"pre") + _leaf(btc))),
+        ("all_known_attestation_kinds_sorted", _detached(0x08, digest, b"\xff" + _leaf(unknown) + b"\xff" + _leaf(pend)
+                                                          + b"\xff" + _leaf(eth) + b"\xff" + _leaf(ltc) + _leaf(btc))),
+        ("non_canonical_order_is_normalised", _detached(0x08, digest, b"\xff" + _leaf(btc) + _leaf(pend))),
+        ("duplicate_attestation_collapses", _detached(0x08, digest, b"\xff" + _leaf(pend) + _leaf(pend))),
+        ("two_ops_branching", _detached(0x08, digest, b"\xff\xf0" + _vb(b"b") + _leaf(pend) + b"\xf0" + _vb(b"a") + _leaf(btc))),
+        ("duplicate_op_last_wins", _detached(0x08, digest, b"\xff\xf0" + _vb(b"a") + _leaf(pend) + b"\xf0" + _vb(b"a") + _leaf(btc))),
+        ("hexlify", _detached(0x08, digest, b"\xf3" + sha256op + _leaf(pend))),
+        ("reverse", _detached(0x08, digest, b"\xf2" + _leaf(pend))),
+        ("sha1_op", _detached(0x08, digest, b"\x02" + b"\xf3" + _leaf(pend))),
+        ("ripemd160_op", _detached(0x08, digest, b"\x03" + b"\xf0" + _vb(b"x") + _leaf(pend))),
+        ("sha1_file_hash", _detached(0x02, digest[:20], _leaf(pend))),
+        ("ripemd160_file_hash", _detached(0x03, digest[:20], _leaf(pend))),
+        ("unknown_attestation_payload_kept", _detached(0x08, digest, _leaf(unknown))),
+        ("pending_uri_max_length", _detached(0x08, digest, _leaf(_att_pending("a" * 1000)))),
+        ("pending_uri_too_long", _detached(0x08, digest, _leaf(_att_pending("a" * 1001)))),
+        ("pending_uri_bad_char", _detached(0x08, digest, _leaf(_att_pending("https://x.example/?q=1")))),
+        ("pending_payload_trailing_byte", _detached(0x08, digest, _leaf(ots_module.TAG_PENDING + _vb(_vb(b"ab") + b"\x00")))),
+        ("bitcoin_payload_trailing_byte", _detached(0x08, digest, _leaf(ots_module.TAG_BITCOIN + _vb(_v(5) + b"\x00")))),
+        ("attestation_payload_over_limit", _detached(0x08, digest, _leaf(bytes(8) + _vb(b"z" * 8193)))),
+        ("attestation_payload_at_limit", _detached(0x08, digest, _leaf(bytes(8) + _vb(b"z" * 8192)))),
+        ("varuint_63_bits_ok", _detached(0x08, digest, _leaf(_att_height(ots_module.TAG_BITCOIN, (1 << 63) - 1)))),
+        ("varuint_64_bits_rejected", _detached(0x08, digest, _leaf(ots_module.TAG_BITCOIN + _vb(_v(1 << 63))))),
+        ("varuint_unterminated", _detached(0x08, digest, _leaf(ots_module.TAG_BITCOIN + _vb(b"\x80" * 12)))),
+        ("empty_append_arg", _detached(0x08, digest, b"\xf0" + _vb(b"") + _leaf(pend))),
+        ("append_result_over_limit", _detached(0x08, digest, b"\xf0" + _vb(b"a" * 4096) + _leaf(pend))),
+        ("append_result_at_limit", _detached(0x08, digest, b"\xf0" + _vb(b"a" * 4064) + _leaf(pend))),
+        ("append_then_hexlify_message_over_limit", _detached(0x08, digest, b"\xf0" + _vb(b"a" * 4000) + b"\xf3" + _leaf(pend))),
+        ("hexlify_at_limit", _detached(0x08, digest, b"\xf0" + _vb(b"a" * 2016) + b"\xf3" + _leaf(pend))),
+        ("unknown_op_tag", _detached(0x08, digest, b"\xf4" + _leaf(pend))),
+        ("keccak_op_rejected", _detached(0x08, digest, b"\x67" + _leaf(pend))),
+        ("keccak_file_hash_rejected", _detached(0x67, digest, _leaf(pend))),
+        ("unknown_file_hash_op", _detached(0xF0, digest, _leaf(pend))),
+        ("bad_major_version", _detached(0x08, digest, _leaf(pend), version=2)),
+        ("bad_magic", b"\x01" + ots_module.HEADER_MAGIC[1:] + b"\x01\x08" + digest + _leaf(pend)),
+        ("truncated_digest", ots_module.HEADER_MAGIC + b"\x01\x08" + digest[:10]),
+        ("truncated_after_op", _detached(0x08, digest, b"\xf0")),
+        ("trailing_garbage", _detached(0x08, digest, _leaf(pend) + b"\x00")),
+        ("empty_input", b""),
+        ("header_only", ots_module.HEADER_MAGIC),
+        ("nesting_255_ok", _detached(0x08, digest, b"\xf0\x01a" * 255 + _leaf(pend))),
+        ("nesting_256_rejected", _detached(0x08, digest, b"\xf0\x01a" * 256 + _leaf(pend))),
+    ]
+    parse_vectors += [
+        {"name": f"constructed:{name}", "origin": "constructed", "proof_hex": raw.hex(), **_parse_outcome(raw)}
+        for name, raw in constructed
+    ]
+
+    # ----- header vectors -----
+    header_vectors = [{
+        "name": "real:358391", "origin": "real", "header_hex": REAL_HEADER_358391.hex(),
+        "block_hash": ots_module.BlockHeader(REAL_HEADER_358391).block_hash().hex(),
+        "merkle_root": ots_module.BlockHeader(REAL_HEADER_358391).merkle_root.hex(),
+        "time": ots_module.BlockHeader(REAL_HEADER_358391).time,
+        "meets_own_target": ots_module.BlockHeader(REAL_HEADER_358391).meets_own_target(),
+    }]
+    for name, raw in (("constructed:mined", _make_header(sha(b"m"), 1_700_000_000)),
+                      ("constructed:unmined", _make_header(sha(b"m"), 1_700_000_000, mined=False))):
+        header = ots_module.BlockHeader(raw)
+        header_vectors.append({
+            "name": name, "origin": "constructed", "header_hex": raw.hex(), "block_hash": header.block_hash().hex(),
+            "merkle_root": header.merkle_root.hex(), "time": header.time, "meets_own_target": header.meets_own_target(),
+        })
+    for bits in (0x00000000, 0x03800001, 0x20000000 | 0x00800000, 0x1D00FFFF, 0x2100FFFF, 0x01003456, 0x03123456):
+        raw = bytes(72) + bits.to_bytes(4, "little") + bytes(4)
+        header_vectors.append({"name": f"bits:{bits:08x}", "origin": "constructed", "header_hex": raw.hex(),
+                               "meets_own_target": ots_module.BlockHeader(raw).meets_own_target()})
+
+    # ----- calendar/service records (Python service against a patched transport) -----
+    fixed_nonce = bytes(range(16))
+    file_hash = hashlib.sha256(b"ots parity export").hexdigest()
+    commitment = sha(bytes.fromhex(file_hash) + fixed_nonce)
+
+    def reply(*attestations: bytes, ops: bytes = b"") -> bytes:
+        body = ops + (b"".join(b"\xff" + _leaf(a) for a in attestations[:-1]) + _leaf(attestations[-1]))
+        return body
+
+    r_a = reply(_att_pending("https://a.example"), ops=b"\xf0" + _vb(b"\x11" * 8) + sha256op)
+    r_b = reply(_att_pending("https://b.example/cal"), ops=b"\xf1" + _vb(b"\x22" * 4) + sha256op)
+    cases = [
+        ("one_calendar", ["https://a.example"], {"https://a.example": (200, r_a)}),
+        ("two_calendars_merge", ["https://a.example", "https://b.example/cal/"],
+         {"https://a.example": (200, r_a), "https://b.example/cal/": (200, r_b)}),
+        ("one_fails_one_succeeds", ["https://a.example", "https://b.example/cal"],
+         {"https://a.example": (500, b""), "https://b.example/cal": (200, r_b)}),
+        ("all_fail", ["https://a.example", "https://b.example/cal"],
+         {"https://a.example": (500, b""), "https://b.example/cal": (404, b"")}),
+        ("malformed_reply", ["https://a.example"], {"https://a.example": (200, b"\xf0")}),
+        ("oversized_reply", ["https://a.example"], {"https://a.example": (200, b"\x00" * 10_001)}),
+        ("bad_uri_in_reply", ["https://a.example"], {"https://a.example": (200, reply(_att_pending("https://a.example/?x")))}),
+        ("duplicate_attestation_across_calendars", ["https://a.example", "https://a2.example"],
+         {"https://a.example": (200, r_a), "https://a2.example": (200, r_a)}),
+    ]
+    record_vectors = []
+    for name, calendars, replies in cases:
+        def fake_fetch(url, *, method="GET", data=None, **_kw):
+            base = url[: -len("/digest")]
+            status, body = next(v for k, v in replies.items() if k.rstrip("/") == base)
+            assert data == commitment, "the calendar must receive the nonce-hashed commitment"
+            return HttpResult(status, f"HTTP/1.1 {status} X", body[: 10_001])
+
+        service = ots_module.OtsAnchorService(calendars)
+        with unittest.mock.patch.object(ots_module, "http_fetch", side_effect=fake_fetch), \
+                unittest.mock.patch.object(ots_module.secrets, "token_bytes", return_value=fixed_nonce):
+            record = service.anchor_record(file_hash)
+        record_vectors.append({
+            "name": name, "calendars": calendars, "data_hash": file_hash, "nonce_hex": fixed_nonce.hex(),
+            "replies": {url: {"status": status, "body_hex": body[:10_001].hex()} for url, (status, body) in replies.items()},
+            "expected": record,
+        })
+    for name, bad_hash in (("data_hash_short", "ab" * 31), ("data_hash_not_hex", "zz" * 32)):
+        record_vectors.append({
+            "name": name, "calendars": ["https://a.example"], "data_hash": bad_hash, "nonce_hex": fixed_nonce.hex(),
+            "replies": {}, "expected": ots_module.OtsAnchorService(["https://a.example"]).anchor_record(bad_hash),
+        })
+
+    # ----- evaluate vectors -----
+    hello = (OTS_DIR / "hello-world.txt.ots").read_bytes()
+    incomplete = (OTS_DIR / "incomplete.txt.ots").read_bytes()
+
+    def record_from(proof_bytes: bytes, *, commitment_index: int = 1, **overrides: object) -> dict:
+        proof = ots_module.parse_detached(proof_bytes)
+        node = sorted({m.hex() for m in proof.timestamp.messages()})[commitment_index]
+        record = {
+            "status": "pending", "data_hash": proof.file_digest.hex(), "file_hash_op": "sha256",
+            "commitment_hex": node, "calendars": [{"url": "https://a.example", "status": "submitted"}],
+            "attestations": ots_module.attestation_summary(proof.timestamp), "proof_hex": proof_bytes.hex(),
+            "scope": "s", "apw:proof_level": "unknown_unobserved",
+        }
+        for key, value in overrides.items():
+            key = "apw:proof_level" if key == "proof_level" else key
+            if value is ...:
+                record.pop(key, None)
+            else:
+                record[key] = value
+        return record
+
+    def manifest_of(record: object, export_hash: object) -> dict:
+        return {"export": {"sha256": export_hash}, "time_anchor_opentimestamps": record}
+
+    real_record = record_from(hello)
+    real_hash = real_record["data_hash"]
+    pending_record = record_from(incomplete)
+
+    # A constructed proof from a pending record to a Bitcoin attestation over a constructed header.
+    export_digest = hashlib.sha256(b"ots evaluate export").digest()
+    nonce = bytes(range(16, 32))
+    base = ots_module.Timestamp(export_digest)
+    commit = base.add_op((ots_module.OP_APPEND, nonce)).add_op((ots_module.OP_SHA256, None))
+    pending_stamp = ots_module.Timestamp(export_digest)
+    pending_stamp.merge(base)
+    commit_pending = pending_stamp.add_op((ots_module.OP_APPEND, nonce)).add_op((ots_module.OP_SHA256, None))
+    commit_pending.attestations.add(ots_module.pending("https://a.example"))
+    upgraded_stamp = ots_module.Timestamp(export_digest)
+    upgraded_commit = upgraded_stamp.add_op((ots_module.OP_APPEND, nonce)).add_op((ots_module.OP_SHA256, None))
+    tip = upgraded_commit.add_op((ots_module.OP_PREPEND, b"\x01\x02")).add_op((ots_module.OP_SHA256, None))
+    tip.attestations.add(ots_module.Attestation("bitcoin", ots_module.TAG_BITCOIN, height=800_000))
+    good_header = _make_header(tip.msg, 1_750_000_000)
+    pending_bytes = ots_module.DetachedTimestampFile(ots_module.OP_SHA256, pending_stamp).serialize()
+    upgraded_bytes = ots_module.DetachedTimestampFile(ots_module.OP_SHA256, upgraded_stamp).serialize()
+    constructed_record = record_from(pending_bytes, commitment_index=0,
+                                     commitment_hex=commit.msg.hex())
+    other_digest = hashlib.sha256(b"other").digest()
+    other_stamp = ots_module.Timestamp(other_digest)
+    other_stamp.add_op((ots_module.OP_APPEND, nonce)).add_op((ots_module.OP_SHA256, None)).attestations.add(
+        ots_module.Attestation("bitcoin", ots_module.TAG_BITCOIN, height=1))
+    unrelated_stamp = ots_module.Timestamp(export_digest)
+    unrelated_stamp.add_op((ots_module.OP_APPEND, b"different nonce")).attestations.add(
+        ots_module.Attestation("bitcoin", ots_module.TAG_BITCOIN, height=1))
+
+    def src(kind: str, headers: dict[int, bytes]) -> dict:
+        return {"kind": kind, "headers": {str(h): raw.hex() for h, raw in headers.items()}}
+
+    evaluate_cases: list[tuple[str, dict, dict | None, bytes | None]] = [
+        ("absent", {"export": {"sha256": "aa" * 32}}, None, None),
+        ("null", {"export": {"sha256": "aa" * 32}, "time_anchor_opentimestamps": None}, None, None),
+        ("not_an_object", manifest_of([], real_hash), None, None),
+        ("unavailable", manifest_of({"status": "unavailable", "data_hash": real_hash}, real_hash), None, None),
+        ("status_unknown", manifest_of({**real_record, "status": "anchored"}, real_hash), None, None),
+        ("status_missing", manifest_of({k: v for k, v in real_record.items() if k != "status"}, real_hash), None, None),
+        ("proof_level_too_strong", manifest_of(record_from(hello, proof_level="directly_observed"), real_hash), None, None),
+        ("proof_level_inferred_allowed", manifest_of(record_from(incomplete, proof_level="inferred"), pending_record["data_hash"]), None, None),
+        ("data_hash_differs", manifest_of(real_record, "00" * 32), None, None),
+        ("export_missing", {"time_anchor_opentimestamps": real_record}, None, None),
+        ("missing_proof", manifest_of(record_from(hello, proof_hex=...), real_hash), None, None),
+        ("file_hash_op_wrong", manifest_of(record_from(hello, file_hash_op="sha1"), real_hash), None, None),
+        ("proof_not_hex", manifest_of(record_from(hello, proof_hex="zz"), real_hash), None, None),
+        ("proof_does_not_parse", manifest_of(record_from(hello, proof_hex=hello[:-3].hex()), real_hash), None, None),
+        ("proof_for_other_digest", manifest_of(record_from(hello, data_hash="11" * 32), "11" * 32), None, None),
+        ("commitment_not_in_proof", manifest_of(record_from(hello, commitment_hex="22" * 32), real_hash), None, None),
+        ("commitment_not_hex", manifest_of(record_from(hello, commitment_hex="xyz"), real_hash), None, None),
+        ("attestation_summary_mismatch", manifest_of(record_from(hello, attestations=[]), real_hash), None, None),
+        ("real_pending_proof", manifest_of(pending_record, pending_record["data_hash"]), None, None),
+        ("real_bitcoin_no_header_source", manifest_of(real_record, real_hash), None, None),
+        ("real_bitcoin_local_header_verified", manifest_of(real_record, real_hash),
+         src("local_header", {358391: REAL_HEADER_358391}), None),
+        ("real_bitcoin_explorer_header_verified", manifest_of(real_record, real_hash),
+         src("explorer", {358391: REAL_HEADER_358391}), None),
+        ("real_bitcoin_header_for_another_block", manifest_of(real_record, real_hash),
+         src("local_header", {358391: good_header}), None),
+        ("real_bitcoin_header_missing", manifest_of(real_record, real_hash), src("explorer", {}), None),
+        ("real_bitcoin_header_fails_own_pow", manifest_of(real_record, real_hash),
+         src("local_header", {358391: REAL_HEADER_358391[:76] + bytes(4)}), None),
+        ("constructed_pending", manifest_of(constructed_record, export_digest.hex()), None, None),
+        ("constructed_override_verified_local", manifest_of(constructed_record, export_digest.hex()),
+         src("local_header", {800_000: good_header}), upgraded_bytes),
+        ("constructed_override_verified_explorer", manifest_of(constructed_record, export_digest.hex()),
+         src("explorer", {800_000: good_header}), upgraded_bytes),
+        ("constructed_override_no_source", manifest_of(constructed_record, export_digest.hex()), None, upgraded_bytes),
+        ("constructed_override_wrong_header", manifest_of(constructed_record, export_digest.hex()),
+         src("local_header", {800_000: _make_header(sha(b"not it"), 1_750_000_000)}), upgraded_bytes),
+        ("override_is_pending_only", manifest_of(constructed_record, export_digest.hex()), None, pending_bytes),
+        ("override_for_other_digest", manifest_of(constructed_record, export_digest.hex()), None,
+         ots_module.DetachedTimestampFile(ots_module.OP_SHA256, other_stamp).serialize()),
+        ("override_without_commitment", manifest_of(constructed_record, export_digest.hex()), None,
+         ots_module.DetachedTimestampFile(ots_module.OP_SHA256, unrelated_stamp).serialize()),
+        ("override_unparsable", manifest_of(constructed_record, export_digest.hex()), None, b"not a proof"),
+    ]
+    evaluate_vectors = []
+    for name, manifest, source, override in evaluate_cases:
+        header_source = TableSource(source["kind"], {int(h): bytes.fromhex(x) for h, x in source["headers"].items()}) if source else None
+        findings = ots_module.evaluate_record(manifest, header_source, override)
+        evaluate_vectors.append({
+            "name": name, "manifest": manifest, "header_source": source,
+            "override_hex": override.hex() if override is not None else None,
+            "expected_findings": [{"severity": sev, "code": code, "message": msg} for sev, code, msg in findings],
+        })
+    return {
+        "sources": "tests/fixtures/parity/ots/SOURCES.json",
+        "parse": parse_vectors, "headers": header_vectors, "records": record_vectors,
+        "evaluate": evaluate_vectors,
+    }
 
 
 def main() -> None:
@@ -724,6 +1071,7 @@ def main() -> None:
     dump("manifest_key_paths.json", {"note": RUN_SPECIFIC_NOTE, "paths": key_paths(capture["manifest"])})
     dump("session_state.json", session_cases())
     dump("network_validation.json", network_validation_cases())
+    dump("ots_vectors.json", ots_fixture())
 
 
 if __name__ == "__main__":

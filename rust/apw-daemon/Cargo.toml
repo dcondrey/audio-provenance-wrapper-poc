@@ -22,6 +22,9 @@ serde.workspace = true
 serde_json.workspace = true
 getrandom.workspace = true
 log.workspace = true
+rustls.workspace = true
+webpki-roots.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
+rcgen.workspace = true

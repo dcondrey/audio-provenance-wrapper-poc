@@ -202,7 +202,7 @@ fn http_transport_posts_a_timestamp_query_and_returns_the_body() {
         &format!("Content-Type: application/timestamp-reply\r\nContent-Length: {}\r\n", body.len()),
         &body,
     ));
-    assert_eq!(HttpTransport.post(&url, b"REQUEST").unwrap(), body);
+    assert_eq!(HttpTransport::new().post(&url, b"REQUEST").unwrap(), body);
     let received = String::from_utf8(server.join().unwrap()).unwrap();
     assert!(received.starts_with("POST /ts?x=1 HTTP/1.1\r\n"), "{received}");
     assert!(received.contains("Content-Type: application/timestamp-query\r\n"));
@@ -216,7 +216,7 @@ fn http_transport_decodes_chunked_bodies() {
         "Transfer-Encoding: chunked\r\n",
         b"3\r\nabc\r\n2;ext=1\r\nde\r\n0\r\n\r\n",
     ));
-    assert_eq!(HttpTransport.post(&url, b"x").unwrap(), b"abcde");
+    assert_eq!(HttpTransport::new().post(&url, b"x").unwrap(), b"abcde");
     server.join().unwrap();
 }
 
@@ -228,7 +228,7 @@ fn http_transport_bounds_the_body_it_returns() {
         &format!("Content-Length: {}\r\n", big.len()),
         &big,
     ));
-    let body = HttpTransport.post(&url, b"x").unwrap();
+    let body = HttpTransport::new().post(&url, b"x").unwrap();
     assert_eq!(body.len(), MAX_TSA_RESPONSE_BYTES + 1, "one byte over the bound proves oversize");
     server.join().unwrap();
 }
@@ -236,19 +236,19 @@ fn http_transport_bounds_the_body_it_returns() {
 #[test]
 fn http_transport_refuses_redirects_errors_and_unsupported_schemes() {
     let (url, server) = serve_once(http_reply("302 Found", "Location: http://elsewhere/\r\nContent-Length: 0\r\n", b""));
-    assert!(HttpTransport.post(&url, b"x").unwrap_err().contains("302"));
+    assert!(HttpTransport::new().post(&url, b"x").unwrap_err().contains("302"));
     server.join().unwrap();
 
     let (url, server) = serve_once(http_reply("500 Oops", "Content-Length: 0\r\n", b""));
-    assert!(HttpTransport.post(&url, b"x").unwrap_err().contains("500"));
+    assert!(HttpTransport::new().post(&url, b"x").unwrap_err().contains("500"));
     server.join().unwrap();
 
     let (url, server) = serve_once(http_reply("200 OK", "Content-Length: 50\r\n", b"short"));
-    assert!(HttpTransport.post(&url, b"x").unwrap_err().contains("shorter"));
+    assert!(HttpTransport::new().post(&url, b"x").unwrap_err().contains("shorter"));
     server.join().unwrap();
 
-    assert!(HttpTransport.post("https://tsa.example/ts", b"x").unwrap_err().contains("plain HTTP"));
-    assert!(HttpTransport.post("http://", b"x").is_err());
-    assert!(HttpTransport.post("http://host:notaport/", b"x").is_err());
-    assert!(HttpTransport.post("http://ho st/", b"x").is_err());
+    assert!(HttpTransport::new().post("ftp://tsa.example/ts", b"x").unwrap_err().contains("only http and https"));
+    assert!(HttpTransport::new().post("http://", b"x").is_err());
+    assert!(HttpTransport::new().post("http://host:notaport/", b"x").is_err());
+    assert!(HttpTransport::new().post("http://ho st/", b"x").is_err());
 }
