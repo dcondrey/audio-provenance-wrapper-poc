@@ -1,0 +1,62 @@
+{
+  "automation_point_count": 0,
+  "clip_count": 0,
+  "clip_hashes": [],
+  "clip_slot_hashes": [],
+  "device_chain_hashes": [
+    "9de2b573875bb000"
+  ],
+  "file_hash": "377da12634b295c3c00e9de7c39af69cf8c23631a300ae8b29569057ad32cb59",
+  "file_size_bytes": 2142,
+  "locator_count": 0,
+  "midi_note_count": 0,
+  "project_format": "pure_data",
+  "sample_rate": null,
+  "sample_refs": [],
+  "track_count": 1,
+  "track_names": [
+    "main"
+  ],
+  "tracks": [
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "9de2b573875bb000"
+      ],
+      "device_presets": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "osc~ 440",
+        "dac~",
+        "*~ 0.05",
+        "../5.reference/set-dsp-tgl",
+        "send pd",
+        "cnv 5 5 25 empty empty Making a Sine Wave 15 13 0 16 #dfdfdf #202020 0"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "main",
+      "sample_paths": [],
+      "track_id": "canvas-0",
+      "track_type": "Patch"
+    }
+  ],
+  "transport_bpm": 0.0,
+  "transport_loop_on": false,
+  "transport_loop_range": [
+    0.0,
+    0.0
+  ],
+  "transport_time_signature": [
+    4,
+    4
+  ]
+}

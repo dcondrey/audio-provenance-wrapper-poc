@@ -3,7 +3,8 @@
 Nothing here reads or interprets file contents. Each entry states why, so a
 report never implies structure that was not extracted. Formats are supported
 only when a documented layout is parseable with the standard library and has
-been checked against a real or documented sample.
+been checked against a real or documented sample. Where the host can export the
+open DAWproject interchange format, the reason says so.
 """
 
 from __future__ import annotations
@@ -11,29 +12,56 @@ from __future__ import annotations
 from .registry import UNSUPPORTED, ProjectFormat, register
 
 _PROPRIETARY = "proprietary binary format with no public specification; no parser is provided"
+_PACKAGE = "package/bundle with proprietary internal project data; no parser is provided"
+_UNVERIFIED = "internal layout not verified against a real or documented sample; no parser is provided"
+_DAWPROJECT = "; the host can export open .dawproject, which is parsed"
+
+
+def _entry(format_id: str, host: str, extensions: tuple[str, ...], reason: str) -> ProjectFormat:
+    return ProjectFormat(format_id, host, extensions, UNSUPPORTED, reason)
+
 
 _ENTRIES = (
-    ProjectFormat(
-        "logic_pro", "Logic Pro", (".logicx", ".logic"), UNSUPPORTED,
-        "package/bundle with proprietary internal project data; no parser is provided",
+    _entry("logic_pro", "Logic Pro", (".logicx", ".logic"), _PACKAGE),
+    _entry("cubase", "Cubase/Nuendo", (".cpr", ".npr"), _PROPRIETARY + _DAWPROJECT),
+    _entry("fl_studio", "FL Studio", (".flp",), _PROPRIETARY),
+    _entry("pro_tools", "Pro Tools", (".ptx", ".ptf"), _PROPRIETARY),
+    _entry("bitwig", "Bitwig Studio", (".bwproject",), _UNVERIFIED + _DAWPROJECT),
+    _entry("studio_one", "Studio One / Fender Studio Pro", (".song",), _UNVERIFIED + _DAWPROJECT),
+    _entry("cakewalk", "Cakewalk", (".cwp",), _PROPRIETARY),
+    _entry("garageband", "GarageBand", (".band",), _PACKAGE),
+    _entry("reason", "Reason", (".reason",), _PROPRIETARY),
+    _entry("sibelius", "Sibelius", (".sib",), _PROPRIETARY),
+    _entry("dorico", "Dorico", (".dorico",), "zip container whose internal XML has no public specification; no parser is provided"),
+    _entry("finale", "Finale", (".musx", ".mus"), _PROPRIETARY + "; MusicXML export is the interchange route and is not parsed here"),
+    _entry("vegas", "VEGAS Pro", (".veg",), _PROPRIETARY),
+    _entry("acid", "ACID Pro", (".acd",), _PROPRIETARY),
+    _entry("premiere", "Premiere Pro", (".prproj",), "compressed XML with no public specification; no parser is provided"),
+    _entry("audition", "Audition", (".sesx",), "XML with no published schema; no parser is provided"),
+    _entry("resolve", "DaVinci Resolve", (".drp",), _PROPRIETARY),
+    _entry("audiomulch", "AudioMulch", (".amh",), "XML that its developer states is undocumented and may change without notice; no parser is provided"),
+    _entry("reaktor", "Reaktor", (".ens", ".rkplr"), _PROPRIETARY),
+    _entry(
+        "vcv_rack", "VCV Rack", (".vcv",),
+        "Rack 2 patches are a tar compressed with Zstandard; the Python standard library in use has no zstd support and no dependency is added",
     ),
-    ProjectFormat("cubase", "Cubase/Nuendo", (".cpr", ".npr"), UNSUPPORTED, _PROPRIETARY),
-    ProjectFormat("fl_studio", "FL Studio", (".flp",), UNSUPPORTED, _PROPRIETARY),
-    ProjectFormat("pro_tools", "Pro Tools", (".ptx", ".ptf"), UNSUPPORTED, _PROPRIETARY),
-    ProjectFormat(
-        "bitwig", "Bitwig Studio", (".bwproject",), UNSUPPORTED,
-        "internal layout not verified against a real or documented sample; no parser is provided",
+    _entry(
+        "renoise", "Renoise", (".xrns",),
+        "zip of Song.xml, but no primary-source schema or format description was available to ground extraction",
     ),
-    ProjectFormat(
-        "studio_one", "Studio One", (".song",), UNSUPPORTED,
-        "internal layout not verified against a real or documented sample; no parser is provided",
+    _entry(
+        "audacity", "Audacity", (".aup3",),
+        "SQLite database whose schema Audacity does not publish; no parser is provided",
     ),
-    ProjectFormat("cakewalk", "Cakewalk", (".cwp",), UNSUPPORTED, _PROPRIETARY),
-    ProjectFormat(
-        "garageband", "GarageBand", (".band",), UNSUPPORTED,
-        "package/bundle with proprietary internal project data; no parser is provided",
+    _entry(
+        "tracktion_waveform", "Tracktion Waveform", (".tracktionedit",),
+        "believed to be a JUCE ValueTree serialised as XML, but the layout is not verified at primary level; no parser is provided",
+    ),
+    _entry(
+        "milkytracker", "MilkyTracker / module trackers", (".xm", ".mod"),
+        "documented module formats, but no parser is implemented",
     ),
 )
 
-for _entry in _ENTRIES:
-    register(_entry)
+for _entry_ in _ENTRIES:
+    register(_entry_)

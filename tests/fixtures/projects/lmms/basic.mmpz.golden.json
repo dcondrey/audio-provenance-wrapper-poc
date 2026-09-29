@@ -1,0 +1,190 @@
+{
+  "automation_point_count": 3,
+  "clip_count": 4,
+  "clip_hashes": [
+    "07e6ba384ff11f15",
+    "7349acc991d0e65e",
+    "7417d8106ba00e24",
+    "eccb38ce3d70f044"
+  ],
+  "clip_slot_hashes": [
+    [
+      "pos-0",
+      "clip-0",
+      "07e6ba384ff11f15"
+    ],
+    [
+      "pos-1",
+      "clip-0",
+      "7417d8106ba00e24"
+    ],
+    [
+      "pos-2",
+      "clip-0",
+      "7349acc991d0e65e"
+    ],
+    [
+      "pos-3",
+      "clip-0",
+      "eccb38ce3d70f044"
+    ]
+  ],
+  "device_chain_hashes": [
+    "5005a45dc75a5419",
+    "f3acd3e30f45b0e1"
+  ],
+  "file_hash": "a8f5eb98943edba7d32805506a3a2533df2dcfe8516b666f1bb27721acc4d5ae",
+  "file_size_bytes": 727,
+  "locator_count": 0,
+  "midi_note_count": 2,
+  "project_format": "lmms",
+  "sample_rate": null,
+  "sample_refs": [
+    "drums/kick.wav",
+    "drums/ride01.ogg"
+  ],
+  "track_count": 5,
+  "track_names": [
+    "Lead",
+    "Drums",
+    "Pattern 0",
+    "Automation",
+    "Sampler"
+  ],
+  "tracks": [
+    {
+      "automation_point_count": 0,
+      "clip_count": 1,
+      "clips": [
+        {
+          "is_midi": true,
+          "length_beats": 4.0,
+          "name": "riff",
+          "position_beats": 2.0,
+          "sample_ref": "",
+          "warp_on": false
+        }
+      ],
+      "device_chain_hashes": [
+        "f3acd3e30f45b0e1"
+      ],
+      "device_presets": [
+        "",
+        ""
+      ],
+      "devices": [
+        "instrument: tripleoscillator",
+        "effect: bassbooster"
+      ],
+      "group_id": "",
+      "midi_note_count": 2,
+      "name": "Lead",
+      "sample_paths": [],
+      "track_id": "pos-0",
+      "track_type": "InstrumentTrack"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 1,
+      "clips": [
+        {
+          "is_midi": false,
+          "length_beats": 3.0,
+          "name": "",
+          "position_beats": 0.0,
+          "sample_ref": "drums/kick.wav",
+          "warp_on": false
+        }
+      ],
+      "device_chain_hashes": [],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Drums",
+      "sample_paths": [
+        "drums/kick.wav"
+      ],
+      "track_id": "pos-1",
+      "track_type": "SampleTrack"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 1,
+      "clips": [
+        {
+          "is_midi": true,
+          "length_beats": 4.0,
+          "name": "Pattern 0",
+          "position_beats": 0.0,
+          "sample_ref": "",
+          "warp_on": false
+        }
+      ],
+      "device_chain_hashes": [],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Pattern 0",
+      "sample_paths": [],
+      "track_id": "pos-2",
+      "track_type": "PatternTrack"
+    },
+    {
+      "automation_point_count": 3,
+      "clip_count": 1,
+      "clips": [
+        {
+          "is_midi": false,
+          "length_beats": 2.0,
+          "name": "cutoff",
+          "position_beats": 0.0,
+          "sample_ref": "",
+          "warp_on": false
+        }
+      ],
+      "device_chain_hashes": [],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Automation",
+      "sample_paths": [],
+      "track_id": "pos-3",
+      "track_type": "AutomationTrack"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "5005a45dc75a5419"
+      ],
+      "device_presets": [
+        ""
+      ],
+      "devices": [
+        "instrument: audiofileprocessor"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Sampler",
+      "sample_paths": [
+        "drums/ride01.ogg"
+      ],
+      "track_id": "pos-4",
+      "track_type": "InstrumentTrack"
+    }
+  ],
+  "transport_bpm": 140.0,
+  "transport_loop_on": true,
+  "transport_loop_range": [
+    0.0,
+    8.0
+  ],
+  "transport_time_signature": [
+    3,
+    4
+  ]
+}

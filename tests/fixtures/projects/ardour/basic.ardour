@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Session version="7003" name="basic" sample-rate="48000">
+  <ProgramVersion created-with="Ardour 8.0" modified-with="Ardour 8.0"/>
+  <Sources>
+    <Source name="kick.wav" take-id="" type="audio" flags="" id="101" origin="/samples/kick.wav" channel="0" gain="1"/>
+    <Source name="pad.wav" take-id="" type="audio" flags="" id="102" origin="/samples/pad.wav" channel="0" gain="1"/>
+    <Source name="lead.mid" take-id="" type="midi" flags="" id="103" origin="" captured-for="Lead"/>
+  </Sources>
+  <Regions/>
+  <Locations>
+    <Location id="201" name="session" start="a0" end="a3048192000" flags="IsSessionRange" locked="0" timestamp="0" cue="0"/>
+    <Location id="202" name="Loop" start="a0" end="a2032128000" flags="IsAutoLoop,IsHidden" locked="0" timestamp="0" cue="0"/>
+    <Location id="203" name="verse" start="a1016064000" end="a1016064000" flags="IsMark" locked="0" timestamp="0" cue="0"/>
+    <Location id="204" name="chorus" start="a1016064000" end="a2032128000" flags="IsRangeMarker" locked="0" timestamp="0" cue="0"/>
+  </Locations>
+  <Routes>
+    <Route version="7003" id="301" name="Master" default-type="audio" strict-io="1" active="1">
+      <PresentationInfo order="0" flags="MasterOut" color="0"/>
+    </Route>
+    <Route version="7003" id="302" name="Drums" default-type="audio" strict-io="1" active="1" audio-playlist="401">
+      <PresentationInfo order="1" flags="AudioTrack,OrderSet" color="0"/>
+      <Processor id="501" name="a-Reverb" active="1" type="lv2" unique-id="urn:example:reverb" count="1"/>
+      <Processor id="502" name="Amp" active="1" type="amp"/>
+    </Route>
+    <Route version="7003" id="303" name="Lead" default-type="midi" strict-io="1" active="1" midi-playlist="402">
+      <PresentationInfo order="2" flags="MidiTrack,OrderSet" color="0"/>
+    </Route>
+    <Route version="7003" id="304" name="Bus 1" default-type="audio" strict-io="1" active="1">
+      <PresentationInfo order="3" flags="AudioBus,OrderSet" color="0"/>
+    </Route>
+  </Routes>
+  <Playlists>
+    <Playlist id="401" name="Drums" type="audio" orig-track-id="302" frozen="0">
+      <Region id="601" name="kick" type="audio" length="a2032128000@a1016064000" start="a0" first-edit="nothing" source-0="101" master-source-0="101"/>
+      <Region id="602" name="pad" type="audio" length="a4064256000@a0" start="a0" first-edit="nothing" source-0="102" master-source-0="102"/>
+    </Playlist>
+    <Playlist id="402" name="Lead" type="midi" orig-track-id="303" frozen="0">
+      <Region id="603" name="riff" type="midi" length="b7680@b3840" start="b0" first-edit="nothing" source-0="103" master-source-0="103"/>
+    </Playlist>
+  </Playlists>
+  <TempoMap superclocks-per-second="508032000">
+    <Tempos>
+      <Tempo sclock="0" quarters="0:0" bbt="1|1|0" npm="120" enpm="120" note-type="4" type="Constant" locked-to-meter="0" continuing="0" active="1"/>
+    </Tempos>
+    <Meters>
+      <Meter sclock="0" quarters="0:0" bbt="1|1|0" note-value="4" divisions-per-bar="3"/>
+    </Meters>
+    <MusicTimes/>
+  </TempoMap>
+</Session>

@@ -1,0 +1,118 @@
+{
+  "automation_point_count": 0,
+  "clip_count": 2,
+  "clip_hashes": [
+    "2fcd92e6c1264a79",
+    "d20d3bcd98274965"
+  ],
+  "clip_slot_hashes": [
+    [
+      "id2",
+      "clip-0",
+      "d20d3bcd98274965"
+    ],
+    [
+      "id9",
+      "clip-0",
+      "2fcd92e6c1264a79"
+    ]
+  ],
+  "device_chain_hashes": [
+    "245b2da590ea3a4e"
+  ],
+  "file_hash": "fe3de869f58c2647ff577ac8fb2b4e4a3eaaabf6ce8500a03f98cffa813c836a",
+  "file_size_bytes": 1219,
+  "locator_count": 0,
+  "midi_note_count": 9,
+  "project_format": "dawproject",
+  "sample_rate": null,
+  "sample_refs": [
+    "audio/Drumfunk3 170bpm.wav"
+  ],
+  "track_count": 3,
+  "track_names": [
+    "Bass",
+    "Drumloop",
+    "Master"
+  ],
+  "tracks": [
+    {
+      "automation_point_count": 0,
+      "clip_count": 1,
+      "clips": [
+        {
+          "is_midi": true,
+          "length_beats": 8.0,
+          "name": "",
+          "position_beats": 0.0,
+          "sample_ref": "",
+          "warp_on": false
+        }
+      ],
+      "device_chain_hashes": [
+        "245b2da590ea3a4e"
+      ],
+      "device_presets": [
+        ""
+      ],
+      "devices": [
+        "ClapPlugin: Surge XT"
+      ],
+      "group_id": "",
+      "midi_note_count": 9,
+      "name": "Bass",
+      "sample_paths": [],
+      "track_id": "id2",
+      "track_type": "Track"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 1,
+      "clips": [
+        {
+          "is_midi": false,
+          "length_beats": 8.00003433227539,
+          "name": "Drumfunk3 170bpm",
+          "position_beats": 0.0,
+          "sample_ref": "audio/Drumfunk3 170bpm.wav",
+          "warp_on": true
+        }
+      ],
+      "device_chain_hashes": [],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Drumloop",
+      "sample_paths": [
+        "audio/Drumfunk3 170bpm.wav"
+      ],
+      "track_id": "id9",
+      "track_type": "Track"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Master",
+      "sample_paths": [],
+      "track_id": "id14",
+      "track_type": "MasterTrack"
+    }
+  ],
+  "transport_bpm": 149.0,
+  "transport_loop_on": false,
+  "transport_loop_range": [
+    0.0,
+    0.0
+  ],
+  "transport_time_signature": [
+    4,
+    4
+  ]
+}

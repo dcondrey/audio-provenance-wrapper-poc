@@ -18,6 +18,11 @@ if TYPE_CHECKING:
 SUPPORTED = "supported"
 UNSUPPORTED = "unsupported"
 
+# How far a supported parser has been checked. Consumers must not read more
+# confidence into a snapshot than this states.
+REAL_FILES = "real_files"
+CONSTRUCTED_ONLY = "constructed_fixtures_only"
+
 # Untrusted-input ceiling shared by text/binary parsers registered here.
 MAX_PROJECT_FILE_BYTES = 64 * 1024 * 1024
 
@@ -42,6 +47,8 @@ class ProjectFormat:
     status: str
     reason: str = ""
     parser: Callable[[Path], "ProjectSnapshot"] | None = None
+    # REAL_FILES or CONSTRUCTED_ONLY for supported formats; empty for unsupported ones.
+    validation: str = ""
 
     @property
     def supported(self) -> bool:

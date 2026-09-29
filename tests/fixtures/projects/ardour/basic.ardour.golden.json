@@ -1,0 +1,149 @@
+{
+  "automation_point_count": 0,
+  "clip_count": 3,
+  "clip_hashes": [
+    "9e5b17090d27b760",
+    "a570a402f79b7d67",
+    "fbcbba3779cc7408"
+  ],
+  "clip_slot_hashes": [
+    [
+      "302",
+      "601",
+      "a570a402f79b7d67"
+    ],
+    [
+      "302",
+      "602",
+      "fbcbba3779cc7408"
+    ],
+    [
+      "303",
+      "603",
+      "9e5b17090d27b760"
+    ]
+  ],
+  "device_chain_hashes": [
+    "c1bb661020945eab"
+  ],
+  "file_hash": "7492e75b9c44a13469281fbae47e8273e4db14d8b33ba5517370882538bed55c",
+  "file_size_bytes": 3069,
+  "locator_count": 2,
+  "midi_note_count": 0,
+  "project_format": "ardour",
+  "sample_rate": 48000,
+  "sample_refs": [
+    "kick.wav",
+    "pad.wav"
+  ],
+  "track_count": 4,
+  "track_names": [
+    "Master",
+    "Drums",
+    "Lead",
+    "Bus 1"
+  ],
+  "tracks": [
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Master",
+      "sample_paths": [],
+      "track_id": "301",
+      "track_type": "MasterOut"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 2,
+      "clips": [
+        {
+          "is_midi": false,
+          "length_beats": 8.0,
+          "name": "kick",
+          "position_beats": 4.0,
+          "sample_ref": "kick.wav",
+          "warp_on": false
+        },
+        {
+          "is_midi": false,
+          "length_beats": 16.0,
+          "name": "pad",
+          "position_beats": 0.0,
+          "sample_ref": "pad.wav",
+          "warp_on": false
+        }
+      ],
+      "device_chain_hashes": [
+        "c1bb661020945eab"
+      ],
+      "device_presets": [
+        ""
+      ],
+      "devices": [
+        "lv2: a-Reverb"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Drums",
+      "sample_paths": [
+        "kick.wav",
+        "pad.wav"
+      ],
+      "track_id": "302",
+      "track_type": "AudioTrack,OrderSet"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 1,
+      "clips": [
+        {
+          "is_midi": true,
+          "length_beats": 4.0,
+          "name": "riff",
+          "position_beats": 2.0,
+          "sample_ref": "",
+          "warp_on": false
+        }
+      ],
+      "device_chain_hashes": [],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Lead",
+      "sample_paths": [],
+      "track_id": "303",
+      "track_type": "MidiTrack,OrderSet"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Bus 1",
+      "sample_paths": [],
+      "track_id": "304",
+      "track_type": "AudioBus,OrderSet"
+    }
+  ],
+  "transport_bpm": 120.0,
+  "transport_loop_on": true,
+  "transport_loop_range": [
+    0.0,
+    8.0
+  ],
+  "transport_time_signature": [
+    3,
+    4
+  ]
+}

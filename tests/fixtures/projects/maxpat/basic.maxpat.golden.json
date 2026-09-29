@@ -1,0 +1,84 @@
+{
+  "automation_point_count": 0,
+  "clip_count": 0,
+  "clip_hashes": [],
+  "clip_slot_hashes": [],
+  "device_chain_hashes": [
+    "5b8f0409973b596f",
+    "7a99aa637afcdceb"
+  ],
+  "file_hash": "af98cdee3507fd039abedcf61e1938db81aece5ba2a5001e8cca76265153c2fa",
+  "file_size_bytes": 1703,
+  "locator_count": 0,
+  "midi_note_count": 0,
+  "project_format": "max_patcher",
+  "sample_rate": null,
+  "sample_refs": [
+    "drums/kick.wav"
+  ],
+  "track_count": 2,
+  "track_names": [
+    "main",
+    "p voice"
+  ],
+  "tracks": [
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "7a99aa637afcdceb"
+      ],
+      "device_presets": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "cycle~ 440",
+        "sfplay~ drums/kick.wav",
+        "ezdac~",
+        "p voice"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "main",
+      "sample_paths": [
+        "drums/kick.wav"
+      ],
+      "track_id": "patcher-0",
+      "track_type": "Patch"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "5b8f0409973b596f"
+      ],
+      "device_presets": [
+        ""
+      ],
+      "devices": [
+        "*~ 0.5"
+      ],
+      "group_id": "patcher-0",
+      "midi_note_count": 0,
+      "name": "p voice",
+      "sample_paths": [],
+      "track_id": "patcher-1",
+      "track_type": "Subpatch"
+    }
+  ],
+  "transport_bpm": 0.0,
+  "transport_loop_on": false,
+  "transport_loop_range": [
+    0.0,
+    0.0
+  ],
+  "transport_time_signature": [
+    4,
+    4
+  ]
+}

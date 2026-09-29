@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!DOCTYPE lmms-project>
+<lmms-project version="1.0" type="song" creator="LMMS" creatorversion="1.3.0-alpha.2">
+  <head bpm="140" timesig_numerator="3" timesig_denominator="4" mastervol="100" masterpitch="0"/>
+  <song>
+    <trackcontainer type="song">
+      <track type="0" name="Lead" muted="0" solo="0">
+        <instrumenttrack vol="100" pan="0">
+          <instrument name="tripleoscillator">
+            <tripleoscillator vol0="33"/>
+          </instrument>
+          <fxchain enabled="1" numofeffects="1">
+            <effect name="bassbooster" on="1" wet="1">
+              <bassboostercontrols gain="1"/>
+            </effect>
+          </fxchain>
+        </instrumenttrack>
+        <midiclip type="1" name="riff" pos="96" len="192" muted="0" steps="16" autoresize="0" off="0">
+          <note key="60" vol="100" pan="0" len="48" pos="0" type="0"/>
+          <note key="64" vol="100" pan="0" len="48" pos="48" type="0"/>
+        </midiclip>
+      </track>
+      <track type="2" name="Drums" muted="0" solo="0">
+        <sampletrack vol="100" pan="0"/>
+        <sampleclip pos="0" len="144" muted="0" src="drums/kick.wav" off="0" autoresize="0" sample_rate="44100"/>
+      </track>
+      <track type="1" name="Pattern 0" muted="0" solo="0">
+        <patterntrack/>
+        <midiclip type="0" name="Pattern 0" pos="0" len="192" muted="0" steps="16" autoresize="1" off="0"/>
+      </track>
+      <track type="5" name="Automation" muted="0" solo="0">
+        <automationtrack/>
+        <automationclip pos="0" len="96" name="cutoff" prog="1" tens="1" mute="0" off="0" autoresize="0">
+          <time pos="0" value="0.2" outValue="0.2" inTan="0" outTan="0" lockedTan="0"/>
+          <time pos="48" value="0.8" outValue="0.8" inTan="0" outTan="0" lockedTan="0"/>
+          <time pos="96" value="0.4" outValue="0.4" inTan="0" outTan="0" lockedTan="0"/>
+        </automationclip>
+      </track>
+      <track type="0" name="Sampler" muted="0" solo="0">
+        <instrumenttrack vol="100" pan="0">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="drums/ride01.ogg" amp="100"/>
+          </instrument>
+        </instrumenttrack>
+      </track>
+    </trackcontainer>
+    <timeline lp0pos="0" lp1pos="384" lpstate="1" stopbehaviour="1"/>
+  </song>
+</lmms-project>
