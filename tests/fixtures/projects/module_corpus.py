@@ -299,7 +299,7 @@ def vcv_container_cases() -> list[dict]:
     for cut in range(len(fixture)):
         out.append(_mut(f"vcv_fixture_cut_{cut}", ".vcv", "vcv/basic.vcv", ["truncate", cut]))
     for offset in range(len(fixture)):
-        out.append(_mut(f"vcv_fixture_flip_{offset}", ".vcv", "vcv/basic.vcv", ["set", offset, f"{fixture[offset] ^ 0x55:02x}"], status_only=True))
+        out.append(_mut(f"vcv_fixture_flip_{offset}", ".vcv", "vcv/basic.vcv", ["set", offset, f"{fixture[offset] ^ 0x55:02x}"]))
     out.append(_mut("vcv_fixture_trailing_zero", ".vcv", "vcv/basic.vcv", ["append", "00"]))
     out.append(_mut("vcv_fixture_two_frames", ".vcv", "vcv/basic.vcv", ["append", fixture.hex()]))
 

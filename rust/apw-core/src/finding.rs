@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use serde_json::{json, Value};
 
 use crate::state::LocalOutcome;
@@ -36,7 +38,30 @@ pub struct Finding {
 #[derive(Debug, Clone, Default)]
 pub struct VerificationReport {
     pub findings: Vec<Finding>,
+    completed_checks: HashSet<String>,
 }
+
+/// Load-bearing checks, in report order, each with what a run that skipped it
+/// could not claim. `verified` is earned by running them, never by finding
+/// nothing wrong.
+pub const REQUIRED_CHECKS: [(&str, &str); 4] = [
+    (
+        "export_binding",
+        "the export file was not available, so its hard binding was never checked",
+    ),
+    (
+        "evidence_binding",
+        "no bound evidence prefix could be hashed, so the coverage counters were never re-derived",
+    ),
+    (
+        "portable_signature",
+        "the portable Ed25519 signature was not verified against a pinned public key",
+    ),
+    (
+        "c2pa_claim",
+        "the C2PA claim was not re-verified against a locally held trust anchor",
+    ),
+];
 
 /// Codes that force [`LocalOutcome::Changed`] regardless of severity.
 pub const CHANGED_CODES: [&str; 9] = [
@@ -55,7 +80,7 @@ pub const CHANGED_CODES: [&str; 9] = [
 /// `daemon/verify.py::VerificationResult.to_dict`. It lands in
 /// `artifacts/*_verification.json`, which the evidence bundle hashes, so
 /// rewording it would break bundle parity with the Python implementation.
-pub const QUALIFIED_SCOPE: &str = "Local POC integrity outcome; not a Audio Provenance registry, identity, rights, or authorship result.";
+pub const QUALIFIED_SCOPE: &str = "Local POC integrity outcome; not a registry, identity, rights, or authorship result from any provider.";
 
 const NOT_FOUND_CODE: &str = "not_found";
 const PORTABLE_SIGNATURE_MISSING_CODE: &str = "portable_signature_missing";
@@ -79,6 +104,19 @@ impl VerificationReport {
 
     pub fn extend(&mut self, other: VerificationReport) {
         self.findings.extend(other.findings);
+        self.completed_checks.extend(other.completed_checks);
+    }
+
+    pub fn complete(&mut self, check: &str) {
+        self.completed_checks.insert(check.to_owned());
+    }
+
+    /// Required checks that never ran, with the reason each leaves unclaimed.
+    pub fn unchecked(&self) -> Vec<(&'static str, &'static str)> {
+        REQUIRED_CHECKS
+            .into_iter()
+            .filter(|(name, _)| !self.completed_checks.contains(*name))
+            .collect()
     }
 
     pub fn errors(&self) -> impl Iterator<Item = &Finding> {
@@ -99,7 +137,7 @@ impl VerificationReport {
 
     /// Precedence, in order: any `not_found` code wins; then any
     /// [`CHANGED_CODES`]; then any error OR the `portable_signature_missing`
-    /// finding at any severity; else verified.
+    /// finding at any severity; then any unrun required check; else verified.
     ///
     /// IMPORTANT: the third clause is not "any error" alone. Python tests the
     /// code set, so a `portable_signature_missing` warning downgrades a report
@@ -118,6 +156,9 @@ impl VerificationReport {
         if !self.passed() || self.has_code(PORTABLE_SIGNATURE_MISSING_CODE) {
             return LocalOutcome::Untrusted;
         }
+        if !self.unchecked().is_empty() {
+            return LocalOutcome::Incomplete;
+        }
         LocalOutcome::Verified
     }
 
@@ -133,6 +174,11 @@ impl VerificationReport {
             "outcome": self.outcome().as_str(),
             "qualified_scope": QUALIFIED_SCOPE,
             "passed": self.passed(),
+            "checks_not_run": self
+                .unchecked()
+                .into_iter()
+                .map(|(check, reason)| json!({"check": check, "reason": reason}))
+                .collect::<Vec<Value>>(),
             "findings": self
                 .findings
                 .iter()

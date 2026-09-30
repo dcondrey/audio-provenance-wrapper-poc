@@ -6,44 +6,26 @@
 
 use std::error::Error;
 use std::fs;
-use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use clap::Parser;
 use serde_json::Value;
 
-fn write_wav(path: &Path, frames: usize, channels: u16, bits: u16) -> Result<(), Box<dyn Error>> {
-    let sample_rate: u32 = 44_100;
-    let block_align = channels * bits / 8;
-    let byte_rate = sample_rate * u32::from(block_align);
-    let data_len = frames * usize::from(block_align);
+#[path = "../../test-support/audio.rs"]
+mod audio;
 
-    let mut body: Vec<u8> = Vec::new();
-    body.extend_from_slice(b"WAVE");
-    body.extend_from_slice(b"fmt ");
-    body.extend_from_slice(&16u32.to_le_bytes());
-    body.extend_from_slice(&if bits == 32 { 3u16 } else { 1u16 }.to_le_bytes());
-    body.extend_from_slice(&channels.to_le_bytes());
-    body.extend_from_slice(&sample_rate.to_le_bytes());
-    body.extend_from_slice(&byte_rate.to_le_bytes());
-    body.extend_from_slice(&block_align.to_le_bytes());
-    body.extend_from_slice(&bits.to_le_bytes());
-    body.extend_from_slice(b"data");
-    body.extend_from_slice(&(data_len as u32).to_le_bytes());
+fn write_wav(path: &Path, frames: usize, channels: u16, bits: u16) -> Result<(), Box<dyn Error>> {
+    let mut data = Vec::new();
     for index in 0..frames {
         for _ in 0..channels {
             let phase = (index as f64) / 37.0;
             match bits {
-                32 => body.extend_from_slice(&(phase.sin() as f32).to_le_bytes()),
-                _ => body.extend_from_slice(&(((phase.sin()) * 12_000.0) as i16).to_le_bytes()),
+                32 => data.extend_from_slice(&(phase.sin() as f32).to_le_bytes()),
+                _ => data.extend_from_slice(&(((phase.sin()) * 12_000.0) as i16).to_le_bytes()),
             }
         }
     }
-
-    let mut file = fs::File::create(path)?;
-    file.write_all(b"RIFF")?;
-    file.write_all(&(body.len() as u32).to_le_bytes())?;
-    file.write_all(&body)?;
+    fs::write(path, audio::riff_wav(if bits == 32 { 3 } else { 1 }, channels, 44_100, bits, &data))?;
     Ok(())
 }
 
@@ -267,34 +249,13 @@ fn an_aiff_without_a_sidecar_grades_nothing_found() -> Result<(), Box<dyn Error>
 }
 
 fn write_aiff(path: &Path, frames: usize, channels: u16) -> Result<(), Box<dyn Error>> {
-    // 44100 Hz as an IEEE 754 80-bit extended float, the only encoding COMM accepts.
-    const SAMPLE_RATE_EXTENDED: [u8; 10] = [0x40, 0x0E, 0xAC, 0x44, 0, 0, 0, 0, 0, 0];
-
-    let mut comm: Vec<u8> = Vec::new();
-    comm.extend_from_slice(&channels.to_be_bytes());
-    comm.extend_from_slice(&(frames as u32).to_be_bytes());
-    comm.extend_from_slice(&16u16.to_be_bytes());
-    comm.extend_from_slice(&SAMPLE_RATE_EXTENDED);
-
-    let mut ssnd: Vec<u8> = vec![0; 8];
+    let mut pcm = Vec::new();
     for index in 0..frames {
         let sample = ((index as f64 / 29.0).sin() * 9_000.0) as i16;
         for _ in 0..channels {
-            ssnd.extend_from_slice(&sample.to_be_bytes());
+            pcm.extend_from_slice(&sample.to_be_bytes());
         }
     }
-
-    let mut body: Vec<u8> = Vec::from(*b"AIFF");
-    body.extend_from_slice(b"COMM");
-    body.extend_from_slice(&(comm.len() as u32).to_be_bytes());
-    body.extend_from_slice(&comm);
-    body.extend_from_slice(b"SSND");
-    body.extend_from_slice(&(ssnd.len() as u32).to_be_bytes());
-    body.extend_from_slice(&ssnd);
-
-    let mut file = fs::File::create(path)?;
-    file.write_all(b"FORM")?;
-    file.write_all(&(body.len() as u32).to_be_bytes())?;
-    file.write_all(&body)?;
+    fs::write(path, audio::aiff(b"AIFF", channels, frames as u32, 16, &[], &pcm))?;
     Ok(())
 }

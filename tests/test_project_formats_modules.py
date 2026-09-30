@@ -8,9 +8,7 @@ test modules, vcv/basic.vcv is constructed. Inputs below are constructed.
 """
 
 import json
-import struct
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -23,19 +21,13 @@ sys.path.insert(0, str(FIXTURES))
 import module_builders as mb  # noqa: E402
 import module_corpus  # noqa: E402
 
-from daemon.project_formats import _safe, _tarzst, parse_project, registry, tracker, vcv  # noqa: E402
+from daemon.project_formats import _safe, _tarzst, parse_project, tracker, vcv  # noqa: E402
+from tests.support import TmpMixin  # noqa: E402
 
 
-class TmpMixin(unittest.TestCase):
-    def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self._tmp.cleanup)
-        self.tmp = Path(self._tmp.name)
-
+class ParseMixin(TmpMixin):
     def parse(self, name: str, data: bytes):
-        path = self.tmp / name
-        path.write_bytes(data)
-        return parse_project(path)
+        return parse_project(self.write(name, data))
 
 
 class CorpusTests(unittest.TestCase):
@@ -50,7 +42,7 @@ class CorpusTests(unittest.TestCase):
         self.assertGreater(len(cases) - accepted, 1000)
 
 
-class TrackerTests(TmpMixin):
+class TrackerTests(ParseMixin):
     def test_real_xm_reports_header_instruments_and_samples(self):
         snapshot = parse_project(FIXTURES / "milkytracker/test.xm")
         module = snapshot.tracks[0]
@@ -126,7 +118,7 @@ class TrackerTests(TmpMixin):
         self.assertEqual(tracker._text(b"\xe9 "), "é")
 
 
-class TarZstdTests(TmpMixin):
+class TarZstdTests(ParseMixin):
     def test_bomb_boundary_at_the_default_cap(self):
         """RLE blocks expand 1 byte to 128 KiB; 2048 of them are exactly the 256 MiB cap."""
 
@@ -195,7 +187,7 @@ class TarZstdTests(TmpMixin):
             _tarzst.inflate_zstd(bytes(flipped))
 
 
-class VcvTests(TmpMixin):
+class VcvTests(ParseMixin):
     def test_fixture_lists_modules_cables_params_data_and_bypass(self):
         snapshot = parse_project(FIXTURES / "vcv/basic.vcv")
         self.assertEqual(snapshot.project_format, "vcv_rack")

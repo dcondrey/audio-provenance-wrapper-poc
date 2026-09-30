@@ -35,7 +35,7 @@ fn le(data: &[u8], start: usize, len: usize) -> u64 {
 }
 
 /// Validate one whole Zstandard frame; return its declared content size.
-fn frame_walk(data: &[u8]) -> Result<(Option<u64>, bool)> {
+fn frame_walk(data: &[u8]) -> Result<Option<u64>> {
     if data.get(..4) != Some(ZSTD_MAGIC.as_slice()) {
         return Err("not a Zstandard frame".to_owned());
     }
@@ -115,83 +115,23 @@ fn frame_walk(data: &[u8]) -> Result<(Option<u64>, bool)> {
     if pos != data.len() {
         return Err("trailing data after the Zstandard frame".to_owned());
     }
-    Ok((content_size, has_checksum))
-}
-
-const P1: u64 = 11_400_714_785_074_694_791;
-const P2: u64 = 14_029_467_366_897_019_727;
-const P3: u64 = 1_609_587_929_392_839_161;
-const P4: u64 = 9_650_029_242_287_828_579;
-const P5: u64 = 2_870_177_450_012_600_261;
-
-fn xx_round(acc: u64, input: u64) -> u64 {
-    acc.wrapping_add(input.wrapping_mul(P2)).rotate_left(31).wrapping_mul(P1)
-}
-
-fn xx_merge(acc: u64, value: u64) -> u64 {
-    (acc ^ xx_round(0, value)).wrapping_mul(P1).wrapping_add(P4)
-}
-
-/// XXH64 with seed 0: the Zstandard content checksum keeps its low 32 bits. `ruzstd`'s
-/// streaming decoder does not verify it, libzstd does, so it is verified here.
-fn xxh64(data: &[u8]) -> u64 {
-    let mut hash;
-    let mut rest = data;
-    if data.len() >= 32 {
-        let mut lanes = [P1.wrapping_add(P2), P2, 0, 0_u64.wrapping_sub(P1)];
-        let mut stripes = data.chunks_exact(32);
-        for stripe in &mut stripes {
-            for (index, lane) in lanes.iter_mut().enumerate() {
-                *lane = xx_round(*lane, le(stripe, index * 8, 8));
-            }
-        }
-        rest = stripes.remainder();
-        hash = lanes[0].rotate_left(1).wrapping_add(lanes[1].rotate_left(7)).wrapping_add(lanes[2].rotate_left(12)).wrapping_add(lanes[3].rotate_left(18));
-        for lane in lanes {
-            hash = xx_merge(hash, lane);
-        }
-    } else {
-        hash = P5;
-    }
-    hash = hash.wrapping_add(data.len() as u64);
-    while rest.len() >= 8 {
-        hash = (hash ^ xx_round(0, le(rest, 0, 8))).rotate_left(27).wrapping_mul(P1).wrapping_add(P4);
-        rest = rest.get(8..).unwrap_or_default();
-    }
-    if rest.len() >= 4 {
-        hash = (hash ^ le(rest, 0, 4).wrapping_mul(P1)).rotate_left(23).wrapping_mul(P2).wrapping_add(P3);
-        rest = rest.get(4..).unwrap_or_default();
-    }
-    for byte in rest {
-        hash = (hash ^ u64::from(*byte).wrapping_mul(P5)).rotate_left(11).wrapping_mul(P1);
-    }
-    hash ^= hash >> 33;
-    hash = hash.wrapping_mul(P2);
-    hash ^= hash >> 29;
-    hash = hash.wrapping_mul(P3);
-    hash ^ (hash >> 32)
+    Ok(content_size)
 }
 
 /// Decompress one Zstandard frame, refusing output past `cap`.
 pub fn inflate_zstd(data: &[u8], cap: usize) -> Result<Vec<u8>> {
-    let (content_size, has_checksum) = frame_walk(data)?;
+    let content_size = frame_walk(data)?;
     if content_size.is_some_and(|size| size > cap as u64) {
         return Err(oversize_message(cap));
     }
-    let mut source = data;
-    let decoder = ruzstd::decoding::StreamingDecoder::new(&mut source).map_err(|_| oversize_message(cap))?;
+    let decoder = zstd::stream::read::Decoder::new(data).map_err(|_| oversize_message(cap))?;
     let mut out = Vec::new();
     decoder
+        .single_frame()
         .take(cap as u64 + 1)
         .read_to_end(&mut out)
         .map_err(|_| oversize_message(cap))?;
-    if out.len() > cap {
-        return Err(oversize_message(cap));
-    }
-    if has_checksum && le(data, data.len() - 4, 4) != xxh64(&out) & 0xFFFF_FFFF {
-        return Err(oversize_message(cap));
-    }
-    if content_size.is_some_and(|size| size != out.len() as u64) {
+    if out.len() > cap || content_size.is_some_and(|size| size != out.len() as u64) {
         return Err(oversize_message(cap));
     }
     Ok(out)

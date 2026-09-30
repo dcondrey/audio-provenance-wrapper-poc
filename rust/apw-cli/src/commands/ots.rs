@@ -49,20 +49,7 @@ pub fn run(args: &OtsArgs) -> Result<i32> {
                 println!("the proof is for a different file digest ({})", file_hash_op_name(parsed.file_hash_op));
                 return Ok(1);
             }
-            let source: Option<Box<dyn HeaderSource>> = if !header.is_empty() {
-                let mut headers = Vec::new();
-                for item in header {
-                    let (height, raw) = item
-                        .split_once(':')
-                        .ok_or_else(|| CliError::usage("--header expects HEIGHT:HEX"))?;
-                    let height = height.parse::<u64>().map_err(|_| CliError::usage("bad header height"))?;
-                    let raw = apw_core::python_from_hex(raw).ok_or_else(|| CliError::usage("bad header hex"))?;
-                    headers.push((height, BlockHeader::new(&raw).map_err(|error| CliError::usage(error.to_string()))?));
-                }
-                Some(Box::new(LocalHeaderSource::new(headers)))
-            } else {
-                explorer.as_ref().map(|url| Box::new(ExplorerHeaderSource::new(url)) as Box<dyn HeaderSource>)
-            };
+            let source = header_source(explorer.as_deref(), header)?;
             let Some(source) = source else {
                 println!(
                     "{}",
@@ -95,4 +82,21 @@ pub fn run(args: &OtsArgs) -> Result<i32> {
             Ok(if all_verified { 0 } else { 1 })
         }
     }
+}
+
+/// The header source a `--header` or `--explorer` flag pair names; `--header` wins.
+pub fn header_source(explorer: Option<&str>, headers: &[String]) -> Result<Option<Box<dyn HeaderSource>>> {
+    if headers.is_empty() {
+        return Ok(explorer.map(|url| Box::new(ExplorerHeaderSource::new(url)) as Box<dyn HeaderSource>));
+    }
+    let mut parsed = Vec::new();
+    for item in headers {
+        let (height, raw) = item
+            .split_once(':')
+            .ok_or_else(|| CliError::usage("--header expects HEIGHT:HEX"))?;
+        let height = height.parse::<u64>().map_err(|_| CliError::usage("bad header height"))?;
+        let raw = apw_core::python_from_hex(raw).ok_or_else(|| CliError::usage("bad header hex"))?;
+        parsed.push((height, BlockHeader::new(&raw).map_err(|error| CliError::usage(error.to_string()))?));
+    }
+    Ok(Some(Box::new(LocalHeaderSource::new(parsed))))
 }

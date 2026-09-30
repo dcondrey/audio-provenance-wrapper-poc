@@ -22,7 +22,7 @@ document claims Windows or Linux correctness from a macOS build.
 | Hardware attestation | `SoftwareProvider`, not attested | `SoftwareProvider`, not attested | `SoftwareProvider`, not attested |
 | Input capture | unsupported | unsupported | unsupported |
 | Screen observer | unsupported | unsupported | unsupported |
-| Project diff | `.als`, `.rpp` | `.als`, `.rpp` (path handling only) | `.als`, `.rpp` (path handling only) |
+| Project diff | `.als`, `.rpp`, `.dawproject`, `.ardour`, `.mmp`/`.mmpz`, `.pd`, `.maxpat`, `.xm`/`.mod`, `.vcv` | same parsers, path handling only | same parsers, path handling only |
 | `scripts/build_plugin.sh` | verified here | syntax-checked on macOS, unrun | not applicable (bash script) |
 
 "Portable readers" are pure-Python RIFF/WAVE and AIFF/AIFC header parsers.
@@ -126,6 +126,13 @@ field to `project_diff` events.
 | --- | --- | --- |
 | Ableton Live | `.als` | supported (gzip XML; existing parser) |
 | REAPER | `.rpp` | supported: tracks, items, sources, FX chain names, envelope points, MIDI note-ons, markers, tempo, time signature, sample rate. The RPP layout is unofficial and the parser is validated only against hand-written fixtures in `tests/fixtures/reaper/`, not files written by REAPER. Item positions are converted to beats with the base tempo, so a tempo envelope makes them approximate. |
+| Bitwig Studio, Cubase, Studio One | `.dawproject` | supported (constructed fixtures only); `docs/PROJECT_FORMATS.md` |
+| Ardour | `.ardour` | supported (constructed fixtures only) |
+| LMMS | `.mmp`, `.mmpz` | supported (constructed fixtures only) |
+| Pure Data | `.pd` | supported (real files) |
+| Max | `.maxpat` | supported (constructed fixtures only; no published spec) |
+| MilkyTracker | `.xm`, `.mod` | supported (real files) |
+| VCV Rack | `.vcv` | supported (constructed fixtures only) |
 | Logic Pro | `.logicx`, `.logic` | unsupported |
 | Cubase, Nuendo | `.cpr`, `.npr` | unsupported |
 | FL Studio | `.flp` | unsupported |

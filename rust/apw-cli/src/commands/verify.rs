@@ -1,9 +1,11 @@
-use apw_core::{VerificationState, NOTHING_FOUND_NORMATIVE_NOTE};
+use apw_core::{LocalOutcome, Severity, VerificationReport, VerificationState, NOTHING_FOUND_NORMATIVE_NOTE};
 use apw_provenance::{expand_user, LocalReferenceProvider, ProvenanceProvider};
 use serde_json::Value;
 
 use crate::cli::VerifyArgs;
+use crate::commands::ots::header_source;
 use crate::error::{CliError, Result};
+use crate::manifest_verify::{verify_manifest, ManifestVerifyOptions};
 use crate::verify_state::state_of_file;
 
 /// A locally issued root proves that a claim chains to a key this machine holds.
@@ -25,18 +27,12 @@ pub fn run(args: &VerifyArgs) -> Result<i32> {
             std::io::Error::new(std::io::ErrorKind::NotFound, "no such file"),
         ));
     }
-    // The local manifest verifier grades an evidence hash chain, a coverage
-    // cross-check and a C2PA claim cross-check that this engine does not
-    // implement. Grading a manifest on the subset it can check would emit a
-    // clean result from checks that never ran.
     if args
         .target
         .extension()
         .is_some_and(|value| value.eq_ignore_ascii_case("json"))
     {
-        return Err(CliError::ManifestVerifierUnported {
-            path: args.target.clone(),
-        });
+        return run_manifest(args);
     }
 
     let (anchors, anchor_scope) = trust_anchors(args)?;
@@ -65,6 +61,49 @@ pub fn run(args: &VerifyArgs) -> Result<i32> {
     } else {
         EXIT_NOT_VERIFIED
     })
+}
+
+fn run_manifest(args: &VerifyArgs) -> Result<i32> {
+    // Python's default anchor is the local store's root, so the same command grades the same way.
+    let trust_anchor = args
+        .trust_anchor
+        .clone()
+        .unwrap_or_else(|| expand_user(&args.provenance_store).join("ca/root_cert.pem"));
+    let ots_proof = match &args.ots_proof {
+        Some(path) => Some(std::fs::read(path).map_err(|source| CliError::io("read", path, source))?),
+        None => None,
+    };
+    let options = ManifestVerifyOptions {
+        signing_key: (!args.public_only).then(|| args.signing_key.clone()),
+        public_key: args.public_key.clone(),
+        export: args.export.clone(),
+        trust_anchor: Some(trust_anchor),
+        c2pa_asset: args.c2pa_asset.clone(),
+        ots_header_source: header_source(args.ots_explorer.as_deref(), &args.ots_header)?,
+        ots_proof,
+    };
+    let report = verify_manifest(&args.target, &options);
+    if args.json {
+        println!("{}", serde_json::to_string_pretty(&report.to_json())?);
+    } else {
+        print_report(&report);
+    }
+    Ok(if report.outcome() == LocalOutcome::Verified { EXIT_VERIFIED } else { EXIT_NOT_VERIFIED })
+}
+
+fn print_report(report: &VerificationReport) {
+    for finding in &report.findings {
+        let label = match finding.severity {
+            Severity::Error => "FAIL:",
+            Severity::Warning => "WARN:",
+            Severity::Info => "OK:  ",
+        };
+        println!("{label} [{}] {}", finding.code, finding.message);
+    }
+    for (check, reason) in report.unchecked() {
+        println!("NOT CHECKED: [{check}] {reason}");
+    }
+    println!("OUTCOME: {} (local POC verifier; not a registry or identity result)", report.outcome());
 }
 
 fn print_summary(record: &Value, state: VerificationState) {

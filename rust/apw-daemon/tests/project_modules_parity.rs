@@ -14,13 +14,14 @@ use apw_core::{canonical_json_utf8, sha256_hex};
 use apw_daemon::project::{detect_format, snapshot_to_golden, Limits};
 use serde_json::Value;
 
+mod common;
+
 fn projects_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/projects")
+    common::fixtures().join("projects")
 }
 
 fn corpus() -> Value {
-    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/parity/project_modules_corpus.json");
-    serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
+    common::parity_json("project_modules_corpus.json")
 }
 
 fn from_hex(text: &str) -> Vec<u8> {
@@ -103,14 +104,7 @@ fn every_module_and_vcv_corpus_case_matches_the_oracle() {
         } else {
             refused += 1;
         }
-        // Corrupted compressed bytes: libzstd decodes some corrupt Huffman streams that ruzstd
-        // refuses. Rust may be stricter there (a refusal never contradicts the oracle's), but
-        // whenever Rust accepts, its digest must equal the oracle's. Documented residual.
-        let same = if case.get("status_only") == Some(&Value::Bool(true)) {
-            produced.get("error").is_some() || &produced == expected
-        } else {
-            &produced == expected
-        };
+        let same = &produced == expected;
         if !same {
             mismatches.push(format!("{}: oracle {expected}, rust {produced}", case["name"].as_str().unwrap()));
         }

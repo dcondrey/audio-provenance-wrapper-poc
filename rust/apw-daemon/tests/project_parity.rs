@@ -10,8 +10,10 @@ use apw_core::canonical_json_utf8;
 use apw_daemon::project::{detect_format, snapshot_to_golden, Limits};
 use serde_json::Value;
 
+mod common;
+
 fn projects_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/projects")
+    common::fixtures().join("projects")
 }
 
 fn golden_files(dir: &Path, out: &mut Vec<PathBuf>) {
@@ -63,7 +65,7 @@ fn every_golden_snapshot_is_reproduced() {
 }
 
 fn fixture() -> Value {
-    read_json(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/parity/project_parity.json"))
+    read_json(&common::fixtures().join("parity/project_parity.json"))
 }
 
 fn all_sources() -> Vec<(String, PathBuf)> {

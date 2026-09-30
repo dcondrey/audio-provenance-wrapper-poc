@@ -15,9 +15,6 @@ pub enum CliError {
     #[error("{0}")]
     Usage(String),
 
-    #[error("{path}: the local manifest verifier is not part of the native engine")]
-    ManifestVerifierUnported { path: PathBuf },
-
     #[error(transparent)]
     Core(#[from] apw_core::CoreError),
 

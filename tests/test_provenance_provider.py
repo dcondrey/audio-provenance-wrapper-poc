@@ -4,7 +4,6 @@ import math
 import struct
 import tempfile
 import unittest
-import wave
 from pathlib import Path
 
 import pytest
@@ -17,6 +16,7 @@ from daemon.common import canonical_json_bytes
 from daemon.provenance import VerificationState, detect_provider
 from daemon.provenance.local_reference import LocalReferenceProvider, validate_certificate_chain
 from daemon.provenance.provider import NOTHING_FOUND_NORMATIVE_NOTE, RevokedKeyError
+from tests.audio_files import write_wav
 
 
 def _write_wav(path: Path, seed: float = 220.0, seconds: float = 3.0) -> Path:
@@ -26,12 +26,7 @@ def _write_wav(path: Path, seed: float = 220.0, seconds: float = 3.0) -> Path:
         value = 0.4 * math.sin(2 * math.pi * seed * index / rate)
         value += 0.2 * math.sin(2 * math.pi * (seed * 2.7) * index / rate)
         frames += struct.pack("<h", int(value * 32767))
-    with wave.open(str(path), "wb") as handle:
-        handle.setnchannels(1)
-        handle.setsampwidth(2)
-        handle.setframerate(rate)
-        handle.writeframes(bytes(frames))
-    return path
+    return write_wav(path, rate=rate, pcm=bytes(frames))
 
 
 def _self_signed_leaf() -> bytes:

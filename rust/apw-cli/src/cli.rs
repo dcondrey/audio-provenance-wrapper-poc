@@ -203,7 +203,9 @@ pub struct VerifyArgs {
     /// File to verify.
     pub target: PathBuf,
 
-    /// PEM file of trust anchors. Without one, no chain can reach `verified`.
+    /// PEM file of trust anchors. Without one, no chain can reach `verified`. For a
+    /// manifest it is the anchor the C2PA claim is evaluated against, and it defaults
+    /// to the root under `--provenance-store`, as `daemon.verify` does.
     #[arg(long, value_name = "PEM")]
     pub trust_anchor: Option<PathBuf>,
 
@@ -219,6 +221,39 @@ pub struct VerifyArgs {
     /// Detached .c2pa manifest to verify the asset against.
     #[arg(long)]
     pub sidecar: Option<PathBuf>,
+
+    /// Manifest only: local HMAC key for same-machine seal verification.
+    #[arg(long, default_value = DEFAULT_SIGNING_KEY)]
+    pub signing_key: PathBuf,
+
+    /// Manifest only: skip the local HMAC seal; the portable signature still applies.
+    #[arg(long)]
+    pub public_only: bool,
+
+    /// Manifest only: raw 32-byte Ed25519 public key this machine pins.
+    #[arg(long, default_value = DEFAULT_PUBLIC_KEY)]
+    pub public_key: PathBuf,
+
+    /// Manifest only: check the export hash against this file instead of the recorded path.
+    #[arg(long)]
+    pub export: Option<PathBuf>,
+
+    /// Manifest only: re-read the C2PA claim from this file instead of the recorded asset.
+    #[arg(long)]
+    pub c2pa_asset: Option<PathBuf>,
+
+    /// Manifest only: Esplora-compatible explorer for an OpenTimestamps Bitcoin
+    /// attestation, trusted to serve the best chain.
+    #[arg(long, value_name = "URL", conflicts_with = "ots_header")]
+    pub ots_explorer: Option<String>,
+
+    /// Manifest only: an 80-byte header from your own node, HEIGHT:HEX (repeatable).
+    #[arg(long, value_name = "HEIGHT:HEX")]
+    pub ots_header: Vec<String>,
+
+    /// Manifest only: an upgraded .ots sidecar for the manifest's OpenTimestamps record.
+    #[arg(long)]
+    pub ots_proof: Option<PathBuf>,
 
     /// Print the full record as JSON instead of a summary.
     #[arg(long)]

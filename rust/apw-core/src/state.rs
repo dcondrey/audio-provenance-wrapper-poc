@@ -63,6 +63,7 @@ pub enum LocalOutcome {
     Changed,
     Untrusted,
     NotFound,
+    Incomplete,
 }
 
 impl LocalOutcome {
@@ -72,6 +73,7 @@ impl LocalOutcome {
             LocalOutcome::Changed => "changed",
             LocalOutcome::Untrusted => "untrusted",
             LocalOutcome::NotFound => "not_found",
+            LocalOutcome::Incomplete => "incomplete",
         }
     }
 }

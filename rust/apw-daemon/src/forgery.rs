@@ -106,23 +106,6 @@ fn truncate(value: f64) -> i128 {
     value.trunc() as i128
 }
 
-/// A JSON value that Python's `isinstance(v, int)` accepts (bool excluded),
-/// saturated to `i128` for integers wider than that.
-fn python_int(value: Option<&Value>) -> Option<i128> {
-    let Value::Number(number) = value? else {
-        return None;
-    };
-    let text = number.to_string();
-    if text.contains(['.', 'e', 'E']) {
-        return None;
-    }
-    Some(text.parse::<i128>().unwrap_or(if text.starts_with('-') {
-        i128::MIN
-    } else {
-        i128::MAX
-    }))
-}
-
 fn ratio_percent(ratio: f64, digits: usize) -> String {
     format!("{:.digits$}%", ratio * 100.0)
 }
@@ -292,7 +275,7 @@ impl InputBehaviorAnalyzer {
         // present non-int (float, string, null, bool) skips the batch.
         let count = match event.get("count") {
             None => 0,
-            Some(value) => match python_int(Some(value)) {
+            Some(value) => match apw_core::python_int(value) {
                 Some(count) => count,
                 None => return,
             },

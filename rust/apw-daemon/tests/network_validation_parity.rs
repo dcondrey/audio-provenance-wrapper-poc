@@ -11,11 +11,11 @@
 use apw_daemon::validate_network_event;
 use serde_json::Value;
 
+mod common;
+
 #[test]
 fn every_case_matches_the_python_validator() {
-    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../tests/fixtures/parity/network_validation.json");
-    let cases: Vec<Value> = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
+    let cases: Vec<Value> = common::parity_json("network_validation.json");
     assert!(cases.len() >= 30);
     for case in &cases {
         let name = case["name"].as_str().unwrap();

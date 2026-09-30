@@ -43,9 +43,9 @@ for the AU. pluginval and clap-validator have not been run. Everything else is
 | Cycling '74 Max | VST3, AU inside patchers (S) | none | `.maxpat` (constructed fixtures only) | |
 | AudioMulch | AU (macOS); VST3 not found | none | no (`.amh` undocumented) | old, last release 2.2.5 |
 | MakeMusic Finale | unconfirmed | none | no | discontinued 2024-08-26; successor Dorico |
-| MilkyTracker | none (no plug-in support) | T | no | Export-only; `.xm`/`.mod` not yet parsed |
+| MilkyTracker | none (no plug-in support) | T | `.xm`, `.mod` | Export-only for audio |
 | Pure Data | none in vanilla | T | `.pd` | Export-only for audio |
-| VCV Rack | none (paid Host module loads VST3) | T | no (`.vcv` needs zstd) | Export-only |
+| VCV Rack | none (paid Host module loads VST3) | T | `.vcv` (constructed fixtures only) | Export-only for audio |
 | Sonic Pi | none | none (not a plug-in host) | no | Export-only |
 | Native Instruments Reaktor | not a host: it is a plug-in | n/a | no (`.ens`) | Nothing to capture inside it |
 

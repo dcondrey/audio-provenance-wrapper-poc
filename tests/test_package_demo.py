@@ -1,23 +1,16 @@
-import importlib.util
 import json
 import os
-import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+from tests.support import load_script
 
 REPO = Path(__file__).resolve().parent.parent
 
 
 def _load_packager():
-    spec = importlib.util.spec_from_file_location(
-        "_package_demo", REPO / "scripts" / "package_demo.py"
-    )
-    module = importlib.util.module_from_spec(spec)
-    # @dataclass resolves annotations through sys.modules[cls.__module__].
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+    return load_script("_package_demo", REPO / "scripts" / "package_demo.py")
 
 
 packager = _load_packager()

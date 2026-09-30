@@ -1,5 +1,4 @@
 import json
-import struct
 import tempfile
 import unittest
 import wave
@@ -9,29 +8,9 @@ from unittest import mock
 from daemon.hardware_attestation import provider as hw
 from daemon.input_capture import observer as input_observer
 from daemon.sample_watcher import watcher
+from tests.audio_files import write_aiff, write_wav
 
 SYSTEMS = ("Darwin", "Linux", "Windows", "FreeBSD", "")
-
-
-def _ext80(rate: int) -> bytes:
-    exponent = 16383 + rate.bit_length() - 1
-    mantissa = rate << (64 - rate.bit_length())
-    return struct.pack(">HQ", exponent, mantissa)
-
-
-def write_aiff(path: Path, rate: int, channels: int, frames: int) -> None:
-    comm = struct.pack(">hIh", channels, frames, 16) + _ext80(rate)
-    ssnd_data = b"\x00" * (frames * channels * 2)
-    ssnd = struct.pack(">II", 0, 0) + ssnd_data
-    body = b"AIFF" + b"COMM" + struct.pack(">I", len(comm)) + comm + b"SSND" + struct.pack(">I", len(ssnd)) + ssnd
-    path.write_bytes(b"FORM" + struct.pack(">I", len(body)) + body)
-
-
-def write_float_wav(path: Path, rate: int, channels: int, frames: int) -> None:
-    fmt = struct.pack("<HHIIHH", 3, channels, rate, rate * channels * 4, channels * 4, 32)
-    data = b"\x00" * (frames * channels * 4)
-    body = b"WAVE" + b"fmt " + struct.pack("<I", 16) + fmt + b"data" + struct.pack("<I", len(data)) + data
-    path.write_bytes(b"RIFF" + struct.pack("<I", len(body)) + body)
 
 
 class SampleMetadataPortabilityTests(unittest.TestCase):
@@ -47,12 +26,12 @@ class SampleMetadataPortabilityTests(unittest.TestCase):
         for system in SYSTEMS:
             with mock.patch.object(watcher.platform, "system", return_value=system):
                 aiff = self.root / "a.aiff"
-                write_aiff(aiff, 44100, 2, 4410)
+                write_aiff(aiff, 4410, 44100, 2)
                 meta = watcher.extract_audio_metadata(aiff)
                 self.assertEqual((meta["sample_rate"], meta["channels"]), (44100, 2))
                 self.assertAlmostEqual(meta["duration_seconds"], 0.1)
                 flt = self.root / "f.wav"
-                write_float_wav(flt, 96000, 1, 9600)
+                write_wav(flt, 9600, 96000, float32=True)
                 meta = watcher.extract_audio_metadata(flt)
                 self.assertEqual((meta["sample_rate"], meta["channels"]), (96000, 1))
                 self.assertAlmostEqual(meta["duration_seconds"], 0.1)

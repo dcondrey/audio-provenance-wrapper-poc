@@ -12,6 +12,7 @@ mod adapters;
 mod cli;
 mod commands;
 mod error;
+mod manifest_verify;
 
 use clap::Parser;
 
@@ -20,6 +21,7 @@ pub use adapters::{
 };
 pub use cli::{Cli, Command};
 pub use error::{one_line, CliError, Result};
+pub use manifest_verify::{verify_manifest, ManifestVerifyOptions};
 pub use verify_state::{state_of_file, VerifiedFile};
 
 mod verify_state;
@@ -50,13 +52,6 @@ where
         Ok(code) => code,
         Err(error) => {
             log::error!("{}", one_line(&error));
-            if let CliError::ManifestVerifierUnported { .. } = error {
-                log::error!(
-                    "The local manifest verifier (evidence hash chain, coverage cross-check, \
-                     C2PA claim cross-check) is not part of the native engine. Run \
-                     `python3 -m daemon.verify <manifest>` for that grade."
-                );
-            }
             1
         }
     }

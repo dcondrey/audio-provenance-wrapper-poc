@@ -6,10 +6,10 @@
 use apw_daemon::{identify_host, identify_host_in, parse_host_table, HostIdentity, MAX_HOST_TABLE_BYTES};
 use serde_json::Value;
 
+mod common;
+
 fn fixture() -> Value {
-    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../tests/fixtures/parity/host_identity.json");
-    serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
+    common::parity_json("host_identity.json")
 }
 
 fn as_json(identity: &HostIdentity) -> Value {

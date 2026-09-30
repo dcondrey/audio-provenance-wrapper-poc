@@ -18,7 +18,9 @@ rust/apw-core/tests/time_anchor_parity.rs and rust/apw-daemon/tests/forgery_pari
 from __future__ import annotations
 
 import contextlib
+import copy
 import hashlib
+import hmac
 import io
 import json
 import sys
@@ -1217,11 +1219,315 @@ def ots_fixture() -> dict:
     }
 
 
+# ----------------------------- full manifest verification -----------------------------
+# A case is edits over a base manifest plus the files it binds, replayed in a fresh directory by
+# `run_verify_case` here and by rust/apw-cli/tests/manifest_verify_parity.rs. `{dir}` stands
+# for that directory in the manifest and in every expected message, so a case that carries a
+# signature is signed at replay time, after the substitution, with the fixed test seeds through
+# the real signers. Ed25519 and HMAC-SHA256 are deterministic, so both languages sign the same
+# bytes. `before` edits the base, `after` edits the manifest once it is sealed.
+SEAL_SEED = bytes([0x11]) * 32
+PIN_SEED = bytes(range(32))
+OTHER_SEED = bytes(range(1, 33))
+# Python's message carries the interpreter's own JSON error text, so it is recorded as null
+# and a replay skips it.
+FREE_TEXT_CODES = ("read_failed",)
+# A 2-byte mono WAV whose every byte is ASCII, so it can travel as a JSON string.
+TINY_WAV = ("RIFF\x26\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x01\x00\x00\x00"
+            "\x02\x00\x00\x00\x02\x00\x10\x00data\x02\x00\x00\x00\x00\x00")
+
+
+def _ed25519_public(seed: bytes) -> bytes:
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    return Ed25519PrivateKey.from_private_bytes(seed).public_key().public_bytes(
+        serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+
+
+def seal_manifest(manifest: dict, pin_seed: bytes, seal_seed: bytes, scratch: Path) -> dict:
+    """Sign with the fixed test keys: the portable signature first, then the local seal over it."""
+    from daemon.hardware_attestation.provider import SoftwareProvider
+    from daemon.signing import Ed25519Signer
+
+    scratch.mkdir(parents=True, exist_ok=True)
+    unsigned = {k: v for k, v in manifest.items() if k not in {"portable_signature", "manifest_signature"}}
+    portable = manifest.get("portable_signature")
+    if isinstance(portable, dict):
+        (scratch / "portable-private.key").write_bytes(pin_seed)
+        signed = Ed25519Signer(scratch / "portable-private.key", scratch / "portable-public.key").sign_manifest(unsigned)
+        portable = {**portable, **{key: signed[key] for key in
+                                   ("public_key_hex", "signer_id", "signature_hex", "signed_content_hash")}}
+    sealed = unsigned if portable is None else {**unsigned, "portable_signature": portable}
+    signed_bytes = json.dumps(sealed, sort_keys=True, separators=(",", ":")).encode()
+    (scratch / "seal-seed.key").write_bytes(seal_seed)
+    provider = SoftwareProvider(scratch / "seal-seed.key")
+    seal = {**manifest["manifest_signature"], "device_id": provider.device_identity().device_id,
+            "signature_hex": provider.sign(signed_bytes).hex(),
+            "signed_content_hash": hashlib.sha256(signed_bytes).hexdigest()}
+    return {**sealed, "manifest_signature": seal}
+
+
+def apply_edits(manifest: dict, edits: list[dict]) -> dict:
+    for edit in edits:
+        node = manifest
+        for step in edit["path"][:-1]:
+            node = node[step]
+        if "delete" in edit:
+            del node[edit["path"][-1]]
+        else:
+            node[edit["path"][-1]] = edit["value"]
+    return manifest
+
+
+def resolve_base(bases: dict, name: str) -> tuple[dict, dict]:
+    """A base is a fixture file holding a manifest, or edits and files over another base."""
+    spec = bases[name]
+    if isinstance(spec, str):
+        return json.loads((HERE / spec).read_text())["manifest"], {}
+    manifest, files = resolve_base(bases, spec["from"])
+    return apply_edits(manifest, copy.deepcopy(spec["edits"])), {**files, **spec["files"]}
+
+
+def _put(*path: object, value: object) -> dict:
+    return {"path": list(path), "value": value}
+
+
+def _drop(*path: object) -> dict:
+    return {"path": list(path), "delete": True}
+
+
+def _evidence(session_id: str, count: int, *, break_at: int | None = None) -> str:
+    lines, previous = [], "genesis"
+    for index in range(count):
+        window = hashlib.sha256(f"window-{index}".encode()).hexdigest()
+        lines.append(json.dumps({
+            "event_type": "buffer_hash", "capture_session_id": session_id, "plugin_instance_id": "instance",
+            "plugin_capture_session_id": "plugin-session", "window_hash": window,
+            "prev_hash": "0" * 64 if index == break_at else previous, "timestamp_ms": 10_000 + index,
+        }, sort_keys=True))
+        previous = window
+    return "\n".join(lines) + "\n"
+
+
+def _bound_base(session_id: str, export: str, evidence: str) -> dict:
+    """The rehearsal manifest with its export and evidence swapped for files a case can carry."""
+    count = evidence.count("\n")
+    last = json.loads(evidence.splitlines()[-1])["window_hash"]
+    digest = hashlib.sha256(evidence.encode()).hexdigest()
+    return {
+        "from": "rehearsal", "files": {"export.wav": export, "evidence/plugin_events.jsonl": evidence},
+        "edits": [
+            _drop("time_anchor"), _drop("time_anchor_opentimestamps"),
+            _put("export", "sha256", value=hashlib.sha256(export.encode()).hexdigest()),
+            _put("export", "file_path", value="{dir}/export.wav"),
+            _put("observed_stems", 0, "hash_chain_root", value=last),
+            _put("observed_stems", 0, "hash_chain_length", value=count),
+            _put("observation_coverage", "counters", "buffer_hash_events_received", value=count),
+            _put("evidence_binding", value={
+                "evidence_directory": "{dir}/evidence", "chain_length": count, "last_window_hash": last,
+                "evidence_file_hashes": {"plugin_events.jsonl": digest},
+                "evidence_files": {"plugin_events.jsonl": {"sha256": digest, "byte_length": len(evidence.encode()),
+                                                            "binding_scope": "file_prefix_at_manifest_creation"}},
+            }),
+        ],
+    }
+
+
+def verify_fixture_bases(rehearsal: dict) -> dict:
+    export, evidence = "RIFF parity export bytes", _evidence(rehearsal["session_id"], 40)
+    return {
+        "rehearsal": "manifest_rehearsal.json",
+        "bound": _bound_base(rehearsal["session_id"], export, evidence),
+        "broken": _bound_base(rehearsal["session_id"], export, _evidence(rehearsal["session_id"], 40, break_at=20)),
+    }
+
+
+def verify_cases(bases: dict) -> list[dict]:
+    rehearsal, _ = resolve_base(bases, "rehearsal")
+    bound, files = resolve_base(bases, "bound")
+    export, evidence = files["export.wav"], files["evidence/plugin_events.jsonl"]
+    recorded_anchor = rehearsal["c2pa_claim"]["signer"]["trust_anchor_pem"]
+    wav_digest = hashlib.sha256(TINY_WAV.encode()).hexdigest()
+    asset_file = {"artifacts/presenter_export_c2pa.wav": TINY_WAV}
+    cases: list[dict] = []
+
+    def add(name: str, base: str | None, *before: dict, raw: object = None, files: dict | None = None,
+            sealed: bool = True, pin_seed: bytes | None = PIN_SEED, pin_public_hex: str | None = None,
+            seal_key: bytes | None = SEAL_SEED, signed_with: bytes = PIN_SEED, public_only: bool = False,
+            export_override: str | None = None, after: list[dict] | None = None,
+            trust_anchor_pem: str | None = None, c2pa_asset: str | None = None) -> None:
+        cases.append({
+            "name": name, "base": base, "raw": raw, "before": list(before), "files": files or {},
+            "seal": {"pin_seed_hex": signed_with.hex(), "seal_seed_hex": SEAL_SEED.hex()} if sealed else None,
+            "after": after or [],
+            "pin_hex": pin_public_hex or (None if pin_seed is None else _ed25519_public(pin_seed).hex()),
+            "seal_key_hex": None if seal_key is None else seal_key.hex(),
+            "public_only": public_only, "export_override": export_override,
+            "trust_anchor_pem": trust_anchor_pem, "c2pa_asset": c2pa_asset,
+        })
+
+    # The daemon's own signed manifest, carrying an anchored RFC 3161 token and an OpenTimestamps record.
+    embedded = rehearsal["portable_signature"]["public_key_hex"]
+    add("rehearsal_as_signed_no_pin", "rehearsal", sealed=False, public_only=True, pin_seed=None)
+    add("rehearsal_as_signed_embedded_pin", "rehearsal", sealed=False, public_only=True, pin_public_hex=embedded)
+    add("rehearsal_as_signed_other_pin", "rehearsal", sealed=False, public_only=True)
+    add("rehearsal_resealed", "rehearsal")
+    add("rehearsal_time_anchor_data_hash_edited", "rehearsal", _put("time_anchor", "data_hash", value="0" * 64))
+    add("rehearsal_time_anchor_claims_cms", "rehearsal", _put("time_anchor", "cms_signature_verified", value=True))
+    add("rehearsal_time_anchor_removed", "rehearsal", _drop("time_anchor"))
+    add("rehearsal_ots_record_not_an_object", "rehearsal", _put("time_anchor_opentimestamps", value="pending"))
+    add("rehearsal_ots_data_hash_edited", "rehearsal", _put("time_anchor_opentimestamps", "data_hash", value="1" * 64))
+    add("rehearsal_ots_removed", "rehearsal", _drop("time_anchor_opentimestamps"))
+
+    # A document that is missing, unreadable, or not a manifest at all.
+    add("not_found", None, sealed=False)
+    add("unparseable_text", None, raw="{not json", sealed=False)
+    add("array_manifest", None, raw=[1, 2], sealed=False)
+    add("empty_object", None, raw={}, sealed=False)
+
+    # Each way the seal and the portable signature can be absent, hollow or wrong.
+    add("unsigned", "bound", _drop("manifest_signature"), _drop("portable_signature"), sealed=False)
+    add("seal_without_hash", "bound", after=[_drop("manifest_signature", "signed_content_hash")])
+    add("seal_algorithm_forged", "bound", _put("manifest_signature", "algorithm", value="none"))
+    add("seal_algorithm_absent", "bound", _drop("manifest_signature", "algorithm"))
+    add("seal_not_an_object", "bound", after=[_put("manifest_signature", value="sealed")])
+    add("portable_not_an_object", "bound", _put("portable_signature", value="sig"))
+    add("portable_absent", "bound", _drop("portable_signature"))
+    add("content_edited_after_sealing", "bound", after=[_put("export", "format", value="flac")])
+    add("seal_bytes_edited", "bound", after=[_put("manifest_signature", "signature_hex", value="ab" * 32)])
+    add("seal_bytes_not_hex", "bound", after=[_put("manifest_signature", "signature_hex", value="zz")])
+    add("seal_bytes_missing", "bound", after=[_put("manifest_signature", "signature_hex", value="")])
+    add("seal_other_device", "bound", after=[_put("manifest_signature", "device_id", value="0" * 16)])
+
+    # A fully consistent manifest and each way its verification inputs can differ.
+    add("bound_and_consistent", "bound")
+    add("bound_public_only", "bound", public_only=True)
+    add("bound_no_hmac_key_file", "bound", seal_key=None)
+    add("bound_wrong_hmac_key", "bound", seal_key=OTHER_SEED)
+    add("bound_no_pin", "bound", pin_seed=None)
+    add("bound_wrong_pin", "bound", pin_seed=OTHER_SEED)
+    add("bound_signed_by_other_key", "bound", signed_with=OTHER_SEED)
+    add("bound_export_altered", "bound", files={"export.wav": export + "!"})
+    add("bound_export_absent", "bound", files={"export.wav": None})
+    add("bound_export_override", "bound", _put("export", "file_path", value="{dir}/missing.wav"),
+        files={"copy.wav": export}, export_override="{dir}/copy.wav")
+    add("bound_export_altered_and_superseded", "bound", files={
+        "export.wav": export + "!", "manifest.superseded.json": json.dumps({"superseded_by": "take_v2.json"})})
+
+    # The bound evidence, hashed as a prefix and then re-read for its counters and chain.
+    evidence_file = "evidence/plugin_events.jsonl"
+    bound_entry = ("evidence_binding", "evidence_files", "plugin_events.jsonl")
+    add("evidence_absent", "bound", files={evidence_file: None})
+    add("evidence_altered", "bound", files={evidence_file: evidence.replace("10001", "10002", 1)})
+    add("evidence_truncated", "bound", files={evidence_file: evidence[:200]})
+    add("evidence_appended", "bound", files={evidence_file: evidence + evidence.splitlines()[-1] + "\n"})
+    add("evidence_rotated", "bound", files={evidence_file: None, "evidence/plugin_events.2.jsonl": evidence})
+    add("evidence_name_traversal", "bound", _put("evidence_binding", "evidence_files", "../plugin_events.jsonl",
+        value=bound["evidence_binding"]["evidence_files"]["plugin_events.jsonl"]))
+    add("evidence_entry_not_an_object", "bound", _put(*bound_entry, value=7))
+    add("evidence_negative_length", "bound", _put(*bound_entry, "byte_length", value=-1))
+    add("evidence_length_not_a_number", "bound", _put(*bound_entry, "byte_length", value="many"))
+    add("evidence_directory_unresolvable", "bound", _put("evidence_binding", "evidence_directory", value="~no_such_user_apw/evidence"))
+    add("evidence_hashes_only", "bound", _drop("evidence_binding", "evidence_files"))
+    add("evidence_hashes_only_altered", "bound", _drop("evidence_binding", "evidence_files"),
+        files={evidence_file: evidence + "\n"})
+    add("evidence_binding_not_an_object", "bound", _put("evidence_binding", value=[]))
+    add("evidence_binding_absent", "bound", _drop("evidence_binding"))
+    add("evidence_chain_break", "broken")
+    add("coverage_over_claimed", "bound", _put("observation_coverage", "counters", "buffer_hash_events_received", value=41))
+    add("coverage_under_claimed", "bound", _put("observation_coverage", "counters", "buffer_hash_events_received", value=39))
+    add("coverage_chain_length_over_claimed", "bound", _put("evidence_binding", "chain_length", value=41))
+    add("coverage_commitment_absent", "bound", _put("evidence_binding", "last_window_hash", value="f" * 64))
+    add("coverage_stem_commitment_differs", "bound", _put("observed_stems", 0, "hash_chain_root", value="e" * 64))
+
+    # The C2PA claim, re-read against a signed asset and an anchor this machine holds. The signed
+    # branches carry each C2PA library's own detail text, so they are not in this table.
+    digest = _put("c2pa_claim", "signed_asset", "sha256", value=wav_digest)
+    add("c2pa_no_claim", "bound", _drop("c2pa_claim"))
+    add("c2pa_claim_unavailable", "bound", _put("c2pa_claim", value={"status": "unavailable", "reason": "no key"}))
+    add("c2pa_claim_not_an_object", "bound", _put("c2pa_claim", value="embedded"))
+    add("c2pa_signer_overclaimed", "bound", _put("c2pa_claim", "signer", "signer_identity", value="Jane Roe"))
+    add("c2pa_asset_outside_the_session", "bound", _put("c2pa_claim", "signed_asset", "relative_path", value="../../../etc/hosts"))
+    add("c2pa_asset_digest_edited", "bound", files=asset_file)
+    add("c2pa_asset_no_anchor", "bound", digest, files=asset_file)
+    add("c2pa_anchor_differs_from_recorded", "bound", digest, files=asset_file,
+        trust_anchor_pem="-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----\n")
+    add("c2pa_anchor_is_not_a_certificate", "bound", digest, files=asset_file, trust_anchor_pem="not a certificate")
+    add("c2pa_asset_unsigned_under_the_recorded_anchor", "bound", digest, files=asset_file, trust_anchor_pem=recorded_anchor)
+    add("c2pa_asset_override", "bound", digest, _drop("c2pa_claim", "signed_asset", "relative_path"),
+        files={"override.wav": TINY_WAV}, c2pa_asset="{dir}/override.wav",
+        trust_anchor_pem="-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----\n")
+
+    # Sections the verifier grades without touching another file.
+    add("session_facts_not_an_object", "bound", _put("session_facts", value=[]))
+    add("session_facts_absent", "bound", _drop("session_facts"))
+    add("no_observed_stems", "bound", _put("observed_stems", value=[]))
+    add("stem_hollow", "bound", _put("observed_stems", 0, "hash_chain_root", value=""),
+        _put("observed_stems", 0, "hash_chain_length", value=0), _put("observed_stems", 0, "source_category_proof_level", value=""))
+    add("no_unobserved_assertion", "bound", _put("c2pa_mapping", "assertions", value=[]))
+    add("presentation_report_present", "bound", _put("presentation", "html_report", value="fight_card.html"),
+        files={"fight_card.html": "<html></html>"})
+    add("presentation_report_missing", "bound", _put("presentation", "html_report", value="fight_card.html"))
+    return cases
+
+
+def run_verify_case(case: dict, bases: dict) -> dict:
+    """Replay one case with the Python verifier; the outcome as the fixture records it."""
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        fill = lambda text: text.replace("{dir}", str(root))  # noqa: E731
+        template, files = (None, {}) if case["base"] is None else resolve_base(bases, case["base"])
+        for name, content in {**files, **case["files"]}.items():
+            if content is not None:
+                (root / name).parent.mkdir(parents=True, exist_ok=True)
+                (root / name).write_text(content, encoding="utf-8")
+        manifest = root / "manifest.json"
+        body = case["raw"] if template is None else apply_edits(template, copy.deepcopy(case["before"]))
+        if body is not None:
+            body = body if isinstance(body, str) else json.loads(fill(json.dumps(body)))
+            if case["seal"]:
+                body = seal_manifest(body, bytes.fromhex(case["seal"]["pin_seed_hex"]),
+                                     bytes.fromhex(case["seal"]["seal_seed_hex"]), root / "scratch")
+                body = apply_edits(body, copy.deepcopy(case["after"]))
+            manifest.write_text(body if isinstance(body, str) else json.dumps(body), encoding="utf-8")
+        pin, seal, anchor = root / "pin.key", root / "seal.key", root / "anchor.pem"
+        if case["pin_hex"] is not None:
+            pin.write_bytes(bytes.fromhex(case["pin_hex"]))
+        if case["seal_key_hex"] is not None:
+            seal.write_bytes(bytes.fromhex(case["seal_key_hex"]))
+            seal.chmod(0o600)
+        if case["trust_anchor_pem"] is not None:
+            anchor.write_text(case["trust_anchor_pem"], encoding="ascii")
+        result = verify_module.verify_manifest(
+            manifest, None if case["public_only"] else seal, pin,
+            Path(fill(case["export_override"])) if case["export_override"] else None,
+            anchor if case["trust_anchor_pem"] is not None else None,
+            Path(fill(case["c2pa_asset"])) if case["c2pa_asset"] else None,
+        )
+        return {
+            "outcome": result.outcome,
+            "passed": result.passed,
+            "checks_not_run": result.unchecked,
+            "findings": [
+                {"severity": f.severity.value, "code": f.code,
+                 "message": None if f.code in FREE_TEXT_CODES else f.message.replace(str(root), "{dir}")}
+                for f in result.findings
+            ],
+        }
+
+
+def verify_manifest_fixture(rehearsal: dict) -> dict:
+    bases = verify_fixture_bases(rehearsal)
+    return {"bases": bases, "cases": [{**case, "expected": run_verify_case(case, bases)} for case in verify_cases(bases)]}
+
+
 def main() -> None:
     dump("forgery_analysis.json", forgery_cases())
     dump("time_anchor.json", time_anchor_fixture())
     capture = rehearsal_capture()
     dump("manifest_rehearsal.json", rehearsal_fixture(capture["manifest"]))
+    dump("manifest_verify.json", verify_manifest_fixture(capture["manifest"]))
     dump("synthetic_events.json", capture["events"])
     dump("manifest_key_paths.json", {"note": RUN_SPECIFIC_NOTE, "paths": key_paths(capture["manifest"])})
     dump("session_state.json", session_cases())

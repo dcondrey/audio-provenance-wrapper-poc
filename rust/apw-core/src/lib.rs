@@ -33,7 +33,7 @@ pub use evidence::{
     append_jsonl, rotated_evidence_paths, DEFAULT_EVIDENCE_BACKUPS, DEFAULT_EVIDENCE_MAX_BYTES,
 };
 pub use finding::{
-    Finding, Severity, VerificationReport, CHANGED_CODES, QUALIFIED_SCOPE,
+    Finding, Severity, VerificationReport, CHANGED_CODES, QUALIFIED_SCOPE, REQUIRED_CHECKS,
 };
 pub use hash::{
     sha256_file, sha256_file_with_size, sha256_hex, sha256_prefix, sha256_reader,
@@ -54,10 +54,10 @@ pub use ots::{
     OtsFinding, Timestamp as OtsTimestamp, CALENDAR_TIMEOUT_SECONDS, DEFAULT_CALENDARS,
     MAX_CALENDAR_RESPONSE_BYTES, OP_SHA256,
 };
-pub use pyvalue::{is_truthy, python_eq, python_repr, python_str};
+pub use pyvalue::{is_truthy, path_name, python_eq, python_int, python_repr, python_str};
 pub use schema::{validate_manifest_invariants, REQUIRED_MANIFEST_KEYS};
 pub use signature::{
-    signer_id_of, verify_portable_signature, Ed25519Signer, PortableSignature, SignatureRejection,
+    signer_id_of, verify_pinned_signature, verify_portable_signature, Ed25519Signer, PortableSignature, SignatureRejection,
     PORTABLE_SIGNATURE_NOTES, PORTABLE_SIGNATURE_VALID_MESSAGE, TRUST_SCOPE_HARDWARE_PROVIDER,
     TRUST_SCOPE_LOCAL_SOFTWARE, TRUST_SCOPE_SELF_GENERATED,
 };

@@ -49,8 +49,9 @@ p256 = { version = "0.13.2", features = ["ecdsa", "pem"] }
 time = { version = "0.3.44", features = ["formatting", "parsing", "macros"] }
 zip = { version = "8.6.0", default-features = false, features = ["deflate-flate2"] }
 flate2 = "1"
-# Decode only, pure Rust (no C build, so the per-arch lipo build is unaffected); reads .vcv archives.
-ruzstd = { version = "0.8.2", default-features = false, features = ["std", "hash"] }
+# libzstd, the decoder the Python port uses, so corrupt-stream outcomes match; reads .vcv archives.
+# Built with cc like ring, so the per-arch lipo build is unaffected.
+zstd = { version = "0.14.0", default-features = false }
 clap = { version = "4.5.53", features = ["derive"] }
 log = "0.4.28"
 env_logger = "0.11.8"

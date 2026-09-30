@@ -9,11 +9,11 @@ use apw_core::canonical_json_utf8;
 use apw_daemon::{derive_host_environment_for, event_type_to_layer, SessionState};
 use serde_json::Value;
 
+mod common;
+
 #[test]
 fn every_session_case_matches_the_oracle() {
-    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../tests/fixtures/parity/session_state.json");
-    let cases: Vec<Value> = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
+    let cases: Vec<Value> = common::parity_json("session_state.json");
     assert!(cases.len() >= 15);
     for case in &cases {
         let name = case["name"].as_str().unwrap();

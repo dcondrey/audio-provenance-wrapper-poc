@@ -5,7 +5,7 @@
 
 use apw_core::{
     append_jsonl, canonical_json_of, canonical_json_utf8, rotated_evidence_paths, Canonicalization,
-    CoreError, LocalOutcome, VerificationReport,
+    CoreError, LocalOutcome, VerificationReport, REQUIRED_CHECKS,
 };
 use serde_json::json;
 
@@ -49,6 +49,10 @@ fn nesting_beyond_the_bound_is_an_error_not_a_stack_overflow() {
 #[test]
 fn outcome_precedence_follows_the_python_verifier() {
     let mut report = VerificationReport::new();
+    assert_eq!(report.outcome(), LocalOutcome::Incomplete);
+    for (check, _) in REQUIRED_CHECKS {
+        report.complete(check);
+    }
     assert_eq!(report.outcome(), LocalOutcome::Verified);
 
     report.warn("portable_signature_missing", "no portable signature");

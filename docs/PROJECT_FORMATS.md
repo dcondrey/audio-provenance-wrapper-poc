@@ -240,9 +240,11 @@ follow-up outside this change.
   limit+1); every offset is bounds-checked.
 - VCV: see the container rules above. Dependencies: Python `zstandard==0.25.0`
   (libzstd 1.5.7, BSD-3-Clause; output bounded by `max_output_size` and a
-  pre-check of the declared content size); Rust `ruzstd` 0.8.2 (MIT, decode only,
-  pure Rust, features `std` and `hash` only, which adds `twox-hash` for the
-  frame checksum) under a `take(cap + 1)` reader.
+  pre-check of the declared content size); Rust `zstd` 0.14 (libzstd 1.5.7 through `zstd-sys`,
+  BSD-3-Clause, no default features, built with `cc` as `ring` already is) under a
+  `take(cap + 1)` reader. Both languages decode with libzstd, so the same corrupt
+  stream is accepted or refused by both: the corpus flips every byte of the fixture
+  and compares the two verdicts exactly.
 
 ## Golden outputs
 

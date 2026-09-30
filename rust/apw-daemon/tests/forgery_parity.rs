@@ -11,10 +11,10 @@ use apw_core::canonical_json_utf8;
 use apw_daemon::{derive_forgery_analysis, ForgeryAnalyzer, StatisticalForgeryScreen};
 use serde_json::Value;
 
+mod common;
+
 fn cases() -> Vec<Value> {
-    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../tests/fixtures/parity/forgery_analysis.json");
-    serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
+    common::parity_json("forgery_analysis.json")
 }
 
 #[test]

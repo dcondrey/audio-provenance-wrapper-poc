@@ -2,7 +2,6 @@ import hashlib
 import json
 import tempfile
 import unittest
-import wave
 from pathlib import Path
 
 from daemon.sample_watcher.watcher import (
@@ -12,13 +11,14 @@ from daemon.sample_watcher.watcher import (
     is_audio_file,
     observe_existing_files,
 )
+from tests.audio_files import write_wav
 
 
 class SampleWatcherTests(unittest.TestCase):
     def test_builds_directly_observed_wav_event(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             sample_path = Path(tmp_dir) / "example.wav"
-            _write_test_wav(sample_path)
+            write_wav(sample_path, 2000, 8000)
 
             event = build_sample_file_event(sample_path, observed_at="2026-05-19T00:00:00Z")
 
@@ -38,7 +38,7 @@ class SampleWatcherTests(unittest.TestCase):
             root = Path(tmp_dir)
             sample_path = root / "loop.WAV"
             evidence_path = root / "evidence" / "sample_import_events.jsonl"
-            _write_test_wav(sample_path)
+            write_wav(sample_path)
 
             events = observe_existing_files(root, evidence_path)
 
@@ -54,10 +54,10 @@ class SampleWatcherTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             sample_path = Path(tmp_dir) / "example.wav"
-            _write_test_wav(sample_path)
+            write_wav(sample_path)
 
             def rewrite_then_extract(path):
-                _write_test_wav(path)
+                write_wav(path)
                 return watcher_module.empty_audio_metadata()
 
             with mock.patch.object(
@@ -69,7 +69,7 @@ class SampleWatcherTests(unittest.TestCase):
     def test_stale_signature_refuses_evidence_record(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             sample_path = Path(tmp_dir) / "example.wav"
-            _write_test_wav(sample_path)
+            write_wav(sample_path)
             stale = FileSignature(size_bytes=1, modified_ns=1)
 
             with self.assertRaises(OSError):
@@ -82,7 +82,7 @@ class SampleWatcherTests(unittest.TestCase):
             root = Path(tmp_dir)
             evidence_path = root / "evidence" / "sample_import_events.jsonl"
             sample_path = root / "loop.wav"
-            _write_test_wav(sample_path)
+            write_wav(sample_path)
 
             watcher = SampleWatcher(watch_dir=root, evidence_path=evidence_path, stable_polls=1)
             watcher.scan_once()
@@ -105,14 +105,6 @@ class SampleWatcherTests(unittest.TestCase):
 
             self.assertTrue(is_audio_file(wav_path))
             self.assertFalse(is_audio_file(txt_path))
-
-
-def _write_test_wav(path: Path) -> None:
-    with wave.open(str(path), "wb") as audio_file:
-        audio_file.setnchannels(1)
-        audio_file.setsampwidth(2)
-        audio_file.setframerate(8000)
-        audio_file.writeframes(b"\x00\x00" * 2000)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use apw_core::{
-    pretty_json_bytes, sha256_file, sha256_hex, sha256_prefix, utc_timestamp_seconds,
+    path_name, pretty_json_bytes, sha256_file, sha256_hex, sha256_prefix, utc_timestamp_seconds,
     without_top_level_keys, Ed25519Signer, ExportEvidence, IngredientEvidence, Manifest,
     ManifestBuilder, ProofLevel, StemEvidence, PORTABLE_SIGNATURE_EXCLUDED_KEYS, PROOF_LEVEL_KEY,
 };
@@ -124,7 +124,7 @@ pub fn generate_manifest(
     let mut builder = ManifestBuilder::new(context.session_id, apw_core::utc_timestamp(None));
     builder.set_export(ExportEvidence {
         file_path: export_path.to_string_lossy().into_owned(),
-        file_name: file_name_of(export_path),
+        file_name: path_name(export_path),
         sha256: export_hash.clone(),
         format: extension_of(export_path),
         file_size_bytes: metadata.len(),
@@ -215,7 +215,7 @@ pub fn generate_manifest(
                 json!([])
             },
         );
-        record.insert("export_file_name".to_owned(), json!(file_name_of(export_path)));
+        record.insert("export_file_name".to_owned(), json!(path_name(export_path)));
         record.insert("basis".to_owned(), json!(ASSOCIATION_BASIS));
     }
     builder.set_audio_association(association.clone());
@@ -341,11 +341,11 @@ pub fn generate_manifest(
         "presentation",
         json!({
             "html_report": if context.generate_html_report {
-                json!(file_name_of(&report_path))
+                json!(path_name(&report_path))
             } else {
                 Value::Null
             },
-            "derived_from": file_name_of(&manifest_path),
+            "derived_from": path_name(&manifest_path),
             "verifier_result": relative_artifact(&verification_path, context.manifest_dir),
             "downstream_handoff": relative_artifact(&handoff_path, context.manifest_dir),
             "bundle_index": if context.generate_html_report {
@@ -382,14 +382,14 @@ pub fn generate_manifest(
             .and_then(|binding| binding.get("evidence_files"))
             .cloned()
             .unwrap_or_else(|| json!({})),
-        manifest_name: &file_name_of(&manifest_path),
+        manifest_name: &path_name(&manifest_path),
         bundle_name: if context.generate_html_report {
-            Some(file_name_of(&bundle_path))
+            Some(path_name(&bundle_path))
         } else {
             None
         },
         bundle_index_name: if context.generate_html_report {
-            Some(file_name_of(&bundle_index_path))
+            Some(path_name(&bundle_index_path))
         } else {
             None
         },
@@ -619,7 +619,7 @@ fn hash_evidence_directory(evidence_dir: &Path) -> Result<(Value, Value)> {
         let metadata = fs::metadata(&path).map_err(|source| DaemonError::io("stat", &path, source))?;
         let byte_length = metadata.len();
         let digest = sha256_prefix(&path, byte_length)?;
-        let name = file_name_of(&path);
+        let name = path_name(&path);
         hashes.insert(name.clone(), json!(digest));
         files.insert(
             name,
@@ -656,12 +656,6 @@ fn optional_string(map: &Map<String, Value>, key: &str) -> Option<String> {
     } else {
         Some(value)
     }
-}
-
-fn file_name_of(path: &Path) -> String {
-    path.file_name()
-        .map(|name| name.to_string_lossy().into_owned())
-        .unwrap_or_default()
 }
 
 fn file_stem_of(path: &Path) -> String {

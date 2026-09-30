@@ -21,6 +21,9 @@ struct Server {
     handle: thread::JoinHandle<()>,
 }
 
+#[path = "../../test-support/tsa.rs"]
+mod tsa;
+
 /// Serves `connections` TLS connections, answering each with `reply(request)`.
 fn serve(names: &[&str], connections: usize, reply: fn(&[u8]) -> Vec<u8>) -> Server {
     let certified = rcgen::generate_simple_self_signed(
@@ -51,16 +54,8 @@ fn serve(names: &[&str], connections: usize, reply: fn(&[u8]) -> Vec<u8>) -> Ser
                     Ok(0) | Err(_) => break,
                     Ok(read) => received.extend_from_slice(&chunk[..read]),
                 }
-                if let Some(split) = received.windows(4).position(|w| w == b"\r\n\r\n") {
-                    let head = String::from_utf8_lossy(&received[..split]).to_ascii_lowercase();
-                    let length: usize = head
-                        .lines()
-                        .find_map(|line| line.strip_prefix("content-length: "))
-                        .and_then(|value| value.trim().parse().ok())
-                        .unwrap_or(0);
-                    if received.len() >= split + 4 + length {
-                        break;
-                    }
+                if tsa::complete_request(&received).is_some() {
+                    break;
                 }
             }
             // A failed handshake (an untrusted client) ends here with no reply.

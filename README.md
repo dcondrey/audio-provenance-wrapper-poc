@@ -106,6 +106,29 @@ automated or synthetic result was used to close it.
 - Produces a deterministic ZIP evidence bundle plus a separately signed canonical
   index covering every other archive entry
 
+### Host, format and platform support
+
+- `docs/HOST_SUPPORT.md` is the per-application matrix. Capture, host identification,
+  project parsing and export-only are separate columns, and no row has a real-host run.
+- `docs/PROJECT_FORMATS.md` lists the project parsers: `.als`, `.rpp`, `.dawproject`,
+  `.ardour`, `.mmp`/`.mmpz`, `.pd`, `.maxpat`, `.xm`/`.mod` and `.vcv`, each Python and Rust
+  against shared golden files and marked `real_files` or `constructed_fixtures_only`.
+  Every other format is registered as unsupported and says why.
+- `docs/PLATFORMS.md` covers plug-in formats (VST3, AU, CLAP, LV2, LADSPA, DSSI, AUv3;
+  AAX and VST2 need vendor SDKs) and what is verified on macOS versus CI only for Linux and
+  Windows. `docs/VALIDATION_PLUGIN_FORMATS.md` records the validator runs.
+- `docs/INSTALL.md` covers the macOS pkg, `scripts/install_linux.sh` and the Windows Inno
+  Setup installer.
+- The Rust `apw verify <manifest.json>` grades a manifest with the same finding codes as
+  `python3 -m daemon.verify`, including the RFC 3161 and OpenTimestamps sections, and the
+  same defaults for the pinned keys and trust anchor. A shared case table
+  (`tests/fixtures/parity/manifest_verify.json`) checks 75 cases against the Python verifier.
+  It stops short of the signed C2PA branches (`c2pa_claim_verified`, `c2pa_hard_binding_broken`,
+  `c2pa_claim_untrusted`), which carry each C2PA library's own detail text, so no case reaches
+  `verified`. Rust also parses more strictly: it caps the manifest at 64 MiB and nesting at 128,
+  and refuses the `NaN` and `Infinity` literals that Python's `json` accepts, reporting
+  `read_failed` where Python carries on.
+
 ## Five-minute demonstration
 
 Build and install the plugin. If JUCE is not already installed, CMake fetches

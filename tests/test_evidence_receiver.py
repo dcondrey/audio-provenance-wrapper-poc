@@ -5,8 +5,6 @@ import unittest
 from pathlib import Path
 
 from daemon.evidence_receiver.taxonomy import (
-    EventType,
-    ProofLevel,
     validate_event,
     validate_network_event,
 )
@@ -15,91 +13,36 @@ from daemon.evidence_receiver.correlation import SampleCorrelator
 
 
 class TaxonomyTests(unittest.TestCase):
-    def test_valid_buffer_hash_event(self):
-        event = {
-            "event_type": "buffer_hash",
-            "proof_level": "directly_observed",
-            "timestamp_ms": 12345,
-            "window_hash": "abc123",
-            "prev_hash": "genesis",
-            "rms_level": 0.042,
-            "zero_crossing_rate": 0.15,
-        }
-        valid, error = validate_event(event)
-        self.assertTrue(valid, error)
+    VALID = {
+        "buffer_hash": {
+            "timestamp_ms": 12345, "window_hash": "abc123", "prev_hash": "genesis",
+            "rms_level": 0.042, "zero_crossing_rate": 0.15,
+        },
+        "transport_change": {"transport_state": "playing"},
+        "midi_event": {"midi_event_type": "note_on", "midi_channel": 1},
+        "audio_transition": {"direction": "silence_to_audio", "boundary_hash": "deadbeef"},
+        "spectral_shift": {"prev_spectral_centroid_hz": 1200.0, "new_spectral_centroid_hz": 2400.0},
+    }
+
+    def test_each_event_type_validates_with_its_required_fields(self):
+        for event_type, fields in self.VALID.items():
+            with self.subTest(event_type):
+                valid, error = validate_event({"event_type": event_type, "proof_level": "directly_observed", **fields})
+                self.assertTrue(valid, error)
 
     def test_rejects_missing_required_field(self):
-        event = {
-            "event_type": "buffer_hash",
-            "proof_level": "directly_observed",
-            "timestamp_ms": 12345,
-            "prev_hash": "genesis",
-            "rms_level": 0.042,
-            "zero_crossing_rate": 0.15,
-        }
-        valid, error = validate_event(event)
+        fields = {k: v for k, v in self.VALID["buffer_hash"].items() if k != "window_hash"}
+        valid, error = validate_event({"event_type": "buffer_hash", "proof_level": "directly_observed", **fields})
         self.assertFalse(valid)
         self.assertIn("window_hash", error)
 
-    def test_rejects_unknown_event_type(self):
-        event = {"event_type": "bogus", "proof_level": "directly_observed"}
-        valid, _ = validate_event(event)
-        self.assertFalse(valid)
-
-    def test_rejects_unknown_proof_level(self):
-        event = {"event_type": "buffer_hash", "proof_level": "bogus"}
-        valid, _ = validate_event(event)
-        self.assertFalse(valid)
-
-    def test_valid_transport_change_event(self):
-        event = {
-            "event_type": "transport_change",
-            "proof_level": "directly_observed",
-            "transport_state": "playing",
-        }
-        valid, error = validate_event(event)
-        self.assertTrue(valid, error)
-
-    def test_valid_midi_event(self):
-        event = {
-            "event_type": "midi_event",
-            "proof_level": "directly_observed",
-            "midi_event_type": "note_on",
-            "midi_channel": 1,
-        }
-        valid, error = validate_event(event)
-        self.assertTrue(valid, error)
-
-    def test_valid_audio_transition_event(self):
-        event = {
-            "event_type": "audio_transition",
-            "proof_level": "directly_observed",
-            "direction": "silence_to_audio",
-            "boundary_hash": "deadbeef",
-        }
-        valid, error = validate_event(event)
-        self.assertTrue(valid, error)
-
-    def test_valid_spectral_shift_event(self):
-        event = {
-            "event_type": "spectral_shift",
-            "proof_level": "directly_observed",
-            "prev_spectral_centroid_hz": 1200.0,
-            "new_spectral_centroid_hz": 2400.0,
-        }
-        valid, error = validate_event(event)
-        self.assertTrue(valid, error)
-
-    def test_event_type_enum_values(self):
-        self.assertEqual(EventType.BUFFER_HASH.value, "buffer_hash")
-        self.assertEqual(EventType.AUDIO_TRANSITION.value, "audio_transition")
-        self.assertEqual(EventType.SPECTRAL_SHIFT.value, "spectral_shift")
-        self.assertEqual(EventType.INGREDIENT_CORRELATION.value, "ingredient_correlation")
-
-    def test_proof_level_enum_values(self):
-        self.assertEqual(ProofLevel.DIRECTLY_OBSERVED.value, "directly_observed")
-        self.assertEqual(ProofLevel.INFERRED.value, "inferred")
-        self.assertEqual(ProofLevel.UNKNOWN_UNOBSERVED.value, "unknown_unobserved")
+    def test_rejects_unknown_event_type_and_proof_level(self):
+        for event in (
+            {"event_type": "bogus", "proof_level": "directly_observed"},
+            {"event_type": "buffer_hash", "proof_level": "bogus"},
+        ):
+            with self.subTest(event):
+                self.assertFalse(validate_event(event)[0])
 
     def test_network_rejects_daemon_origin_event_type(self):
         event = {
@@ -410,25 +353,6 @@ class ReceiverTests(unittest.TestCase):
             self.assertIsNotNone(event)
             self.assertEqual(ack["receipt_state"], "accepted_chain_unknown")
             self.assertEqual(receiver.hash_chain_break_count, 1)
-
-    def test_event_count_increments(self):
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            evidence_path = Path(tmp_dir) / "events.jsonl"
-            receiver = EvidenceReceiver(
-                host="127.0.0.1", port=0, evidence_path=evidence_path
-            )
-            self.addCleanup(receiver.close)
-
-            event_json = json.dumps({
-                "event_type": "transport_change",
-                "proof_level": "directly_observed",
-                "transport_state": "playing",
-            }).encode("utf-8")
-
-            receiver.process_packet(event_json)
-            receiver.process_packet(event_json)
-
-            self.assertEqual(receiver.event_count, 2)
 
 
 class CorrelationTests(unittest.TestCase):

@@ -1,9 +1,10 @@
 import gzip
-import importlib.util
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
+
+from tests.support import load_script
 
 REPO = Path(__file__).resolve().parent.parent
 QUICKSTART_PDF = REPO / "packaging" / "assets" / "quickstart.pdf"
@@ -12,10 +13,7 @@ DEMO_SET = REPO / "packaging" / "assets" / "demo-project" / "apw-demo Project" /
 
 
 def _load_generator():
-    spec = importlib.util.spec_from_file_location("_make_quickstart_pdf", QUICKSTART_GENERATOR)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    return load_script("_make_quickstart_pdf", QUICKSTART_GENERATOR)
 
 
 class QuickstartPdfTest(unittest.TestCase):

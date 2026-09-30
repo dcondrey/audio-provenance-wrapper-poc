@@ -11,10 +11,10 @@ use apw_daemon::{
 };
 use serde_json::{json, Value};
 
+mod common;
+
 fn vectors() -> Value {
-    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../tests/fixtures/parity/ots_vectors.json");
-    serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
+    common::parity_json("ots_vectors.json")
 }
 
 /// Answers from a URL table: `(status, body)` per base URL.

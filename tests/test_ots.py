@@ -6,16 +6,14 @@ examples (real). Everything else in ots_vectors.json is constructed and labelled
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
-import sys
-import threading
 import unittest
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 
 from daemon import verify as verify_module
 from daemon.time_anchor import ots
+from tests.support import load_script, serve
 
 PARITY = Path(__file__).parent / "fixtures" / "parity"
 OTS_DIR = PARITY / "ots"
@@ -26,11 +24,7 @@ HEADER_358391 = bytes.fromhex(
 
 
 def _generator():
-    spec = importlib.util.spec_from_file_location("parity_generator", PARITY / "generate_parity_fixtures.py")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules["parity_generator"] = module
-    spec.loader.exec_module(module)
-    return module
+    return load_script("parity_generator", PARITY / "generate_parity_fixtures.py")
 
 
 class RealProofTests(unittest.TestCase):
@@ -140,9 +134,7 @@ class Handler(BaseHTTPRequestHandler):
 class NetworkTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-        cls.server.daemon_threads = True
-        threading.Thread(target=cls.server.serve_forever, daemon=True).start()
+        cls.server = serve(Handler)
         cls.url = f"http://127.0.0.1:{cls.server.server_address[1]}"
 
     @classmethod

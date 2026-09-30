@@ -1,48 +1,42 @@
-import tempfile
 import unittest
-from pathlib import Path
 
 from daemon.hardware_attestation.provider import SoftwareProvider
+from tests.support import TmpMixin
 
 
-class SoftwareProviderSealTests(unittest.TestCase):
+class SoftwareProviderTests(TmpMixin):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.provider = SoftwareProvider(key_path=Path(self._tmp.name) / "key.bin")
+        super().setUp()
+        self.key_path = self.tmp / "key.bin"
+        self.provider = SoftwareProvider(key_path=self.key_path)
 
-    def tearDown(self):
-        self._tmp.cleanup()
-
-    def test_round_trip(self):
-        plaintext = b"provenance evidence payload" * 5
-        sealed = self.provider.seal(plaintext)
-        self.assertEqual(self.provider.unseal(sealed), plaintext)
-
-    def test_round_trip_empty(self):
-        sealed = self.provider.seal(b"")
-        self.assertEqual(self.provider.unseal(sealed), b"")
+    def test_seal_round_trips(self):
+        for plaintext in (b"provenance evidence payload" * 5, b""):
+            with self.subTest(len(plaintext)):
+                self.assertEqual(self.provider.unseal(self.provider.seal(plaintext)), plaintext)
 
     def test_repeated_32_byte_blocks_produce_distinct_ciphertext(self):
-        """Regression for M-006: the old keystream repeated a single 32-byte
-        HMAC block, so identical aligned plaintext blocks encrypted to
-        identical ciphertext blocks (ECB-style leakage)."""
-        plaintext = b"A" * 32 + b"A" * 32 + b"A" * 32
-        sealed = self.provider.seal(plaintext)
-        ciphertext = sealed[32:]
-        block0, block1, block2 = ciphertext[0:32], ciphertext[32:64], ciphertext[64:96]
-        self.assertNotEqual(block0, block1)
-        self.assertNotEqual(block1, block2)
-        self.assertNotEqual(block0, block2)
+        # M-006: the old keystream repeated one 32-byte HMAC block, leaking equal aligned blocks
+        sealed = self.provider.seal(b"A" * 96)
+        blocks = {sealed[32 + i:64 + i] for i in (0, 32, 64)}
+        self.assertEqual(len(blocks), 3)
 
-    def test_tamper_detected(self):
+    def test_unseal_rejects_tampered_and_truncated_input(self):
         sealed = bytearray(self.provider.seal(b"integrity matters"))
         sealed[-1] ^= 0xFF
-        with self.assertRaises(ValueError):
-            self.provider.unseal(bytes(sealed))
+        for bad in (bytes(sealed), b"too short"):
+            with self.subTest(len(bad)), self.assertRaises(ValueError):
+                self.provider.unseal(bad)
 
-    def test_unseal_rejects_short_input(self):
-        with self.assertRaises(ValueError):
-            self.provider.unseal(b"too short")
+    def test_signatures_verify_only_their_message_and_across_instances(self):
+        signature = self.provider.sign(b"data")
+        reopened = SoftwareProvider(key_path=self.key_path)
+        self.assertTrue(reopened.verify(b"data", signature))
+        self.assertFalse(reopened.verify(b"tampered", signature))
+        self.assertEqual(reopened.device_identity().device_id, self.provider.device_identity().device_id)
+
+    def test_monotonic_counter_increments(self):
+        self.assertEqual([self.provider.monotonic_counter() for _ in range(3)], [1, 2, 3])
 
 
 if __name__ == "__main__":

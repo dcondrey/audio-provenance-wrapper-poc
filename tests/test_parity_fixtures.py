@@ -156,6 +156,18 @@ class KeyPathTests(unittest.TestCase):
             self.assertIn(path, fixture["paths"])
 
 
+class ManifestVerifyTests(unittest.TestCase):
+    """The Python side of rust/apw-cli/tests/manifest_verify_parity.rs: the same cases,
+    each replayed in a fresh directory and compared with what was recorded."""
+
+    def test_every_case_replays_to_its_recorded_findings(self):
+        generator = _load("parity_generator", PARITY / "generate_parity_fixtures.py")
+        fixture = json.loads((PARITY / "manifest_verify.json").read_text())
+        for case in fixture["cases"]:
+            with self.subTest(case["name"]):
+                self.assertEqual(generator.run_verify_case(case, fixture["bases"]), case["expected"])
+
+
 class RehearsalManifestTests(unittest.TestCase):
     """A real manifest from the Python daemon carrying both new sections."""
 

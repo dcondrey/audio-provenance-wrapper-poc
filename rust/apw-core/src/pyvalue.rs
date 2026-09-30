@@ -20,6 +20,24 @@ pub fn is_truthy(value: &Value) -> bool {
     }
 }
 
+/// A JSON number Python's `json` decodes as `int` (no fraction or exponent, booleans
+/// excluded), saturated to `i128` for integers wider than that.
+pub fn python_int(value: &Value) -> Option<i128> {
+    let Value::Number(number) = value else {
+        return None;
+    };
+    let text = number.to_string();
+    if text.contains(['.', 'e', 'E']) {
+        return None;
+    }
+    Some(text.parse::<i128>().unwrap_or(if text.starts_with('-') { i128::MIN } else { i128::MAX }))
+}
+
+/// `pathlib.Path.name`: the final component, empty when there is none.
+pub fn path_name(path: &std::path::Path) -> String {
+    path.file_name().map(|name| name.to_string_lossy().into_owned()).unwrap_or_default()
+}
+
 /// Python `==` over decoded JSON. IMPORTANT: `1 == 1.0` and `False == 0` are
 /// true in Python but false under `serde_json::Value`'s derived `PartialEq`,
 /// which compares the `PosInt`/`NegInt`/`Float` discriminant. Every counter

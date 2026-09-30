@@ -2,9 +2,9 @@ import hashlib
 import json
 import math
 import random
+import struct
 import tempfile
 import unittest
-import wave
 import zipfile
 from pathlib import Path
 
@@ -12,19 +12,12 @@ from daemon.audio_association import associate_export
 from daemon.bundle import create_evidence_bundle, verify_evidence_bundle
 from daemon.evidence_receiver.receiver import EvidenceReceiver
 from daemon.signing import Ed25519Signer
+from tests.audio_files import write_wav
 
 
 def _write_wav(path: Path, samples: list[float], sample_rate: int = 44_100) -> None:
-    import struct
-
-    with wave.open(str(path), "wb") as handle:
-        handle.setnchannels(1)
-        handle.setsampwidth(2)
-        handle.setframerate(sample_rate)
-        handle.writeframes(b"".join(
-            struct.pack("<h", max(-32768, min(32767, round(sample * 32767))))
-            for sample in samples
-        ))
+    pcm = b"".join(struct.pack("<h", max(-32768, min(32767, round(sample * 32767)))) for sample in samples)
+    write_wav(path, rate=sample_rate, pcm=pcm)
 
 
 def _fixture_samples(window_size: int = 4096, windows: int = 16) -> list[float]:

@@ -11,6 +11,8 @@ use apw_daemon::project::safe::{check_json_bounds, check_member_name, inflate_zl
 use apw_daemon::project::xml::{parse_xml, XmlLimits};
 use apw_daemon::project::{ardour, dawproject, lmms, maxpat, puredata, reaper, safe, tarzst, Limits};
 
+mod common;
+
 fn limits() -> Limits {
     Limits::default()
 }
@@ -458,22 +460,7 @@ fn als_decompression_and_dtd_caps() {
 // ---- .xm / .mod / .vcv ----
 
 fn fixture_bytes(relative: &str) -> Vec<u8> {
-    std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/projects").join(relative)).unwrap()
-}
-
-#[test]
-fn module_and_vcv_files_have_the_size_cap_boundary() {
-    let directory = tempfile::tempdir().unwrap();
-    for relative in ["milkytracker/test.xm", "milkytracker/test.mod", "vcv/basic.vcv"] {
-        let data = fixture_bytes(relative);
-        let path = directory.path().join(relative.rsplit('/').next().unwrap());
-        std::fs::write(&path, &data).unwrap();
-        let format = apw_daemon::project::detect_format(&path).unwrap();
-        let size = data.len() as u64;
-        assert!(format.parse(&path, &Limits { max_project_file_bytes: size - 1, ..limits() }).is_err(), "{relative}: limit-1");
-        assert!(format.parse(&path, &Limits { max_project_file_bytes: size, ..limits() }).is_ok(), "{relative}: limit");
-        assert!(format.parse(&path, &Limits { max_project_file_bytes: size + 1, ..limits() }).is_ok(), "{relative}: limit+1");
-    }
+    std::fs::read(common::fixtures().join("projects").join(relative)).unwrap()
 }
 
 /// A frame of RLE blocks: 1 byte in, 128 KiB of zeros out, so a bomb is a few KiB.

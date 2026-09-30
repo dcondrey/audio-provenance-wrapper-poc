@@ -11,6 +11,8 @@ use crate::canonical::{canonical_json_utf8, CANONICALIZATION_PORTABLE};
 use crate::error::{CoreError, Result};
 use crate::hash::{hex_decode, hex_lower, sha256_hex};
 use crate::proof::ProofLevel;
+use crate::pyvalue::python_str;
+use crate::time_anchor::python_from_hex;
 
 pub const TRUST_SCOPE_SELF_GENERATED: &str = "self_generated_demo_key_integrity";
 pub const TRUST_SCOPE_LOCAL_SOFTWARE: &str = "local_software_integrity";
@@ -183,11 +185,49 @@ pub fn verify_portable_signature(
     let signature_bytes =
         hex_decode(&signature.signature_hex).ok_or(SignatureRejection::MalformedSignature)?;
 
+    check_signed_content(unsigned, &public_raw, &signature_bytes, &signature.signed_content_hash)?;
+    Ok(PORTABLE_SIGNATURE_VALID_MESSAGE)
+}
+
+/// `daemon/signing.py::verify_ed25519_signature`: the verifying key is the one this
+/// machine pins, never `signature["public_key_hex"]`. A blob that names its own key
+/// proves only that its author owned some key, so the embedded one is compared with
+/// the pin and never used to verify. Both arms render the Python message.
+pub fn verify_pinned_signature(
+    unsigned: &Value,
+    signature: &Value,
+    pinned: &[u8; 32],
+    pinned_path: &Path,
+) -> core::result::Result<String, String> {
+    let field = |key: &str| signature.get(key);
+    let embedded = field("public_key_hex").map(python_str).unwrap_or_default();
+    if !embedded.is_empty() && embedded.to_lowercase() != hex_lower(pinned) {
+        return Err(format!(
+            "the portable signature was produced by a different key than the pinned public key at {}",
+            pinned_path.display()
+        ));
+    }
+    let signature_bytes = python_from_hex(&field("signature_hex").map(python_str).unwrap_or_default())
+        .ok_or_else(|| SignatureRejection::MalformedSignature.to_string())?;
+    let claimed = field("signed_content_hash").and_then(Value::as_str).unwrap_or_default();
+    check_signed_content(unsigned, pinned, &signature_bytes, claimed).map_err(|rejection| rejection.to_string())?;
+    Ok(format!(
+        "Ed25519 signature verified against the pinned public key at {}; signer identity remains unverified",
+        pinned_path.display()
+    ))
+}
+
+fn check_signed_content(
+    unsigned: &Value,
+    public_raw: &[u8; 32],
+    signature_bytes: &[u8],
+    signed_content_hash: &str,
+) -> core::result::Result<(), SignatureRejection> {
     let content = canonical_json_utf8(unsigned).map_err(|_| SignatureRejection::ContentHashMismatch)?;
     let expected = sha256_hex(&content);
     if expected
         .as_bytes()
-        .ct_eq(signature.signed_content_hash.as_bytes())
+        .ct_eq(signed_content_hash.as_bytes())
         .unwrap_u8()
         != 1
     {
@@ -202,11 +242,11 @@ pub fn verify_portable_signature(
         .try_into()
         .map_err(|_| SignatureRejection::SignatureInvalid)?;
     let verifying_key =
-        VerifyingKey::from_bytes(&public_raw).map_err(|_| SignatureRejection::SignatureInvalid)?;
+        VerifyingKey::from_bytes(public_raw).map_err(|_| SignatureRejection::SignatureInvalid)?;
     verifying_key
         .verify_strict(&content, &Signature::from_bytes(&parsed))
         .map_err(|_| SignatureRejection::SignatureInvalid)?;
-    Ok(PORTABLE_SIGNATURE_VALID_MESSAGE)
+    Ok(())
 }
 
 fn write_key_file(path: &Path, bytes: &[u8], mode: u32) -> Result<()> {

@@ -8,7 +8,6 @@ from daemon.project_formats import (
     UnsupportedProjectFormat,
     detect_format,
     parse_project,
-    registered_formats,
     unsupported_format_event,
 )
 from daemon.project_formats import reaper
@@ -107,11 +106,6 @@ class RegistryTests(unittest.TestCase):
         ".bwproject": "Bitwig Studio",
     }
 
-    def test_supported_formats(self):
-        self.assertTrue(detect_format(Path("a.als")).supported)
-        self.assertTrue(detect_format(Path("A.RPP")).supported)
-        self.assertIsNone(detect_format(Path("a.unknown")))
-
     def test_unsupported_formats_report_without_structure(self):
         for extension, host in self.UNSUPPORTED.items():
             fmt = detect_format(Path("song" + extension))
@@ -134,10 +128,6 @@ class RegistryTests(unittest.TestCase):
             bundle.mkdir()
             with self.assertRaises(UnsupportedProjectFormat):
                 parse_project(bundle)
-
-    def test_extensions_are_unique(self):
-        seen = [e for f in registered_formats() for e in f.extensions]
-        self.assertEqual(len(seen), len(set(seen)))
 
     def test_watcher_records_unsupported_and_returns(self):
         from daemon.project_differ.differ import ProjectWatcher

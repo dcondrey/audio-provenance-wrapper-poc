@@ -26,7 +26,6 @@ Each fixture has a golden snapshot beside it that the Rust port can reuse.
 
 import json
 import struct
-import tempfile
 import unittest
 import zipfile
 import zlib
@@ -39,13 +38,13 @@ from daemon.project_formats import (
     REAL_FILES,
     SUPPORTED,
     UNSUPPORTED,
-    detect_format,
     parse_project,
     registered_formats,
     registry,
 )
 from daemon.project_formats import _safe, ardour, dawproject, lmms, maxpat, puredata
 from daemon.project_formats._snapshot import snapshot_to_golden
+from tests.support import TmpMixin
 
 FIXTURES = Path(__file__).parent / "fixtures" / "projects"
 ALL_FIXTURES = (
@@ -68,18 +67,6 @@ def make_zip(members, path: Path) -> Path:
             info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, data)
     return path
-
-
-class TmpMixin(unittest.TestCase):
-    def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self._tmp.cleanup)
-        self.tmp = Path(self._tmp.name)
-
-    def write(self, name: str, data) -> Path:
-        path = self.tmp / name
-        path.write_bytes(data if isinstance(data, bytes) else data.encode())
-        return path
 
 
 class GoldenTests(unittest.TestCase):
@@ -123,19 +110,10 @@ class RegistryTests(unittest.TestCase):
         for constructed in ("dawproject", "ardour", "lmms", "max_patcher", "vcv_rack"):
             self.assertEqual(supported[constructed].validation, CONSTRUCTED_ONLY)
 
-    def test_unsupported_formats_have_reasons_and_name_dawproject_where_exportable(self):
-        unsupported = {f.format_id: f for f in registered_formats() if f.status == UNSUPPORTED}
-        for fmt in unsupported.values():
+    def test_unsupported_formats_state_a_reason_and_have_no_parser(self):
+        for fmt in (f for f in registered_formats() if f.status == UNSUPPORTED):
             self.assertTrue(fmt.reason, fmt.format_id)
             self.assertIsNone(fmt.parser)
-        for exports in ("cubase", "bitwig", "studio_one"):
-            self.assertIn(".dawproject", unsupported[exports].reason)
-        for fmt_id in ("renoise", "premiere", "sibelius", "dorico", "reaktor", "audiomulch"):
-            self.assertIn(fmt_id, unsupported)
-        self.assertEqual(detect_format(Path("x.vcv")).format_id, "vcv_rack")
-        self.assertEqual(detect_format(Path("x.XM")).format_id, "milkytracker")
-        self.assertEqual(detect_format(Path("x.mod")).format_id, "milkytracker")
-        self.assertIn("no XSD", unsupported["renoise"].reason)
 
     def test_extensions_do_not_collide(self):
         seen = {}

@@ -81,9 +81,9 @@ pub const NOTHING_FOUND_NORMATIVE_NOTE: &str =
 /// `VerificationState`: it grades one local manifest file, not a registry record.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum LocalOutcome { Verified, Changed, Untrusted, NotFound }
+pub enum LocalOutcome { Verified, Changed, Untrusted, NotFound, Incomplete }
 impl LocalOutcome {
-    pub fn as_str(self) -> &'static str;   // "verified" | "changed" | "untrusted" | "not_found"
+    pub fn as_str(self) -> &'static str;   // "verified" | "changed" | "untrusted" | "not_found" | "incomplete"
 }
 
 // ============================== findings ==============================
@@ -103,11 +103,14 @@ impl VerificationReport {
     pub fn warn(&mut self, code: &str, message: impl Into<String>);
     pub fn info(&mut self, code: &str, message: impl Into<String>);
     pub fn extend(&mut self, other: VerificationReport);
+    pub fn complete(&mut self, check: &str);            // a REQUIRED_CHECKS entry ran
+    pub fn unchecked(&self) -> Vec<(&'static str, &'static str)>;   // (check, reason) not yet run
     pub fn errors(&self) -> impl Iterator<Item = &Finding>;
     pub fn warnings(&self) -> impl Iterator<Item = &Finding>;
     pub fn passed(&self) -> bool;                       // no error findings
     /// Precedence, in order: any `not_found` code wins; then any CHANGED_CODES;
-    /// then any error OR the `portable_signature_missing` warning; else verified.
+    /// then any error OR the `portable_signature_missing` warning; then any unrun
+    /// REQUIRED_CHECKS entry (`incomplete`); else verified.
     pub fn outcome(&self) -> LocalOutcome;
     pub fn to_json(&self) -> serde_json::Value;         // shape of artifacts/*_verification.json
 }
@@ -118,6 +121,10 @@ pub const CHANGED_CODES: [&str; 9] = [
     "tampered", "signature_invalid", "portable_signature_invalid",
     "stem_commitment_mismatch", "c2pa_asset_hash_mismatch", "c2pa_hard_binding_broken",
 ];
+
+/// `export_binding`, `evidence_binding`, `portable_signature`, `c2pa_claim`, each with the
+/// reason a run that skipped it cannot claim `verified` (`daemon/verify.py::_REQUIRED_CHECKS`).
+pub const REQUIRED_CHECKS: [(&str, &str); 4];
 
 // ============================== canonical JSON ==============================
 /// Two canonicalizations exist and they are NOT interchangeable. Both sort keys

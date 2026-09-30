@@ -3,13 +3,11 @@ from __future__ import annotations
 
 import datetime
 import ipaddress
-import socket
 import ssl
 import tempfile
-import threading
 import time
 import unittest
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 
 from cryptography import x509
@@ -18,6 +16,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import NameOID
 
 from daemon.time_anchor.http import fetch
+from tests.support import serve
 
 
 def self_signed(names: list[str]) -> tuple[bytes, bytes]:
@@ -87,19 +86,11 @@ class Handler(BaseHTTPRequestHandler):
         self._reply()
 
 
-def serve(context: ssl.SSLContext | None = None) -> tuple[ThreadingHTTPServer, int]:
-    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-    server.daemon_threads = True
-    if context is not None:
-        server.socket = context.wrap_socket(server.socket, server_side=True)
-    threading.Thread(target=server.serve_forever, daemon=True).start()
-    return server, server.server_address[1]
-
-
 class PlainHttpTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.server, cls.port = serve()
+        cls.server = serve(Handler)
+        cls.port = cls.server.server_address[1]
 
     @classmethod
     def tearDownClass(cls):
@@ -150,7 +141,8 @@ class TlsTests(unittest.TestCase):
         (root / "key.pem").write_bytes(key)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.load_cert_chain(root / "cert.pem", root / "key.pem")
-        server, port = serve(context)
+        server = serve(Handler, context)
+        port = server.server_address[1]
         self.addCleanup(server.shutdown)
         return port, certificate
 

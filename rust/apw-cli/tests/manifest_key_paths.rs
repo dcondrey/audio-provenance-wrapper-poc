@@ -19,6 +19,11 @@ use std::time::{Duration, Instant};
 
 use serde_json::Value;
 
+#[path = "../../test-support/audio.rs"]
+mod audio;
+#[path = "../../test-support/tsa.rs"]
+mod tsa;
+
 const SAMPLE_RATE: u32 = 44_100;
 const WINDOW: usize = 4096;
 
@@ -45,25 +50,11 @@ fn demo_samples(window_count: usize) -> Vec<f64> {
 }
 
 fn write_wav(path: &Path, samples: &[f64]) {
-    let data_len = (samples.len() * 2) as u32;
-    let mut bytes = Vec::new();
-    bytes.extend_from_slice(b"RIFF");
-    bytes.extend_from_slice(&(36 + data_len).to_le_bytes());
-    bytes.extend_from_slice(b"WAVEfmt ");
-    bytes.extend_from_slice(&16u32.to_le_bytes());
-    bytes.extend_from_slice(&1u16.to_le_bytes());
-    bytes.extend_from_slice(&1u16.to_le_bytes());
-    bytes.extend_from_slice(&SAMPLE_RATE.to_le_bytes());
-    bytes.extend_from_slice(&(SAMPLE_RATE * 2).to_le_bytes());
-    bytes.extend_from_slice(&2u16.to_le_bytes());
-    bytes.extend_from_slice(&16u16.to_le_bytes());
-    bytes.extend_from_slice(b"data");
-    bytes.extend_from_slice(&data_len.to_le_bytes());
-    for value in samples {
-        let scaled = (value * 32767.0).round_ties_even().clamp(-32768.0, 32767.0);
-        bytes.extend_from_slice(&(scaled as i16).to_le_bytes());
-    }
-    std::fs::write(path, bytes).unwrap();
+    let data: Vec<u8> = samples
+        .iter()
+        .flat_map(|value| ((value * 32767.0).round_ties_even().clamp(-32768.0, 32767.0) as i16).to_le_bytes())
+        .collect();
+    std::fs::write(path, audio::riff_wav(1, 1, SAMPLE_RATE, 16, &data)).unwrap();
 }
 
 fn kind_of(value: &Value) -> &'static str {
@@ -109,122 +100,48 @@ fn key_paths(value: &Value, path: &str, out: &mut Paths) {
     }
 }
 
-fn der(tag: u8, content: &[u8]) -> Vec<u8> {
-    let mut out = vec![tag];
-    if content.len() < 0x80 {
-        out.push(content.len() as u8);
-    } else {
-        out.extend([0x82, (content.len() >> 8) as u8, content.len() as u8]);
-    }
-    out.extend_from_slice(content);
-    out
+/// A loopback HTTP server answering every POST with `reply(port, body)`.
+fn spawn_http(reply: impl Fn(u16, &[u8]) -> Vec<u8> + Send + 'static) -> u16 {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    std::thread::spawn(move || {
+        for stream in listener.incoming() {
+            let Ok(mut stream) = stream else { continue };
+            let mut received = Vec::new();
+            let mut chunk = [0_u8; 1024];
+            while let Ok(read) = stream.read(&mut chunk) {
+                if read == 0 {
+                    break;
+                }
+                received.extend_from_slice(&chunk[..read]);
+                let Some((start, length)) = tsa::complete_request(&received) else { continue };
+                let body = reply(port, &received[start..start + length]);
+                let head = format!("HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", body.len());
+                let _ = stream.write_all(head.as_bytes());
+                let _ = stream.write_all(&body);
+                break;
+            }
+        }
+    });
+    port
 }
 
-fn der_uint(magnitude: &[u8]) -> Vec<u8> {
-    let mut body: Vec<u8> = magnitude.iter().copied().skip_while(|b| *b == 0).collect();
-    if body.first().is_none_or(|b| b & 0x80 != 0) {
-        body.insert(0, 0);
-    }
-    der(0x02, &body)
-}
-
-/// A granted TimeStampResp bound to the request's hash and nonce.
-fn echoing_reply(request: &[u8]) -> Vec<u8> {
-    let (hash, nonce) = apw_core::parse_timestamp_request(request).unwrap();
-    let sha256 = [0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01];
-    let mut algorithm = sha256.to_vec();
-    algorithm.extend(der(0x05, &[]));
-    let mut imprint = der(0x30, &algorithm);
-    imprint.extend(der(0x04, &apw_core::python_from_hex(&hash).unwrap()));
-    let mut tst = der(0x02, &[1]);
-    tst.extend([0x06, 0x03, 0x2a, 0x03, 0x04]);
-    tst.extend(der(0x30, &imprint));
-    tst.extend(der_uint(&[9, 9]));
-    tst.extend(der(0x18, b"20260928123000Z"));
-    tst.extend(der_uint(&nonce));
-    let mut encap = vec![0x06, 0x0b, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x09, 0x10, 0x01, 0x04];
-    encap.extend(der(0xA0, &der(0x04, &der(0x30, &tst))));
-    let mut signed = der_uint(&[3]);
-    signed.extend(der(0x31, &[]));
-    signed.extend(der(0x30, &encap));
-    let mut token = vec![0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x07, 0x02];
-    token.extend(der(0xA0, &der(0x30, &signed)));
-    let mut response = der(0x30, &der_uint(&[0]));
-    response.extend(der(0x30, &token));
-    der(0x30, &response)
-}
-
-/// A loopback TSA: answers every POST with a token echoing its hash and nonce.
+/// A loopback TSA: answers with a token echoing the request's hash and nonce.
 fn spawn_tsa() -> u16 {
-    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-    let port = listener.local_addr().unwrap().port();
-    std::thread::spawn(move || {
-        for stream in listener.incoming() {
-            let Ok(mut stream) = stream else { continue };
-            let mut received = Vec::new();
-            let mut chunk = [0_u8; 1024];
-            while let Ok(read) = stream.read(&mut chunk) {
-                if read == 0 {
-                    break;
-                }
-                received.extend_from_slice(&chunk[..read]);
-                let Some(split) = received.windows(4).position(|w| w == b"\r\n\r\n") else { continue };
-                let head = String::from_utf8_lossy(&received[..split]).to_ascii_lowercase();
-                let length: usize = head
-                    .lines()
-                    .find_map(|line| line.strip_prefix("content-length: "))
-                    .and_then(|value| value.trim().parse().ok())
-                    .unwrap_or(0);
-                if received.len() >= split + 4 + length {
-                    let body = echoing_reply(&received[split + 4..split + 4 + length]);
-                    let head = format!("HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", body.len());
-                    let _ = stream.write_all(head.as_bytes());
-                    let _ = stream.write_all(&body);
-                    break;
-                }
-            }
-        }
-    });
-    port
+    spawn_http(|_, request| tsa::echoing_reply(request))
 }
 
-/// A loopback OpenTimestamps calendar: answers POST /cal/digest with a pending receipt.
+/// A loopback OpenTimestamps calendar: answers with a pending receipt.
 fn spawn_calendar() -> u16 {
-    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-    let port = listener.local_addr().unwrap().port();
-    std::thread::spawn(move || {
-        for stream in listener.incoming() {
-            let Ok(mut stream) = stream else { continue };
-            let mut received = Vec::new();
-            let mut chunk = [0_u8; 1024];
-            while let Ok(read) = stream.read(&mut chunk) {
-                if read == 0 {
-                    break;
-                }
-                received.extend_from_slice(&chunk[..read]);
-                let Some(split) = received.windows(4).position(|w| w == b"\r\n\r\n") else { continue };
-                let head = String::from_utf8_lossy(&received[..split]).to_ascii_lowercase();
-                let length: usize = head
-                    .lines()
-                    .find_map(|line| line.strip_prefix("content-length: "))
-                    .and_then(|value| value.trim().parse().ok())
-                    .unwrap_or(0);
-                if received.len() >= split + 4 + length {
-                    let uri = format!("http://127.0.0.1:{port}/cal");
-                    let mut body = vec![0xf0, 0x08];
-                    body.extend([7_u8; 8]);
-                    body.extend([0x08, 0x00, 0x83, 0xdf, 0xe3, 0x0d, 0x2e, 0xf9, 0x0c, 0x8e]);
-                    body.extend([(uri.len() + 1) as u8, uri.len() as u8]);
-                    body.extend(uri.as_bytes());
-                    let head = format!("HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", body.len());
-                    let _ = stream.write_all(head.as_bytes());
-                    let _ = stream.write_all(&body);
-                    break;
-                }
-            }
-        }
-    });
-    port
+    spawn_http(|port, _| {
+        let uri = format!("http://127.0.0.1:{port}/cal");
+        let mut body = vec![0xf0, 0x08];
+        body.extend([7_u8; 8]);
+        body.extend([0x08, 0x00, 0x83, 0xdf, 0xe3, 0x0d, 0x2e, 0xf9, 0x0c, 0x8e]);
+        body.extend([(uri.len() + 1) as u8, uri.len() as u8]);
+        body.extend(uri.as_bytes());
+        body
+    })
 }
 
 fn free_udp_port() -> u16 {

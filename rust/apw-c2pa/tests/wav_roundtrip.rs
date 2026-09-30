@@ -14,6 +14,9 @@ use rcgen::{
 };
 use time::{Duration, OffsetDateTime};
 
+#[path = "../../test-support/audio.rs"]
+mod audio;
+
 type TestResult = Result<(), Box<dyn Error>>;
 
 struct Chain {
@@ -74,115 +77,34 @@ fn signer_for(chain: &Chain) -> Result<C2paSigner, Box<dyn Error>> {
     )?)
 }
 
-fn riff_header(data_len: usize, format_tag: u16, bits: u16, block_align: u16, byte_rate: u32) -> Vec<u8> {
-    let mut header = Vec::with_capacity(44);
-    header.extend_from_slice(b"RIFF");
-    header.extend_from_slice(&((36 + data_len) as u32).to_le_bytes());
-    header.extend_from_slice(b"WAVEfmt ");
-    header.extend_from_slice(&16u32.to_le_bytes());
-    header.extend_from_slice(&format_tag.to_le_bytes());
-    header.extend_from_slice(&1u16.to_le_bytes());
-    header.extend_from_slice(&44100u32.to_le_bytes());
-    header.extend_from_slice(&byte_rate.to_le_bytes());
-    header.extend_from_slice(&block_align.to_le_bytes());
-    header.extend_from_slice(&bits.to_le_bytes());
-    header.extend_from_slice(b"data");
-    header.extend_from_slice(&(data_len as u32).to_le_bytes());
-    header
+fn pcm16_ramp(frames: usize) -> impl Iterator<Item = i16> {
+    (0..frames).map(|index| (((index as i64 * 37) % 3000) - 1500) as i16)
+}
+
+fn float_ramp(frames: usize) -> impl Iterator<Item = f32> {
+    (0..frames).map(|index| (index % 100) as f32 / 100.0)
 }
 
 fn write_wav_pcm16(path: &Path, frames: usize) -> TestResult {
-    let mut data = Vec::with_capacity(frames * 2);
-    for index in 0..frames {
-        let sample = (((index as i64 * 37) % 3000) - 1500) as i16;
-        data.extend_from_slice(&sample.to_le_bytes());
-    }
-    let mut out = riff_header(data.len(), 1, 16, 2, 88200);
-    out.extend_from_slice(&data);
-    fs::write(path, out)?;
+    fs::write(path, audio::riff_wav(1, 1, 44100, 16, &pcm16_ramp(frames).flat_map(i16::to_le_bytes).collect::<Vec<u8>>()))?;
     Ok(())
 }
 
 fn write_wav_float32(path: &Path, frames: usize) -> TestResult {
-    let mut data = Vec::with_capacity(frames * 4);
-    for index in 0..frames {
-        let sample = (index % 100) as f32 / 100.0;
-        data.extend_from_slice(&sample.to_le_bytes());
-    }
-    let mut out = riff_header(data.len(), 3, 32, 4, 176400);
-    out.extend_from_slice(&data);
-    fs::write(path, out)?;
+    let data: Vec<u8> = float_ramp(frames).flat_map(f32::to_le_bytes).collect();
+    fs::write(path, audio::riff_wav(3, 1, 44100, 32, &data))?;
     Ok(())
 }
 
 fn write_aiff(path: &Path, frames: usize) -> TestResult {
-    let mut data = Vec::with_capacity(frames * 2);
-    for index in 0..frames {
-        let sample = (((index as i64 * 37) % 3000) - 1500) as i16;
-        data.extend_from_slice(&sample.to_be_bytes());
-    }
-    let mut comm = Vec::new();
-    comm.extend_from_slice(b"COMM");
-    comm.extend_from_slice(&18u32.to_be_bytes());
-    comm.extend_from_slice(&1i16.to_be_bytes());
-    comm.extend_from_slice(&(frames as u32).to_be_bytes());
-    comm.extend_from_slice(&16i16.to_be_bytes());
-    comm.extend_from_slice(&16398u16.to_be_bytes());
-    comm.extend_from_slice(&(44100u64 << 33).to_be_bytes());
-
-    let mut ssnd = Vec::new();
-    ssnd.extend_from_slice(b"SSND");
-    ssnd.extend_from_slice(&((data.len() + 8) as u32).to_be_bytes());
-    ssnd.extend_from_slice(&0u32.to_be_bytes());
-    ssnd.extend_from_slice(&0u32.to_be_bytes());
-    ssnd.extend_from_slice(&data);
-
-    let mut body = Vec::new();
-    body.extend_from_slice(b"AIFF");
-    body.extend_from_slice(&comm);
-    body.extend_from_slice(&ssnd);
-
-    let mut out = Vec::new();
-    out.extend_from_slice(b"FORM");
-    out.extend_from_slice(&(body.len() as u32).to_be_bytes());
-    out.extend_from_slice(&body);
-    fs::write(path, out)?;
+    let pcm: Vec<u8> = pcm16_ramp(frames).flat_map(i16::to_be_bytes).collect();
+    fs::write(path, audio::aiff(b"AIFF", 1, frames as u32, 16, &[], &pcm))?;
     Ok(())
 }
 
 fn write_aifc_float32(path: &Path, frames: usize) -> TestResult {
-    let mut data = Vec::with_capacity(frames * 4);
-    for index in 0..frames {
-        let sample = (index % 100) as f32 / 100.0;
-        data.extend_from_slice(&sample.to_be_bytes());
-    }
-    let mut comm = Vec::new();
-    comm.extend_from_slice(b"COMM");
-    comm.extend_from_slice(&22u32.to_be_bytes());
-    comm.extend_from_slice(&1i16.to_be_bytes());
-    comm.extend_from_slice(&(frames as u32).to_be_bytes());
-    comm.extend_from_slice(&32i16.to_be_bytes());
-    comm.extend_from_slice(&16398u16.to_be_bytes());
-    comm.extend_from_slice(&(44100u64 << 33).to_be_bytes());
-    comm.extend_from_slice(b"fl32");
-
-    let mut ssnd = Vec::new();
-    ssnd.extend_from_slice(b"SSND");
-    ssnd.extend_from_slice(&((data.len() + 8) as u32).to_be_bytes());
-    ssnd.extend_from_slice(&0u32.to_be_bytes());
-    ssnd.extend_from_slice(&0u32.to_be_bytes());
-    ssnd.extend_from_slice(&data);
-
-    let mut body = Vec::new();
-    body.extend_from_slice(b"AIFC");
-    body.extend_from_slice(&comm);
-    body.extend_from_slice(&ssnd);
-
-    let mut out = Vec::new();
-    out.extend_from_slice(b"FORM");
-    out.extend_from_slice(&(body.len() as u32).to_be_bytes());
-    out.extend_from_slice(&body);
-    fs::write(path, out)?;
+    let data: Vec<u8> = float_ramp(frames).flat_map(f32::to_be_bytes).collect();
+    fs::write(path, audio::aiff(b"AIFC", 1, frames as u32, 32, b"fl32", &data))?;
     Ok(())
 }
 

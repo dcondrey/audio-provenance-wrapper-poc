@@ -1,9 +1,7 @@
 import json
-import struct
 import tempfile
 import types
 import unittest
-import wave
 from pathlib import Path
 
 from daemon.__main__ import Daemon
@@ -12,22 +10,7 @@ from daemon.report import render_html_report
 from daemon.common import sha256_file
 from daemon.schema import validate_manifest_invariants
 from daemon.verify import VerificationResult, _check_c2pa_claim, verify_manifest
-
-
-def _write_pcm_wav(path: Path, frame_count: int = 8000) -> None:
-    with wave.open(str(path), "wb") as handle:
-        handle.setnchannels(1)
-        handle.setsampwidth(2)
-        handle.setframerate(44100)
-        handle.writeframes(b"\x00\x10" * frame_count)
-
-
-def _write_float_wav(path: Path, frame_count: int = 512) -> None:
-    data = b"\x00\x00\x80\x3f" * frame_count
-    fmt = struct.pack("<HHIIHH", 3, 1, 44100, 44100 * 4, 4, 32)
-    body = b"WAVE" + b"fmt " + struct.pack("<I", len(fmt)) + fmt
-    body += b"data" + struct.pack("<I", len(data)) + data
-    path.write_bytes(b"RIFF" + struct.pack("<I", len(body)) + body)
+from tests.audio_files import write_wav
 
 
 def _project_snapshot(sample_refs: tuple[str, ...]) -> types.SimpleNamespace:
@@ -85,7 +68,7 @@ class C2paPipelineTests(unittest.TestCase):
 
     def test_export_is_signed_without_rewriting_the_exported_file(self):
         export = self.export_dir / "mixdown.wav"
-        _write_pcm_wav(export)
+        write_wav(export)
         original = export.read_bytes()
 
         manifest = self._generate(export)
@@ -126,7 +109,7 @@ class C2paPipelineTests(unittest.TestCase):
 
     def test_tampering_the_signed_asset_is_reported_as_changed(self):
         export = self.export_dir / "mixdown.wav"
-        _write_pcm_wav(export)
+        write_wav(export)
         manifest = self._generate(export)
         signed = self.daemon.manifest_dir / manifest["c2pa_claim"]["signed_asset"]["relative_path"]
 
@@ -153,7 +136,7 @@ class C2paPipelineTests(unittest.TestCase):
 
     def test_unsignable_export_records_an_honest_unavailable_claim(self):
         export = self.export_dir / "float.wav"
-        _write_float_wav(export)
+        write_wav(export, float32=True)
 
         manifest = self._generate(export)
         claim = manifest["c2pa_claim"]
@@ -175,12 +158,12 @@ class C2paPipelineTests(unittest.TestCase):
 
     def test_unobserved_project_sample_becomes_an_ingredient_with_its_hash(self):
         unobserved = self.root / "never_observed.wav"
-        _write_pcm_wav(unobserved, frame_count=1000)
+        write_wav(unobserved, 1000)
         self.daemon._latest_project_snapshot = _project_snapshot(
             (str(unobserved), "Samples/Imported/missing.wav")
         )
         export = self.export_dir / "mixdown.wav"
-        _write_pcm_wav(export)
+        write_wav(export)
 
         manifest = self._generate(export)
         claim = manifest["c2pa_claim"]

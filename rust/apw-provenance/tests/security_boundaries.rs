@@ -18,6 +18,9 @@ use x509_parser::oid_registry::{
 };
 use x509_parser::prelude::*;
 
+#[path = "../../test-support/audio.rs"]
+mod audio;
+
 const SAMPLE_RATE: u32 = 8_000;
 
 /// Issuance, reload, and the exact certificate profile c2pa-rs was measured
@@ -256,20 +259,7 @@ fn write_pcm_wav(path: &Path, seconds: f64) {
         data.extend_from_slice(&sample.to_le_bytes());
     }
 
-    let mut wav = Vec::with_capacity(44 + data.len());
-    wav.extend_from_slice(b"RIFF");
-    wav.extend_from_slice(&((36 + data.len()) as u32).to_le_bytes());
-    wav.extend_from_slice(b"WAVEfmt ");
-    wav.extend_from_slice(&16u32.to_le_bytes());
-    wav.extend_from_slice(&1u16.to_le_bytes());
-    wav.extend_from_slice(&1u16.to_le_bytes());
-    wav.extend_from_slice(&SAMPLE_RATE.to_le_bytes());
-    wav.extend_from_slice(&(SAMPLE_RATE * 2).to_le_bytes());
-    wav.extend_from_slice(&2u16.to_le_bytes());
-    wav.extend_from_slice(&16u16.to_le_bytes());
-    wav.extend_from_slice(b"data");
-    wav.extend_from_slice(&(data.len() as u32).to_le_bytes());
-    wav.extend_from_slice(&data);
+    let wav = audio::riff_wav(1, 1, SAMPLE_RATE, 16, &data);
     std::fs::write(path, wav).unwrap();
 }
 

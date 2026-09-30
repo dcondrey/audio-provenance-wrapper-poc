@@ -11,6 +11,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID
 
 from daemon.c2pa_engine import identity, manifest, signer, verifier
+from tests.audio_files import write_aiff, write_wav
 
 # IMPORTANT: c2pa-rs rejects a signing certificate whose subject carries only a common name
 # (it reports claimSignature.mismatch), so the C2PA certificate profile's organizationName is
@@ -83,45 +84,6 @@ def make_chain(label: str = "apw") -> tuple[bytes, bytes, bytes]:
     return chain_pem, key_pem, root.public_bytes(serialization.Encoding.PEM)
 
 
-def write_wav_pcm16(path: Path, frames: int = 4000) -> Path:
-    data = b"".join(struct.pack("<h", (i * 37) % 3000 - 1500) for i in range(frames))
-    header = (
-        b"RIFF"
-        + struct.pack("<I", 36 + len(data))
-        + b"WAVEfmt "
-        + struct.pack("<IHHIIHH", 16, 1, 1, 44100, 88200, 2, 16)
-        + b"data"
-        + struct.pack("<I", len(data))
-    )
-    path.write_bytes(header + data)
-    return path
-
-
-def write_wav_float32(path: Path, frames: int = 1000) -> Path:
-    data = b"".join(struct.pack("<f", (i % 100) / 100.0) for i in range(frames))
-    header = (
-        b"RIFF"
-        + struct.pack("<I", 36 + len(data))
-        + b"WAVEfmt "
-        + struct.pack("<IHHIIHH", 16, 3, 1, 44100, 176400, 4, 32)
-        + b"data"
-        + struct.pack("<I", len(data))
-    )
-    path.write_bytes(header + data)
-    return path
-
-
-def write_aiff(path: Path, frames: int = 4000) -> Path:
-    data = b"".join(struct.pack(">h", (i * 37) % 3000 - 1500) for i in range(frames))
-    comm = b"COMM" + struct.pack(">I", 18) + struct.pack(">hIh", 1, frames, 16) + struct.pack(
-        ">HQ", 16398, 44100 << 33
-    )
-    ssnd = b"SSND" + struct.pack(">I", len(data) + 8) + struct.pack(">II", 0, 0) + data
-    body = b"AIFF" + comm + ssnd
-    path.write_bytes(b"FORM" + struct.pack(">I", len(body)) + body)
-    return path
-
-
 @pytest.fixture(scope="module")
 def chain() -> tuple[bytes, bytes, bytes]:
     return make_chain()
@@ -129,7 +91,7 @@ def chain() -> tuple[bytes, bytes, bytes]:
 
 @pytest.fixture
 def spec(tmp_path: Path) -> manifest.ManifestSpec:
-    sample = write_wav_pcm16(tmp_path / "sample.wav", 500)
+    sample = write_wav(tmp_path / "sample.wav", 500)
     return manifest.ManifestSpec(
         title="mix.wav",
         actions=[manifest.ObservedAction(edit_type="clip_paste", proof_level="inferred", confidence=0.8)],
@@ -147,7 +109,7 @@ def spec(tmp_path: Path) -> manifest.ManifestSpec:
 
 def test_signed_wav_round_trips_to_verified_with_supplied_anchor(tmp_path, chain, spec):
     chain_pem, key_pem, root_pem = chain
-    src = write_wav_pcm16(tmp_path / "mix.wav")
+    src = write_wav(tmp_path / "mix.wav")
     dest = tmp_path / "mix-signed.wav"
 
     result = signer.sign_wav(src, dest, manifest.build_manifest(spec), signer.build_signer(chain_pem, key_pem))
@@ -175,7 +137,7 @@ def test_signed_wav_round_trips_to_verified_with_supplied_anchor(tmp_path, chain
 
 def test_flipped_audio_byte_is_registered_but_changed(tmp_path, chain, spec):
     chain_pem, key_pem, root_pem = chain
-    src = write_wav_pcm16(tmp_path / "mix.wav")
+    src = write_wav(tmp_path / "mix.wav")
     dest = tmp_path / "mix-signed.wav"
     signer.sign_wav(src, dest, manifest.build_manifest(spec), signer.build_signer(chain_pem, key_pem))
 
@@ -192,7 +154,7 @@ def test_flipped_audio_byte_is_registered_but_changed(tmp_path, chain, spec):
 def test_chain_outside_the_anchor_list_is_not_trusted(tmp_path, chain, spec):
     chain_pem, key_pem, _root_pem = chain
     _other_chain, _other_key, other_root = make_chain("unrelated")
-    src = write_wav_pcm16(tmp_path / "mix.wav")
+    src = write_wav(tmp_path / "mix.wav")
     dest = tmp_path / "mix-signed.wav"
     signer.sign_wav(src, dest, manifest.build_manifest(spec), signer.build_signer(chain_pem, key_pem))
 
@@ -202,7 +164,7 @@ def test_chain_outside_the_anchor_list_is_not_trusted(tmp_path, chain, spec):
 
 
 def test_unsigned_asset_is_nothing_found(tmp_path):
-    src = write_wav_pcm16(tmp_path / "bare.wav")
+    src = write_wav(tmp_path / "bare.wav")
     assert verifier.verify_asset(src, "audio/wav").state == verifier.NOTHING_FOUND
 
 
@@ -240,7 +202,7 @@ def test_aiff_routes_to_a_whole_file_sidecar(tmp_path, chain, spec):
 
 
 def test_float32_wav_is_refused_with_an_actionable_message(tmp_path):
-    src = write_wav_float32(tmp_path / "float.wav")
+    src = write_wav(tmp_path / "float.wav", 1000, float32=True)
     with pytest.raises(signer.UnsupportedAssetError) as excinfo:
         signer.detect_format(src)
     assert "16-bit PCM WAV" in str(excinfo.value)
@@ -363,7 +325,7 @@ def test_build_signer_rejects_a_lone_self_signed_certificate(chain):
 
 def test_parent_ingredient_becomes_the_opening_action(tmp_path, chain):
     chain_pem, key_pem, root_pem = chain
-    parent = write_wav_pcm16(tmp_path / "previous-mix.wav", 500)
+    parent = write_wav(tmp_path / "previous-mix.wav", 500)
     spec = manifest.ManifestSpec(
         title="mix.wav",
         actions=[
@@ -396,7 +358,7 @@ def test_parent_ingredient_becomes_the_opening_action(tmp_path, chain):
     assert actions[1]["parameters"]["ingredientIds"] == ["stem-1"]
     assert len(actions) == 2
 
-    src = write_wav_pcm16(tmp_path / "mix.wav")
+    src = write_wav(tmp_path / "mix.wav")
     dest = tmp_path / "mix-signed.wav"
     signer.sign_wav(src, dest, built, signer.build_signer(chain_pem, key_pem))
     assert verifier.verify_asset(dest, "audio/wav", trust_anchors_pem=root_pem).state == verifier.VERIFIED
@@ -452,7 +414,7 @@ def test_unclassified_and_removal_edits_stay_valid_under_claim_v2(tmp_path, chai
         "c2pa.unknown",
         "c2pa.removed",
     ]
-    src = write_wav_pcm16(tmp_path / "mix.wav")
+    src = write_wav(tmp_path / "mix.wav")
     dest = tmp_path / "mix-signed.wav"
     signer.sign_wav(src, dest, built, signer.build_signer(chain_pem, key_pem))
     assert verifier.verify_asset(dest, "audio/wav", trust_anchors_pem=root_pem).state == verifier.VERIFIED

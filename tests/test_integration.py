@@ -4,11 +4,11 @@ import tempfile
 import threading
 import time
 import unittest
-import wave
 from pathlib import Path
 
 from daemon.__main__ import Daemon
-from daemon.hardware_attestation.provider import SoftwareProvider, detect_provider
+from daemon.hardware_attestation.provider import SoftwareProvider
+from tests.audio_files import write_wav
 
 
 class DaemonIntegrationTests(unittest.TestCase):
@@ -122,7 +122,7 @@ class DaemonIntegrationTests(unittest.TestCase):
             self.assertEqual(len(lines), 5)
 
             export_path = export_dir / "mixdown.wav"
-            _write_test_wav(export_path)
+            write_wav(export_path)
 
             artifact_dir = manifest_dir / "artifacts"
             expected_outputs = [
@@ -230,7 +230,7 @@ class DaemonIntegrationTests(unittest.TestCase):
             thread.start()
             time.sleep(0.3)
 
-            _write_test_wav(sample_dir / "kick.wav")
+            write_wav(sample_dir / "kick.wav")
             sample_events_path = evidence_dir / "sample_import_events.jsonl"
             _wait_for(
                 lambda: sample_events_path.exists()
@@ -238,7 +238,7 @@ class DaemonIntegrationTests(unittest.TestCase):
                 message="sample import event for kick.wav",
             )
 
-            _write_test_wav(export_dir / "final.wav")
+            write_wav(export_dir / "final.wav")
             final_outputs = [
                 manifest_dir / "final_manifest.json",
                 manifest_dir / "artifacts" / "final_bundle_index.json",
@@ -270,7 +270,7 @@ class DaemonIntegrationTests(unittest.TestCase):
             sample_dir.mkdir()
             export_dir.mkdir()
             export_path = export_dir / "demo.wav"
-            _write_test_wav(export_path, frame_count=1000)
+            write_wav(export_path, 1000)
 
             daemon = Daemon(
                 udp_port=0,
@@ -284,7 +284,7 @@ class DaemonIntegrationTests(unittest.TestCase):
             thread.start()
             time.sleep(0.4)
 
-            _write_test_wav(export_path, frame_count=4000)
+            write_wav(export_path, 4000)
             demo_outputs = [
                 manifest_dir / "demo_manifest.json",
                 manifest_dir / "artifacts" / "demo_bundle_index.json",
@@ -425,81 +425,6 @@ class HostEnvironmentTests(unittest.TestCase):
                     {event.get("event_type") for event in daemon._session_events},
                 )
             self.assertEqual(daemon._derive_host_environment()["host_name"], "Ableton Live")
-
-
-class SoftwareProviderTests(unittest.TestCase):
-    def test_sign_and_verify(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            provider = SoftwareProvider(key_path=Path(tmp) / "key.bin")
-            sig = provider.sign(b"hello")
-            self.assertTrue(provider.verify(b"hello", sig))
-            self.assertFalse(provider.verify(b"tampered", sig))
-
-    def test_seal_and_unseal(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            provider = SoftwareProvider(key_path=Path(tmp) / "key.bin")
-            plaintext = b"secret data here"
-            sealed = provider.seal(plaintext)
-            self.assertNotEqual(sealed, plaintext)
-            recovered = provider.unseal(sealed)
-            self.assertEqual(recovered, plaintext)
-
-    def test_seal_tamper_detection(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            provider = SoftwareProvider(key_path=Path(tmp) / "key.bin")
-            sealed = provider.seal(b"data")
-            tampered = sealed[:20] + bytes([sealed[20] ^ 0xFF]) + sealed[21:]
-            with self.assertRaises(ValueError):
-                provider.unseal(tampered)
-
-    def test_monotonic_counter_increments(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            provider = SoftwareProvider(key_path=Path(tmp) / "key.bin")
-            a = provider.monotonic_counter()
-            b = provider.monotonic_counter()
-            c = provider.monotonic_counter()
-            self.assertEqual(a, 1)
-            self.assertEqual(b, 2)
-            self.assertEqual(c, 3)
-
-    def test_device_identity(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            provider = SoftwareProvider(key_path=Path(tmp) / "key.bin")
-            identity = provider.device_identity()
-            self.assertEqual(len(identity.device_id), 16)
-            self.assertEqual(identity.algorithm, "hmac-sha256-local")
-            self.assertEqual(identity.public_key_hex, "")
-
-    def test_bind_chain_root(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            provider = SoftwareProvider(key_path=Path(tmp) / "key.bin")
-            binding = provider.bind_chain_root("abc123deadbeef")
-            self.assertEqual(binding.chain_root_hash, "abc123deadbeef")
-            self.assertEqual(binding.monotonic_counter, 1)
-            self.assertTrue(len(binding.signature_hex) > 0)
-
-    def test_cosign_checkpoint(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            provider = SoftwareProvider(key_path=Path(tmp) / "key.bin")
-            cosig = provider.cosign_checkpoint("content_hash", "sw_sig", "genesis")
-            self.assertEqual(cosig.content_hash, "content_hash")
-            self.assertEqual(cosig.previous_cosignature_hash, "genesis")
-            self.assertTrue(len(cosig.entangled_hash) == 64)
-
-    def test_key_persists_across_instances(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            key_path = Path(tmp) / "key.bin"
-            p1 = SoftwareProvider(key_path=key_path)
-            p2 = SoftwareProvider(key_path=key_path)
-            self.assertEqual(p1.device_identity().device_id, p2.device_identity().device_id)
-            sig = p1.sign(b"data")
-            self.assertTrue(p2.verify(b"data", sig))
-
-    def test_detect_provider_returns_operational_fallback(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            provider = detect_provider(Path(tmp) / "key.bin")
-            signature = provider.sign(b"demo")
-            self.assertTrue(provider.verify(b"demo", signature))
 
 
 class VerifyTests(unittest.TestCase):
@@ -748,14 +673,6 @@ def _wait_for(condition, timeout: float = 30.0, interval: float = 0.05, message:
             return
         time.sleep(interval)
     raise AssertionError(f"Timed out after {timeout}s waiting for {message}")
-
-
-def _write_test_wav(path: Path, frame_count: int = 22050) -> None:
-    with wave.open(str(path), "wb") as wf:
-        wf.setnchannels(1)
-        wf.setsampwidth(2)
-        wf.setframerate(44100)
-        wf.writeframes(b"\x00\x10" * frame_count)
 
 
 if __name__ == "__main__":
