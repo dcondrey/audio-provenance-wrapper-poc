@@ -9,7 +9,7 @@ use serde_json::{json, Value};
 
 use super::safe::{Limits, Result};
 use super::snapshot::ProjectSnapshot;
-use super::{als, ardour, dawproject, lmms, maxpat, puredata, reaper};
+use super::{als, ardour, dawproject, lmms, maxpat, puredata, reaper, tracker, vcv};
 
 pub const REAL_FILES: &str = "real_files";
 pub const CONSTRUCTED_ONLY: &str = "constructed_fixtures_only";
@@ -108,6 +108,12 @@ pub static FORMATS: &[ProjectFormat] = &[
     supported!("max_patcher", "Max", [".maxpat"],
         "JSON patcher with no published spec; keys observed in one Max 7 file, fixture is constructed",
         maxpat::extract_maxpat_snapshot, CONSTRUCTED_ONLY),
+    supported!("milkytracker", "MilkyTracker / module trackers", [".xm", ".mod"],
+        "FastTracker 2 XM 1.04 and 31-sample ProTracker MOD per MilkyTracker's loaders: header, instruments, sample names and lengths, pattern hash; no audio is decoded; fixtures are OpenMPT's own test modules",
+        tracker::extract_module_snapshot, REAL_FILES),
+    supported!("vcv_rack", "VCV Rack", [".vcv"],
+        "Rack 2 tar+Zstandard or legacy JSON patch per Rack v2.6.6 src/patch.cpp; module list, cable count, param and data presence; the committed fixture is constructed, a real Rack 2.6.6 template patch was checked locally",
+        vcv::extract_vcv_snapshot, CONSTRUCTED_ONLY),
     unsupported!("logic_pro", "Logic Pro", [".logicx", ".logic"], PACKAGE),
     unsupported!("cubase", "Cubase/Nuendo", [".cpr", ".npr"],
         "proprietary binary format with no public specification; no parser is provided; the host can export open .dawproject, which is parsed"),
@@ -134,16 +140,12 @@ pub static FORMATS: &[ProjectFormat] = &[
     unsupported!("audiomulch", "AudioMulch", [".amh"],
         "XML that its developer states is undocumented and may change without notice; no parser is provided"),
     unsupported!("reaktor", "Reaktor", [".ens", ".rkplr"], PROPRIETARY),
-    unsupported!("vcv_rack", "VCV Rack", [".vcv"],
-        "Rack 2 patches are a tar compressed with Zstandard; the Python standard library in use has no zstd support and no dependency is added"),
     unsupported!("renoise", "Renoise", [".xrns"],
-        "zip of Song.xml, but no primary-source schema or format description was available to ground extraction"),
+        "zip of Song.xml, but Renoise publishes no schema or format specification (the xrnx repository, github.com/renoise/xrnx, has no XSD and covers tool scripting only), so no primary source grounds extraction; no parser is provided"),
     unsupported!("audacity", "Audacity", [".aup3"],
         "SQLite database whose schema Audacity does not publish; no parser is provided"),
     unsupported!("tracktion_waveform", "Tracktion Waveform", [".tracktionedit"],
         "believed to be a JUCE ValueTree serialised as XML, but the layout is not verified at primary level; no parser is provided"),
-    unsupported!("milkytracker", "MilkyTracker / module trackers", [".xm", ".mod"],
-        "documented module formats, but no parser is implemented"),
 ];
 
 const _: (&str, &str, &str) = (UNVERIFIED, DAWPROJECT, PACKAGE);

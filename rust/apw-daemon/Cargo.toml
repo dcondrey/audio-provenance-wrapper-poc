@@ -25,6 +25,7 @@ log.workspace = true
 rustls.workspace = true
 zip.workspace = true
 flate2.workspace = true
+ruzstd.workspace = true
 webpki-roots.workspace = true
 
 [dev-dependencies]

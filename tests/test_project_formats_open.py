@@ -16,6 +16,11 @@ Fixture provenance (details and licences in docs/PROJECT_FORMATS.md):
   maxpat/basic.maxpat          constructed from the structure of
                                https://github.com/Cycling74/max-sdk/blob/15b6fe17eedc7c8a8b4ee249706d3aaf21e192fa/help/dummy.maxhelp
                                (Max 7 patcher; no formal spec exists; file not vendored).
+  milkytracker/test.xm, test.mod  the OpenMPT project's own test modules (BSD-3-Clause, unmodified):
+                               https://github.com/OpenMPT/openmpt/tree/f83cedb0cd5446e4dfaa83ac97e3087107e26767/test
+                               (licence text in LICENSE.third-party beside them). Real files.
+  vcv/basic.vcv                constructed (tests/fixtures/projects/module_builders.py) from Rack v2.6.6
+                               src/patch.cpp, engine/Module.cpp and engine/Cable.cpp (GPL, not vendored).
 Each fixture has a golden snapshot beside it that the Rust port can reuse.
 """
 
@@ -50,6 +55,9 @@ ALL_FIXTURES = (
     "lmms/basic.mmpz",
     "puredata/A01.sinewave.pd",
     "maxpat/basic.maxpat",
+    "milkytracker/test.xm",
+    "milkytracker/test.mod",
+    "vcv/basic.vcv",
 )
 
 
@@ -106,12 +114,13 @@ class GoldenTests(unittest.TestCase):
 class RegistryTests(unittest.TestCase):
     def test_supported_formats_state_how_they_were_validated(self):
         supported = {f.format_id: f for f in registered_formats() if f.status == SUPPORTED}
-        for expected in ("dawproject", "ardour", "lmms", "pure_data", "max_patcher", "reaper_rpp"):
+        for expected in ("dawproject", "ardour", "lmms", "pure_data", "max_patcher", "reaper_rpp", "milkytracker", "vcv_rack"):
             self.assertIn(expected, supported)
         for fmt in supported.values():
             self.assertIn(fmt.validation, (REAL_FILES, CONSTRUCTED_ONLY), fmt.format_id)
         self.assertEqual(supported["pure_data"].validation, REAL_FILES)
-        for constructed in ("dawproject", "ardour", "lmms", "max_patcher"):
+        self.assertEqual(supported["milkytracker"].validation, REAL_FILES)
+        for constructed in ("dawproject", "ardour", "lmms", "max_patcher", "vcv_rack"):
             self.assertEqual(supported[constructed].validation, CONSTRUCTED_ONLY)
 
     def test_unsupported_formats_have_reasons_and_name_dawproject_where_exportable(self):
@@ -121,9 +130,12 @@ class RegistryTests(unittest.TestCase):
             self.assertIsNone(fmt.parser)
         for exports in ("cubase", "bitwig", "studio_one"):
             self.assertIn(".dawproject", unsupported[exports].reason)
-        for fmt_id in ("vcv_rack", "renoise", "premiere", "sibelius", "dorico", "reaktor", "audiomulch"):
+        for fmt_id in ("renoise", "premiere", "sibelius", "dorico", "reaktor", "audiomulch"):
             self.assertIn(fmt_id, unsupported)
         self.assertEqual(detect_format(Path("x.vcv")).format_id, "vcv_rack")
+        self.assertEqual(detect_format(Path("x.XM")).format_id, "milkytracker")
+        self.assertEqual(detect_format(Path("x.mod")).format_id, "milkytracker")
+        self.assertIn("no XSD", unsupported["renoise"].reason)
 
     def test_extensions_do_not_collide(self):
         seen = {}

@@ -89,6 +89,8 @@ pub fn py_json_dumps(value: &Value, out: &mut String) {
         Value::Bool(false) => out.push_str("false"),
         Value::Number(number) => {
             let text = number.to_string();
+            // Python parses "-0" to the int 0 and prints "0".
+            let text = if text == "-0" { "0".to_owned() } else { text };
             if text.contains(['.', 'e', 'E']) {
                 out.push_str(&number.as_f64().and_then(|f| python_repr_f64(f).ok()).unwrap_or(text));
             } else {

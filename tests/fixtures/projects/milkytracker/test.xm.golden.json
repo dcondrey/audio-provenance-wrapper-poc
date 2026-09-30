@@ -1,0 +1,113 @@
+{
+  "automation_point_count": 0,
+  "clip_count": 0,
+  "clip_hashes": [],
+  "clip_slot_hashes": [],
+  "device_chain_hashes": [
+    "135b08093f8a1223",
+    "68133118c7926bc8"
+  ],
+  "file_hash": "38995d872538fcf469efd9ef46840f397bdf6220f393cb7f849fe5258a208293",
+  "file_size_bytes": 6279,
+  "locator_count": 0,
+  "midi_note_count": 0,
+  "project_format": "milkytracker",
+  "sample_rate": null,
+  "sample_refs": [],
+  "track_count": 3,
+  "track_names": [
+    "Test Module",
+    "patterns",
+    ""
+  ],
+  "tracks": [
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [],
+      "device_presets": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "format: XM 1.04",
+        "tracker: OpenMPT 1.32.00.32",
+        "channels: 2",
+        "song length: 2",
+        "restart position: 1",
+        "patterns: 2",
+        "instruments: 1",
+        "samples: 3",
+        "frequency table: linear",
+        "ticks per row: 5",
+        "bpm: 139"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Test Module",
+      "sample_paths": [],
+      "track_id": "module",
+      "track_type": "Module"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "68133118c7926bc8"
+      ],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "patterns",
+      "sample_paths": [],
+      "track_id": "patterns",
+      "track_type": "Patterns"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "135b08093f8a1223"
+      ],
+      "device_presets": [
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "Pulse Sample (16 bytes)",
+        "Empty Sample (0 bytes)",
+        "Unassigned Sample (0 bytes)"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "",
+      "sample_paths": [],
+      "track_id": "instrument-1",
+      "track_type": "Instrument"
+    }
+  ],
+  "transport_bpm": 139.0,
+  "transport_loop_on": false,
+  "transport_loop_range": [
+    0.0,
+    0.0
+  ],
+  "transport_time_signature": [
+    4,
+    4
+  ]
+}

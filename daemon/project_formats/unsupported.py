@@ -42,12 +42,8 @@ _ENTRIES = (
     _entry("audiomulch", "AudioMulch", (".amh",), "XML that its developer states is undocumented and may change without notice; no parser is provided"),
     _entry("reaktor", "Reaktor", (".ens", ".rkplr"), _PROPRIETARY),
     _entry(
-        "vcv_rack", "VCV Rack", (".vcv",),
-        "Rack 2 patches are a tar compressed with Zstandard; the Python standard library in use has no zstd support and no dependency is added",
-    ),
-    _entry(
         "renoise", "Renoise", (".xrns",),
-        "zip of Song.xml, but no primary-source schema or format description was available to ground extraction",
+        "zip of Song.xml, but Renoise publishes no schema or format specification (the xrnx repository, github.com/renoise/xrnx, has no XSD and covers tool scripting only), so no primary source grounds extraction; no parser is provided",
     ),
     _entry(
         "audacity", "Audacity", (".aup3",),
@@ -56,10 +52,6 @@ _ENTRIES = (
     _entry(
         "tracktion_waveform", "Tracktion Waveform", (".tracktionedit",),
         "believed to be a JUCE ValueTree serialised as XML, but the layout is not verified at primary level; no parser is provided",
-    ),
-    _entry(
-        "milkytracker", "MilkyTracker / module trackers", (".xm", ".mod"),
-        "documented module formats, but no parser is implemented",
     ),
 )
 

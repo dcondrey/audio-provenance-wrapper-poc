@@ -19,6 +19,8 @@ non-`.als` projects, and the Ableton event schema is untouched.
 | `lmms` | `.mmp`, `.mmpz` | constructed_fixtures_only | LMMS source @ `a2f57e7` (GPL-2+), `src/core`, `src/tracks`, `include/` |
 | `pure_data` | `.pd` | real_files | Pd source @ `43a5b89` (BSD), `src/g_readwrite.c` |
 | `max_patcher` | `.maxpat` | constructed_fixtures_only | no spec; keys observed in one Max 7 file (see below) |
+| `milkytracker` | `.xm`, `.mod` | real_files | FastTracker 2 XM layout and MilkyTracker `LoaderXM.cpp`/`LoaderMOD.cpp` @ `e3ceb05` (GPL-3+, cited only) |
+| `vcv_rack` | `.vcv` | constructed_fixtures_only | VCV Rack v2.6.6 `src/patch.cpp`, `src/system.cpp`, `src/engine/{Module,Cable}.cpp` (GPL-3+, cited only) |
 | `reaper_rpp` | `.rpp` | constructed_fixtures_only | pre-existing, unchanged |
 | `ableton_als` | `.als` | constructed_fixtures_only | pre-existing; tests use synthetic gzip XML |
 
@@ -123,9 +125,91 @@ https://github.com/Cycling74/max-sdk/blob/15b6fe17eedc7c8a8b4ee249706d3aaf21e192
 covers the SDK's headers and source examples, and whether that includes help
 patchers is not clear. Format status: no formal spec, treat as best-effort.
 
+### MilkyTracker modules (.xm, .mod)
+
+Grounding: https://github.com/milkytracker/MilkyTracker @ `e3ceb05105e8c5bdc907d6451245bf5a1926b1f9`,
+`src/milkyplay/LoaderXM.cpp`, `LoaderMOD.cpp`, `XModule.h` (limits), and the
+FastTracker 2 XM layout they implement. Nothing is copied or vendored.
+Content, not extension, picks the reader (`Extended Module:` means XM).
+
+XM: version 0x0104 only (0x0102/0x0103 store instruments before patterns and
+are refused). Header size is honoured and a short header is zero-padded as
+`LoaderXM.cpp` does (the OpenMPT fixture has a 22-byte header size). Extracted:
+module name, tracker name, channels (1..32), song length (clamped to 256),
+restart, patterns (max 256; rows 1..256; packed data hashed, never unpacked),
+instruments (max 255) with name and up to 96 samples each (name, length in
+bytes), frequency table flag, ticks per row, BPM (`transport_bpm`). Sample data is
+hashed, not decoded. A file that ends at an instrument boundary, or inside
+sample data, is tolerated as MilkyTracker tolerates it and reported as a
+`truncated` device.
+
+MOD: 31-sample layout with a format tag at offset 1080 recognised as
+`getPTnumchannels` does (`M.K.`, `M!K!`, `FLT4`, `FLT8`, `OKTA`, `OCTA`, `FA08`,
+`CD81`, `nCHN`, `nnCH`, `nnCN`). Title, tag, channels, song length, restart,
+pattern count (max order entry + 1), sample slots with used names/lengths.
+Refused: 15-sample Soundtracker files (MilkyTracker detects them heuristically,
+which is not reproduced), files without a tag, and files shorter than 1084
+bytes. ModPlug ADPCM-packed samples are not recognised; sample-data hashes past
+such a sample are positional. No tempo is stored, so `transport_bpm` is 0.0.
+
+Snapshot mapping: a `module` track (name = title, devices = header facts), a
+`patterns` track (order table plus pattern hashes), an `Instrument` track per
+XM instrument or used MOD slot (devices = `name (N bytes)`).
+
+Fixtures `milkytracker/test.xm`, `test.mod`: real, unmodified, the OpenMPT
+project's own test modules, github.com/OpenMPT/openmpt @
+`f83cedb0cd5446e4dfaa83ac97e3087107e26767`, `test/`. That repository's BSD-3-Clause
+`LICENSE` (no separate notice covers `test/`) is committed as
+`milkytracker/LICENSE.third-party`. MilkyTracker's own demo songs
+(`resources/music`) were not used: no licence is stated for them.
+
+### VCV Rack (.vcv)
+
+Grounding: https://github.com/VCVRack/Rack tag v2.6.6 (object
+`061ccf63c1758599396ac1bb10d47345d9d34076`). `Manager::load`/`isPatchLegacyV1`:
+a file starting with the Zstandard magic `28 b5 2f fd` is a tar (libarchive
+`pax_restricted`, entries named `./...`) containing `patch.json`; anything else
+is a legacy Rack 1 JSON patch. Root keys `version`, `modules`, `cables` (legacy
+`wires`); module `id`, `plugin`, `model`, `version`, `params`, `bypass` (legacy
+`disabled`), `data`; cable `outputModuleId`, `outputId`, `inputModuleId`,
+`inputId`. `version` must be a string or the file is refused.
+
+Snapshot mapping: a `patch` track (container, Rack version, module and cable
+counts), a `Module` track per module (`plugin/model`; devices: version, param
+count, `data: present`, `bypassed`; hash over plugin, model, version, params,
+data, bypass but not id, `pos` or expander links), and a `Cables` track (a device
+per cable). Module `data` is untrusted and only hashed. Sample paths in `data`,
+module asset folders and patch metadata such as `zoom` are not extracted.
+No tempo (0.0).
+
+Container rules (`_tarzst.py`, `tarzst.rs`, identical): exactly one Zstandard
+frame that consumes the whole file (frame header and block headers are walked
+first: no dictionary, reserved bits, windows over 128 MiB, block sizes, trailing
+or missing bytes are refused), decoded under `MAX_TAR_BYTES` (256 MiB); tar is
+ustar with pax `path`/`size`, checksum verified, regular files and directories
+only (links, devices, FIFOs, GNU long names and pax globals are refused), names
+refused when absolute, drive-lettered, NUL-bearing or containing `..` (`.`
+segments dropped), regular-file names unique, at most `MAX_TAR_MEMBERS` (10 000)
+entries; nothing is extracted to disk. Non-finite JSON numbers and integers over
+4300 digits are refused in both languages.
+
+Fixture `vcv/basic.vcv`: **constructed** (`tests/fixtures/projects/module_builders.py`)
+from the Rack source above, written like Rack 2 writes (`./` names, directory
+entries, an asset member, unsized Zstandard frame). Its bytes depend on the
+`zstandard` build that made them, so its `file_hash` changes if it is rebuilt with
+another libzstd. Not vendored: Rack's own `template.vcv` (GPL-3+); it was parsed
+locally once (Rack 2.6.6, unsized frame, no checksum, 512 KiB window, five tar
+entries) and the parser handled it, but it is not committed, so validation stays
+`constructed_fixtures_only`.
+
+### Renoise (.xrns) stays unsupported
+
+Renoise publishes no schema or format specification: github.com/renoise/xrnx @
+`1f35b9c` has no XSD and covers tool scripting only, so `Song.xml` is not guessed.
+
 ## Tempo-less formats
 
-Pd and Max have no tempo, and a DAWproject without `Transport/Tempo` in bpm has
+Pd, Max, VCV Rack and MOD have no tempo, and a DAWproject without `Transport/Tempo` in bpm has
 none either. Their snapshots carry `transport_bpm = 0.0` (REAPER's parser falls
 back to 120.0 instead). Anything that reports `transport_bpm` as a fact about the
 session must treat 0.0 as "no tempo in this format". At the time of writing
@@ -152,6 +236,13 @@ follow-up outside this change.
 - JSON: depth `MAX_JSON_DEPTH`, node count `MAX_JSON_NODES`, `RecursionError`
   becomes `ValueError`.
 - Pd: statements, canvases and canvas nesting are capped.
+- XM/MOD: every count is bounded by the format maxima (tested at limit-1, limit,
+  limit+1); every offset is bounds-checked.
+- VCV: see the container rules above. Dependencies: Python `zstandard==0.25.0`
+  (libzstd 1.5.7, BSD-3-Clause; output bounded by `max_output_size` and a
+  pre-check of the declared content size); Rust `ruzstd` 0.8.2 (MIT, decode only,
+  pure Rust, features `std` and `hash` only, which adds `twox-hash` for the
+  frame checksum) under a `take(cap + 1)` reader.
 
 ## Golden outputs
 
@@ -189,11 +280,9 @@ so a port must reproduce that canonicalisation to match them.
 | `resolve` | `.drp` | proprietary |
 | `audiomulch` | `.amh` | XML the developer calls undocumented |
 | `reaktor` | `.ens`, `.rkplr` | proprietary |
-| `vcv_rack` | `.vcv` | Rack 2 is tar + Zstandard; Python 3.13 has no `compression.zstd`, `zstandard` is not installed, no dependency added |
-| `renoise` | `.xrns` | zip of `Song.xml`, but no primary-source description was available (the vendor wiki page was empty per HOST_SUPPORT_RESEARCH.md) |
+| `renoise` | `.xrns` | zip of `Song.xml`; Renoise publishes no schema (xrnx repository has no XSD), so nothing grounds extraction |
 | `audacity` | `.aup3` | SQLite, schema unpublished |
 | `tracktion_waveform` | `.tracktionedit` | believed JUCE ValueTree XML, layout not verified at primary level |
-| `milkytracker` | `.xm`, `.mod` | documented module formats, parser not implemented |
 
 `.mod` is also used by unrelated tools; the entry only matters where a project
 path is explicitly watched.
@@ -206,6 +295,11 @@ Verification, all against the Python oracle:
 
 - `rust/apw-daemon/tests/project_parity.rs` compares every `tests/fixtures/projects/**/*.golden.json` byte for byte on the canonical JSON, and also the registry (including every unsupported reason), the `project_format_unsupported` events, the differ, `session_facts`, and 88 XML documents (accepted or refused, canonical form, and the `ET.tostring` serialisation the `.als` hashes depend on).
 - `rust/apw-daemon/tests/project_hardening.rs` covers limit-1, limit and limit+1 for every cap, traversal names, duplicate zip members, decompression bombs, and DTD/entity refusal. These inputs are constructed.
+- `rust/apw-daemon/tests/project_modules_parity.rs` runs `tests/fixtures/parity/project_modules_corpus.json`
+  (about 6 700 inputs: fixtures, byte pokes, truncation at every offset, tar and Zstandard
+  oddities, limit-1/limit/limit+1 under lowered caps) and requires the Python verdict for each
+  (snapshot digest or exact error text; `malformed JSON:` diagnostics compare by class).
+  Regenerate with `tests/fixtures/parity/generate_project_fixtures.py`.
 - The manifest key-path parity test runs a session with `--project tests/fixtures/projects/lmms/basic.mmp`.
 
 The `reaper` and `als` golden fixtures were added for this port: `reaper/*.rpp` are copies of `tests/fixtures/reaper/`, and `als/*.als` are constructed Live sets (`tests/fixtures/parity/generate_project_fixtures.py`), not files saved by Live.

@@ -16,9 +16,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from daemon.project_formats import parse_project  # noqa: E402
 from daemon.project_formats._snapshot import golden_json  # noqa: E402
+from module_builders import constructed_vcv  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 FIXED_TIME = (1980, 1, 1, 0, 0, 0)
@@ -30,6 +32,9 @@ FIXTURES = (
     "lmms/basic.mmpz",
     "puredata/A01.sinewave.pd",
     "maxpat/basic.maxpat",
+    "milkytracker/test.xm",
+    "milkytracker/test.mod",
+    "vcv/basic.vcv",
 )
 
 
@@ -48,6 +53,7 @@ def qcompress(data: bytes) -> bytes:
 
 def main() -> None:
     build_zip(HERE / "dawproject/basic.dawproject", {"project.xml": (HERE / "dawproject/project.xml").read_bytes()})
+    (HERE / "vcv/basic.vcv").write_bytes(constructed_vcv())
     (HERE / "lmms/basic.mmpz").write_bytes(qcompress((HERE / "lmms/basic.mmp").read_bytes()))
     for relative in FIXTURES:
         path = HERE / relative

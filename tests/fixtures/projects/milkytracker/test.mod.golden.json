@@ -1,0 +1,135 @@
+{
+  "automation_point_count": 0,
+  "clip_count": 0,
+  "clip_hashes": [],
+  "clip_slot_hashes": [],
+  "device_chain_hashes": [
+    "12320450975c81ab",
+    "6d2b6f4b2ef50f87",
+    "6eb7dc019ee556f4",
+    "7bab7d3fd675ea0d"
+  ],
+  "file_hash": "c505aeedfb08cd8645f607bc29388319b7f37d40587bc6f1ca12c41b7a69dc7c",
+  "file_size_bytes": 5400,
+  "locator_count": 0,
+  "midi_note_count": 0,
+  "project_format": "milkytracker",
+  "sample_rate": null,
+  "sample_refs": [],
+  "track_count": 5,
+  "track_names": [
+    "MOD_Test___________X",
+    "patterns",
+    "Sample_1_____________X",
+    "OpenMPT Module Loader",
+    "Test Suite Version 1"
+  ],
+  "tracks": [
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [],
+      "device_presets": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "format: MOD M.K.",
+        "channels: 4",
+        "song length: 4",
+        "restart position: 0",
+        "patterns: 3",
+        "samples: 1"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "MOD_Test___________X",
+      "sample_paths": [],
+      "track_id": "module",
+      "track_type": "Module"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "12320450975c81ab"
+      ],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "patterns",
+      "sample_paths": [],
+      "track_id": "patterns",
+      "track_type": "Patterns"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "6eb7dc019ee556f4"
+      ],
+      "device_presets": [
+        ""
+      ],
+      "devices": [
+        "Sample_1_____________X (1244 bytes)"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Sample_1_____________X",
+      "sample_paths": [],
+      "track_id": "instrument-1",
+      "track_type": "Instrument"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "7bab7d3fd675ea0d"
+      ],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "OpenMPT Module Loader",
+      "sample_paths": [],
+      "track_id": "instrument-3",
+      "track_type": "Instrument"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "6d2b6f4b2ef50f87"
+      ],
+      "device_presets": [],
+      "devices": [],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Test Suite Version 1",
+      "sample_paths": [],
+      "track_id": "instrument-4",
+      "track_type": "Instrument"
+    }
+  ],
+  "transport_bpm": 0.0,
+  "transport_loop_on": false,
+  "transport_loop_range": [
+    0.0,
+    0.0
+  ],
+  "transport_time_signature": [
+    4,
+    4
+  ]
+}

@@ -196,23 +196,13 @@
    "validation": ""
   },
   {
-   "format_id": "vcv_rack",
-   "host": "VCV Rack",
-   "extensions": [
-    ".vcv"
-   ],
-   "status": "unsupported",
-   "reason": "Rack 2 patches are a tar compressed with Zstandard; the Python standard library in use has no zstd support and no dependency is added",
-   "validation": ""
-  },
-  {
    "format_id": "renoise",
    "host": "Renoise",
    "extensions": [
     ".xrns"
    ],
    "status": "unsupported",
-   "reason": "zip of Song.xml, but no primary-source schema or format description was available to ground extraction",
+   "reason": "zip of Song.xml, but Renoise publishes no schema or format specification (the xrnx repository, github.com/renoise/xrnx, has no XSD and covers tool scripting only), so no primary source grounds extraction; no parser is provided",
    "validation": ""
   },
   {
@@ -233,17 +223,6 @@
    ],
    "status": "unsupported",
    "reason": "believed to be a JUCE ValueTree serialised as XML, but the layout is not verified at primary level; no parser is provided",
-   "validation": ""
-  },
-  {
-   "format_id": "milkytracker",
-   "host": "MilkyTracker / module trackers",
-   "extensions": [
-    ".xm",
-    ".mod"
-   ],
-   "status": "unsupported",
-   "reason": "documented module formats, but no parser is implemented",
    "validation": ""
   },
   {
@@ -315,6 +294,27 @@
    ],
    "status": "supported",
    "reason": "JSON patcher with no published spec; keys observed in one Max 7 file, fixture is constructed",
+   "validation": "constructed_fixtures_only"
+  },
+  {
+   "format_id": "milkytracker",
+   "host": "MilkyTracker / module trackers",
+   "extensions": [
+    ".xm",
+    ".mod"
+   ],
+   "status": "supported",
+   "reason": "FastTracker 2 XM 1.04 and 31-sample ProTracker MOD per MilkyTracker's loaders: header, instruments, sample names and lengths, pattern hash; no audio is decoded; fixtures are OpenMPT's own test modules",
+   "validation": "real_files"
+  },
+  {
+   "format_id": "vcv_rack",
+   "host": "VCV Rack",
+   "extensions": [
+    ".vcv"
+   ],
+   "status": "supported",
+   "reason": "Rack 2 tar+Zstandard or legacy JSON patch per Rack v2.6.6 src/patch.cpp; module list, cable count, param and data presence; the committed fixture is constructed, a real Rack 2.6.6 template patch was checked locally",
    "validation": "constructed_fixtures_only"
   }
  ],
@@ -471,21 +471,13 @@
    "file_extension": ".ens",
    "reason": "proprietary binary format with no public specification; no parser is provided"
   },
-  "vcv_rack": {
-   "event_type": "project_format_unsupported",
-   "proof_level": "unknown_unobserved",
-   "project_format": "vcv_rack",
-   "host": "VCV Rack",
-   "file_extension": ".vcv",
-   "reason": "Rack 2 patches are a tar compressed with Zstandard; the Python standard library in use has no zstd support and no dependency is added"
-  },
   "renoise": {
    "event_type": "project_format_unsupported",
    "proof_level": "unknown_unobserved",
    "project_format": "renoise",
    "host": "Renoise",
    "file_extension": ".xrns",
-   "reason": "zip of Song.xml, but no primary-source schema or format description was available to ground extraction"
+   "reason": "zip of Song.xml, but Renoise publishes no schema or format specification (the xrnx repository, github.com/renoise/xrnx, has no XSD and covers tool scripting only), so no primary source grounds extraction; no parser is provided"
   },
   "audacity": {
    "event_type": "project_format_unsupported",
@@ -502,14 +494,6 @@
    "host": "Tracktion Waveform",
    "file_extension": ".tracktionedit",
    "reason": "believed to be a JUCE ValueTree serialised as XML, but the layout is not verified at primary level; no parser is provided"
-  },
-  "milkytracker": {
-   "event_type": "project_format_unsupported",
-   "proof_level": "unknown_unobserved",
-   "project_format": "milkytracker",
-   "host": "MilkyTracker / module trackers",
-   "file_extension": ".xm",
-   "reason": "documented module formats, but no parser is implemented"
   }
  },
  "session_facts": {
@@ -1291,6 +1275,216 @@
     }
    ]
   },
+  "milkytracker/test.mod": {
+   "apw:proof_level": "inferred",
+   "observation_basis": "Structural facts inferred by parsing the saved Ableton .als file; Ableton does not provide this project with a supported semantic API.",
+   "bpm": 0.0,
+   "time_signature": "4/4",
+   "loop_on": false,
+   "track_count": 5,
+   "clip_count": 0,
+   "sample_refs": [],
+   "tracks": [
+    {
+     "name": "MOD_Test___________X",
+     "type": "Module",
+     "devices": [
+      "format: MOD M.K.",
+      "channels: 4",
+      "song length: 4",
+      "restart position: 0",
+      "patterns: 3",
+      "samples: 1"
+     ],
+     "device_presets": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "patterns",
+     "type": "Patterns",
+     "devices": [],
+     "device_presets": [],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "Sample_1_____________X",
+     "type": "Instrument",
+     "devices": [
+      "Sample_1_____________X (1244 bytes)"
+     ],
+     "device_presets": [
+      ""
+     ],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "OpenMPT Module Loader",
+     "type": "Instrument",
+     "devices": [],
+     "device_presets": [],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "Test Suite Version 1",
+     "type": "Instrument",
+     "devices": [],
+     "device_presets": [],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    }
+   ]
+  },
+  "milkytracker/test.xm": {
+   "apw:proof_level": "inferred",
+   "observation_basis": "Structural facts inferred by parsing the saved Ableton .als file; Ableton does not provide this project with a supported semantic API.",
+   "bpm": 139.0,
+   "time_signature": "4/4",
+   "loop_on": false,
+   "track_count": 3,
+   "clip_count": 0,
+   "sample_refs": [],
+   "tracks": [
+    {
+     "name": "Test Module",
+     "type": "Module",
+     "devices": [
+      "format: XM 1.04",
+      "tracker: OpenMPT 1.32.00.32",
+      "channels: 2",
+      "song length: 2",
+      "restart position: 1",
+      "patterns: 2",
+      "instruments: 1",
+      "samples: 3",
+      "frequency table: linear",
+      "ticks per row: 5",
+      "bpm: 139"
+     ],
+     "device_presets": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "patterns",
+     "type": "Patterns",
+     "devices": [],
+     "device_presets": [],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "",
+     "type": "Instrument",
+     "devices": [
+      "Pulse Sample (16 bytes)",
+      "Empty Sample (0 bytes)",
+      "Unassigned Sample (0 bytes)"
+     ],
+     "device_presets": [
+      "",
+      "",
+      ""
+     ],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    }
+   ]
+  },
   "puredata/A01.sinewave.pd": {
    "apw:proof_level": "inferred",
    "observation_basis": "Structural facts inferred by parsing the saved Ableton .als file; Ableton does not provide this project with a supported semantic API.",
@@ -1500,6 +1694,201 @@
      ],
      "clip_count": 4,
      "midi_note_count": 2,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    }
+   ]
+  },
+  "vcv/basic.vcv": {
+   "apw:proof_level": "inferred",
+   "observation_basis": "Structural facts inferred by parsing the saved Ableton .als file; Ableton does not provide this project with a supported semantic API.",
+   "bpm": 0.0,
+   "time_signature": "4/4",
+   "loop_on": false,
+   "track_count": 7,
+   "clip_count": 0,
+   "sample_refs": [],
+   "tracks": [
+    {
+     "name": "patch",
+     "type": "Patch",
+     "devices": [
+      "format: VCV Rack patch (tar+zstd)",
+      "rack version: 2.6.6",
+      "modules: 5",
+      "cables: 3"
+     ],
+     "device_presets": [
+      "",
+      "",
+      "",
+      ""
+     ],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "Fundamental/VCO",
+     "type": "Module",
+     "devices": [
+      "Fundamental/VCO",
+      "version: 2.6.4",
+      "params: 3"
+     ],
+     "device_presets": [
+      "",
+      "",
+      ""
+     ],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "Fundamental/VCF",
+     "type": "Module",
+     "devices": [
+      "Fundamental/VCF",
+      "version: 2.6.4",
+      "params: 2"
+     ],
+     "device_presets": [
+      "",
+      "",
+      ""
+     ],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "Core/AudioInterface2",
+     "type": "Module",
+     "devices": [
+      "Core/AudioInterface2",
+      "version: 2.6.6",
+      "params: 1",
+      "data: present"
+     ],
+     "device_presets": [
+      "",
+      "",
+      "",
+      ""
+     ],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "Fundamental/Scope",
+     "type": "Module",
+     "devices": [
+      "Fundamental/Scope",
+      "version: 2.6.4",
+      "params: 0",
+      "bypassed"
+     ],
+     "device_presets": [
+      "",
+      "",
+      "",
+      ""
+     ],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "Fundamental/WTLFO",
+     "type": "Module",
+     "devices": [
+      "Fundamental/WTLFO",
+      "version: 2.6.4",
+      "params: 0",
+      "data: present"
+     ],
+     "device_presets": [
+      "",
+      "",
+      "",
+      ""
+     ],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
+     "automation_point_count": 0,
+     "routing_input": "",
+     "routing_output": "",
+     "sends": [],
+     "group_id": "",
+     "is_frozen": false,
+     "color_index": -1
+    },
+    {
+     "name": "cables",
+     "type": "Cables",
+     "devices": [
+      "101:0 -> 102:3",
+      "102:0 -> 103:0",
+      "102:0 -> 104:0"
+     ],
+     "device_presets": [
+      "",
+      "",
+      ""
+     ],
+     "sample_paths": [],
+     "clips": [],
+     "clip_count": 0,
+     "midi_note_count": 0,
      "automation_point_count": 0,
      "routing_input": "",
      "routing_output": "",

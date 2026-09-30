@@ -21,6 +21,8 @@ pub struct Limits {
     pub max_xml_elements: usize,
     pub max_json_depth: usize,
     pub max_json_nodes: usize,
+    pub max_tar_members: usize,
+    pub max_tar_bytes: usize,
     pub max_pd_statements: usize,
     pub max_pd_canvas_depth: usize,
     pub max_pd_canvases: usize,
@@ -45,6 +47,8 @@ impl Default for Limits {
             max_xml_elements: 2_000_000,
             max_json_depth: 128,
             max_json_nodes: 2_000_000,
+            max_tar_members: 10_000,
+            max_tar_bytes: 256 * 1024 * 1024,
             max_pd_statements: 1_000_000,
             max_pd_canvas_depth: 64,
             max_pd_canvases: 100_000,
@@ -98,7 +102,7 @@ pub fn check_member_name(name: &str) -> Result<()> {
     Ok(())
 }
 
-fn py_repr(text: &str) -> String {
+pub(crate) fn py_repr(text: &str) -> String {
     apw_core::python_repr(&Value::String(text.to_owned()))
 }
 
@@ -237,7 +241,12 @@ pub fn parse_xml(data: &[u8], allowed_doctype: Option<&str>, limits: &Limits) ->
 
 /// JSON with bounded depth and node count.
 pub fn parse_json(data: &[u8], limits: &Limits) -> Result<Value> {
-    if data.len() as u64 > limits.max_project_file_bytes {
+    parse_json_capped(data, limits.max_project_file_bytes, limits)
+}
+
+/// [`parse_json`] with `cap` in place of the project size cap.
+pub fn parse_json_capped(data: &[u8], cap: u64, limits: &Limits) -> Result<Value> {
+    if data.len() as u64 > cap {
         return Err("JSON exceeds the project size cap; refusing to parse".to_owned());
     }
     let data = data.strip_prefix(&[0xEF, 0xBB, 0xBF][..]).unwrap_or(data);

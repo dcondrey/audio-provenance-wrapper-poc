@@ -9,7 +9,7 @@ use std::io::Write;
 
 use apw_daemon::project::safe::{check_json_bounds, check_member_name, inflate_zlib, open_zip, parse_json, read_project_bytes};
 use apw_daemon::project::xml::{parse_xml, XmlLimits};
-use apw_daemon::project::{ardour, dawproject, lmms, maxpat, puredata, reaper, safe, Limits};
+use apw_daemon::project::{ardour, dawproject, lmms, maxpat, puredata, reaper, safe, tarzst, Limits};
 
 fn limits() -> Limits {
     Limits::default()
@@ -453,4 +453,93 @@ fn als_decompression_and_dtd_caps() {
     let garbage_tempo = gz("tempo.als", b"<Ableton><LiveSet><Transport><Tempo><Manual Value='fast'/></Tempo></Transport></LiveSet></Ableton>");
     assert!(apw_daemon::project::als::extract_snapshot(&garbage_tempo, &limits()).is_err());
     let _ = safe::Limits::default();
+}
+
+// ---- .xm / .mod / .vcv ----
+
+fn fixture_bytes(relative: &str) -> Vec<u8> {
+    std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/projects").join(relative)).unwrap()
+}
+
+#[test]
+fn module_and_vcv_files_have_the_size_cap_boundary() {
+    let directory = tempfile::tempdir().unwrap();
+    for relative in ["milkytracker/test.xm", "milkytracker/test.mod", "vcv/basic.vcv"] {
+        let data = fixture_bytes(relative);
+        let path = directory.path().join(relative.rsplit('/').next().unwrap());
+        std::fs::write(&path, &data).unwrap();
+        let format = apw_daemon::project::detect_format(&path).unwrap();
+        let size = data.len() as u64;
+        assert!(format.parse(&path, &Limits { max_project_file_bytes: size - 1, ..limits() }).is_err(), "{relative}: limit-1");
+        assert!(format.parse(&path, &Limits { max_project_file_bytes: size, ..limits() }).is_ok(), "{relative}: limit");
+        assert!(format.parse(&path, &Limits { max_project_file_bytes: size + 1, ..limits() }).is_ok(), "{relative}: limit+1");
+    }
+}
+
+/// A frame of RLE blocks: 1 byte in, 128 KiB of zeros out, so a bomb is a few KiB.
+fn rle_frame(blocks: usize) -> Vec<u8> {
+    let mut out = vec![0x28, 0xb5, 0x2f, 0xfd, 0x00, 17 << 3];
+    for index in 0..blocks {
+        let header = ((1_u32 << 17) << 3) | (1 << 1) | u32::from(index == blocks - 1);
+        out.extend(&header.to_le_bytes()[..3]);
+        out.push(0);
+    }
+    out
+}
+
+#[test]
+fn the_zstd_output_cap_has_the_right_boundary_at_the_default() {
+    let cap = limits().max_tar_bytes;
+    assert_eq!(cap, 2048 * (1 << 17));
+    assert_eq!(tarzst::inflate_zstd(&rle_frame(2048), cap).unwrap().len(), cap);
+    let error = tarzst::inflate_zstd(&rle_frame(2049), cap).unwrap_err();
+    assert!(error.contains("decompresses past"), "{error}");
+}
+
+#[test]
+fn tar_member_and_byte_caps_have_exact_boundaries() {
+    let fixture = fixture_bytes("vcv/basic.vcv");
+    let tar = tarzst::inflate_zstd(&fixture, limits().max_tar_bytes).unwrap();
+    // "." "./modules" "./patch.json" "./modules/105" "./modules/105/wavetable.wav"
+    for (limit, ok) in [(4, false), (5, true), (6, true)] {
+        let result = tarzst::read_tar(&tar, &Limits { max_tar_members: limit, ..limits() });
+        assert_eq!(result.is_ok(), ok, "members {limit}");
+    }
+    for (limit, ok) in [(tar.len() - 1, false), (tar.len(), true), (tar.len() + 1, true)] {
+        assert_eq!(tarzst::inflate_zstd(&fixture, limit).is_ok(), ok, "bytes {limit}");
+    }
+    let members = tarzst::read_tar(&tar, &limits()).unwrap();
+    assert_eq!(members.iter().map(|m| m.0.as_str()).collect::<Vec<_>>(), ["patch.json", "modules/105/wavetable.wav"]);
+}
+
+fn ustar(name: &str, size: usize, kind: u8) -> Vec<u8> {
+    let mut block = vec![0_u8; 512];
+    block[..name.len()].copy_from_slice(name.as_bytes());
+    block[100..108].copy_from_slice(b"0000644\0");
+    block[124..136].copy_from_slice(format!("{size:011o}\0").as_bytes());
+    block[148..156].copy_from_slice(b"        ");
+    block[156] = kind;
+    block[257..265].copy_from_slice(b"ustar\x0000");
+    let checksum: u32 = block.iter().map(|byte| u32::from(*byte)).sum();
+    block[148..156].copy_from_slice(format!("{checksum:06o}\0 ").as_bytes());
+    block
+}
+
+#[test]
+fn unsafe_tar_entries_are_refused_and_nothing_is_written() {
+    let directory = tempfile::tempdir().unwrap();
+    let before = std::fs::read_dir(directory.path()).unwrap().count();
+    for (name, kind) in [("../evil", b'0'), ("/evil", b'0'), ("a/../../evil", b'0'), ("link", b'2'), ("link", b'1'), ("dev", b'3'), ("fifo", b'6')] {
+        let mut tar = ustar(name, 0, kind);
+        tar.extend(vec![0_u8; 1024]);
+        assert!(tarzst::read_tar(&tar, &limits()).is_err(), "{name} type {kind}");
+    }
+    let mut ok = ustar("./patch.json", 2, b'0');
+    ok.extend(b"{}".iter().chain(vec![0_u8; 510].iter()));
+    ok.extend(vec![0_u8; 1024]);
+    assert_eq!(tarzst::read_tar(&ok, &limits()).unwrap().len(), 1);
+    let mut bad_checksum = ok.clone();
+    bad_checksum[0] = b'X';
+    assert!(tarzst::read_tar(&bad_checksum, &limits()).unwrap_err().contains("checksum"));
+    assert_eq!(std::fs::read_dir(directory.path()).unwrap().count(), before);
 }

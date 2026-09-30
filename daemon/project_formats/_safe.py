@@ -25,6 +25,8 @@ MAX_XML_DEPTH = 128
 MAX_XML_ELEMENTS = 2_000_000
 MAX_JSON_DEPTH = 128
 MAX_JSON_NODES = 2_000_000
+MAX_TAR_MEMBERS = 10_000
+MAX_TAR_BYTES = 256 * 1024 * 1024
 
 _CHUNK = 64 * 1024
 
@@ -171,9 +173,9 @@ def parse_xml(data: bytes, *, allowed_doctype: str | None = None) -> ET.Element:
     return state["root"]
 
 
-def parse_json(data: bytes) -> Any:
-    """Parse JSON with bounded depth and node count."""
-    if len(data) > registry.MAX_PROJECT_FILE_BYTES:
+def parse_json(data: bytes, limit: int | None = None) -> Any:
+    """Parse JSON with bounded depth and node count; `limit` replaces the project size cap."""
+    if len(data) > (registry.MAX_PROJECT_FILE_BYTES if limit is None else limit):
         raise ValueError("JSON exceeds the project size cap; refusing to parse")
     try:
         text = data.decode("utf-8-sig")

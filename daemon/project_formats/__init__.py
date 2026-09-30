@@ -63,6 +63,18 @@ def _parse_maxpat(path: Path):
     return extract_maxpat_snapshot(path)
 
 
+def _parse_module(path: Path):
+    from .tracker import extract_module_snapshot
+
+    return extract_module_snapshot(path)
+
+
+def _parse_vcv(path: Path):
+    from .vcv import extract_vcv_snapshot
+
+    return extract_vcv_snapshot(path)
+
+
 register(
     ProjectFormat(
         "ableton_als", "Ableton Live", (".als",), SUPPORTED,
@@ -133,6 +145,28 @@ register(
         SUPPORTED,
         "JSON patcher with no published spec; keys observed in one Max 7 file, fixture is constructed",
         parser=_parse_maxpat,
+        validation=CONSTRUCTED_ONLY,
+    )
+)
+register(
+    ProjectFormat(
+        "milkytracker",
+        "MilkyTracker / module trackers",
+        (".xm", ".mod"),
+        SUPPORTED,
+        "FastTracker 2 XM 1.04 and 31-sample ProTracker MOD per MilkyTracker's loaders: header, instruments, sample names and lengths, pattern hash; no audio is decoded; fixtures are OpenMPT's own test modules",
+        parser=_parse_module,
+        validation=REAL_FILES,
+    )
+)
+register(
+    ProjectFormat(
+        "vcv_rack",
+        "VCV Rack",
+        (".vcv",),
+        SUPPORTED,
+        "Rack 2 tar+Zstandard or legacy JSON patch per Rack v2.6.6 src/patch.cpp; module list, cable count, param and data presence; the committed fixture is constructed, a real Rack 2.6.6 template patch was checked locally",
+        parser=_parse_vcv,
         validation=CONSTRUCTED_ONLY,
     )
 )

@@ -15,6 +15,9 @@ pub mod reaper;
 pub mod registry;
 pub mod safe;
 pub mod snapshot;
+pub mod tarzst;
+pub mod tracker;
+pub mod vcv;
 pub mod xml;
 
 pub use diff::{compute_diff, diff_to_event, session_facts, ProjectDiff};

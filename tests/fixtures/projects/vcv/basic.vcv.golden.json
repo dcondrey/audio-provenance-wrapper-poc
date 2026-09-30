@@ -1,0 +1,217 @@
+{
+  "automation_point_count": 0,
+  "clip_count": 0,
+  "clip_hashes": [],
+  "clip_slot_hashes": [],
+  "device_chain_hashes": [
+    "1d1856b7bfadd274",
+    "202ce4df2ef7b9ad",
+    "235d8cd74132d5ad",
+    "6dc5f175c5ee91cd",
+    "e027f8d688985591",
+    "efa7eb4de02d19bf"
+  ],
+  "file_hash": "cdbf9b9f23770a8b90758d44ec7afb00017510d14167eb54478c37041fe3a23c",
+  "file_size_bytes": 710,
+  "locator_count": 0,
+  "midi_note_count": 0,
+  "project_format": "vcv_rack",
+  "sample_rate": null,
+  "sample_refs": [],
+  "track_count": 7,
+  "track_names": [
+    "patch",
+    "Fundamental/VCO",
+    "Fundamental/VCF",
+    "Core/AudioInterface2",
+    "Fundamental/Scope",
+    "Fundamental/WTLFO",
+    "cables"
+  ],
+  "tracks": [
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [],
+      "device_presets": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "format: VCV Rack patch (tar+zstd)",
+        "rack version: 2.6.6",
+        "modules: 5",
+        "cables: 3"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "patch",
+      "sample_paths": [],
+      "track_id": "patch",
+      "track_type": "Patch"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "efa7eb4de02d19bf"
+      ],
+      "device_presets": [
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "Fundamental/VCO",
+        "version: 2.6.4",
+        "params: 3"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Fundamental/VCO",
+      "sample_paths": [],
+      "track_id": "module-101",
+      "track_type": "Module"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "6dc5f175c5ee91cd"
+      ],
+      "device_presets": [
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "Fundamental/VCF",
+        "version: 2.6.4",
+        "params: 2"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Fundamental/VCF",
+      "sample_paths": [],
+      "track_id": "module-102",
+      "track_type": "Module"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "202ce4df2ef7b9ad"
+      ],
+      "device_presets": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "Core/AudioInterface2",
+        "version: 2.6.6",
+        "params: 1",
+        "data: present"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Core/AudioInterface2",
+      "sample_paths": [],
+      "track_id": "module-103",
+      "track_type": "Module"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "1d1856b7bfadd274"
+      ],
+      "device_presets": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "Fundamental/Scope",
+        "version: 2.6.4",
+        "params: 0",
+        "bypassed"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Fundamental/Scope",
+      "sample_paths": [],
+      "track_id": "module-104",
+      "track_type": "Module"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "e027f8d688985591"
+      ],
+      "device_presets": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "Fundamental/WTLFO",
+        "version: 2.6.4",
+        "params: 0",
+        "data: present"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "Fundamental/WTLFO",
+      "sample_paths": [],
+      "track_id": "module-105",
+      "track_type": "Module"
+    },
+    {
+      "automation_point_count": 0,
+      "clip_count": 0,
+      "clips": [],
+      "device_chain_hashes": [
+        "235d8cd74132d5ad"
+      ],
+      "device_presets": [
+        "",
+        "",
+        ""
+      ],
+      "devices": [
+        "101:0 -> 102:3",
+        "102:0 -> 103:0",
+        "102:0 -> 104:0"
+      ],
+      "group_id": "",
+      "midi_note_count": 0,
+      "name": "cables",
+      "sample_paths": [],
+      "track_id": "cables",
+      "track_type": "Cables"
+    }
+  ],
+  "transport_bpm": 0.0,
+  "transport_loop_on": false,
+  "transport_loop_range": [
+    0.0,
+    0.0
+  ],
+  "transport_time_signature": [
+    4,
+    4
+  ]
+}

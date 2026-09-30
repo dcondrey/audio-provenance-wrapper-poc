@@ -297,8 +297,25 @@ def build_payload() -> dict:
             "xml": xml_cases()}
 
 
+def write_modules_corpus() -> None:
+    """Verdicts of the Python oracle for the shared .xm/.mod/.vcv corpus (see module_corpus.py)."""
+    sys.path.insert(0, str(PROJECTS))
+    import module_corpus
+
+    module_corpus.BASES.clear()
+    cases = module_corpus.build_cases()
+    for case in cases:
+        case["expect"] = module_corpus.evaluate(case)
+    document = {"bases": dict(module_corpus.BASES), "cases": cases}
+    target = HERE / "project_modules_corpus.json"
+    target.write_text(json.dumps(document, separators=(",", ":"), ensure_ascii=True) + "\n", encoding="utf-8")
+    ok = sum(1 for case in cases if "ok" in case["expect"])
+    print(f"wrote {target}: {len(cases)} cases, {ok} accepted, {len(cases) - ok} refused")
+
+
 def main() -> None:
     write_fixtures()
+    write_modules_corpus()
     payload = build_payload()
     (HERE / "project_parity.json").write_text(json.dumps(payload, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"wrote {HERE / 'project_parity.json'}")
